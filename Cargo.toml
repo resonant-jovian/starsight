@@ -1,0 +1,123 @@
+[workspace]
+memebers = ["xtask", "starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks"]
+resolver = "3"
+
+[workspace.package]
+name = "starsight"
+version = "0.1.0"
+edition = "2024"
+description = "A unified scientific visualization crate for Rust — from zero-config one-liners to GPU-accelerated interactive 3D."
+license = "GPL-3.0-only"
+authors = ["Albin Sjögren <albin@sjoegren.se>"]
+repository = "https://github.com/resonant-jovian/starsight"
+documentation = "https://docs.rs/starsight"
+readme = "README.md"
+keywords = ["plot", "chart", "scientific", "visualization", "data-viz"]
+categories = ["no-std", "science", "visualization"]
+
+[workspace.dependencies]
+# Rendering & graphics
+wgpu = "29.0.1"             # WebGPU -
+vello = "0.8.0"             # 2D GPU -
+tiny-skia = "0.12.0"        # 2D CPU -
+lyon = "1.0.19"             # Path tessellation -
+cosmic-text = "0.18.2"      # Text shaping -
+parley = "0.8.0"            # Text layout -
+ab_glyph = "0.2.32"         # OpenType font glyph -
+
+# Data & math
+polars = "0.53.0"           #
+ndarray = "0.17.2"          #
+nalgebra = "0.34.2"         #
+arrow = "58.1.0"            #
+
+# Color
+palette = "0.7.6"           # Colormanagment -
+chromata = "0.3.1"          # Themes - GPL-3.0
+prismatica = "0.3.1"        # Colormaps - GPL-3.0
+
+# Statistics
+statrs = "0.18.0"           #
+contour = "0.13.1"          #
+delaunator = "1.0.2"        #
+
+# Export
+image = "0.25.10"           #
+resvg = "0.47.0"            #
+usvg = "0.47.0"             #
+svg = "0.18.0"              #
+krilla = "0.6.0"            #
+pdf-writer = "0.14.0"       #
+printpdf = "0.9.1"          #
+
+# Terminal
+crossterm = "0.29.0"        #
+ratatui = "0.30.0"          #
+ratatui-image = "10.0.6"    #
+viuer = "0.11.0"            #
+
+# GUI
+winit = "0.31.0-beta.2"     #
+egui = "0.34.1"             #
+egui-plotter = "0.6.0"      #
+
+# WASM
+wasm-bindgen = "0.2.115"    #
+web-sys = "0.3.92"          #
+
+# Geospatial
+geo = "0.32.0"              #
+proj = "0.31.0"             #
+geojson = "1.0.0"           #
+
+# Utilities
+serde = "1.0.228"           #
+clap = "4.6.0"              #
+insta = "1.47.1"            #
+proptest = "1.11.0"         #
+
+# Logging & error handling
+log = "0.4.29"              #
+tracing = "0.1.44"          #
+thiserror = "2.0.18"        #
+anyhow = "1.0.102"          #
+
+# Reference & comparison
+plotters = "0.3.7"          #
+charming = "0.6.0"          #
+plotly = "0.14.1"           #
+plotlars = "0.11.8"         #
+
+
+[features]
+default = []
+full = []
+minimal = []
+science = []
+dashboard = []
+terminal = []
+web = []
+gpu = []
+interactive = []
+polars = []
+ndarray = []
+arrow = []
+3d = []
+pdf = []
+stats = []
+contour = []
+geo = []
+resvg = []
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1

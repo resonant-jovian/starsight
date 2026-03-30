@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+version.workspace = true
+edition.workspace = true
+description = "xtask for starsight"
+license.workspace = true
+authors.workspace = true
+publish = false
+
+[dependencies]
+
+[features]
+
+[lints]
+workspace = true

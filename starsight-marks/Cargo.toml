@@ -1,0 +1,25 @@
+[package]
+name = "starsight-marks"
+version.workspace = true
+edition.workspace = true
+description = "marks component of starsight"
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+documentation.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish = true
+
+[dependencies]
+starsight-core = { path = "../starsight-core"}
+
+[features]
+default = []
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

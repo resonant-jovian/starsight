@@ -1,0 +1,4 @@
+contact_links:
+  - name: Question
+    url: https://github.com/resonant-jovian/starsight/discussions
+    about: Questions about starsight should be posted as a GitHub discussion.
