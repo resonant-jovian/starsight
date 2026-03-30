@@ -15,10 +15,6 @@ publish = true
 [dependencies]
 starsight-figure = { path = "../starsight-figure", optional = true }
 
-[features]
-default = []
-figure = ["dep:starsight-figure"]
-
 [lints]
 workspace = true
 

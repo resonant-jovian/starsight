@@ -14,9 +14,6 @@ publish = true
 
 [dependencies]
 
-[features]
-default = []
-
 [lints]
 workspace = true
 

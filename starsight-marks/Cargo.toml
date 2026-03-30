@@ -15,9 +15,6 @@ publish = true
 [dependencies]
 starsight-core = { path = "../starsight-core"}
 
-[features]
-default = []
-
 [lints]
 workspace = true
 

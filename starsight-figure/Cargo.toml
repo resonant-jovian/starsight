@@ -16,9 +16,6 @@ publish = true
 starsight-marks = { path = "../starsight-marks" }
 starsight-layout = { path = "../starsight-layout" }
 
-[features]
-default = []
-
 [lints]
 workspace = true
 

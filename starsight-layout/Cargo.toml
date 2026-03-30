@@ -15,9 +15,6 @@ publish = true
 [dependencies]
 starsight-marks = { path = "../starsight-marks" }
 
-[features]
-default = []
-
 [lints]
 workspace = true
 

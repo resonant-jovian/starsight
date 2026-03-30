@@ -22,9 +22,6 @@ image.workspace = true
 chromata.workspace = true
 prismatica.workspace = true
 
-[features]
-default = []
-
 [lints]
 workspace = true
 

@@ -1,5 +1,5 @@
 [workspace]
-memebers = ["xtask", "starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks"]
+memebers = ["starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks", "xtask"]
 resolver = "3"
 
 [workspace.package]
@@ -89,7 +89,7 @@ plotly = "0.14.1"           #
 plotlars = "0.11.8"         #
 
 
-[features]
+[workspace.features]
 default = []
 full = []
 minimal = []
