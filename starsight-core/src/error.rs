@@ -18,4 +18,4 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-impl From<std::io::Error> for Error {}
+// impl From<std::io::Error> for Error {}

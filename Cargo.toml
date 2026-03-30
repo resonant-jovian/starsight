@@ -1,9 +1,8 @@
 [workspace]
-memebers = ["starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks", "xtask"]
+members = ["starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks", "xtask"]
 resolver = "3"
 
 [workspace.package]
-name = "starsight"
 version = "0.1.0"
 edition = "2024"
 description = "A unified scientific visualization crate for Rust — from zero-config one-liners to GPU-accelerated interactive 3D."
@@ -87,27 +86,6 @@ plotters = "0.3.7"          #
 charming = "0.6.0"          #
 plotly = "0.14.1"           #
 plotlars = "0.11.8"         #
-
-
-[workspace.features]
-default = []
-full = []
-minimal = []
-science = []
-dashboard = []
-terminal = []
-web = []
-gpu = []
-interactive = []
-polars = []
-ndarray = []
-arrow = []
-3d = []
-pdf = []
-stats = []
-contour = []
-geo = []
-resvg = []
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -19,3 +19,23 @@ workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
+
+[features]
+default = []
+full = []
+minimal = []
+science = []
+dashboard = []
+terminal = []
+web = []
+gpu = []
+interactive = []
+polars = []
+ndarray = []
+arrow = []
+3d = []
+pdf = []
+stats = []
+contour = []
+geo = []
+resvg = []
