@@ -1,0 +1,339 @@
+# clippy.toml — full configuration with defaults
+# Generated from: rust-lang/rust-clippy book/src/lint_configuration.md
+#
+# NOTE: "stable" and "unstable" refer to the *lints* each key configures,
+# not to the keys themselves. All keys in this file are valid in stable
+# clippy.toml; however, some configure lints that only fire under specific
+# lint groups (restriction, nursery) which you must opt into explicitly.
+#
+# Keys whose default is an empty list are commented out — uncomment and
+# populate them as needed. Two keys whose defaults are computed at build time
+# (msrv, trivial-copy-size-limit) are also commented out.
+#
+# Append ".." to any list-valued key to extend the built-in default instead
+# of replacing it, e.g.:
+#   disallowed-names = ["myname", ".."]
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STABLE LINTS
+# Configuration for lints that ship in stable Clippy (warn/deny by default
+# or commonly enabled via #[warn(clippy::...)]).
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── Paths ─────────────────────────────────────────────────────────────────
+# absolute_paths
+# absolute-paths-allowed-crates = []
+absolute-paths-max-segments = 2
+
+# ── Safety comments ───────────────────────────────────────────────────────
+# undocumented_unsafe_blocks
+accept-comment-above-attributes = true
+accept-comment-above-statement   = true
+
+# ── Test helpers ──────────────────────────────────────────────────────────
+# dbg_macro
+allow-dbg-in-tests = false
+
+# expect_used
+allow-expect-in-consts = true
+allow-expect-in-tests  = false
+
+# unwrap_used
+allow-unwrap-in-consts = true
+allow-unwrap-in-tests  = false
+
+# expect_used + unwrap_used
+# allow-unwrap-types = []
+
+# indexing_slicing
+allow-indexing-slicing-in-tests = false
+
+# large_stack_frames
+allow-large-stack-frames-in-tests = true
+
+# uninlined_format_args
+allow-mixed-uninlined-format-args = true
+
+# needless_raw_string_hashes
+allow-one-hash-in-raw-strings = false
+
+# panic
+allow-panic-in-tests = false
+
+# print_stderr + print_stdout
+allow-print-in-tests = false
+
+# module_inception
+allow-private-module-inception = false
+
+# useless_vec
+allow-useless-vec-in-tests = false
+
+# ── Naming ────────────────────────────────────────────────────────────────
+# renamed_function_params
+allow-renamed-params-for = [
+    "core::convert::From",
+    "core::convert::TryFrom",
+    "core::str::FromStr",
+]
+
+# module_name_repetitions
+allow-exact-repetitions = true
+allowed-prefixes = ["to", "as", "into", "from", "try_into", "try_from"]
+
+# disallowed_script_idents
+allowed-scripts = ["Latin"]
+
+# disallowed_names
+disallowed-names = ["foo", "baz", "quux"]
+
+# min_ident_chars
+allowed-idents-below-min-chars = ["i", "j", "x", "y", "z", "w", "n"]
+min-ident-chars-threshold = 1
+
+# struct_field_names
+struct-field-name-threshold = 3
+
+# enum_variant_names
+enum-variant-name-threshold  = 3
+
+# many_single_char_names
+single-char-binding-names-threshold = 4
+
+# upper_case_acronyms
+upper-case-acronyms-aggressive = false
+
+# ── Arithmetic ────────────────────────────────────────────────────────────
+# modulo_arithmetic
+allow-comparison-to-zero = true
+
+# arithmetic_side_effects
+# arithmetic-side-effects-allowed        = []
+# arithmetic-side-effects-allowed-binary = []
+# arithmetic-side-effects-allowed-unary  = []
+
+# ── Size / memory ─────────────────────────────────────────────────────────
+# large_const_arrays + large_stack_arrays
+array-size-threshold = 16384
+
+# large_futures
+future-size-threshold = 16384
+
+# large_include_file
+max-include-file-size = 1000000
+
+# large_stack_frames
+stack-size-threshold = 512000
+
+# large_enum_variant
+enum-variant-size-threshold = 200
+
+# result_large_err
+large-error-threshold = 128
+# large-error-ignored = []
+
+# boxed_local + useless_vec
+too-large-for-stack = 200
+
+# large_types_passed_by_value
+pass-by-value-size-limit = 256
+
+# trivially_copy_pass_by_ref
+# trivial-copy-size-limit = <target_pointer_width>   # computed; set explicitly if needed, e.g. 8
+
+# unnecessary_box_returns
+unnecessary-box-size = 128
+
+# vec_box
+vec-box-size-threshold = 4096
+
+# ── Complexity ────────────────────────────────────────────────────────────
+# cognitive_complexity
+cognitive-complexity-threshold = 25
+
+# type_complexity
+type-complexity-threshold = 250
+
+# excessive_nesting
+excessive-nesting-threshold = 0
+
+# too_many_arguments
+too-many-arguments-threshold = 7
+
+# too_many_lines
+too-many-lines-threshold = 100
+
+# fn_params_excessive_bools
+max-fn-params-bools = 3
+
+# struct_excessive_bools
+max-struct-bools = 3
+
+# type_repetition_in_bounds
+max-trait-bounds = 3
+
+# ── Lints / documentation ─────────────────────────────────────────────────
+# doc_markdown
+doc-valid-idents = [
+    "KiB", "MiB", "GiB", "TiB", "PiB", "EiB",
+    "MHz", "GHz", "THz",
+    "AccessKit", "CoAP", "CoreFoundation", "CoreGraphics", "CoreText",
+    "DevOps", "Direct2D", "Direct3D", "DirectWrite", "DirectX",
+    "ECMAScript", "GPLv2", "GPLv3", "GitHub", "GitLab",
+    "IPv4", "IPv6", "InfiniBand", "RoCE",
+    "ClojureScript", "CoffeeScript", "JavaScript", "PostScript",
+    "PureScript", "TypeScript", "PowerPC", "PowerShell", "WebAssembly",
+    "NaN", "NaNs", "OAuth", "GraphQL",
+    "OCaml", "OpenAL", "OpenDNS", "OpenGL", "OpenMP",
+    "OpenSSH", "OpenSSL", "OpenStreetMap", "OpenTelemetry", "OpenType",
+    "WebGL", "WebGL2", "WebGPU", "WebRTC", "WebSocket",
+    "WebTransport", "WebP", "OpenExr", "YCbCr", "sRGB",
+    "TensorFlow", "TrueType",
+    "iOS", "macOS", "FreeBSD", "NetBSD", "OpenBSD", "NixOS",
+    "TeX", "LaTeX", "BibTeX", "BibLaTeX", "MinGW", "CamelCase",
+]
+
+# missing_errors_doc + missing_panics_doc + missing_safety_doc + unnecessary_safety_doc
+check-private-items = false
+
+# missing_docs_in_private_items
+missing-docs-allow-unused    = false
+missing-docs-in-crate-items  = false
+
+# ── API surface ───────────────────────────────────────────────────────────
+# box_collection, enum_variant_names, large_types_passed_by_value, linkedlist,
+# needless_pass_by_ref_mut, option_option, owned_cow, rc_buffer, rc_mutex,
+# redundant_allocation, ref_option, single_call_fn, trivially_copy_pass_by_ref,
+# unnecessary_box_returns, unnecessary_wraps, unused_self, upper_case_acronyms,
+# vec_box, wrong_self_convention
+avoid-breaking-exported-api = true
+
+# ── Iterators ─────────────────────────────────────────────────────────────
+# explicit_iter_loop
+enforce-iter-loop-reborrow = false
+
+# ── Formatting / style ────────────────────────────────────────────────────
+# unreadable_literal
+unreadable-literal-lint-fractions = true
+
+# decimal_literal_representation
+literal-representation-threshold = 16384
+
+# verbose_bit_mask
+verbose-bit-mask-threshold = 1
+
+# semicolon_inside_block
+semicolon-inside-block-ignore-singleline = false
+
+# semicolon_outside_block
+semicolon_outside_block_ignore_multiline = false
+
+# collapsible_else_if + collapsible_if
+lint-commented-code = false
+
+# manual_let_else
+matches-for-let-else = "WellKnownTypes"
+
+# index_refutable_slice
+max-suggested-slice-pattern-length = 3
+
+# excessive_precision
+const-literal-digits-threshold = 30
+
+# ── Imports ───────────────────────────────────────────────────────────────
+# wildcard_imports
+warn-on-all-wildcard-imports = false
+# allowed-wildcard-imports = []
+
+# missing_enforced_import_renames
+# enforced-import-renames = []
+
+# ── Interior mutability ───────────────────────────────────────────────────
+# borrow_interior_mutable_const + declare_interior_mutable_const
+# + ifs_same_cond + mutable_key_type
+ignore-interior-mutability = ["bytes::Bytes"]
+
+# ── Concurrency ───────────────────────────────────────────────────────────
+# non_send_fields_in_send_ty
+enable-raw-pointer-heuristic-for-send = true
+
+# await_holding_invalid_type
+# await-holding-invalid-types = []
+
+# ── Cargo ─────────────────────────────────────────────────────────────────
+# cargo_common_metadata  (internal testing only)
+cargo-ignore-publish = false
+
+# multiple_crate_versions
+# allowed-duplicate-crates = []
+
+# ── MSRV ──────────────────────────────────────────────────────────────────
+# Affects ~70 lints; defaults to rust-version in Cargo.toml.
+# Uncomment and set explicitly to override.
+# msrv = "1.65.0"
+
+# incompatible_msrv
+check-incompatible-msrv-in-tests = false
+
+# ── Visibility / fields ───────────────────────────────────────────────────
+# pub_underscore_fields
+pub-underscore-fields-behavior = "PubliclyExported"
+
+# path_ends_with_ext
+# allowed-dotfiles = []
+
+# inconsistent_struct_constructor
+check-inconsistent-struct-field-initializers = false
+
+# use_self
+recursive-self-in-type-definitions = true
+
+# ── Inherent impl scope ───────────────────────────────────────────────────
+# multiple_inherent_impl
+inherent-impl-lint-scope = "crate"
+
+# ── Macros ────────────────────────────────────────────────────────────────
+# nonstandard_macro_braces
+# standard-macro-braces = []
+
+# macro_metavars_in_unsafe
+warn-unsafe-macro-metavars-in-private-macros = false
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# UNSTABLE / RESTRICTION / NURSERY LINTS
+# Configuration for lints that are off by default and must be opted into
+# explicitly (clippy::restriction, clippy::nursery, or nightly-only lints).
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── Disallow lists ────────────────────────────────────────────────────────
+# disallowed_fields   (restriction)
+# disallowed-fields = []
+
+# disallowed_macros   (restriction)
+# disallowed-macros = []
+
+# disallowed_methods  (restriction)
+# disallowed-methods = []
+
+# disallowed_types    (restriction)
+# disallowed-types = []
+
+# ── Arbitrary source item ordering  (nursery) ─────────────────────────────
+source-item-ordering = ["enum", "impl", "module", "struct", "trait"]
+trait-assoc-item-kinds-order = ["const", "type", "fn"]
+module-items-ordered-within-groupings = "none"
+module-item-order-groupings = [
+    ["modules",        ["extern_crate", "mod", "foreign_mod"]],
+    ["use",            ["use"]],
+    ["macros",         ["macro"]],
+    ["global_asm",     ["global_asm"]],
+    ["UPPER_SNAKE_CASE", ["static", "const"]],
+    ["PascalCase",     ["ty_alias", "enum", "struct", "union", "trait", "trait_alias", "impl"]],
+    ["lower_snake_case", ["fn"]],
+]
+
+# ── indexing_slicing  (restriction) ───────────────────────────────────────
+suppress-restriction-lint-in-const = false
