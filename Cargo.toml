@@ -87,6 +87,17 @@ charming = "0.6.0"          #
 plotly = "0.14.1"           #
 plotlars = "0.11.8"         #
 
+# Internal
+starsight = { path = "starsight" }
+starsight-core = { path = "starsight-core" }
+starsight-derive = { path = "starsight-derive" }
+starsight-export = { path = "starsight-export" }
+starsight-figure = { path = "starsight-figure" }
+starsight-gpu = { path = "starsight-gpu" }
+starsight-interact = { path = "starsight-interact" }
+starsight-layout = { path = "starsight-layout" }
+starsight-marks = { path = "starsight-marks" }
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 

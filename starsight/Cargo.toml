@@ -13,6 +13,14 @@ categories.workspace = true
 publish = true
 
 [dependencies]
+starsight-core.workspace = true
+starsight-derive.workspace = true
+starsight-export.workspace = true
+starsight-figure.workspace = true
+starsight-gpu = { workspace = true, optional = true }
+starsight-interact.workspace = true
+starsight-layout.workspace = true
+starsight-marks.workspace = true
 
 [lints]
 workspace = true
@@ -28,7 +36,7 @@ science = []
 dashboard = []
 terminal = []
 web = []
-gpu = []
+gpu = ["dep:starsight-gpu"]
 interactive = []
 polars = []
 ndarray = []
