@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # TODO: publish workspace crates in dependency order
+      # - run: cargo publish -p starsight-core
+      # - run: cargo publish -p starsight-derive
+      # - run: cargo publish -p starsight-marks
+      # - run: cargo publish -p starsight-layout
+      # - run: cargo publish -p starsight-figure
+      # - run: cargo publish -p starsight-export
+      # - run: cargo publish -p starsight-gpu
+      # - run: cargo publish -p starsight-interact
+      # - run: cargo publish -p starsight
+      - run: echo "TODO — publish crates"
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate changelog
+        id: changelog
+        run: |
+          cargo install git-cliff || true
+          git cliff --latest --strip header > RELEASE_NOTES.md
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md

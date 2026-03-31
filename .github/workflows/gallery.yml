@@ -1,0 +1,30 @@
+name: Gallery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - "starsight/**"
+      - "starsight-export/**"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  gallery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # TODO: run gallery generation via xtask once it exists
+      # - run: cargo xtask gallery
+      - run: echo "TODO — generate gallery images"
+      - name: Upload gallery
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery
+          path: gallery/
+          if-no-files-found: ignore
