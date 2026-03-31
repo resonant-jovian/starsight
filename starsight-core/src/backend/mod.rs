@@ -1,8 +1,8 @@
 use crate::error::Result;
 
-mod pdf;
-mod svg;
-mod tiny_skia;
+pub mod pdf;
+pub mod svg;
+pub mod tiny_skia;
 
 pub trait DrawBackend {
     fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>;

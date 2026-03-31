@@ -1,5 +1,5 @@
-mod camera;
-mod mesh;
-mod pipeline;
-mod renderer;
-mod window;
+pub mod camera;
+pub mod mesh;
+pub mod pipeline;
+pub mod renderer;
+pub mod window;

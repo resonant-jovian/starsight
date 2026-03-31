@@ -228,7 +228,7 @@ verbose-bit-mask-threshold = 1
 semicolon-inside-block-ignore-singleline = false
 
 # semicolon_outside_block
-semicolon_outside_block_ignore_multiline = false
+semicolon-outside-block-ignore-multiline = false
 
 # collapsible_else_if + collapsible_if
 lint-commented-code = false

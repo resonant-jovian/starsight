@@ -1,6 +1,6 @@
-mod auto;
-mod figure;
-mod plot_macro;
-mod shorthand;
+pub mod auto;
+pub mod figure;
+pub mod plot_macro;
+pub mod shorthand;
 
-mod data;
+pub mod data;

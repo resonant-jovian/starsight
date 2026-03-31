@@ -1,9 +1,9 @@
 pub mod error;
-mod scene;
+pub mod scene;
 
-mod axis;
-mod backend;
-mod color;
-mod coord;
-mod scale;
-mod text;
+pub mod axis;
+pub mod backend;
+pub mod color;
+pub mod coord;
+pub mod scale;
+pub mod text;

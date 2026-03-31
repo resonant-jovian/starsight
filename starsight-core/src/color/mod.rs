@@ -1,2 +1,2 @@
-mod mapping;
-mod theme;
+pub mod mapping;
+pub mod theme;

@@ -1,6 +1,6 @@
-mod animation;
-mod html;
-mod pdf;
-mod png;
-mod svg;
-mod terminal;
+pub mod animation;
+pub mod html;
+pub mod pdf;
+pub mod png;
+pub mod svg;
+pub mod terminal;

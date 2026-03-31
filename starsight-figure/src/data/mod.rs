@@ -1,4 +1,4 @@
-mod arrow;
-mod ndarray;
-mod polars;
-mod raw;
+pub mod arrow;
+pub mod ndarray;
+pub mod polars;
+pub mod raw;

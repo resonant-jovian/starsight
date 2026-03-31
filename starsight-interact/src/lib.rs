@@ -1,7 +1,7 @@
-mod controls;
-mod hover;
-mod linked;
-mod pan;
-mod select;
-mod stream;
-mod zoom;
+pub mod controls;
+pub mod hover;
+pub mod linked;
+pub mod pan;
+pub mod select;
+pub mod stream;
+pub mod zoom;

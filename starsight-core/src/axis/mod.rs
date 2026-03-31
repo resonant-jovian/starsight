@@ -1,2 +1,2 @@
-mod grid;
-mod tick;
+pub mod grid;
+pub mod tick;

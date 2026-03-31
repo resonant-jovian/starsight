@@ -1,6 +1,6 @@
-mod categorical;
-mod color;
-mod linear;
-mod log;
-mod symlog;
-mod time;
+pub mod categorical;
+pub mod color;
+pub mod linear;
+pub mod log;
+pub mod symlog;
+pub mod time;
