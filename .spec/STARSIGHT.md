@@ -178,7 +178,7 @@ These decisions are informed by studying egui, Iced, Vello, Bevy, tiny-skia, Rat
 
 ```rust
 let c: prismatica::Color = prismatica::crameri::BATLOW.eval(0.5);
-let tc: tiny_skia::Color = c.into();  // From<prismatica::Color> for tiny_skia::Color
+let tc: tiny_skia::Color = c.into();  // From<prismatica::Color> for skia::Color
 ```
 
 Without the feature: `paint.set_color_rgba8(c.r, c.g, c.b, 255);`

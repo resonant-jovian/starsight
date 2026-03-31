@@ -1,5 +1,5 @@
 [workspace]
-members = ["starsight", "starsight-core", "starsight-derive", "starsight-export", "starsight-figure", "starsight-gpu", "starsight-interact", "starsight-layout", "starsight-marks", "xtask"]
+members = ["starsight", "starsight-layer-1", "starsight-layer-2", "starsight-layer-3", "starsight-layer-4", "starsight-layer-5", "starsight-layer-6", "starsight-layer-7", "xtask"]
 resolver = "3"
 
 [workspace.package]
@@ -32,8 +32,8 @@ arrow = "58.1.0"            #
 
 # Color
 palette = "0.7.6"           # Colormanagment -
-chromata = "0.3.1"          # Themes - GPL-3.0
-prismatica = "0.3.1"        # Colormaps - GPL-3.0
+chromata = "1.0.0"          # Themes - GPL-3.0
+prismatica = "1.0.0"        # Colormaps - GPL-3.0
 
 # Statistics
 statrs = "0.18.0"           #
@@ -61,8 +61,8 @@ egui = "0.34.1"             #
 egui-plotter = "0.6.0"      #
 
 # WASM
-wasm-bindgen = "0.2.115"    #
-web-sys = "0.3.92"          #
+wasm-bindgen = "0.2.116"    #
+web-sys = "0.3.93"          #
 
 # Geospatial
 geo = "0.32.0"              #
@@ -72,7 +72,7 @@ geojson = "1.0.0"           #
 # Utilities
 serde = "1.0.228"           #
 clap = "4.6.0"              #
-insta = "1.47.1"            #
+insta = "1.47.2"            #
 proptest = "1.11.0"         #
 
 # Logging & error handling
@@ -89,14 +89,13 @@ plotlars = "0.11.8"         #
 
 # Internal
 starsight = { path = "starsight" }
-starsight-core = { path = "starsight-core" }
-starsight-derive = { path = "starsight-derive" }
-starsight-export = { path = "starsight-export" }
-starsight-figure = { path = "starsight-figure" }
-starsight-gpu = { path = "starsight-gpu" }
-starsight-interact = { path = "starsight-interact" }
-starsight-layout = { path = "starsight-layout" }
-starsight-marks = { path = "starsight-marks" }
+starsight-layer-1 = { path = "starsight-layer-1" }
+starsight-layer-2 = { path = "starsight-layer-2" }
+starsight-layer-3 = { path = "starsight-layer-3" }
+starsight-layer-4 = { path = "starsight-layer-4" }
+starsight-layer-5 = { path = "starsight-layer-5" }
+starsight-layer-6 = { path = "starsight-layer-6" }
+starsight-layer-7 = { path = "starsight-layer-7" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

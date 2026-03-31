@@ -158,7 +158,7 @@
               "type": "outline",
               "state": {
                 "file": "STARSIGHT.md",
-                "followCursor": false,
+                "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
@@ -184,8 +184,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "d42ebb41a834e8b0",
+  "active": "afbc7c86dd48e558",
   "lastOpenFiles": [
+    "STARSIGHT.md~",
     "STARSIGHT.md",
     "Welcome.md"
   ]

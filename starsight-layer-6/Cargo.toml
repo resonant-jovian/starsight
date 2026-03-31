@@ -1,8 +1,8 @@
 [package]
-name = "starsight"
+name = "starsight-layer-6"
 version.workspace = true
 edition.workspace = true
-description = "A unified scientific visualization crate for Rust — from zero-config one-liners to GPU-accelerated interactive 3D."
+description = "Layer 6: Interactivity"
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -18,31 +18,9 @@ starsight-layer-2.workspace = true
 starsight-layer-3.workspace = true
 starsight-layer-4.workspace = true
 starsight-layer-5.workspace = true
-starsight-layer-6.workspace = true
-starsight-layer-7.workspace = true
 
 [lints]
 workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
-
-[features]
-default = []
-full = []
-minimal = []
-science = []
-dashboard = []
-terminal = []
-web = []
-gpu = []
-interactive = []
-polars = []
-ndarray = []
-arrow = []
-3d = []
-pdf = []
-stats = []
-contour = []
-geo = []
-resvg = []

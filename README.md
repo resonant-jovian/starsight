@@ -129,34 +129,17 @@ plot!(x, y).save("chart.png");
 > [!NOTE]
 > Crate dependency graph:
 
-```
-starsight
-├── starsight-figure
-│   ├── starsight-layout
-│   │   └── starsight-marks
-│   │       └── starsight-core
-│   └── starsight-marks
-├── starsight-interact
-│   └── starsight-figure
-├── starsight-export
-│   └── starsight-figure
-├── starsight-gpu
-│   └── starsight-core
-└── starsight-derive
-```
 
-| Crate | Layer | Role |
-|-------|-------|------|
-| `starsight` | Facade | Re-exports everything, the only crate users depend on |
-| `starsight-core` | 1-2 | Rendering backends, scales, axes, color, text, geometry primitives |
-| `starsight-marks` | 3 | Geom/mark system, stat transforms, aesthetic mappings |
-| `starsight-layout` | 4 | Grid layout, faceting, legends, colorbars |
-| `starsight-figure` | 5 | Figure builder, `plot!()` macro, data acceptance |
-| `starsight-interact` | 6 | Hover, zoom, pan, selection, streaming |
-| `starsight-export` | 7 | Animation, PNG/SVG/PDF/HTML export, terminal output |
-| `starsight-gpu` | 1 | wgpu + vello GPU backend (optional) |
-| `starsight-derive` | -- | Proc macros (`#[starsight::recipe]`) |
-
+| Crate               | Role |
+|---------------------|------|
+| `starsight`         ||
+| `starsight-layer-1` ||
+| `starsight-layer-2` ||
+| `starsight-layer-3` ||
+| `starsight-layer-4` ||
+| `starsight-layer-5` ||
+| `starsight-layer-6` ||
+| `starsight-layer-7` ||
 ---
 
 ## Contribution
