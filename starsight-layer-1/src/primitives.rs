@@ -1,4 +1,5 @@
 //!
+pub type NonZeroF32 = std::num::NonZero<f32>; //Maybe? or https://docs.rs/strict-num/latest/strict_num/ or skia
 ///
 pub struct Color {
     ///
