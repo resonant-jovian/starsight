@@ -30,7 +30,7 @@ Reach out to me via email at [albin@sjoegren.se](mailto:albin@sjoegren.se) for a
 
 ## LTS guarantees
 
-* `TBD`
+* _TBD_
 
 ## Minimum Supported Rust Version (MSRV)
 

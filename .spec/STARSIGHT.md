@@ -1,12 +1,14 @@
 # starsight — development reference
 
 > The single source of truth for building starsight: architecture, implementation details, API design, dependency reference, development rules, and the full roadmap from 0.1.0 to 1.0.0.
+>
+> Authored by Claude Opus 4.6 (Anthropic) with Albin Sjögren. Last generated: 2026-03-31.
 
 ---
 
 ## What this document is
 
-This is your working reference while building starsight. It replaces the four separate spec files (STARSIGHT_SPEC.md, STARSIGHT_ARCHITECTURE.md, STARSIGHT_LINKS.md, STARSIGHT_TODO.md) with one document you can search, update, and trust. Every section is written for you, the developer, not for end users or marketing. The README.md in the repo root handles public-facing description.
+This is your working reference while building starsight — one document you can search, update, and trust. Every section is written for you, the developer, not for end users or marketing. The README.md in the repo root handles public-facing description.
 
 When you need to know how `tiny_skia::Color::from_rgba()` differs from `from_rgba8()`, it is here. When you need the prismatica API for sampling a colormap, it is here. When you need to remember what the next task is for 0.1.0, scroll to the roadmap.
 
@@ -86,6 +88,24 @@ For native (winit+wgpu) and web (WASM+WebGPU): hover tooltips, zoom, pan, select
 ### Layer 7 — Animation and export
 
 Frame-based animation to GIF/MP4. Transition animations. Static export: PNG, SVG, PDF. Interactive HTML. Terminal output with automatic protocol detection (Kitty → Sixel → iTerm2 → half-block → Braille).
+
+### Critical architectural decisions (from ecosystem analysis)
+
+These decisions are informed by studying egui, Iced, Vello, Bevy, tiny-skia, Ratatui, Plotters, and Rerun.
+
+**Geometry primitives live in starsight-core, not starsight-marks.** Every successful Rust graphics project (egui's `emath`, Iced's `iced_core`, Vello's kurbo, Bevy's `bevy_math`) puts Point, Rect, Size, Color in the lowest crate. The current codebase has `Point`, `Rect`, `TextBlock` defined in `starsight-marks` with `starsight-core` depending on them — this inverts the dependency. Fix: move all geometry primitives into `starsight-core`, remove `starsight-core`'s dependency on `starsight-marks`.
+
+**Scene is data, not a trait.** Vello's flat `Encoding` and egui's `Vec<ClippedShape>` outperform Plotters' trait-based `DrawingBackend` for testability, thread safety, and debuggability. The current `Scene` struct with `render(&self, backend: &mut dyn DrawBackend)` is correct — keep it as data that backends consume. Scene building should be infallible; errors surface only at the rendering boundary.
+
+**One struct per color space, with a unifying enum.** Bevy's color refactor (from one Color enum to separate `Srgba`, `LinearRgba`, `Oklaba` structs) is the proven approach. For starsight: the current `Color { r: u8, g: u8, b: u8 }` should become `SrgbColor` (u8 for storage/themes/colormaps) with a separate `LinearColor` (f32 for blending/gradients). Arithmetic operators only on linear types. Bridge to `tiny_skia::Color` via `From`.
+
+**`DrawBackend` must be object-safe.** Plotters' `DrawingBackend: Sized` prevents `dyn DrawingBackend`, blocking runtime backend selection. The current `DrawBackend` trait uses `&mut dyn DrawBackend` in `Scene::render()` — this is correct, keep it object-safe. Never add `Sized` bound.
+
+**CPU rendering for deterministic tests from day one.** tiny-skia's exact pixel assertions and Vello's Kompari-based snapshot comparison are both viable. Plotters' examples-as-smoke-tests approach (testing only that code runs, not that output is correct) missed real rendering bugs. Use `insta` binary snapshots with tiny-skia for CI; GPU tests run locally only.
+
+**Consuming-self builders with `impl Into<T>`.** This is the pattern egui, Iced, and Ratatui converge on. Methods take `self` by value, return `Self`. Parameters accept `impl Into<T>` for ergonomics. Provide `Default` on all option structs.
+
+**Feature unification pitfall.** In a Cargo workspace, all members share a unified feature set for shared dependencies. If `starsight-gpu` enables `wgpu/vulkan` and `starsight-export` doesn't need it, running `cargo test --workspace` still builds with vulkan. Mitigation: use `--no-default-features` in CI for minimal builds, test feature combinations explicitly.
 
 ---
 
@@ -321,7 +341,48 @@ starsight/
 
 Crate dependency graph: `starsight` → `starsight-figure` → `starsight-layout` → `starsight-marks` → `starsight-core`. Side branches: `starsight-interact` → `starsight-figure`, `starsight-export` → `starsight-figure`, `starsight-gpu` → `starsight-core`.
 
+> **KNOWN ISSUE — circular dependency.** The current `starsight-core/Cargo.toml` depends on `starsight-marks` to import `Point`, `Rect`, `TextBlock` for `DrawBackend` and `Scene`. This inverts the intended dependency direction (marks should depend on core, not the other way around). **Fix before any further development**: move `Point`, `Rect`, `Size`, `TextBlock` into `starsight-core::geom`, remove `starsight-marks` from `starsight-core`'s `[dependencies]`, and have `starsight-marks` re-export or depend on core's geometry types.
+
 Users depend only on `starsight`. Internal crate boundaries exist for compile-time isolation and feature gating.
+
+### Current codebase state
+
+Files with actual implementation (not just module declarations or empty stubs):
+
+| File | Content |
+|------|---------|
+| `starsight-core/src/error.rs` | `StarsightError` enum (6 variants) + `Result<T>` type alias via thiserror |
+| `starsight-core/src/backend/mod.rs` | `DrawBackend` trait (7 methods), `PathStyle` struct, `PathCommand` enum, `Path` type alias |
+| `starsight-core/src/scene.rs` | `SceneNode` enum (Path/Text/Group/Clip), `Scene` struct with `render()` (todo!) |
+| `starsight-core/src/color/mod.rs` | `Color` struct (r/g/b u8) with `new()` and `from_hex()` |
+| `starsight-core/src/style.rs` | Empty `Style` enum |
+| `starsight-core/src/scale/mod.rs` | Empty `Scale` struct |
+| `starsight-core/src/backend/svg.rs` | Empty `ImageData` enum |
+| `starsight-marks/src/position.rs` | `Position` struct (x/y/z f32), empty `Transform` enum |
+| `starsight-marks/src/geom/point.rs` | Empty `Point` struct |
+| `starsight-marks/src/geom/rect.rs` | Empty `Rect` struct |
+| `starsight-marks/src/geom/text.rs` | Empty `TextBlock` struct |
+| `starsight-marks/src/geom/mod.rs` | Module declarations + empty `Size` struct |
+| `starsight/src/lib.rs` | Module re-exports for all workspace crates |
+| `starsight/src/prelude.rs` | Re-exports `StarsightError` |
+
+Everything else (92 files) contains only module declarations or is completely empty. All GitHub Actions workflows (ci.yml, release.yml, coverage.yml, snapshots.yml, gallery.yml) are written and functional. All Cargo.toml files are properly configured with workspace inheritance.
+
+### Immediate next steps (do these before any 0.1.0 feature work)
+
+These are structural fixes required before implementing any chart functionality:
+
+1. **Move geometry primitives to starsight-core.** Create `starsight-core/src/geom.rs` with `Point { x: f32, y: f32 }`, `Rect { x: f32, y: f32, width: f32, height: f32 }`, `Size { width: f32, height: f32 }`, `TextBlock`. Derive `Display`, `Debug`, `Clone`, `Copy`, `PartialEq`. Add arithmetic: `Point - Point -> Vec2`, `Point + Vec2 -> Point`. Add `From<[f32; 2]>` for interop. Follow egui's `emath` pattern of semantic Point vs Vec2 distinction.
+
+2. **Remove starsight-core's dependency on starsight-marks.** Delete `starsight-marks.workspace = true` from `starsight-core/Cargo.toml`. Update all imports to `crate::geom::*`.
+
+3. **Add starsight-core dependency to starsight-marks.** Have marks use core's geometry types via `starsight-core = { path = "../starsight-core" }`.
+
+4. **Fill in the Color type.** Expand `starsight-core/src/color/mod.rs`: add alpha field, `to_f32()`, `from_css_hex()`, `luminance()`, `contrast_ratio()`, `lerp()`, `to_hex()`. Add `From<chromata::Color>`, `From<prismatica::Color>`, and conversion to `tiny_skia::Color`.
+
+5. **Implement the tiny-skia DrawBackend.** Fill in `starsight-core/src/backend/tiny_skia.rs` with a `SkiaBackend` struct wrapping `tiny_skia::Pixmap` that implements `DrawBackend`. This is the foundation for all rendering and testing.
+
+6. **Set up snapshot testing.** Add `insta` to `[dev-dependencies]`, create a test that renders a simple rect and snapshots the PNG bytes. This validates the entire rendering pipeline end-to-end.
 
 ---
 
@@ -704,9 +765,11 @@ For variable-color scatter, group by color into `HashMap<[u8;4], Vec<(f32,f32,f3
 ### Testing
 
 - **Unit tests**: every scale, mark, stat, layout algorithm with known-good values
-- **Snapshot tests** via [insta](https://docs.rs/insta/1.47.1): every chart type at fixed dimensions on tiny-skia; `cargo insta test --check --unreferenced reject` in CI
-- **Property tests** via [proptest](https://docs.rs/proptest/1.11.0): scale round-trips, tick monotonicity, colormap monotonicity
-- **No GPU in CI**: tiny-skia and SVG only; starsight-gpu has mock backends
+- **Snapshot tests** via [insta](https://docs.rs/insta/1.47.1): every chart type at fixed dimensions on tiny-skia; `cargo insta test --check --unreferenced reject` in CI. Use `assert_binary_snapshot!(".png", bytes)` for pixel-exact regression. The snapshot workflow is already configured in `.github/workflows/snapshots.yml`.
+- **Exact pixel assertions** for core rendering: follow tiny-skia's pattern of asserting specific `PremultipliedColorU8` values at known coordinates after known operations. This catches blending, anti-aliasing, and color conversion bugs that snapshot hashes miss.
+- **Property tests** via [proptest](https://docs.rs/proptest/1.11.0): scale round-trips (`inverse(transform(x)) ≈ x`), tick monotonicity, colormap monotonicity
+- **No GPU in CI**: tiny-skia and SVG only; starsight-gpu has mock backends. Follow Vello's pattern: CPU rendering for deterministic CI, GPU for production. The CI matrix already tests on ubuntu/macos/windows × stable/beta/1.85.
+- **Do NOT follow Plotters' examples-as-smoke-tests pattern.** Plotters tests only that examples run without panicking, not that output is correct. This missed real rendering bugs (e.g., issue #368 fill inconsistency). Every starsight chart type must have a visual regression test.
 
 ### Documentation
 
@@ -767,6 +830,19 @@ For variable-color scatter, group by color into `HashMap<[u8;4], Vec<(f32,f32,f3
 - Edition 2024 guide: https://doc.rust-lang.org/edition-guide/rust-2024/index.html
 - Clippy lint list: https://rust-lang.github.io/rust-clippy/master/index.html
 - rustfmt config: https://rust-lang.github.io/rustfmt/
+- Large Rust Workspaces (matklad): https://matklad.github.io/2021/08/22/large-rust-workspaces.html
+- Feature unification pitfall: https://nickb.dev/blog/cargo-workspace-and-the-feature-unification-pitfall/
+
+### Architecture references (patterns starsight follows)
+
+- egui ARCHITECTURE.md: https://github.com/emilk/egui/blob/main/ARCHITECTURE.md
+- Rerun ARCHITECTURE.md: https://raw.githubusercontent.com/rerun-io/rerun/main/ARCHITECTURE.md
+- Bevy crate organization: https://deepwiki.com/bevyengine/bevy/1.2-crate-organization
+- Iced rendering architecture: https://deepwiki.com/iced-rs/iced/4.1-wgpu-renderer
+- Vello scene patterns: https://poignardazur.github.io//2025/01/18/vello-analysis/
+- Bevy Colors V2 refactor: https://github.com/bevyengine/bevy/issues/10986
+- Linebender peniko (style primitives): https://github.com/linebender/peniko
+- egui_kittest (snapshot testing): https://docs.rs/egui_kittest
 
 ### Release and CI tooling
 
@@ -816,7 +892,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 ### Repository and workspace setup
 
 - [x] Create `resonant-jovian/starsight` GitHub repository
-- [ ] Write initial README.md with project description, badges, and resonant-jovian ecosystem overview
+- [x] Write initial README.md with project description, badges, and resonant-jovian ecosystem overview
 - [x] Add GPL-3.0-or-later LICENSE file
 - [x] Create CONTRIBUTING.md with PR process, commit message conventions (Conventional Commits), and code review expectations
 - [x] Create CODE_OF_CONDUCT.md (Contributor Covenant or Rust Code of Conduct reference)
@@ -828,7 +904,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 
 ### Workspace Cargo configuration
 
-- [x] Initialize workspace root `Cargo.toml` with `resolver = "2"` and workspace members list
+- [x] Initialize workspace root `Cargo.toml` with `resolver = "3"` (edition 2024) and workspace members list
 - [x] Create `starsight/Cargo.toml` (facade crate) with all workspace dependencies
 - [x] Create `starsight-core/Cargo.toml` with tiny-skia, palette, cosmic-text, ab_glyph, svg, image, colorgrad, colorous as dependencies
 - [x] Create `starsight-marks/Cargo.toml` depending on starsight-core
@@ -850,7 +926,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 
 ### CI/CD pipeline
 
-- [ ] Create `.github/workflows/ci.yml` — runs on every PR and push to main
+- [x] Create `.github/workflows/ci.yml` — runs on every PR and push to main
   - [ ] Job: `check` — `cargo check --workspace --all-features`
   - [ ] Job: `test` — `cargo test --workspace` (default features)
   - [ ] Job: `test-all-features` — `cargo test --workspace --all-features`
@@ -863,19 +939,19 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
   - [ ] Job: `wasm` — verify WASM compilation with `cargo build --target wasm32-unknown-unknown --features web` (placeholder)
   - [ ] Matrix: test on `ubuntu-latest`, `macos-latest`, `windows-latest`
   - [ ] Matrix: test on Rust `stable`, `beta`, and MSRV
-- [ ] Create `.github/workflows/release.yml` — triggered by version tags
+- [x] Create `.github/workflows/release.yml` — triggered by version tags
   - [ ] Publish all workspace crates to crates.io in dependency order
   - [ ] Generate GitHub release with changelog extract via git-cliff
-- [ ] Create `.github/workflows/coverage.yml` — weekly or on-demand
+- [x] Create `.github/workflows/coverage.yml` — weekly or on-demand
   - [ ] Run cargo-llvm-cov and upload to Codecov or similar
-- [ ] Create `.github/workflows/snapshots.yml` — runs snapshot tests and stores artifacts
-- [ ] Create `.github/workflows/gallery.yml` — generates gallery images for documentation
+- [x] Create `.github/workflows/snapshots.yml` — runs snapshot tests and stores artifacts
+- [x] Create `.github/workflows/gallery.yml` — generates gallery images for documentation
 
 ### Skeleton source files
 
-- [ ] Create `starsight/src/lib.rs` with top-level doc comment and feature-gated re-exports
-- [ ] Create `starsight/src/prelude.rs` with `pub use` of all primary types
-- [ ] Create `starsight-core/src/lib.rs` with module declarations
+- [x] Create `starsight/src/lib.rs` with top-level doc comment and feature-gated re-exports
+- [x] Create `starsight/src/prelude.rs` with `pub use` of all primary types
+- [x] Create `starsight-core/src/lib.rs` with module declarations
 - [x] Create stub `mod.rs` for every module listed in the workspace file tree
 - [x] Ensure `cargo check --workspace` passes with all stubs
 - [x] Ensure `cargo test --workspace` passes (zero tests, zero failures)
@@ -901,32 +977,45 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 
 > Exit criteria: `plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png")` produces a correct line chart.
 
+### Structural fixes (do first — blocks everything else)
+
+- [ ] Move `Point`, `Rect`, `Size`, `TextBlock` from `starsight-marks/src/geom/` into `starsight-core/src/geom.rs`
+- [ ] Add `Vec2 { x: f32, y: f32 }` with arithmetic: `Point - Point = Vec2`, `Point + Vec2 = Point`
+- [ ] Derive `Debug`, `Clone`, `Copy`, `PartialEq` on all geometry types, `Display` on Point/Rect
+- [ ] Add `From<[f32; 2]>` and `From<(f32, f32)>` for `Point` and `Vec2`
+- [ ] Add `Rect::from_xywh(x, y, w, h)`, `Rect::from_ltrb(l, t, r, b)`, `Rect::contains(Point)`, `Rect::width()`, `Rect::height()`
+- [ ] Remove `starsight-marks` from `starsight-core/Cargo.toml` `[dependencies]`
+- [ ] Add `starsight-core` to `starsight-marks/Cargo.toml` `[dependencies]`
+- [ ] Update all imports in `starsight-core/src/backend/mod.rs` and `scene.rs` to use `crate::geom::*`
+- [ ] Have `starsight-marks` re-export core geometry types if needed for its own API
+- [ ] Verify `cargo check --workspace` passes with corrected dependency direction
+
 ### starsight-core: Rendering abstraction (Layer 1)
 
 #### DrawBackend trait
 
-- [ ] Define `DrawBackend` trait in `starsight-core/src/backend/mod.rs`
-  - [ ] Method: `fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>`
-  - [ ] Method: `fn draw_text(&mut self, text: &TextBlock, position: Point) -> Result<()>`
-  - [ ] Method: `fn draw_image(&mut self, image: &ImageData, rect: Rect) -> Result<()>`
-  - [ ] Method: `fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>`
-  - [ ] Method: `fn dimensions(&self) -> (u32, u32)`
-  - [ ] Method: `fn save_png(&self, path: &std::path::Path) -> Result<()>`
-  - [ ] Method: `fn save_svg(&self, path: &std::path::Path) -> Result<()>`
-- [ ] Define `PathStyle` struct: stroke color, stroke width, fill color, dash pattern, line cap, line join, opacity
-- [ ] Define `Path` type wrapping a sequence of `PathCommand` (MoveTo, LineTo, QuadTo, CubicTo, Close)
-- [ ] Define `Point`, `Rect`, `Size` geometry primitives
+- [x] Define `DrawBackend` trait in `starsight-core/src/backend/mod.rs`
+  - [x] Method: `fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>`
+  - [x] Method: `fn draw_text(&mut self, text: &TextBlock, position: Point) -> Result<()>`
+  - [x] Method: `fn draw_image(&mut self, image: &ImageData, rect: Rect) -> Result<()>`
+  - [x] Method: `fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>`
+  - [x] Method: `fn dimensions(&self) -> (u32, u32)`
+  - [x] Method: `fn save_png(&self, path: &std::path::Path) -> Result<()>`
+  - [x] Method: `fn save_svg(&self, path: &std::path::Path) -> Result<()>`
+- [x] Define `PathStyle` struct: stroke color, stroke width, fill color, dash pattern, line cap, line join, opacity
+- [x] Define `Path` type wrapping a sequence of `PathCommand` (MoveTo, LineTo, QuadTo, CubicTo, Close)
+- [ ] Define `Point`, `Rect`, `Size` geometry primitives (IN starsight-core — see structural fixes above)
 - [ ] Define `Color` type with from_rgba, from_hex, named constants, and conversion to palette types
 - [ ] Write unit tests for all geometry primitives
 
 #### Scene graph
 
-- [ ] Define `SceneNode` enum in `starsight-core/src/scene.rs`
-  - [ ] Variant: `Path { path, style }`
-  - [ ] Variant: `Text { block, position }`
-  - [ ] Variant: `Group { children, transform }`
-  - [ ] Variant: `Clip { rect, child }`
-- [ ] Define `Scene` struct holding root `Vec<SceneNode>`
+- [x] Define `SceneNode` enum in `starsight-core/src/scene.rs`
+  - [x] Variant: `Path { path, style }`
+  - [x] Variant: `Text { block, position }`
+  - [x] Variant: `Group { children, transform }`
+  - [x] Variant: `Clip { rect, child }`
+- [x] Define `Scene` struct holding root `Vec<SceneNode>`
 - [ ] Implement `Scene::render(&self, backend: &mut dyn DrawBackend) -> Result<()>`
 - [ ] Write unit tests for scene construction and traversal
 
@@ -1853,7 +1942,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 - [ ] Implement `#[starsight::recipe]` attribute macro
 - [ ] Transform annotated function into a registered chart type callable from Figure builder
 - [ ] Generate documentation for recipe parameters
-- [ ] Write example recipe: `volcano_plot` from STARSIGHT_ARCHITECTURE.md
+- [ ] Write example recipe: `volcano_plot` from the Target API section
 - [ ] Write example recipe: `manhattan_plot` for genomics
 - [ ] Write test: custom recipe renders correctly
 
