@@ -13,7 +13,6 @@ categories.workspace = true
 publish = true
 
 [dependencies]
-starsight-core = { path = "../starsight-core"}
 
 [lints]
 workspace = true

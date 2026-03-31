@@ -23,6 +23,8 @@ chromata.workspace = true
 prismatica.workspace = true
 thiserror.workspace = true
 
+starsight-marks.workspace = true
+
 [lints]
 workspace = true
 

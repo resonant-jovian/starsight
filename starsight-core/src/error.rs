@@ -1,5 +1,6 @@
 //! Crate defining error definitions
 
+///
 use thiserror::Error;
 
 /// Error handling enum
@@ -30,4 +31,3 @@ pub enum StarsightError {
 
 /// Public Result type for starsight
 pub type Result<T> = std::result::Result<T, StarsightError>;
-

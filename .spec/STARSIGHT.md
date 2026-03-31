@@ -850,7 +850,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 
 ### CI/CD pipeline
 
-- [x] Create `.github/workflows/ci.yml` — runs on every PR and push to main
+- [ ] Create `.github/workflows/ci.yml` — runs on every PR and push to main
   - [ ] Job: `check` — `cargo check --workspace --all-features`
   - [ ] Job: `test` — `cargo test --workspace` (default features)
   - [ ] Job: `test-all-features` — `cargo test --workspace --all-features`
@@ -863,10 +863,10 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
   - [ ] Job: `wasm` — verify WASM compilation with `cargo build --target wasm32-unknown-unknown --features web` (placeholder)
   - [ ] Matrix: test on `ubuntu-latest`, `macos-latest`, `windows-latest`
   - [ ] Matrix: test on Rust `stable`, `beta`, and MSRV
-- [x] Create `.github/workflows/release.yml` — triggered by version tags
+- [ ] Create `.github/workflows/release.yml` — triggered by version tags
   - [ ] Publish all workspace crates to crates.io in dependency order
   - [ ] Generate GitHub release with changelog extract via git-cliff
-- [x] Create `.github/workflows/coverage.yml` — weekly or on-demand
+- [ ] Create `.github/workflows/coverage.yml` — weekly or on-demand
   - [ ] Run cargo-llvm-cov and upload to Codecov or similar
 - [ ] Create `.github/workflows/snapshots.yml` — runs snapshot tests and stores artifacts
 - [ ] Create `.github/workflows/gallery.yml` — generates gallery images for documentation
@@ -878,20 +878,20 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 - [ ] Create `starsight-core/src/lib.rs` with module declarations
 - [x] Create stub `mod.rs` for every module listed in the workspace file tree
 - [x] Ensure `cargo check --workspace` passes with all stubs
-- [ ] Ensure `cargo test --workspace` passes (zero tests, zero failures)
-- [ ] Ensure `cargo doc --workspace --no-deps` builds cleanly
+- [x] Ensure `cargo test --workspace` passes (zero tests, zero failures)
+- [x] Ensure `cargo doc --workspace --no-deps` builds cleanly
 
 ### Error type
 
-- [ ] Define `starsight::Error` enum in `starsight-core/src/error.rs` using thiserror
-  - [ ] Variant: `Render(String)` — rendering backend failures
-  - [ ] Variant: `Data(String)` — data shape/type mismatches
-  - [ ] Variant: `Io(std::io::Error)` — file I/O errors
-  - [ ] Variant: `Scale(String)` — scale domain/range errors
-  - [ ] Variant: `Export(String)` — export format errors
-  - [ ] Variant: `Config(String)` — invalid configuration
-- [ ] Define `pub type Result<T> = std::result::Result<T, Error>;`
-- [ ] Implement `From<std::io::Error>` for `Error`
+- [x] Define `starsight::Error` enum in `starsight-core/src/error.rs` using thiserror
+  - [x] Variant: `Render(String)` — rendering backend failures
+  - [x] Variant: `Data(String)` — data shape/type mismatches
+  - [x] Variant: `Io(std::io::Error)` — file I/O errors
+  - [x] Variant: `Scale(String)` — scale domain/range errors
+  - [x] Variant: `Export(String)` — export format errors
+  - [x] Variant: `Config(String)` — invalid configuration
+- [x] Define `pub type Result<T> = std::result::Result<T, Error>;`
+- [x] Implement `From<std::io::Error>` for `Error`
 - [ ] Implement `From<tiny_skia::...>` conversions as needed
 - [ ] Write unit tests for error creation and Display output
 

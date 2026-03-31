@@ -4,4 +4,5 @@
 //! use starsight::prelude::*;
 //! ```
 
+///
 pub use starsight_core::error::StarsightError;

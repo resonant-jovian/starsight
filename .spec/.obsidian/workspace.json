@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "4243ddab0d38d3fb",
+        "id": "ae0107eb6b965a64",
         "type": "tabs",
         "children": [
           {
-            "id": "c592c1dbea7a8c6a",
+            "id": "afbc7c86dd48e558",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "e54be2812f300750",
@@ -94,6 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "STARSIGHT.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +105,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for STARSIGHT"
             }
           },
           {
@@ -112,11 +114,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "STARSIGHT.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from STARSIGHT"
             }
           },
           {
@@ -154,20 +157,21 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "STARSIGHT.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of STARSIGHT"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,7 +184,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "c592c1dbea7a8c6a",
+  "active": "d42ebb41a834e8b0",
   "lastOpenFiles": [
     "STARSIGHT.md",
     "Welcome.md"
