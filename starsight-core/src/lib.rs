@@ -19,3 +19,5 @@ pub mod scale;
 pub mod style;
 ///
 pub mod text;
+///
+pub mod geom;

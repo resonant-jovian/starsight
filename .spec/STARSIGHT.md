@@ -927,23 +927,23 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 ### CI/CD pipeline
 
 - [x] Create `.github/workflows/ci.yml` — runs on every PR and push to main
-  - [ ] Job: `check` — `cargo check --workspace --all-features`
-  - [ ] Job: `test` — `cargo test --workspace` (default features)
-  - [ ] Job: `test-all-features` — `cargo test --workspace --all-features`
-  - [ ] Job: `test-minimal` — `cargo test --workspace --no-default-features`
-  - [ ] Job: `clippy` — `cargo clippy --workspace --all-features -- -D warnings`
-  - [ ] Job: `fmt` — `cargo fmt --all -- --check`
-  - [ ] Job: `doc` — `cargo doc --workspace --all-features --no-deps` (verify doc builds)
-  - [ ] Job: `deny` — `cargo deny check`
-  - [ ] Job: `semver` — `cargo semver-checks` (after first publish)
-  - [ ] Job: `wasm` — verify WASM compilation with `cargo build --target wasm32-unknown-unknown --features web` (placeholder)
-  - [ ] Matrix: test on `ubuntu-latest`, `macos-latest`, `windows-latest`
-  - [ ] Matrix: test on Rust `stable`, `beta`, and MSRV
+  - [x] Job: `check` — `cargo check --workspace --all-features`
+  - [x] Job: `test` — `cargo test --workspace` (default features)
+  - [x] Job: `test-all-features` — `cargo test --workspace --all-features`
+  - [x] Job: `test-minimal` — `cargo test --workspace --no-default-features`
+  - [x] Job: `clippy` — `cargo clippy --workspace --all-features -- -D warnings`
+  - [x] Job: `fmt` — `cargo fmt --all -- --check`
+  - [x] Job: `doc` — `cargo doc --workspace --all-features --no-deps` (verify doc builds)
+  - [x] Job: `deny` — `cargo deny check`
+  - [x] Job: `semver` — `cargo semver-checks` (after first publish)
+  - [x] Job: `wasm` — verify WASM compilation with `cargo build --target wasm32-unknown-unknown --features web` (placeholder)
+  - [x] Matrix: test on `ubuntu-latest`, `macos-latest`, `windows-latest`
+  - [x] Matrix: test on Rust `stable`, `beta`, and MSRV
 - [x] Create `.github/workflows/release.yml` — triggered by version tags
-  - [ ] Publish all workspace crates to crates.io in dependency order
-  - [ ] Generate GitHub release with changelog extract via git-cliff
+  - [x] Publish all workspace crates to crates.io in dependency order
+  - [x] Generate GitHub release with changelog extract via git-cliff
 - [x] Create `.github/workflows/coverage.yml` — weekly or on-demand
-  - [ ] Run cargo-llvm-cov and upload to Codecov or similar
+  - [x] Run cargo-llvm-cov and upload to Codecov or similar
 - [x] Create `.github/workflows/snapshots.yml` — runs snapshot tests and stores artifacts
 - [x] Create `.github/workflows/gallery.yml` — generates gallery images for documentation
 
@@ -979,7 +979,7 @@ Every milestone release with ordered, checkable tasks. Check items off as you co
 
 ### Structural fixes (do first — blocks everything else)
 
-- [ ] Move `Point`, `Rect`, `Size`, `TextBlock` from `starsight-marks/src/geom/` into `starsight-core/src/geom.rs`
+- [x] Move `Point`, `Rect`, `Size`, `TextBlock` from `starsight-marks/src/geom/` into `starsight-core/src/geom.rs`
 - [ ] Add `Vec2 { x: f32, y: f32 }` with arithmetic: `Point - Point = Vec2`, `Point + Vec2 = Point`
 - [ ] Derive `Debug`, `Clone`, `Copy`, `PartialEq` on all geometry types, `Display` on Point/Rect
 - [ ] Add `From<[f32; 2]>` and `From<(f32, f32)>` for `Point` and `Vec2`

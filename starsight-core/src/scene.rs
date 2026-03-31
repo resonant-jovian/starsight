@@ -7,9 +7,9 @@ use crate::error::Result;
 ///
 use crate::style::Style;
 ///
-use starsight_marks::geom::rect::Rect;
+use crate::geom::Rect;
 ///
-use starsight_marks::geom::text::TextBlock;
+use crate::geom::TextBlock;
 ///
 use starsight_marks::position::{Position, Transform};
 

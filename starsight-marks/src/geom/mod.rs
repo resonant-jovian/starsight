@@ -24,6 +24,3 @@ pub mod surface;
 pub mod text;
 ///
 pub mod volume;
-///
-
-pub struct Size {}

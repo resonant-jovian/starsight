@@ -1,4 +1,2 @@
 //!
 
-///
-pub struct Point {}

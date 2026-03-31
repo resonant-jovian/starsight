@@ -8,11 +8,11 @@ use crate::error::Result;
 ///
 use ::tiny_skia::{LineCap, LineJoin};
 ///
-use starsight_marks::geom::point::Point;
+use crate::geom::Rect;
 ///
-use starsight_marks::geom::rect::Rect;
+use crate::geom::Point;
 ///
-use starsight_marks::geom::text::TextBlock;
+use crate::geom::TextBlock;
 
 ///
 pub mod pdf;
