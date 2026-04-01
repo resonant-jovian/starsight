@@ -152,3 +152,35 @@ impl std::ops::Neg for Vec2 {
         Vec2 { x: -self.x, y: -self.y }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::primitives::{Point, Vec2};
+
+    #[test]
+    fn point_minus_point_is_vec2() {
+        let a = Point::new(10.0, 20.0);
+        let b = Point::new(3.0, 5.0);
+        let v: Vec2 = a - b;
+        assert_eq!(v, Vec2::new(7.0, 15.0));
+    }
+
+    #[test]
+    fn point_plus_vec2_is_point() {
+        let p = Point::new(1.0, 2.0);
+        let v = Vec2::new(10.0, 20.0);
+        let result: Point = p + v;
+        assert_eq!(result, Point::new(11.0, 22.0));
+    }
+
+    #[test]
+    fn vec2_scale() {
+        assert_eq!(Vec2::new(3.0, 4.0) * 2.0, Vec2::new(6.0, 8.0));
+        assert_eq!(2.0 * Vec2::new(3.0, 4.0), Vec2::new(6.0, 8.0));
+    }
+
+    #[test]
+    fn vec2_length() {
+        assert!((Vec2::new(3.0, 4.0).length() - 5.0).abs() < f32::EPSILON);
+    }
+}
