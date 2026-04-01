@@ -2077,7 +2077,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Add Vec2 with semantic arithmetic
 
-- [ ] Create `Vec2` in `starsight-layer-1/src/primitives.rs`. A Vec2 is a displacement, not a position. The grocery store minus your house is a Vec2. The grocery store itself is a Point.
+- [x] Create `Vec2` in `starsight-layer-1/src/primitives.rs`. A Vec2 is a displacement, not a position. The grocery store minus your house is a Vec2. The grocery store itself is a Point.
 
     ```rust
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
