@@ -2102,7 +2102,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Implement the semantic arithmetic. This is the entire point of having two types. `Point - Point = Vec2` (displacement between positions). `Point + Vec2 = Point` (shift a position). `Point + Point` does not compile (meaningless). `Vec2 + Vec2 = Vec2` (compose displacements). `Vec2 * f32 = Vec2` (scale a displacement). `Point * f32` does not compile (scaling a position is meaningless).
+- [x] Implement the semantic arithmetic. This is the entire point of having two types. `Point - Point = Vec2` (displacement between positions). `Point + Vec2 = Point` (shift a position). `Point + Point` does not compile (meaningless). `Vec2 + Vec2 = Vec2` (compose displacements). `Vec2 * f32 = Vec2` (scale a displacement). `Point * f32` does not compile (scaling a position is meaningless).
 
     ```rust
     impl std::ops::Sub for Point {

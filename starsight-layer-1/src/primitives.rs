@@ -25,13 +25,16 @@ impl Color {
         }
     }
 }
-
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
 }
 impl Point {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
+    pub const X: Self = Self { x: 1.0, y: 0.0 };
+    pub const Y: Self = Self { x: 0.0, y: 1.0 };
+    pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
 }
@@ -91,5 +94,61 @@ impl Vec2 {
     pub fn normalize(self) -> Self {
         let len = self.length();
         if len == 0.0 { Self::ZERO } else { Self { x: self.x / len, y: self.y / len} }
+    }
+}
+
+impl std::ops::Sub for Point {
+    type Output = Vec2;
+    fn sub(self, rhs: Point) -> Vec2 {
+        Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
+    }
+}
+
+impl std::ops::Add<Vec2> for Point {
+    type Output = Point;
+    fn add(self, rhs: Vec2) -> Point {
+        Point { x: self.x + rhs.x, y: self.y + rhs.y }
+    }
+}
+
+impl std::ops::Sub<Vec2> for Point {
+    type Output = Point;
+    fn sub(self, rhs: Vec2) -> Point {
+        Point { x: self.x - rhs.x, y: self.y - rhs.y }
+    }
+}
+
+impl std::ops::Add for Vec2 {
+    type Output = Vec2;
+    fn add(self, rhs: Vec2) -> Vec2 {
+        Vec2 { x: self.x + rhs.x, y: self.y + rhs.y }
+    }
+}
+
+impl std::ops::Sub for Vec2 {
+    type Output = Vec2;
+    fn sub(self, rhs: Vec2) -> Vec2 {
+        Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
+    }
+}
+
+impl std::ops::Mul<f32> for Vec2 {
+    type Output = Vec2;
+    fn mul(self, rhs: f32) -> Vec2 {
+        Vec2 { x: self.x * rhs, y: self.y * rhs }
+    }
+}
+
+impl std::ops::Mul<Vec2> for f32 {
+    type Output = Vec2;
+    fn mul(self, rhs: Vec2) -> Vec2 {
+        Vec2 { x: self * rhs.x, y: self * rhs.y }
+    }
+}
+
+impl std::ops::Neg for Vec2 {
+    type Output = Vec2;
+    fn neg(self) -> Vec2 {
+        Vec2 { x: -self.x, y: -self.y }
     }
 }
