@@ -1,30 +1,8 @@
 //!
-pub type NonZeroF32 = std::num::NonZero<f32>; //Maybe? or https://docs.rs/strict-num/latest/strict_num/ or skia
-///
-pub struct Color {
-    ///
-    r: u8,
-    ///
-    g: u8,
-    ///
-    b: u8,
-}
 
-///
-impl Color {
-    ///
-    pub const fn new(r: u8, g: u8, b: u8) -> Self {
-        Self { r, g, b }
-    }
-    ///
-    pub const fn from_hex(hex: u32) -> Self {
-        Self {
-            r: ((hex >> 16) & 0xFF) as u8,
-            g: ((hex >> 8) & 0xFF) as u8,
-            b: (hex & 0xFF) as u8,
-        }
-    }
-}
+//pub type NonZeroF32 = std::num::NonZero<f32>; //Maybe? or https://docs.rs/strict-num/latest/strict_num/ or skia
+
+// -------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Point {
     pub x: f32,
@@ -40,13 +18,34 @@ impl Point {
 }
 impl From<tiny_skia::Point> for Point {
     fn from(value: tiny_skia::Point) -> Self {
-        Self { x: value.x, y: value.y }
+        Self {
+            x: value.x,
+            y: value.y,
+        }
     }
 }
-impl From<[f32; 2]> for Point { fn from([x, y]: [f32; 2]) -> Self { Self { x, y } } }
-impl From<(f32, f32)> for Point { fn from((x, y): (f32, f32)) -> Self { Self { x, y } } }
-impl From<Point> for [f32; 2] { fn from(p: Point) -> Self { [p.x, p.y] } }
-impl From<Point> for (f32, f32) { fn from(p: Point) -> Self { (p.x, p.y) } }
+impl From<[f32; 2]> for Point {
+    fn from([x, y]: [f32; 2]) -> Self {
+        Self { x, y }
+    }
+}
+impl From<(f32, f32)> for Point {
+    fn from((x, y): (f32, f32)) -> Self {
+        Self { x, y }
+    }
+}
+impl From<Point> for [f32; 2] {
+    fn from(p: Point) -> Self {
+        [p.x, p.y]
+    }
+}
+impl From<Point> for (f32, f32) {
+    fn from(p: Point) -> Self {
+        (p.x, p.y)
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 // Same four impls for Vec2
 pub struct Rect {
     pub left: f32,
@@ -56,7 +55,12 @@ pub struct Rect {
 }
 impl Rect {
     pub fn new(left: f32, top: f32, right: f32, bottom: f32) -> Self {
-        Self { left, top, right, bottom }
+        Self {
+            left,
+            top,
+            right,
+            bottom,
+        }
     }
 }
 impl From<tiny_skia::Rect> for Rect {
@@ -71,24 +75,46 @@ impl From<tiny_skia::Rect> for Rect {
 }
 impl Rect {
     pub fn from_xywh(x: f32, y: f32, width: f32, height: f32) -> Self {
-        Self { left: x, top: y, right: x + width, bottom: y + height }
+        Self {
+            left: x,
+            top: y,
+            right: x + width,
+            bottom: y + height,
+        }
     }
 
     pub fn from_center_size(center: Point, size: Size) -> Self {
         let half_w = size.width * 0.5;
         let half_h = size.height * 0.5;
-        Self { left: center.x - half_w, top: center.y - half_h,
-            right: center.x + half_w, bottom: center.y + half_h }
+        Self {
+            left: center.x - half_w,
+            top: center.y - half_h,
+            right: center.x + half_w,
+            bottom: center.y + half_h,
+        }
     }
 
-    pub fn width(&self) -> f32 { self.right - self.left }
-    pub fn height(&self) -> f32 { self.bottom - self.top }
-    pub fn size(&self) -> Size { Size::new(self.width(), self.height()) }
-    pub fn center(&self) -> Point {
-        Point::new((self.left + self.right) * 0.5, (self.top + self.bottom) * 0.5)
+    pub fn width(&self) -> f32 {
+        self.right - self.left
     }
-    pub fn top_left(&self) -> Point { Point::new(self.left, self.top) }
-    pub fn bottom_right(&self) -> Point { Point::new(self.right, self.bottom) }
+    pub fn height(&self) -> f32 {
+        self.bottom - self.top
+    }
+    pub fn size(&self) -> Size {
+        Size::new(self.width(), self.height())
+    }
+    pub fn center(&self) -> Point {
+        Point::new(
+            (self.left + self.right) * 0.5,
+            (self.top + self.bottom) * 0.5,
+        )
+    }
+    pub fn top_left(&self) -> Point {
+        Point::new(self.left, self.top)
+    }
+    pub fn bottom_right(&self) -> Point {
+        Point::new(self.right, self.bottom)
+    }
 
     pub fn contains(&self, p: Point) -> bool {
         p.x >= self.left && p.x <= self.right && p.y >= self.top && p.y <= self.bottom
@@ -96,15 +122,25 @@ impl Rect {
 
     pub fn intersection(&self, other: &Rect) -> Option<Rect> {
         let r = Rect {
-            left: self.left.max(other.left), top: self.top.max(other.top),
-            right: self.right.min(other.right), bottom: self.bottom.min(other.bottom),
+            left: self.left.max(other.left),
+            top: self.top.max(other.top),
+            right: self.right.min(other.right),
+            bottom: self.bottom.min(other.bottom),
         };
-        if r.left < r.right && r.top < r.bottom { Some(r) } else { None }
+        if r.left < r.right && r.top < r.bottom {
+            Some(r)
+        } else {
+            None
+        }
     }
 
     pub fn pad(&self, amount: f32) -> Rect {
-        Rect { left: self.left - amount, top: self.top - amount,
-            right: self.right + amount, bottom: self.bottom + amount }
+        Rect {
+            left: self.left - amount,
+            top: self.top - amount,
+            right: self.right + amount,
+            bottom: self.bottom + amount,
+        }
     }
 
     /// Returns None if left >= right or top >= bottom.
@@ -112,6 +148,8 @@ impl Rect {
         tiny_skia::Rect::from_ltrb(self.left, self.top, self.right, self.bottom)
     }
 }
+// -------------------------------------------------------------------------------------------------
+
 pub struct Size {
     width: f32,
     height: f32,
@@ -123,9 +161,13 @@ impl Size {
 }
 impl From<tiny_skia::Size> for Size {
     fn from(value: tiny_skia::Size) -> Self {
-        Self { width: value.width(), height: value.height() }
+        Self {
+            width: value.width(),
+            height: value.height(),
+        }
     }
 }
+// -------------------------------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec2 {
@@ -137,73 +179,109 @@ impl Vec2 {
     pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
     pub const X: Self = Self { x: 1.0, y: 0.0 };
     pub const Y: Self = Self { x: 0.0, y: 1.0 };
-    pub const fn new(x: f32, y: f32) -> Self { Self { x, y } }
-    pub fn length(self) -> f32 { (self.x * self.x + self.y * self.y).sqrt() }
+    pub const fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+    pub fn length(self) -> f32 {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
     pub fn normalize(self) -> Self {
         let len = self.length();
-        if len == 0.0 { Self::ZERO } else { Self { x: self.x / len, y: self.y / len} }
+        if len == 0.0 {
+            Self::ZERO
+        } else {
+            Self {
+                x: self.x / len,
+                y: self.y / len,
+            }
+        }
     }
 }
+// -------------------------------------------------------------------------------------------------
 
 impl std::ops::Sub for Point {
     type Output = Vec2;
     fn sub(self, rhs: Point) -> Vec2 {
-        Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
+        Vec2 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
 
 impl std::ops::Add<Vec2> for Point {
     type Output = Point;
     fn add(self, rhs: Vec2) -> Point {
-        Point { x: self.x + rhs.x, y: self.y + rhs.y }
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
     }
 }
 
 impl std::ops::Sub<Vec2> for Point {
     type Output = Point;
     fn sub(self, rhs: Vec2) -> Point {
-        Point { x: self.x - rhs.x, y: self.y - rhs.y }
+        Point {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
 
 impl std::ops::Add for Vec2 {
     type Output = Vec2;
     fn add(self, rhs: Vec2) -> Vec2 {
-        Vec2 { x: self.x + rhs.x, y: self.y + rhs.y }
+        Vec2 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
     }
 }
 
 impl std::ops::Sub for Vec2 {
     type Output = Vec2;
     fn sub(self, rhs: Vec2) -> Vec2 {
-        Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
+        Vec2 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
 
 impl std::ops::Mul<f32> for Vec2 {
     type Output = Vec2;
     fn mul(self, rhs: f32) -> Vec2 {
-        Vec2 { x: self.x * rhs, y: self.y * rhs }
+        Vec2 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
     }
 }
 
 impl std::ops::Mul<Vec2> for f32 {
     type Output = Vec2;
     fn mul(self, rhs: Vec2) -> Vec2 {
-        Vec2 { x: self * rhs.x, y: self * rhs.y }
+        Vec2 {
+            x: self * rhs.x,
+            y: self * rhs.y,
+        }
     }
 }
 
 impl std::ops::Neg for Vec2 {
     type Output = Vec2;
     fn neg(self) -> Vec2 {
-        Vec2 { x: -self.x, y: -self.y }
+        Vec2 {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
-
+// -------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
-    use crate::primitives::{Point, Vec2};
+    use crate::primitives::geom::{Point, Vec2};
 
     #[test]
     fn point_minus_point_is_vec2() {
