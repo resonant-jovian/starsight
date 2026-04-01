@@ -2162,7 +2162,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Add `From`/`Into` conversions for interop with other libraries:
+- [x] Add `From`/`Into` conversions for interop with other libraries:
 
     ```rust
     impl From<[f32; 2]> for Point { fn from([x, y]: [f32; 2]) -> Self { Self { x, y } } }
@@ -2172,7 +2172,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     // Same four impls for Vec2
     ```
 
-- [ ] Write tests:
+- [x] Write tests:
 
     ```rust
     #[test]
@@ -2205,7 +2205,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Complete the Rect type
 
-- [ ] Add convenience constructors and accessors:
+- [x] Add convenience constructors and accessors:
 
     ```rust
     impl Rect {

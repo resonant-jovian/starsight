@@ -43,6 +43,11 @@ impl From<tiny_skia::Point> for Point {
         Self { x: value.x, y: value.y }
     }
 }
+impl From<[f32; 2]> for Point { fn from([x, y]: [f32; 2]) -> Self { Self { x, y } } }
+impl From<(f32, f32)> for Point { fn from((x, y): (f32, f32)) -> Self { Self { x, y } } }
+impl From<Point> for [f32; 2] { fn from(p: Point) -> Self { [p.x, p.y] } }
+impl From<Point> for (f32, f32) { fn from(p: Point) -> Self { (p.x, p.y) } }
+// Same four impls for Vec2
 pub struct Rect {
     pub left: f32,
     pub top: f32,
@@ -62,6 +67,49 @@ impl From<tiny_skia::Rect> for Rect {
             right: value.right(),
             bottom: value.bottom(),
         }
+    }
+}
+impl Rect {
+    pub fn from_xywh(x: f32, y: f32, width: f32, height: f32) -> Self {
+        Self { left: x, top: y, right: x + width, bottom: y + height }
+    }
+
+    pub fn from_center_size(center: Point, size: Size) -> Self {
+        let half_w = size.width * 0.5;
+        let half_h = size.height * 0.5;
+        Self { left: center.x - half_w, top: center.y - half_h,
+            right: center.x + half_w, bottom: center.y + half_h }
+    }
+
+    pub fn width(&self) -> f32 { self.right - self.left }
+    pub fn height(&self) -> f32 { self.bottom - self.top }
+    pub fn size(&self) -> Size { Size::new(self.width(), self.height()) }
+    pub fn center(&self) -> Point {
+        Point::new((self.left + self.right) * 0.5, (self.top + self.bottom) * 0.5)
+    }
+    pub fn top_left(&self) -> Point { Point::new(self.left, self.top) }
+    pub fn bottom_right(&self) -> Point { Point::new(self.right, self.bottom) }
+
+    pub fn contains(&self, p: Point) -> bool {
+        p.x >= self.left && p.x <= self.right && p.y >= self.top && p.y <= self.bottom
+    }
+
+    pub fn intersection(&self, other: &Rect) -> Option<Rect> {
+        let r = Rect {
+            left: self.left.max(other.left), top: self.top.max(other.top),
+            right: self.right.min(other.right), bottom: self.bottom.min(other.bottom),
+        };
+        if r.left < r.right && r.top < r.bottom { Some(r) } else { None }
+    }
+
+    pub fn pad(&self, amount: f32) -> Rect {
+        Rect { left: self.left - amount, top: self.top - amount,
+            right: self.right + amount, bottom: self.bottom + amount }
+    }
+
+    /// Returns None if left >= right or top >= bottom.
+    pub fn to_tiny_skia(&self) -> Option<tiny_skia::Rect> {
+        tiny_skia::Rect::from_ltrb(self.left, self.top, self.right, self.bottom)
     }
 }
 pub struct Size {
@@ -150,6 +198,38 @@ impl std::ops::Neg for Vec2 {
     type Output = Vec2;
     fn neg(self) -> Vec2 {
         Vec2 { x: -self.x, y: -self.y }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::primitives::{Point, Vec2};
+
+    #[test]
+    fn point_minus_point_is_vec2() {
+        let a = Point::new(10.0, 20.0);
+        let b = Point::new(3.0, 5.0);
+        let v: Vec2 = a - b;
+        assert_eq!(v, Vec2::new(7.0, 15.0));
+    }
+
+    #[test]
+    fn point_plus_vec2_is_point() {
+        let p = Point::new(1.0, 2.0);
+        let v = Vec2::new(10.0, 20.0);
+        let result: Point = p + v;
+        assert_eq!(result, Point::new(11.0, 22.0));
+    }
+
+    #[test]
+    fn vec2_scale() {
+        assert_eq!(Vec2::new(3.0, 4.0) * 2.0, Vec2::new(6.0, 8.0));
+        assert_eq!(2.0 * Vec2::new(3.0, 4.0), Vec2::new(6.0, 8.0));
+    }
+
+    #[test]
+    fn vec2_length() {
+        assert!((Vec2::new(3.0, 4.0).length() - 5.0).abs() < f32::EPSILON);
     }
 }
 
