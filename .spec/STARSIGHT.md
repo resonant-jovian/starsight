@@ -2265,7 +2265,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Complete the Color type
 
-- [ ] Add `ColorAlpha` and core Color methods:
+- [x] Add `ColorAlpha` and core Color methods:
 
     ```rust
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
