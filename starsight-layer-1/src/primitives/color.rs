@@ -64,6 +64,32 @@ impl Color {
     pub fn to_css_hex(self) -> String {
         format!("#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
+    /// Based on WCAG calc
+    pub fn luminance(self) -> f64 {
+        fn linearize(c: f64) -> f64 {
+            if c <= 0.03928 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+        }
+        let r = linearize(self.r as f64 / 255.0);
+        let g = linearize(self.g as f64 / 255.0);
+        let b = linearize(self.b as f64 / 255.0);
+        0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+
+    pub fn contrast_ratio(self, other: Color) -> f64 {
+        let l1 = self.luminance();
+        let l2 = other.luminance();
+        let (lighter, darker) = if l1 > l2 { (l1, l2) } else { (l2, l1) };
+        (lighter + 0.05) / (darker + 0.05)
+    }
+
+    pub fn lerp(self, other: Color, t: f32) -> Color {
+        let t = t.clamp(0.0, 1.0);
+        Color {
+            r: (self.r as f32 + (other.r as f32 - self.r as f32) * t) as u8,
+            g: (self.g as f32 + (other.g as f32 - self.g as f32) * t) as u8,
+            b: (self.b as f32 + (other.b as f32 - self.b as f32) * t) as u8,
+        }
+    }
 }
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
