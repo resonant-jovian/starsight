@@ -72,7 +72,7 @@ geojson = "1.0.0"           #
 # Utilities
 serde = "1.0.228"           #
 clap = "4.6.0"              #
-insta = { version = "1.47.2", features = ["binary"] }            #
+insta = { version = "1.47.2" }            #
 proptest = "1.11.0"         #
 
 # Logging & error handling
