@@ -2408,7 +2408,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Create the SkiaBackend struct
 
-- [ ] Create `starsight-layer-1/src/backend/skia/raster/mod.rs`:
+- [x] Create `starsight-layer-1/src/backend/skia/raster/mod.rs`:
 
     ```rust
     use tiny_skia::{Pixmap, Paint, FillRule, Stroke, LineCap, LineJoin, PathBuilder};
@@ -2445,7 +2445,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Implement `DrawBackend` for `SkiaBackend`. The key methods:
+- [x] Implement `DrawBackend` for `SkiaBackend`. The key methods:
 
     ```rust
     impl DrawBackend for SkiaBackend {
@@ -2505,7 +2505,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
+- [x] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
 
     ```rust
     pub enum PathCommand {
@@ -2529,14 +2529,14 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Set up snapshot testing
 
-- [ ] Add to root `Cargo.toml`:
+- [x] Add to root `Cargo.toml`:
 
     ```toml
     [workspace.dependencies]
     insta = { version = "1.47.2", features = ["binary"] }
     ```
 
-- [ ] Create `starsight-layer-1/tests/snapshot_basic.rs`:
+- [x] Create `starsight-layer-1/tests/snapshot_basic.rs`:
 
     ```rust
     use starsight_layer_1::backend::skia::raster::SkiaBackend;

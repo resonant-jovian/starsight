@@ -1,11 +1,13 @@
 //!
-mod pdf;
-mod skia;
-mod svg;
-mod terminal;
-mod wgpu;
+pub mod pdf;
+pub mod skia;
+pub mod svg;
+pub mod terminal;
+pub mod wgpu;
 
 use crate::error::Result;
+use crate::primitives::color::Color;
+use crate::primitives::geom::{Point, Rect};
 
 pub trait DrawBackend {
     fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>;
@@ -20,32 +22,31 @@ pub trait DrawBackend {
     fn save_png(&self, path: &std::path::Path) -> Result<()>;
 
     fn save_svg(&self, path: &std::path::Path) -> Result<()>;
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
 }
-
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PathStyle {
-    //stroke_color: Color,
-    stroke_width: f32,
-
-    //fill_color: Color,
-    dash_pattern: Option<(f32, f32)>,
-
-    //line_cap: LineCap,
-
-    //line_join: LineJoin,
-    opacity: f32,
+    pub stroke_color: Color,
+    pub stroke_width: f32,
+    pub fill_color: Option<Color>,
+    pub dash_pattern: Option<(f32, f32)>,
+    pub line_cap: tiny_skia::LineCap,
+    pub line_join: tiny_skia::LineJoin,
+    pub opacity: f32,
 }
-
 pub type Path = PathCommand;
-
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PathCommand {
-    //MoveTo(Point),
-
-    //LineTo(Point),
-
-    //QuadTo(Point, Point),
-
-    //CubicTo(Point, Point, Point),
+    MoveTo(Point),
+    LineTo(Point),
+    QuadTo(Point, Point),
+    CubicTo(Point, Point, Point),
     Close,
+}
+impl PathCommand {
+    pub fn commands(self) -> Vec<Path> {
+        todo!()
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Transform(pub(crate) tiny_skia::Transform);
