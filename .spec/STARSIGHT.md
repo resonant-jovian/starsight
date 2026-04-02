@@ -2384,7 +2384,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
 
 #### Add the Transform type
 
-- [ ] Create a `Transform` newtype wrapping `tiny_skia::Transform`:
+- [x] Create a `Transform` newtype wrapping `tiny_skia::Transform`:
 
     ```rust
     #[derive(Debug, Clone, Copy, PartialEq)]
