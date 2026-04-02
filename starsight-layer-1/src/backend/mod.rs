@@ -11,15 +11,17 @@ use crate::primitives::geom::{Point, Rect};
 
 pub trait DrawBackend {
     fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>;
-
-    //fn draw_text(&mut self, text: &TextBlock, position: Point) -> Result<()>;
-
+    fn draw_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+    ) -> Result<()>;
     //fn draw_image(&mut self, image: &ImageData, rect: Rect) -> Result<()>;
-
+    fn set_clip(&mut self, rect: Option<Rect>) -> Result<()>;
     fn dimensions(&self) -> (u32, u32);
-
     fn save_png(&self, path: &std::path::Path) -> Result<()>;
-
     fn save_svg(&self, path: &std::path::Path) -> Result<()>;
     fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
 }
@@ -78,6 +80,10 @@ impl Transform {
 }
 impl std::fmt::Display for Transform {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Transform({}, {}, {}, {}, {}, {})", self.0.sx, self.0.sy, self.0.kx, self.0.ky, self.0.tx, self.0.ty)
+        write!(
+            f,
+            "Transform({}, {}, {}, {}, {}, {})",
+            self.0.sx, self.0.sy, self.0.kx, self.0.ky, self.0.tx, self.0.ty
+        )
     }
 }

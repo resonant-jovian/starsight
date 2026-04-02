@@ -1,7 +1,7 @@
 use crate::backend::{DrawBackend, PathCommand};
 use crate::error::{Result, StarsightError};
 use crate::primitives::color::Color;
-use crate::primitives::geom::Rect;
+use crate::primitives::geom::{Point, Rect};
 use std::path::Path;
 use tiny_skia::{Paint, PathBuilder, Pixmap, Stroke};
 // -------------------------------------------------------------------------------------------------
@@ -9,6 +9,7 @@ pub struct SkiaBackend {
     pixmap: Pixmap,
     font_system: cosmic_text::FontSystem,
     swash_cache: cosmic_text::SwashCache,
+    clip_mask: Option<tiny_skia::Mask>,
 }
 
 impl SkiaBackend {
@@ -20,6 +21,7 @@ impl SkiaBackend {
             pixmap,
             font_system: cosmic_text::FontSystem::new(),
             swash_cache: cosmic_text::SwashCache::new(),
+            clip_mask: None,
         })
     }
 
@@ -81,6 +83,71 @@ impl DrawBackend for SkiaBackend {
         Ok(())
     }
 
+    fn draw_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+    ) -> Result<()> {
+        let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
+        let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
+        buffer.set_text(
+            &mut self.font_system,
+            text,
+            &cosmic_text::Attrs::new(),
+            cosmic_text::Shaping::Advanced,
+            None,
+        );
+        buffer.set_size(
+            &mut self.font_system,
+            Some(self.pixmap.width() as f32),
+            None,
+        );
+        buffer.shape_until_scroll(&mut self.font_system, true);
+
+        let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
+        let mut paint = Paint::default();
+        buffer.draw(
+            &mut self.font_system,
+            &mut self.swash_cache,
+            text_color,
+            |x, y, w, h, c| {
+                paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
+                let px = x as f32 + position.x;
+                let py = y as f32 + position.y;
+                if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
+                    self.pixmap
+                        .fill_rect(rect, &paint, tiny_skia::Transform::identity(), None);
+                }
+            },
+        );
+        Ok(())
+    }
+    fn set_clip(&mut self, rect: Option<Rect>) -> Result<()> {
+        match rect {
+            Some(r) => {
+                let mut mask = tiny_skia::Mask::new(self.pixmap.width(), self.pixmap.height())
+                    .ok_or_else(|| StarsightError::Render("Failed to create mask".into()))?;
+                let clip_path = PathBuilder::from_rect(
+                    r.to_tiny_skia()
+                        .ok_or_else(|| StarsightError::Render("Invalid clip rect".into()))?,
+                );
+                mask.fill_path(
+                    &clip_path,
+                    tiny_skia::FillRule::Winding,
+                    false,
+                    tiny_skia::Transform::identity(),
+                );
+                self.clip_mask = Some(mask);
+            }
+            None => {
+                self.clip_mask = None;
+            }
+        }
+        Ok(())
+    }
+
     fn dimensions(&self) -> (u32, u32) {
         (self.pixmap.width(), self.pixmap.height())
     }
@@ -105,6 +172,4 @@ impl DrawBackend for SkiaBackend {
             .fill_rect(sk_rect, &paint, tiny_skia::Transform::identity(), None);
         Ok(())
     }
-
-    // draw_text and save_svg omitted for brevity — see Look up section
 }
