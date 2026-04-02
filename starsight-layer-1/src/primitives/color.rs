@@ -17,13 +17,21 @@ impl Color {
         }
     }
     pub const BLACK: Self = Self { r: 0, g: 0, b: 0 };
-    pub const WHITE: Self = Self { r: 255, g: 255, b: 255 };
+    pub const WHITE: Self = Self {
+        r: 255,
+        g: 255,
+        b: 255,
+    };
     pub const RED: Self = Self { r: 255, g: 0, b: 0 };
     pub const GREEN: Self = Self { r: 0, g: 255, b: 0 };
     pub const BLUE: Self = Self { r: 0, g: 0, b: 255 };
 
     pub const fn to_f32(self) -> (f32, f32, f32) {
-        (self.r as f32 / 255.0, self.g as f32 / 255.0, self.b as f32 / 255.0)
+        (
+            self.r as f32 / 255.0,
+            self.g as f32 / 255.0,
+            self.b as f32 / 255.0,
+        )
     }
 
     pub fn from_f32(r: f32, g: f32, b: f32) -> Self {
@@ -39,7 +47,12 @@ impl Color {
     }
 
     pub fn with_alpha(self, a: u8) -> ColorAlpha {
-        ColorAlpha { r: self.r, g: self.g, b: self.b, a }
+        ColorAlpha {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a,
+        }
     }
     pub fn from_css_hex(s: &str) -> Option<Self> {
         let hex = s.strip_prefix('#').unwrap_or(s);
@@ -53,7 +66,11 @@ impl Color {
                 let r = chars.next().and_then(|c| c.to_digit(16))? as u8;
                 let g = chars.next().and_then(|c| c.to_digit(16))? as u8;
                 let b = chars.next().and_then(|c| c.to_digit(16))? as u8;
-                Some(Self { r: r << 4 | r, g: g << 4 | g, b: b << 4 | b })
+                Some(Self {
+                    r: r << 4 | r,
+                    g: g << 4 | g,
+                    b: b << 4 | b,
+                })
             }
             _ => None,
         }
@@ -65,7 +82,11 @@ impl Color {
     /// Based on WCAG calc
     pub fn luminance(self) -> f64 {
         fn linearize(c: f64) -> f64 {
-            if c <= 0.03928 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+            if c <= 0.03928 {
+                c / 12.92
+            } else {
+                ((c + 0.055) / 1.055).powf(2.4)
+            }
         }
         let r = linearize(self.r as f64 / 255.0);
         let g = linearize(self.g as f64 / 255.0);
@@ -90,10 +111,22 @@ impl Color {
     }
 }
 impl From<chromata::Color> for Color {
-    fn from(c: chromata::Color) -> Self { Self { r: c.r, g: c.g, b: c.b } }
+    fn from(c: chromata::Color) -> Self {
+        Self {
+            r: c.r,
+            g: c.g,
+            b: c.b,
+        }
+    }
 }
 impl From<prismatica::Color> for Color {
-    fn from(c: prismatica::Color) -> Self { Self { r: c.r, g: c.g, b: c.b } }
+    fn from(c: prismatica::Color) -> Self {
+        Self {
+            r: c.r,
+            g: c.g,
+            b: c.b,
+        }
+    }
 }
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -106,7 +139,8 @@ pub struct ColorAlpha {
     pub r: u8,
     pub g: u8,
     pub b: u8,
-    pub a: u8 }
+    pub a: u8,
+}
 impl ColorAlpha {
     pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
@@ -119,14 +153,43 @@ impl ColorAlpha {
             a: (hex >> 24) as u8,
         }
     }
-    pub const BLACK: Self = Self { r: 0, g: 0, b: 0, a: 255 };
-    pub const WHITE: Self = Self { r: 255, g: 255, b: 255, a: 255 };
-    pub const RED: Self = Self { r: 255, g: 0, b: 0, a: 255 };
-    pub const GREEN: Self = Self { r: 0, g: 255, b: 0, a: 255 };
-    pub const BLUE: Self = Self { r: 0, g: 0, b: 255, a: 255 };
+    pub const BLACK: Self = Self {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 255,
+    };
+    pub const WHITE: Self = Self {
+        r: 255,
+        g: 255,
+        b: 255,
+        a: 255,
+    };
+    pub const RED: Self = Self {
+        r: 255,
+        g: 0,
+        b: 0,
+        a: 255,
+    };
+    pub const GREEN: Self = Self {
+        r: 0,
+        g: 255,
+        b: 0,
+        a: 255,
+    };
+    pub const BLUE: Self = Self {
+        r: 0,
+        g: 0,
+        b: 255,
+        a: 255,
+    };
 
     pub const fn to_f32(self) -> (f32, f32, f32) {
-        (self.r as f32 / 255.0, self.g as f32 / 255.0, self.b as f32 / 255.0)
+        (
+            self.r as f32 / 255.0,
+            self.g as f32 / 255.0,
+            self.b as f32 / 255.0,
+        )
     }
 
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
@@ -143,7 +206,11 @@ impl ColorAlpha {
     }
 
     pub fn without_alpha(self) -> Color {
-        Color { r: self.r, g: self.g, b: self.b }
+        Color {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+        }
     }
 }
 // -------------------------------------------------------------------------------------------------
