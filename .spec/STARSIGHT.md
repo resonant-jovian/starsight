@@ -1759,10 +1759,10 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 - [x] Implement `DrawBackend::dimensions()` for SkiaBackend
 - [x] Implement `DrawBackend::save_png()` for SkiaBackend
 - [x] Implement `DrawBackend::fill_rect()` for SkiaBackend
-- [ ] Implement `DrawBackend::draw_path()` for SkiaBackend
+- [x] Implement `DrawBackend::draw_path()` for SkiaBackend
 - [ ] Implement `DrawBackend::draw_text()` for SkiaBackend
 - [ ] Implement `DrawBackend::set_clip()` for SkiaBackend
-- [x] Key methods reference:
+- [ ] Key methods reference:
 
     ```rust
     impl DrawBackend for SkiaBackend {
@@ -1822,7 +1822,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [x] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
+- [ ] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
 
     ```rust
     pub enum PathCommand {
