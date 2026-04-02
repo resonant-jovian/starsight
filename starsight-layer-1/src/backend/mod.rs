@@ -15,7 +15,6 @@ pub trait DrawBackend {
     //fn draw_text(&mut self, text: &TextBlock, position: Point) -> Result<()>;
 
     //fn draw_image(&mut self, image: &ImageData, rect: Rect) -> Result<()>;
-    //fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
 
     fn dimensions(&self) -> (u32, u32);
 
@@ -75,5 +74,10 @@ impl Transform {
 
     pub(crate) fn as_tiny_skia(self) -> tiny_skia::Transform {
         self.0
+    }
+}
+impl std::fmt::Display for Transform {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Transform({}, {}, {}, {}, {}, {})", self.0.sx, self.0.sy, self.0.kx, self.0.ky, self.0.tx, self.0.ty)
     }
 }
