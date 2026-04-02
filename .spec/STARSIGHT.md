@@ -19,11 +19,9 @@ This document has four parts. Use the one you need.
 
 This part is designed for text-to-speech. No code blocks, no backticks, no tables.
 
-
 ---
 
 ## 1.1 Overview
-
 
 ### What starsight is
 
@@ -32,7 +30,6 @@ starsight is a scientific visualization library for Rust. It exists because Rust
 The library provides one import, sixty chart types, and five rendering backends. A user writes "plot x y dot save chart dot png" and gets a chart. A power user writes a grammar-of-graphics figure with layered marks, custom scales, faceting, and publication-quality PDF export. Both use the same library.
 
 starsight belongs to the resonant-jovian ecosystem. Its sister crates are prismatica, which provides 308 scientific colormaps as compile-time lookup tables, and chromata, which provides 1104 editor color themes as compile-time constants. These are not optional integrations. They are the actual color and theme systems starsight uses. When starsight needs a viridis colormap, it calls prismatica dot crameri dot BATLOW dot eval of 0.5 and gets an RGB color back. When starsight needs a dark theme background color, it reads chromata dot popular dot gruvbox dot DARK HARD dot bg and gets three bytes.
-
 
 ### The layer architecture
 
@@ -52,7 +49,6 @@ Layer six is interactivity. Hover tooltips, box zoom, wheel zoom, pan, lasso sel
 
 Layer seven is animation and export. Frame recording for GIF and MP4. Transition animations between chart states. Static export to PNG, SVG, PDF. Interactive HTML export. Terminal inline output with automatic protocol detection.
 
-
 ### The resonant-jovian ecosystem
 
 The resonant-jovian organization on GitHub hosts four published crates and two in development. Understanding how they connect helps you make architectural decisions in starsight.
@@ -67,11 +63,9 @@ phasma is a terminal UI for caustic, built with ratatui. It will use starsight's
 
 The licensing chain matters. prismatica and chromata are GPL-3.0. starsight is GPL-3.0. caustic and phasma are also GPL-3.0. This means the entire ecosystem is GPL-consistent. A user who depends on starsight already accepts the GPL, so depending on prismatica and chromata creates no additional licensing constraint.
 
-
 ---
 
 ## 1.2 Type system and primitives
-
 
 ### Point, Vec2, and semantic arithmetic
 
@@ -82,7 +76,6 @@ They are both two floats. But the valid operations are different. Subtracting on
 The type system enforces this. Point minus Point returns Vec2. Point plus Vec2 returns Point. Point plus Point does not compile. This catches real bugs. In chart layout code, you deal with positions (where does this axis label go) and offsets (how much margin do I add). If they are both just float tuples, nothing stops you from accidentally adding two positions together and getting garbage coordinates. With separate types, the compiler catches this.
 
 Vec2 also supports scalar multiplication. A displacement times two is twice as far in the same direction. A position times two is nonsensical. So Vec2 implements multiplication by f32, and Point does not.
-
 
 ### Color, alpha, and the conversion pipeline
 
@@ -96,7 +89,6 @@ When encoding a pixmap to PNG, tiny-skia demultiplies the pixels back to straigh
 
 For the SVG backend, none of this matters. SVG uses CSS color strings like fill equals hash ff8000. The SVG backend converts starsight Color to a hex string and writes it directly. No alpha premultiplication, no pixel format concerns.
 
-
 ### The Scene graph
 
 Scene is a struct that holds a vector of SceneNode values. A SceneNode is an enum with variants for Path, Text, Group (with children and a transform), and Clip (with a rect and a child). The Scene does not know how to render itself. It is pure data. You build a Scene by pushing nodes into it, and then you hand the Scene to a backend which reads the nodes and renders them.
@@ -104,7 +96,6 @@ Scene is a struct that holds a vector of SceneNode values. A SceneNode is an enu
 This is the pattern used by Vello (flat encoding), egui (clipped shapes list), and every modern Rust graphics library. The alternative, used by Plotters, is to make charts call backend methods directly during construction. That approach tangles chart logic with rendering logic, makes testing harder (you cannot inspect the scene without rendering it), and prevents optimizations like batching or reordering draw calls.
 
 With a data-based scene, you can serialize it for debugging, compare two scenes for equality in tests, render the same scene to multiple backends without re-running the chart logic, and build the scene on one thread while rendering it on another.
-
 
 ### Builder patterns
 
@@ -115,7 +106,6 @@ This pattern was chosen over consuming self (where each method takes self by val
 The exception is the build or save method, which does consume self (or borrows immutably and clones what it needs). This prevents accidentally modifying a figure after it has been rendered.
 
 For mark types like LineMark and PointMark, the types are plain structs with public fields. No builder needed. You construct them with struct literal syntax. This is simpler and appropriate for types with a small number of fields where most fields are always specified.
-
 
 ### Error handling
 
@@ -133,7 +123,6 @@ In thiserror, the Display format string is the error message. Write it in lowerc
 
 A useful practice: write the error message before writing the error-producing code. If you cannot explain what went wrong and how to fix it, you do not yet understand the failure mode well enough to handle it.
 
-
 ### Thread safety
 
 Send means a value can be transferred between threads. Sync means a value can be shared (by reference) between threads. Most Rust types are automatically Send and Sync if all their fields are Send and Sync.
@@ -148,11 +137,9 @@ The Figure type should be Send but does not need to be Sync because it is a buil
 
 Make sure all public types are Send by default. Check with a compile-time assertion: const _ colon fn of unit where Figure colon Send equals open close curly braces. This is a zero-cost way to verify Send bounds.
 
-
 ---
 
 ## 1.3 Rendering
-
 
 ### How tiny-skia works
 
@@ -170,7 +157,6 @@ For text, starsight uses cosmic-text. You create a FontSystem (which loads syste
 
 There is a persistent myth that you need to swap the red and blue channels between cosmic-text and tiny-skia. You do not. That swap exists in the cosmic-text example code because the example renders to softbuffer, which uses a different byte order. For PNG and SVG output, pass the channels straight through.
 
-
 ### The DrawBackend trait
 
 The DrawBackend trait is the contract between charts and rendering engines. Any type that implements DrawBackend can turn path commands, text, and rectangles into visible output. The tiny-skia backend implements it by rasterizing to a pixel buffer. The SVG backend implements it by building an XML document. A hypothetical cairo backend would implement it by calling cairo C functions.
@@ -181,7 +167,6 @@ A trait is object-safe if none of its methods use Self as a return type, none of
 
 starsight avoids this by keeping DrawBackend object-safe from day one. The render method on Scene takes a mutable reference to dyn DrawBackend. No generics, no Sized bound, no monomorphization overhead.
 
-
 ### Anti-aliasing
 
 Anti-aliasing smooths the jagged edges of diagonal lines and curves by blending edge pixels with the background. Without it, a line at a slight angle shows visible staircase steps. In tiny-skia, anti-aliasing is controlled by the anti alias field on Paint, which defaults to true.
@@ -189,7 +174,6 @@ Anti-aliasing smooths the jagged edges of diagonal lines and curves by blending 
 For chart rendering, anti-aliasing should be on for all geometric elements: lines, areas, bars with rounded corners, circles. It should be off for axis lines and tick marks that are exactly horizontal or exactly vertical, because anti-aliasing a perfectly aligned line makes it appear blurry (it bleeds into adjacent pixels instead of being a crisp single-pixel line). It should also be off for glyph rectangles from cosmic-text, because the text rasterizer already handles its own anti-aliasing.
 
 The practical rule: set paint dot anti alias to true by default, set it to false when drawing horizontal or vertical lines at integer coordinates, and set it to false when compositing text glyphs.
-
 
 ### Clipping
 
@@ -200,7 +184,6 @@ In tiny-skia, clipping uses a Mask. A Mask is a grayscale image the same size as
 This is much simpler than the alternative, which is computing the intersection of every line segment with the clipping rectangle (Cohen-Sutherland algorithm). For SVG output, clipping uses the clip-path element. You define a rectangle in a defs block, reference it via clip-path attribute on a group, and the browser handles the rest.
 
 The key insight is that clipping is a backend concern, not a mark concern. The LineMark does not need to know about clipping. It produces path commands for all data points including those outside the plot area. The backend applies the mask. This keeps mark code simple and makes the clipping behavior consistent across all mark types.
-
 
 ### Text rendering
 
@@ -218,7 +201,6 @@ For measuring text (needed for margin calculation), you iterate layout runs afte
 
 The critical integration detail: cosmic-text and tiny-skia use different color types. cosmic-text Color has r, g, b, a as u8 values. tiny-skia Color has r, g, b, a as f32 values. The conversion goes through set color rgba8 on the Paint struct, which does the division by 255 internally.
 
-
 ### Memory allocation
 
 Understanding allocation patterns helps you avoid unnecessary copies and heap pressure during rendering.
@@ -235,7 +217,6 @@ The PNG encoding allocates a buffer for the compressed output. The size depends 
 
 For 0.1.0, do not optimize memory allocation. Use straightforward Vec and String allocations. Profile first (with cargo-flamegraph), optimize only the hotspots. The most likely optimization targets after profiling are: reusing Path buffers between draw calls (instead of allocating new Vecs for each path), pre-allocating the Scene vector to the expected number of nodes, and caching shaped text (so the same tick label is not shaped repeatedly if it appears on multiple axes).
 
-
 ### DPI handling
 
 Charts need to render at different resolutions depending on the output target. A screen display might be 96 DPI. A retina display is 192 DPI. A print PDF is 300 DPI. A poster is 600 DPI.
@@ -248,11 +229,9 @@ The tiny-skia backend creates the Pixmap at the physical size and applies a Tran
 
 For SVG output, DPI does not apply because SVG is resolution-independent. The viewBox is set to the logical size, and the SVG renderer handles scaling to the display resolution.
 
-
 ---
 
 ## 1.4 Color and themes
-
 
 ### Prismatica colormaps
 
@@ -266,7 +245,6 @@ reversed returns a ReversedColormap, which is a zero-allocation wrapper that int
 
 A DiscretePalette is different from a Colormap. It stores a fixed set of distinct colors for categorical data. It has get which takes an index and wraps around if the index exceeds the palette size. It has iter which returns an iterator over all colors without allocation.
 
-
 ### Chromata themes
 
 A Theme in chromata has 29 color fields plus metadata. The bg and fg fields are always present. Everything else is Option of Color because not every source theme defines every semantic role. The accent method returns the first available accent color, checking blue, then purple, then cyan, then green, then orange, then red, falling back to fg if none are defined.
@@ -276,7 +254,6 @@ The Theme struct is non-exhaustive, meaning you cannot construct it with struct 
 starsight uses chromata for the theming system. When a user applies a theme (for example, Catppuccin Mocha or Gruvbox Dark), starsight reads the theme's background, foreground, and accent colors and derives a chart color scheme. The background becomes the chart background. The foreground becomes the axis and text color. The accent colors become the data series color cycle. The is-dark method determines whether to use light or dark grid lines and whether text should be white-on-dark or dark-on-light.
 
 There are 1104 themes across the popular, base16, base24, vim, and emacs modules. The popular module contains widely used themes (Dracula, Gruvbox, Catppuccin, Nord, Solarized, One Dark, Tokyo Night). The base16 module contains hundreds of themes following the Base16 color scheme specification. For starsight, the popular module provides the primary theme options. The full collection is available for users who want precise matching with their editor environment. The build method auto-detects variant (dark if background luminance is 0.5 or below) and contrast level (from the WCAG contrast ratio between bg and fg).
-
 
 ### Palette crate integration
 
@@ -289,7 +266,6 @@ Color gradient fills for area charts and heatmaps, where blending should happen 
 The integration path is: starsight Color converts to palette's Srgb type via From, palette performs the color space operations, and the result converts back to starsight Color. All conversions go through the f32 representation. The conversion chain is: starsight Color (u8 sRGB) to palette Srgb of f32 (f32 sRGB) to palette LinSrgb of f32 (linear RGB) to palette Oklab of f32 (perceptually uniform) and back.
 
 For 0.1.0, the Color lerp method does linear interpolation in sRGB space. This is slightly incorrect perceptually (the midpoint between two colors appears too dark in sRGB) but matches what matplotlib and most other tools do. Correct perceptual interpolation via Oklab can be added as an option in a later version without breaking the existing API.
-
 
 ### Default theme and sensible defaults
 
@@ -317,13 +293,11 @@ The legend defaults to automatic placement in the upper right corner of the plot
 
 These defaults collectively define what a starsight chart looks like. Getting them right is more important than getting any individual feature right, because every chart that any user ever creates starts from these defaults.
 
-
 ---
 
 ## 1.5 Visualization theory
 
 The previous subparts covered what starsight is made of: types, rendering, and color. This subpart covers what it does: translating data into visual form.
-
 
 ### The grammar of graphics
 
@@ -338,7 +312,6 @@ A statistical transform preprocesses data before the mark renders. A bin transfo
 A position adjustment handles overlapping marks. If you have a bar chart with two categories at the same x position, dodge places them side by side. Stack places them on top of each other. Jitter adds random noise to prevent overplotting in scatter plots where many points share the same coordinates.
 
 This decomposition is why starsight has a marks layer (layer three) separate from a high-level API layer (layer five). Layer three provides the composable pieces. Layer five provides convenient shortcuts that assemble the pieces for common chart types. When a user writes plot of data frame comma x equals petal length comma kind equals Histogram, layer five internally creates a bin stat transform piped into a bar mark with a linear x scale and a count y scale.
-
 
 ### Scales
 
@@ -362,7 +335,6 @@ A categorical scale maps discrete labels to evenly spaced positions. The categor
 
 A color scale maps data values to colors using a prismatica colormap. A sequential color scale maps the range 0 to 100 onto a gradient from dark blue to bright yellow. A diverging color scale maps negative values to one color, positive values to another, with a neutral center. A qualitative color scale assigns distinct colors from a discrete palette to each category.
 
-
 ### The Wilkinson tick algorithm
 
 The original paper by Talbot, Lin, and Hanrahan from 2010 is titled "An Extension of Wilkinson's Algorithm for Positioning Tick Labels on Axes." It is published in the IEEE Transactions on Visualization and Computer Graphics. The paper is dense with mathematics but the core ideas are surprisingly intuitive.
@@ -382,7 +354,6 @@ The search algorithm is a set of nested loops. The outer loop iterates over skip
 The pruning makes the algorithm fast. In the paper's analysis, the average number of candidates evaluated is about 41, regardless of the data range or the target tick count. This means the algorithm runs in effectively constant time, which is fast enough for real-time interactive use.
 
 When implementing this in Rust, the main challenges are: getting the floating point arithmetic right (accumulated rounding errors can cause off-by-one tick positions), handling the edge cases (zero-width data range, very large or very small data values), and formatting the tick labels correctly (removing trailing zeros, using appropriate precision).
-
 
 ### Chart types and the mark-stat system
 
@@ -462,7 +433,6 @@ The box is rendered as a filled rectangle from Q1 to Q3. The median is rendered 
 
 For grouped box plots (comparing distributions across categories), the band scale positions each group's box within a category band, similar to grouped bar charts.
 
-
 ### Coordinate systems
 
 Cartesian coordinates (x right, y up) are the default for most charts. But several chart types need different coordinate systems, and understanding how they work helps you implement them correctly.
@@ -473,7 +443,6 @@ Geographic coordinates use longitude (degrees east or west of the prime meridian
 
 For starsight, the geo feature flag enables geographic chart types. The proj crate provides the actual projection functions. The coordinate system in layer 2 becomes polymorphic: CartesianCoord, PolarCoord, and GeoCoord all implement a common interface that maps data coordinates to pixel positions. The mark types do not need to know which coordinate system they are in; they call data_to_pixel and get a Point back.
 
-
 ### Faceting and legends
 
 Faceting takes a single dataset and creates a grid of small charts, one per value of a categorical variable. If your data has a species column with values setosa, versicolor, and virginica, facet wrap on species creates three charts side by side, each showing only the data for one species. The axes are shared so the charts are directly comparable.
@@ -483,7 +452,6 @@ Facet wrap lays out the panels in a single row that wraps to multiple rows when 
 The layout system in layer four handles faceting. It divides the available space into cells, computes shared axis ranges (unless free scales are requested), and creates a CartesianCoord for each cell. Each mark renders once per cell, filtered to the subset of data belonging to that cell.
 
 Free scales versus fixed scales is a key user choice. Fixed scales mean all panels share the same axis range, making cross-panel comparison easy. Free scales allow each panel to zoom in on its own data range, which is useful when the scales are very different across groups. Free x and free y can be set independently.
-
 
 ### The data-to-pixel pipeline
 
@@ -507,13 +475,11 @@ Finally, the backend serializes the result. The tiny-skia backend calls encode p
 
 Every step in this pipeline is a separate concern in a separate layer. Data acceptance is layer five. Scale computation is layer two. Mark description is layer three. Rendering is layer one. When something goes wrong, the layer boundary tells you where to look.
 
-
 ---
 
 ## 1.6 Output formats
 
 starsight targets seven output formats. Not all are needed for 0.1.0, but the architecture must accommodate them from the start.
-
 
 ### SVG
 
@@ -527,7 +493,6 @@ The mitigation for production use is to embed the font in the SVG. SVG supports 
 
 For resvg-based rasterization (converting SVG to PNG without a browser), starsight can use the resvg crate (behind the resvg feature flag). resvg is a Rust SVG renderer that handles most of the SVG specification. The advantage over browser rendering is determinism: resvg always produces the same output for the same input, making it suitable for snapshot testing of SVG output.
 
-
 ### PDF
 
 PDF is a page description language, not a pixel format and not an XML format. It uses a stack-based drawing model similar to PostScript. You push a graphics state, set a color, draw a path, fill or stroke it, and pop the state. Text in PDF is positioned with exact glyph coordinates and references embedded font programs.
@@ -540,7 +505,6 @@ The PDF backend in starsight works differently from the tiny-skia and SVG backen
 
 PDF export is gated behind the pdf feature flag and is planned for version 0.10.0.
 
-
 ### Terminal
 
 starsight supports rendering charts directly in the terminal. Different terminals support different graphics protocols, and they vary wildly in capability. Kitty protocol can display full color images at pixel resolution. Sixel protocol (supported by mlterm, WezTerm, and some xterm builds) can display images at a reduced color depth. iTerm2 has its own inline image protocol. Terminals without any image protocol fall back to character-based rendering: half-block characters (the upper half and lower half block Unicode characters, giving twice the vertical resolution of regular characters) or Braille dot patterns (giving eight dots per character cell for line drawing).
@@ -550,7 +514,6 @@ The detection cascade queries terminal capabilities in order: try Kitty first (b
 For the Kitty and Sixel protocols, the chart is rendered to a PNG via the tiny-skia backend at a resolution appropriate for the terminal's cell size, then encoded in the protocol's format and written to stdout as escape sequences. The terminal interprets the escape sequences and displays the image inline. For half-block and Braille, the chart is rendered at low resolution and the pixel values are mapped to Unicode characters with foreground and background colors.
 
 The terminal backend lives in layer one because it is a rendering backend, not an export format. It implements DrawBackend just like the tiny-skia and SVG backends. From the perspective of the marks and the figure builder, terminal rendering is indistinguishable from PNG rendering. The difference is only in how the final pixels reach the user's eyes.
-
 
 ### GPU
 
@@ -564,7 +527,6 @@ The critical design consequence is that the DrawBackend trait must accommodate b
 
 The wgpu backend is entirely optional, behind the gpu feature flag. It is not needed for 0.1.0 and should not distract from getting the CPU rendering pipeline correct first. But the Scene-based architecture exists specifically to make adding the GPU backend later a matter of implementing a new backend, not restructuring the entire library.
 
-
 ### Animation
 
 Animated charts (version 0.10.0) produce GIF or MP4 files showing a chart changing over time. The simplest animation is a line chart that draws from left to right. The most complex is a scatter plot where points appear, move, change color, and disappear over a time range.
@@ -577,7 +539,6 @@ For GIF encoding, the main challenge is palette quantization. GIF supports only 
 
 For MP4 encoding, starsight writes raw RGBA frames to a pipe connected to ffmpeg's stdin. This requires ffmpeg to be installed on the system, which is a system dependency that violates the "no C dependencies" rule. Therefore, MP4export might use a pure-Rust encoder like rav1e (for AV1) or x264 bindings (if GPL-compatible alternatives exist). This is a version 0.10.0 concern and does not affect the current architecture.
 
-
 ### WASM
 
 When starsight compiles to WebAssembly for browser deployment, it uses wasm-bindgen to bridge between Rust and JavaScript. wasm-bindgen generates JavaScript glue code that converts between Rust types and JavaScript types. web-sys provides bindings to browser Web APIs like the Canvas API and WebGPU.
@@ -588,13 +549,11 @@ For the WASM target, starsight needs to handle several differences from native: 
 
 This is all planned for version 0.10.0 and should not distract from the native rendering pipeline. But the architecture accommodates it: the DrawBackend trait is generic enough that a WebGPU backend can implement it without changes to the marks, scales, or figure layers.
 
-
 ---
 
 ## 1.7 Data integration
 
 A visualization library is only as useful as the data it can consume. starsight accepts raw arrays, Polars DataFrames, Arrow RecordBatches, and ndarray arrays.
-
 
 ### Polars and Arrow
 
@@ -605,7 +564,6 @@ The plot macro has a special form for DataFrames: plot of ampersand df comma x e
 The DataFrame integration lives in layer five behind the polars feature flag. Layer five depends on polars only when that feature is enabled. Layers one through four have no knowledge of DataFrames. The data acceptance module in layer five converts DataFrame columns to plain Vec of f64 before passing them to marks in layer three.
 
 This design means adding support for a new data source (like an Arrow RecordBatch or a CSV reader) is purely a layer five concern. You write a new data acceptance module that converts the external format to Vec of f64, and every mark and scale in the lower layers works automatically.
-
 
 ### Edge case data
 
@@ -625,7 +583,6 @@ For color interpolation, NaN in the lerp parameter should return a default color
 
 Test NaN handling explicitly in every component. A property test that feeds NaN to every public function and asserts that no panic occurs is one of the highest-value tests in the suite.
 
-
 ### Streaming and scale
 
 Scientific datasets can have millions or tens of millions of data points. A line chart with ten million points generates ten million PathCommand values, each producing a line segment. Drawing ten million line segments to a 800-by-600 pixmap is wasteful because most segments are shorter than a pixel and are invisible.
@@ -640,13 +597,11 @@ For scatter plots with millions of points, the equivalent optimization is spatia
 
 These optimizations are not needed for 0.1.0 but should be planned for 0.4.0 or 0.5.0, when users start reporting slow rendering on large datasets.
 
-
 ---
 
 ## 1.8 Interactivity
 
 Static charts cover most use cases. Interactive charts cover the rest: exploration, live dashboards, and presentation.
-
 
 ### Interactive charts
 
@@ -660,7 +615,6 @@ When the user clicks and drags, the chart pans. Panning shifts the scale domain 
 
 All interactive state (current zoom level, pan offset, selected points, hover target) lives in layer six. The marks in layer three and the figure in layer five are stateless descriptions. The interactive layer wraps a figure and maintains the mutable state. Each frame, it applies the current interactive state to the figure's scales, re-renders the scene, and presents it to the window.
 
-
 ### Custom chart types
 
 The recipe proc macro (planned for version 0.11.0) lets users define new chart types as compositions of existing marks, stats, and scales. A recipe is a function that takes data and configuration parameters and returns a Figure with the appropriate marks and scales already configured.
@@ -670,7 +624,6 @@ Without the recipe system, creating a custom chart type requires manually constr
 For example, a volcano plot (used in genomics to display differentially expressed genes) combines a scatter mark with specific axis scales (log2 fold change on x, minus log10 p-value on y), threshold lines (significance cutoff as a horizontal line, fold change cutoff as two vertical lines), and color mapping (up-regulated genes in red, down-regulated in blue, non-significant in gray). Without a recipe, setting this up requires about 30 lines of code. With a recipe, it is a single function call.
 
 The recipe system is an API convenience, not a fundamental architectural component. starsight works perfectly well without it. But it significantly reduces the barrier to creating and sharing custom chart types, which is important for adoption in specialized scientific communities.
-
 
 ### 3D visualization
 
@@ -684,7 +637,6 @@ For 3D marks, each data point has three coordinates (x, y, z). The mark converts
 
 nalgebra is behind the 3d feature flag and is not needed until version 0.7.0. The layer-1 architecture does not need to know about 3D: the 3D mark types in layer 3 perform the projection and emit 2D PathCommand sequences to the DrawBackend. From the backend's perspective, a 3D scatter plot is just a collection of 2D circles at projected positions.
 
-
 ### Gallery generation
 
 The gallery is a collection of rendered chart images, one per chart type, that serves as both a visual reference and a test suite. The gallery is generated by the xtask crate and published as part of the documentation.
@@ -697,13 +649,11 @@ The gallery examples should use synthetic but realistic data. For a line chart, 
 
 The gallery HTML should be deployable to GitHub Pages. The gallery workflow generates the images and the HTML, then a deployment step copies them to the gh-pages branch. This makes the gallery available at resonant-jovian.github.io/starsight/gallery/.
 
-
 ---
 
 ## 1.9 Development tooling
 
 This subpart covers every tool in the development workflow. Each tool is explained with what it does, why it matters for starsight, and how it fits into CI.
-
 
 ### Formatting and linting
 
@@ -714,7 +664,6 @@ starsight enables pedantic at the warn level, which is more aggressive than most
 The strategy is: enable pedantic globally, then selectively allow specific lints either in the workspace configuration (for truly noisy lints) or with per-function allow attributes (for specific exceptions). Document why each allow is necessary.
 
 The restriction group contains lints that are too opinionated for most projects but useful for specific cases. For starsight, the most useful restriction lints are: print_stdout (catches accidental println), unwrap_used (catches accidental unwrap), and dbg_macro (catches leftover debug macros).
-
 
 ### Testing
 
@@ -744,7 +693,6 @@ A practical detail: snapshot names should be descriptive. If your test renders a
 
 For SVG output, use the string snapshot macro instead of binary. SVG is text, so insta can show a readable diff. This is often more useful for debugging than a PNG diff because you can see exactly which element changed.
 
-
 ### Coverage and profiling
 
 cargo-flamegraph generates flamegraph visualizations that show where your program spends its CPU time. It works by sampling the call stack at high frequency (typically 1997 times per second) and aggregating the results into a hierarchical chart where wider boxes indicate more time.
@@ -758,7 +706,6 @@ Run it with cargo flamegraph minus minus example followed by the example name. T
 For tiny-skia rendering, the typical hotspots are fill_path (filling shapes with color), stroke_path (drawing outlines), and the alpha blending pipeline. If fill_path dominates, consider reducing path complexity by pre-culling off-screen geometry. If alpha blending dominates, consider reducing the number of overlapping semi-transparent elements.
 
 An alternative tool is samply, which opens the Firefox Profiler web UI with an interactive timeline, call tree, and flame chart. It is more powerful for exploratory profiling than static SVG flamegraphs.
-
 
 ### Dependencies
 
@@ -778,7 +725,6 @@ The source check ensures all dependencies come from trusted registries. By defau
 
 In CI, use the EmbarkStudios cargo-deny-action at version 2. It runs cargo deny check with the specified arguments. The recommended pattern is a matrix with two entries: one for advisories with continue-on-error true, and one for bans licenses sources without continue-on-error.
 
-
 ### API stability
 
 cargo-semver-checks compares your current public API against the last published version on crates.io and reports any breaking changes. It works by analyzing rustdoc JSON output, which means it can detect over 120 categories of API breakage: removed public items, changed function signatures, removed trait implementations, visibility reductions, non-exhaustive additions to previously exhaustive types, and even Cargo.toml changes like removing feature flags.
@@ -788,7 +734,6 @@ The things it catches are exactly the things that are hardest to notice during c
 Run it with cargo semver-checks check-release for a single crate, or cargo semver-checks for the workspace. In CI, use the obi1kenobi cargo-semver-checks-action. Run it on every PR, not just before publishing. The earlier you catch an accidental break, the easier it is to fix.
 
 For starsight's pre-1.0 phase, every minor version bump (0.1.0 to 0.2.0) is implicitly a breaking change under semver. But running cargo-semver-checks anyway catches unintentional breaks within a minor version: if you are at 0.1.3 and accidentally remove a public method that existed in 0.1.0, it catches that.
-
 
 ### Publishing
 
@@ -802,7 +747,6 @@ In the release workflow, git-cliff generates release notes for the GitHub Releas
 
 For workspace changelogs, you can generate per-crate changelogs using the include-path flag. This filters commits to only those touching files within a specific crate's directory. Whether you want a single monorepo changelog or per-crate changelogs is a project decision. For starsight, a single changelog is simpler because releases are coordinated across all layers.
 
-
 ### Debugging
 
 cargo-expand shows the output of macro expansion. When you write the plot macro and something does not work, cargo expand tells you exactly what code the macro generated. Install with cargo install cargo-expand (requires nightly to be installed as a toolchain, but not as the default).
@@ -812,7 +756,6 @@ Run cargo expand with the minus p flag to target a specific crate and optionally
 The expanded output is a debugging aid, not compilable code. Macro hygiene may produce identifiers that look odd. But it tells you whether the macro generated the correct structure, whether it captured the right expressions, and whether the type annotations are correct.
 
 For the plot macro, the most common bug is incorrect expression capture. If the DataFrame form of the macro (with x equals and y equals literal tokens) does not match properly, cargo expand shows you which arm of the macro actually matched and what code it generated. This is much faster than trying to reason about macro matching rules in your head.
-
 
 ### Feature and MSRV testing
 
@@ -824,13 +767,11 @@ In practice, the simplest MSRV verification in CI is to just include the MSRV in
 
 The MSRV policy for starsight is to track the latest stable minus two releases, consistent with wgpu and ratatui. This means when Rust 1.90 ships, the MSRV may advance to 1.88. Each MSRV advance is a breaking change in the strictest reading of semver, so it should be noted in the changelog.
 
-
 ---
 
 ## 1.10 Workspace
 
 A nine-crate workspace has configuration that single-crate projects never need. This subpart covers the Cargo-level plumbing.
-
 
 ### Workspace inheritance
 
@@ -846,7 +787,6 @@ Lints can also be inherited. The workspace.lints section defines clippy and rust
 
 Profile settings (release and dev) are always workspace-level. You cannot have different optimization settings for different member crates within the same profile. The opt-level of 1 in the dev profile applies to all starsight crates.
 
-
 ### Feature gating
 
 Resolver version 3 (implied by edition 2024) changes how Cargo handles features in a workspace. When you build or test the workspace, Cargo creates a single dependency graph for all member crates and unifies their feature requirements. If starsight-layer-7 enables the terminal feature and starsight-layer-2 does not, the terminal feature is still enabled in the unified graph because some crate needs it.
@@ -854,7 +794,6 @@ Resolver version 3 (implied by edition 2024) changes how Cargo handles features 
 This feature unification is a source of subtle bugs. If you test starsight-layer-2 in the workspace context, it compiles with the terminal feature enabled even though it does not depend on terminal functionality. This means a test might pass in the workspace but fail when starsight-layer-2 is compiled standalone. The mitigation is to test individual crates with cargo test minus p starsight-layer-2 during development, and to use cargo-hack with the each-feature flag in CI to verify that each feature compiles independently.
 
 Resolver 3 adds MSRV-aware resolution on top of resolver 2's feature behavior. If a dependency's latest version requires Rust 1.90 but your declared rust-version is 1.85, Cargo will select an older version of the dependency that is compatible with 1.85. This only applies to user-initiated resolution (cargo update, adding new dependencies) and does not retroactively change existing Cargo.lock entries.
-
 
 ### Lints and CI
 
@@ -870,7 +809,6 @@ At 1.0.0, add: cargo-release dry-run in PRs to verify the release process works,
 
 Keep CI fast. The total CI time should be under 15 minutes. If it exceeds that, split slow jobs (coverage, mutation testing, feature-powerset) into a separate workflow that runs on a schedule rather than on every PR.
 
-
 ### Publishing order
 
 When you publish starsight to crates.io, you must publish the crates in dependency order. starsight-layer-1 first (it has no internal dependencies), then layer-2 (which depends on layer-1), then layer-3, and so on up to starsight (the facade which depends on everything).
@@ -882,7 +820,6 @@ Cargo 1.90 and later support cargo publish minus minus workspace, which automate
 crates.io also supports Trusted Publishing via OIDC tokens, which means the GitHub Action can publish without a stored API token. The workflow generates a short-lived token via the crates-io-auth-action. This is more secure than storing a long-lived CARGO_REGISTRY_TOKEN secret.
 
 One important detail: each published crate must have a unique, meaningful description in its Cargo.toml. The current descriptions ("Layer 1: Rendering abstraction", "Layer 2: Scale, axis, coordinate") are fine for internal use but should be expanded before the first publish. crates.io search weights the description heavily.
-
 
 ### Compile times
 
@@ -898,7 +835,6 @@ The Swatinem rust-cache action in CI caches the target directory between runs, w
 
 Profile-guided optimization and link-time optimization (LTO) improve runtime performance at the cost of compile time. LTO is enabled in the release profile (already configured). It combines all crates into a single compilation unit and optimizes across crate boundaries. This can reduce binary size by 10 to 30 percent and improve performance by 5 to 20 percent, but it makes release builds 2 to 5 times slower. For development, LTO is disabled (the dev profile uses opt-level 1 with no LTO).
 
-
 ### The xtask pattern
 
 The xtask crate is a binary that lives in the workspace but is never published. It automates development tasks that are too complex for shell scripts but do not belong in the library code. The standard Rust convention is to run these tasks with cargo xtask followed by a subcommand.
@@ -907,13 +843,11 @@ For starsight, xtask will eventually handle: generating the gallery (running all
 
 The xtask pattern works because Cargo allows running binaries from workspace members without installing them. You add a .cargo/config.toml file at the workspace root with the alias: xtask equals run minus minus manifest-path xtask/Cargo.toml minus minus. Then cargo xtask gallery runs the xtask binary with the gallery argument.
 
-
 ---
 
 ## 1.11 API design
 
 The public API is the contract with users. Changing it after 1.0 requires a major version bump. Getting it right before 1.0 is worth the effort.
-
 
 ### Rust API Guidelines
 
@@ -931,7 +865,6 @@ Public dependencies are re-exported. If starsight's public API exposes a type fr
 
 Sealed traits prevent external implementations. If the DrawBackend trait should only be implemented by starsight's own backends (not by external crates), use the sealed trait pattern: add a method that returns a private type. External crates cannot implement the private method, so they cannot implement the trait. However, for starsight, DrawBackend should probably be implementable externally (a user might want to implement a custom backend for their own use), so do not seal it.
 
-
 ### The orphan rule
 
 The orphan rule says: you can only implement a trait for a type if either the trait or the type (or both) is defined in the current crate. This prevents two crates from independently implementing the same trait for the same type, which would create ambiguity.
@@ -941,7 +874,6 @@ For starsight, the orphan rule affects color conversions. You want to implement 
 The workaround is a method instead of a trait implementation: add a to_tiny_skia method on starsight Color that returns a tiny_skia Color. This is not a From implementation, so the orphan rule does not apply. The downside is that you cannot use the Into syntax or the question mark operator for conversion. But since these conversions happen inside backend code (not in user-facing API), the ergonomic cost is acceptable.
 
 Similarly, you cannot implement the ratatui Widget trait for a type defined in starsight unless the Widget trait is in scope. Since Widget is defined in the ratatui crate and starsight's widget type is defined in starsight, this IS allowed: the type is local. But if you wanted a type from prismatica to implement a trait from chromata, neither is local, and the orphan rule blocks it. This is why wrapper types (newtypes) exist: wrap the foreign type in a local newtype and implement the foreign trait on the newtype.
-
 
 ### non_exhaustive
 
@@ -957,7 +889,6 @@ For error enums like StarsightError, non_exhaustive is essential. You will disco
 
 The tradeoff: non_exhaustive makes the API slightly less ergonomic. Users cannot construct the struct with literal syntax, so they need a constructor function. Users cannot exhaustively match, so they need a wildcard arm. But this tradeoff is overwhelmingly worthwhile for a pre-1.0 library that will evolve rapidly.
 
-
 ### Generic versus concrete types
 
 A common question when designing a Rust API is whether to make a function generic. For starsight, the answer depends on the layer.
@@ -970,7 +901,6 @@ In layer 5 (high-level API), use generics on entry points. The data acceptance f
 
 The general rule: concrete types at the bottom (where implementation details matter), generic types at the top (where user ergonomics matter), trait objects in the middle (where heterogeneous collections are needed).
 
-
 ### Prelude design
 
 The prelude module re-exports the types that every user needs in every program. It should contain the types that appear in the most common usage pattern: use starsight prelude star, then call plot and save.
@@ -980,7 +910,6 @@ The prelude should export: Figure (the builder everyone uses), the plot macro (t
 The prelude should not export: backend types (SkiaBackend, SvgBackend), internal types (PathCommand, PathStyle, SceneNode), mark types (LineMark, PointMark), scale types (LinearScale), or any type that is only needed for advanced compositional use. These live in the crate's module tree and users import them explicitly when needed.
 
 The principle is: if a type appears in the getting started example, it belongs in the prelude. If it appears only in the advanced composition example, it does not. Overstuffing the prelude pollutes the user's namespace and causes name collisions. Understuffing it forces the user to write long import lists for basic operations.
-
 
 ### Documentation
 
@@ -996,13 +925,11 @@ The changelog serves all three audiences: casual users check it before upgrading
 
 Do not duplicate information across these documents. The README links to docs.rs for API details. The docs.rs documentation links to the spec for architecture decisions. The spec links to the README for the public-facing description. Each document has a single authoritative role and delegates everything else.
 
-
 ---
 
 ## 1.12 Code standards
 
 These rules apply to every line of code in the workspace. They are enforced by clippy, CI, and code review.
-
 
 ### Standard trait derives
 
@@ -1014,7 +941,6 @@ For types that hold heap data (Figure, LineMark with Vec data), derive Debug and
 
 Do not derive Default on types where the default is not useful. A default Point at zero zero is sensible. A default Figure with no data and no marks is not: it produces an empty chart with no axes and no content, which is never what anyone wants. If Default does not produce something useful, force the user to call a constructor.
 
-
 ### No panicking in library code
 
 The clippy configuration forbids unwrap_used and expect_used. These are panicking operations. A library should never crash the caller's program because a color string was malformed or a path was empty.
@@ -1022,7 +948,6 @@ The clippy configuration forbids unwrap_used and expect_used. These are panickin
 Use the question mark operator to propagate errors. Use ok_or_else to convert Option to Result. Use map_err to convert external error types to StarsightError. If an operation truly cannot fail (because you have already validated the inputs), use a comment explaining why and use the match or if-let pattern instead of unwrap.
 
 The only permitted exception is in tests. Test code may use unwrap because a panic in a test is an expected failure mode. But even in tests, prefer the question mark operator with a test function that returns Result, because the error message from a propagated error is more informative than the generic "called unwrap on a None value" message.
-
 
 ### Dependency isolation
 
@@ -1032,7 +957,6 @@ Wrap external types in your own types. starsight has its own Point, Rect, Color,
 
 The same principle applies to error types. StarsightError variants contain Strings, not tiny_skia::png::EncodingError or cosmic_text::SomeError. When a backend encounters a dependency-specific error, it wraps it in a StarsightError with a descriptive message. The dependency error type never leaks through the public API.
 
-
 ### Feature flags and string params
 
 The user who writes cargo add starsight should get a working library with CPU rendering, SVG output, and PNG export. They should not be forced to compile wgpu, polars, ratatui, nalgebra, or any other heavyweight dependency they do not need.
@@ -1040,7 +964,6 @@ The user who writes cargo add starsight should get a working library with CPU re
 Every optional dependency goes behind a feature flag. The feature flag is defined in the starsight facade crate's Cargo.toml and forwarded to the appropriate layer crate. When the user enables the gpu feature, the facade crate enables the gpu feature on starsight-layer-1, which activates the wgpu dependency and compiles the wgpu backend code.
 
 Feature flags must be additive. Enabling a feature must never remove functionality. A crate compiled with all features enabled must work exactly the same as one compiled with the default features, plus additional capabilities. This means feature flags should never be used for exclusive choices (either wgpu or tiny-skia, but not both). Both backends are always available; the user chooses at runtime which to use.
-
 
 ### Documentation
 
@@ -1052,7 +975,6 @@ A common mistake is writing doc comments that say "creates a new Point" on a fun
 
 For trait methods, the doc comment should describe the contract: what the implementor must guarantee, what the caller can assume. For the DrawBackend trait, each method should document whether it is safe to call concurrently, whether it may block, and what errors it may return.
 
-
 ### Don'ts
 
 Do not return mutable references from builder methods if the builder will be consumed later. If the Figure builder returns and mut Self from title() but then save() takes self by value, the user has to call save on a temporary, which is syntactically awkward. Either make all methods take and mut self and have save take and self, or make all methods take self by value and have save also take self by value.
@@ -1060,7 +982,6 @@ Do not return mutable references from builder methods if the builder will be con
 Do not use type aliases to hide complexity. If a function returns Result of Vec of Box dyn Mark plus Send plus Sync, StarsightError, do not create a type alias MarkList that hides the Box dyn part. Users need to see the boxed trait object to understand the ownership and dynamic dispatch implications. Type aliases are appropriate for Result T StarsightError (because every function in the crate uses this pattern) but not for application-specific composed types.
 
 Do not add a method to a trait when a free function or a blanket impl would work. Every method on the DrawBackend trait requires every backend to implement it. If a method can be implemented in terms of other trait methods (like drawing a dashed rect by drawing four dashed lines), provide a default implementation so backends get it for free.
-
 
 ### Commits
 
@@ -1074,13 +995,11 @@ The description is imperative mood, lowercase, no period. "add linear scale supp
 
 Bad commit messages: "fix stuff", "wip", "updates", "more changes." These tell you nothing about what changed or why. Good commit messages: "fix layer-2 colon correct Y axis inversion in CartesianCoord," "feat layer-1 colon implement SVG backend fill_rect," "test layer-1 colon add snapshot for blue rect on white."
 
-
 ---
 
 ## 1.13 Versioning
 
 For a visualization library, breaking changes include both API changes and visual output changes.
-
 
 ### Breaking changes
 
@@ -1094,7 +1013,6 @@ The specific things that can change later without much pain: the Figure builder'
 
 Use the pre-1.0 period wisely. This is the time when breaking changes are socially acceptable. After 1.0, every breaking change requires a major version bump, which fractures the ecosystem. Make the hard decisions now so that 1.0 is a stable foundation for years of compatible evolution.
 
-
 ### Deprecation
 
 Rust has built-in deprecation support via the deprecated attribute. When you mark a function as deprecated, any code that calls it produces a compiler warning. The warning includes the deprecation message, which should tell the user what to use instead.
@@ -1105,20 +1023,17 @@ This gives users two full releases to migrate. The deprecation warning is visibl
 
 In the changelog, deprecations appear under the Deprecated heading. Removals appear under the Removed heading in the version where the deprecated item is finally removed. Each removal entry should reference the version where the item was deprecated and the replacement.
 
-
 ---
 
 ## 1.14 Language choices
 
 Three high-level decisions that affect everything downstream.
 
-
 ### Edition 2024
 
 Rust edition 2024 (shipped with Rust 1.85) changed several things relevant to starsight. The gen keyword is now reserved for future generators, so any identifier named gen must become r#gen. The unsafe_op_in_unsafe_fn lint is now warn by default, meaning unsafe operations inside unsafe functions need explicit unsafe blocks. RPIT (return position impl trait) lifetime capture rules changed: functions returning impl Trait now capture all in-scope lifetimes by default, which can affect public API signatures.
 
 Resolver 3 (implied by edition 2024) adds MSRV-aware dependency resolution. If a dependency's latest version requires a newer Rust than your declared rust-version, Cargo falls back to an older compatible version. Feature unification behavior is unchanged from resolver 2.
-
 
 ### GPL-3.0
 
@@ -1127,7 +1042,6 @@ starsight is GPL-3.0-only. Not MIT, not Apache-2.0, not dual-licensed. This is a
 For the codebase, this means every dependency must be GPL-3.0 compatible. MIT, Apache-2.0, BSD, ISC, Zlib, and similar permissive licenses are all compatible. LGPL is compatible. Proprietary licenses and SSPL are not. The deny.toml file configures cargo-deny to check this: any dependency with an incompatible license will fail CI.
 
 The practical impact during development: before adding a new dependency, check its license. All current workspace dependencies (tiny-skia is BSD-3, cosmic-text is MIT/Apache-2.0, thiserror is MIT/Apache-2.0, image is MIT/Apache-2.0, svg is MIT/Apache-2.0) are permissive and therefore GPL-compatible.
-
 
 ### No async
 
@@ -1139,13 +1053,11 @@ The one place where async might seem natural is streaming data: receiving sensor
 
 This design means starsight has zero dependency on any async runtime. It works equally well in a tokio application, a bare metal embedded system, a WASM browser environment, and a simple synchronous command-line tool. Adding a tokio dependency to a visualization library would be an architectural mistake that constrains every downstream user.
 
-
 ---
 
 ## 1.15 Sustainability
 
 A multi-year open-source project needs more than code. It needs positioning, maintenance habits, and community awareness.
-
 
 ### Ecosystem positioning
 
@@ -1158,7 +1070,6 @@ starsight's differentiator is: no JavaScript runtime, no C dependencies in the d
 The risk is scope. Building a library this comprehensive takes years. Many Rust visualization projects have been abandoned after the initial enthusiasm. starsight mitigates this risk with a narrow initial scope (0.1.0 is just line charts and scatter plots), a sustainable development pace, and an architecture that allows incremental expansion without restructuring.
 
 The opportunity is timing. The Rust data science ecosystem is maturing rapidly. Polars is approaching feature parity with pandas. ndarray is stable and widely used. Arrow support is standardized. The missing piece is visualization. The first Rust visualization library that reaches maturity will become the default choice for the ecosystem, just as matplotlib became the default for Python. starsight aims to be that library.
-
 
 ### Accessibility
 
@@ -1176,7 +1087,6 @@ For blindness, the most accessible approach is to provide the underlying data ta
 
 These accessibility features are not planned for 0.1.0 but should inform design decisions from the start: do not hardcode colors that are only distinguishable by people with full color vision, do not hardcode font sizes that are too small, and design the API so accessibility options can be added later without breaking changes.
 
-
 ### Long-term maintenance
 
 starsight depends on about 30 external crates. Each of these crates is maintained by someone else and can release breaking changes, security fixes, or performance improvements at any time. Monitoring these changes and responding appropriately is an ongoing maintenance task.
@@ -1191,13 +1101,11 @@ When an upstream dependency is abandoned (no releases for over a year, no respon
 
 When an upstream dependency introduces a regression (a new version that breaks something), pin the dependency to the previous version in Cargo.toml until the regression is fixed upstream. Document the pin with a comment explaining the issue and linking to the upstream bug report. Remove the pin when the fix is released.
 
-
 ---
 
 ## 1.16 Getting started
 
 Everything before this was context. This subpart is about action: how to sit down and start writing code.
-
 
 ### First coding session
 
@@ -1225,10 +1133,8 @@ By the third session, you should have the SkiaBackend drawing paths and text. By
 
 The first PNG is the proof that the architecture works. Everything after that is adding chart types, backends, and features to a foundation that you know is solid.
 
-
 ---
 ---
-
 
 ### Managing complexity and motivation
 
@@ -1279,7 +1185,6 @@ You do not need: log scales, categorical scales, bar charts, histograms, box plo
 
 Resist the temptation to add features before the vertical slice is complete. A library that renders one chart type correctly and has tests is more valuable than a library that has stubs for 60 chart types and renders nothing.
 
-
 ### Debugging charts
 
 When a chart renders incorrectly, the bug is at one of the pipeline boundaries. Here is how to isolate it.
@@ -1298,7 +1203,6 @@ Sixth, check clipping. Temporarily disable the mask (pass None instead of the pl
 
 The snapshot test approach helps here too. When you fix a visual bug, the snapshot test captures the corrected output. If the bug regresses, the snapshot comparison fails immediately.
 
-
 ### Performance
 
 Performance optimization should not happen before the code works correctly. But performance-aware architecture decisions should happen from the start, because they are expensive to retrofit.
@@ -1311,7 +1215,6 @@ The third key decision is avoiding unnecessary allocation. Use slices (and f64) 
 
 After correctness is established, use criterion benchmarks to measure baseline performance and cargo-flamegraph to identify hotspots. Optimize only the hotspots. A 10x speedup on a function that takes 1 percent of the total time saves 0.9 percent. A 2x speedup on a function that takes 50 percent of the total time saves 25 percent.
 
-
 ### After 1.0
 
 You now have the complete mental model for building starsight. The architecture is seven layers, each a separate crate, with strict dependency direction. The rendering pipeline goes from data to marks to scales to coordinates to path commands to backend to pixels. The color pipeline goes from user specification to sRGB Color to tiny-skia premultiplied pixels. The text pipeline goes from string to cosmic-text shaped glyphs to per-pixel callback to pixmap fill_rect. The testing strategy is snapshot tests for visual output, property tests for mathematical invariants, and unit tests for everything else.
@@ -1321,7 +1224,6 @@ The tools are: rustfmt for formatting, clippy for linting, cargo-deny for depend
 The rules are: no unsafe in layers 3 through 7, no panics in library code, no println or eprintln, no async, no JavaScript dependencies, no C dependencies in the default feature set, no nightly-only features. Every public type derives Debug and Clone. Every public item has a doc comment. Every error is a StarsightError. Every feature-gated module is behind a cfg attribute at the module level.
 
 Start with the vertical slice. Get plot save to produce a PNG. Everything else follows from there.
-
 
 # Part 2 — Build
 
@@ -1336,33 +1238,246 @@ Checked items reflect the current state of the codebase as of 2026-03-31.
 These are done. Listed for audit completeness.
 
 - [x] Create resonant-jovian/starsight GitHub repository
+
+    ```bash
+    gh repo create resonant-jovian/starsight --public --license gpl-3.0
+    ```
 - [x] Add GPL-3.0-only LICENSE
+
+    ```
+    SPDX: GPL-3.0-only
+    ```
 - [x] Create CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md, SECURITY.md
+
+    ```bash
+    touch CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md SECURITY.md
+    ```
 - [x] Create .github/ISSUE_TEMPLATE/ (bug_report.md, feature_request.md, config.yml)
+
+    ```bash
+    mkdir -p .github/ISSUE_TEMPLATE
+    touch .github/ISSUE_TEMPLATE/{bug_report,feature_request}.md .github/ISSUE_TEMPLATE/config.yml
+    ```
 - [x] Create .github/PULL_REQUEST_TEMPLATE.md
+
+    ```bash
+    touch .github/PULL_REQUEST_TEMPLATE.md
+    ```
 - [x] Create .github/FUNDING.yml
+
+    ```yaml
+    # .github/FUNDING.yml
+    github: [resonant-jovian]
+    thanks_dev: u/gh/resonant-jovian
+    ```
 - [x] Initialize workspace Cargo.toml with resolver 3, edition 2024, all workspace members
+
+    ```toml
+    [workspace]
+    members = ["starsight", "starsight-layer-1", "starsight-layer-2", "starsight-layer-3",
+           "starsight-layer-4", "starsight-layer-5", "starsight-layer-6", "starsight-layer-7", "xtask"]
+    resolver = "3"
+    
+    [workspace.package]
+    edition = "2024"
+    license = "GPL-3.0-only"
+    ```
 - [x] Create all 8 crate Cargo.toml files (starsight, layer-1 through layer-7) with workspace inheritance
+
+    ```toml
+    # Each crate's Cargo.toml:
+    [package]
+    name = "starsight-layer-1"
+    version.workspace = true
+    edition.workspace = true
+    license.workspace = true
+    ```
 - [x] Create xtask/Cargo.toml
+
+    ```toml
+    [package]
+    name = "xtask"
+    version = "0.0.0"
+    edition.workspace = true
+    publish = false
+    ```
 - [x] Define all feature flags in starsight/Cargo.toml
+
+    ```toml
+    [features]
+    default = []
+    gpu = []
+    terminal = []
+    polars = []
+    3d = []
+    pdf = []
+    stats = []
+    arrow = []
+    ndarray = []
+    interactive = []
+    web = []
+    ```
 - [x] Configure workspace lints: unsafe_code forbid, clippy pedantic warn
+
+    ```toml
+    [workspace.lints.rust]
+    unsafe_code = "forbid"
+    
+    [workspace.lints.clippy]
+    pedantic = { level = "warn", priority = -1 }
+    ```
 - [x] Create .rustfmt.toml and .clippy.toml with full config
+
+    ```toml
+    # .rustfmt.toml (key settings)
+    max_width = 100
+    tab_spaces = 4
+    edition = "2024"
+    ```
 - [x] Create deny.toml for cargo-deny
+
+    ```toml
+    # deny.toml
+    [licenses]
+    allow = ["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Zlib", "GPL-3.0"]
+    
+    [advisories]
+    vulnerability = "deny"
+    ```
 - [x] Configure profile.release (LTO, codegen-units 1) and profile.dev (opt-level 1)
+
+    ```toml
+    [profile.release]
+    lto = true
+    codegen-units = 1
+    
+    [profile.dev]
+    opt-level = 1
+    ```
 - [x] Create .github/workflows/ci.yml (fmt, clippy, check, test matrix, deny)
+
+    ```yaml
+    # .github/workflows/ci.yml
+    name: CI
+    on: [push, pull_request]
+    jobs:
+    fmt: { runs-on: ubuntu-latest, steps: [{ uses: actions/checkout@v4 }, { run: cargo fmt --all -- --check }] }
+    clippy: { runs-on: ubuntu-latest, steps: [{ run: cargo clippy --workspace --all-targets -- -D warnings }] }
+    test: { runs-on: ubuntu-latest, steps: [{ run: cargo test --workspace }] }
+    deny: { runs-on: ubuntu-latest, steps: [{ run: cargo deny check }] }
+    ```
 - [x] Create .github/workflows/release.yml (publish, GitHub release with git-cliff)
+
+    ```yaml
+    name: Release
+    on: { push: { tags: ["v*"] } }
+    jobs:
+    publish: { runs-on: ubuntu-latest, steps: [{ run: cargo publish -p starsight-layer-1 }, { run: cargo publish -p starsight }] }
+    ```
 - [x] Create .github/workflows/coverage.yml (cargo-llvm-cov, Codecov upload)
+
+    ```yaml
+    name: Coverage
+    on: [push]
+    jobs:
+    coverage: { runs-on: ubuntu-latest, steps: [{ run: cargo llvm-cov --workspace --lcov --output-path lcov.info }] }
+    ```
 - [x] Create .github/workflows/snapshots.yml (cargo insta test, artifact upload on failure)
+
+    ```yaml
+    name: Snapshots
+    on: [pull_request]
+    jobs:
+    snapshots: { runs-on: ubuntu-latest, steps: [{ run: cargo insta test --workspace }] }
+    ```
 - [x] Create .github/workflows/gallery.yml (xtask gallery, artifact upload)
+
+    ```yaml
+    name: Gallery
+    on: [push]
+    jobs:
+    gallery: { runs-on: ubuntu-latest, steps: [{ run: cargo xtask gallery }] }
+    ```
 - [x] Create README.md with badges, feature table, roadmap
+
+    ```markdown
+    # starsight
+    [![crates.io](https://img.shields.io/crates/v/starsight?style=for-the-badge)](https://crates.io/crates/starsight)
+    
+    A unified scientific visualization crate for Rust.
+    ```
 - [x] Create starsight-layer-1/src/error.rs with StarsightError enum (7 variants) and Result type alias
+
+    ```rust
+    #[derive(thiserror::Error, Debug)]
+    #[non_exhaustive]
+    pub enum StarsightError {
+    #[error("Rendering: {0}")] Render(String),
+    #[error("Data: {0}")] Data(String),
+    #[error("I/O: {0}")] Io(#[from] std::io::Error),
+    #[error("Scale: {0}")] Scale(String),
+    #[error("Export: {0}")] Export(String),
+    #[error("Config: {0}")] Config(String),
+    #[error("Unknown: {0}")] Unknown(String),
+    }
+    pub type Result<T> = std::result::Result<T, StarsightError>;
+    ```
 - [x] Create starsight-layer-1/src/backend/mod.rs with DrawBackend trait (partial, some methods commented)
+
+    ```rust
+    pub trait DrawBackend {
+    fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()>;
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
+    fn dimensions(&self) -> (u32, u32);
+    fn save_png(&self, path: &std::path::Path) -> Result<()>;
+    fn save_svg(&self, path: &std::path::Path) -> Result<()>;
+    }
+    ```
 - [x] Create starsight-layer-1/src/primitives.rs with Color (r/g/b u8), Point (x/y f32), Rect (ltrb f32), Size (wh f32)
+
+    ```rust
+    pub struct Color { pub r: u8, pub g: u8, pub b: u8 }
+    pub struct Point { pub x: f32, pub y: f32 }
+    pub struct Rect { pub left: f32, pub top: f32, pub right: f32, pub bottom: f32 }
+    pub struct Size { pub width: f32, pub height: f32 }
+    ```
 - [x] Create From<tiny_skia::Point> for Point, From<tiny_skia::Rect> for Rect, From<tiny_skia::Size> for Size
+
+    ```rust
+    impl From<tiny_skia::Point> for Point {
+    fn from(p: tiny_skia::Point) -> Self { Self { x: p.x, y: p.y } }
+    }
+    impl From<tiny_skia::Rect> for Rect {
+    fn from(r: tiny_skia::Rect) -> Self { Self { left: r.left(), top: r.top(), right: r.right(), bottom: r.bottom() } }
+    }
+    ```
 - [x] Create all stub module files for every backend (skia/, svg/, pdf/, wgpu/, terminal/)
+
+    ```bash
+    mkdir -p starsight-layer-1/src/backend/{skia,svg,pdf,wgpu,terminal/{kitty,sixel,braille,half_block,iterm2}}
+    for d in skia svg pdf wgpu terminal terminal/kitty terminal/sixel terminal/braille terminal/half_block terminal/iterm2; do
+    echo "//!" > starsight-layer-1/src/backend/$d/mod.rs
+    done
+    ```
 - [x] Create all stub lib.rs files for layers 2-7
+
+    ```bash
+    for i in 2 3 4 5 6 7; do
+    echo "//!" > starsight-layer-$i/src/lib.rs
+    done
+    ```
 - [x] Verify cargo check --workspace passes
+
+    ```bash
+    cargo check --workspace
+    # Expected: no errors
+    ```
 - [x] Verify cargo test --workspace passes (zero tests, zero failures)
+
+    ```bash
+    cargo test --workspace
+    # Expected: 0 tests, 0 failures
+    ```
 
 ---
 
@@ -1377,9 +1492,29 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 #### Add Vec2 with semantic arithmetic
 
 - [x] Create `Vec2` struct in `starsight-layer-1/src/primitives.rs` with `x: f32, y: f32` fields
+
+    ```rust
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct Vec2 { pub x: f32, pub y: f32 }
+    ```
 - [x] Add derives: `Debug, Clone, Copy, PartialEq, Default`
+
+    ```rust
+    #[derive(Debug, Clone, Copy, PartialEq, Default)]
+    pub struct Vec2 { pub x: f32, pub y: f32 }
+    ```
 - [x] Add constants: `ZERO`, `X`, `Y`
+
+    ```rust
+    pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
+    pub const X: Self = Self { x: 1.0, y: 0.0 };
+    pub const Y: Self = Self { x: 0.0, y: 1.0 };
+    ```
 - [x] Add `new(x, y)` constructor
+
+    ```rust
+    pub const fn new(x: f32, y: f32) -> Self { Self { x, y } }
+    ```
 - [x] Add `length()` and `normalize()` methods
 
     ```rust
@@ -1388,16 +1523,16 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub x: f32,
         pub y: f32,
     }
-
+    
     impl Vec2 {
         pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
         pub const X: Self = Self { x: 1.0, y: 0.0 };
         pub const Y: Self = Self { x: 0.0, y: 1.0 };
-
+    
         pub const fn new(x: f32, y: f32) -> Self { Self { x, y } }
-
+    
         pub fn length(self) -> f32 { (self.x * self.x + self.y * self.y).sqrt() }
-
+    
         pub fn normalize(self) -> Self {
             let len = self.length();
             if len == 0.0 { Self::ZERO } else { Self { x: self.x / len, y: self.y / len } }
@@ -1406,12 +1541,57 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```
 
 - [x] Implement `Point - Point = Vec2` (Sub trait)
+
+    ```rust
+    impl std::ops::Sub for Point { type Output = Vec2;
+    fn sub(self, rhs: Point) -> Vec2 { Vec2 { x: self.x - rhs.x, y: self.y - rhs.y } }
+    }
+    ```
 - [x] Implement `Point + Vec2 = Point` (Add trait)
+
+    ```rust
+    impl std::ops::Add<Vec2> for Point { type Output = Point;
+    fn add(self, rhs: Vec2) -> Point { Point { x: self.x + rhs.x, y: self.y + rhs.y } }
+    }
+    ```
 - [x] Implement `Point - Vec2 = Point` (Sub trait)
+
+    ```rust
+    impl std::ops::Sub<Vec2> for Point { type Output = Point;
+    fn sub(self, rhs: Vec2) -> Point { Point { x: self.x - rhs.x, y: self.y - rhs.y } }
+    }
+    ```
 - [x] Implement `Vec2 + Vec2 = Vec2` (Add trait)
+
+    ```rust
+    impl std::ops::Add for Vec2 { type Output = Vec2;
+    fn add(self, rhs: Vec2) -> Vec2 { Vec2 { x: self.x + rhs.x, y: self.y + rhs.y } }
+    }
+    ```
 - [x] Implement `Vec2 * f32 = Vec2` (Mul trait)
+
+    ```rust
+    impl std::ops::Mul<f32> for Vec2 { type Output = Vec2;
+    fn mul(self, rhs: f32) -> Vec2 { Vec2 { x: self.x * rhs, y: self.y * rhs } }
+    }
+    impl std::ops::Mul<Vec2> for f32 { type Output = Vec2;
+    fn mul(self, rhs: Vec2) -> Vec2 { Vec2 { x: self * rhs.x, y: self * rhs.y } }
+    }
+    ```
 - [x] Verify `Point + Point` does not compile (no Add<Point> for Point)
+
+    ```rust
+    // This should NOT compile — no Add<Point> for Point:
+    // let p = Point::new(1.0, 2.0) + Point::new(3.0, 4.0); // ERROR
+    // Verify with: cargo check and see E0369
+    ```
 - [x] Verify `Point * f32` does not compile (no Mul<f32> for Point)
+
+    ```rust
+    // This should NOT compile — no Mul<f32> for Point:
+    // let p = Point::new(1.0, 2.0) * 3.0; // ERROR
+    // Verify with: cargo check and see E0369
+    ```
 - [x] Write unit tests for all arithmetic operations
 
     ```rust
@@ -1421,49 +1601,49 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
         }
     }
-
+    
     impl std::ops::Add<Vec2> for Point {
         type Output = Point;
         fn add(self, rhs: Vec2) -> Point {
             Point { x: self.x + rhs.x, y: self.y + rhs.y }
         }
     }
-
+    
     impl std::ops::Sub<Vec2> for Point {
         type Output = Point;
         fn sub(self, rhs: Vec2) -> Point {
             Point { x: self.x - rhs.x, y: self.y - rhs.y }
         }
     }
-
+    
     impl std::ops::Add for Vec2 {
         type Output = Vec2;
         fn add(self, rhs: Vec2) -> Vec2 {
             Vec2 { x: self.x + rhs.x, y: self.y + rhs.y }
         }
     }
-
+    
     impl std::ops::Sub for Vec2 {
         type Output = Vec2;
         fn sub(self, rhs: Vec2) -> Vec2 {
             Vec2 { x: self.x - rhs.x, y: self.y - rhs.y }
         }
     }
-
+    
     impl std::ops::Mul<f32> for Vec2 {
         type Output = Vec2;
         fn mul(self, rhs: f32) -> Vec2 {
             Vec2 { x: self.x * rhs, y: self.y * rhs }
         }
     }
-
+    
     impl std::ops::Mul<Vec2> for f32 {
         type Output = Vec2;
         fn mul(self, rhs: Vec2) -> Vec2 {
             Vec2 { x: self * rhs.x, y: self * rhs.y }
         }
     }
-
+    
     impl std::ops::Neg for Vec2 {
         type Output = Vec2;
         fn neg(self) -> Vec2 {
@@ -1492,7 +1672,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         let v: Vec2 = a - b;
         assert_eq!(v, Vec2::new(7.0, 15.0));
     }
-
+    
     #[test]
     fn point_plus_vec2_is_point() {
         let p = Point::new(1.0, 2.0);
@@ -1500,13 +1680,13 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         let result: Point = p + v;
         assert_eq!(result, Point::new(11.0, 22.0));
     }
-
+    
     #[test]
     fn vec2_scale() {
         assert_eq!(Vec2::new(3.0, 4.0) * 2.0, Vec2::new(6.0, 8.0));
         assert_eq!(2.0 * Vec2::new(3.0, 4.0), Vec2::new(6.0, 8.0));
     }
-
+    
     #[test]
     fn vec2_length() {
         assert!((Vec2::new(3.0, 4.0).length() - 5.0).abs() < f32::EPSILON);
@@ -1522,14 +1702,14 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub fn from_xywh(x: f32, y: f32, width: f32, height: f32) -> Self {
             Self { left: x, top: y, right: x + width, bottom: y + height }
         }
-
+    
         pub fn from_center_size(center: Point, size: Size) -> Self {
             let half_w = size.width * 0.5;
             let half_h = size.height * 0.5;
             Self { left: center.x - half_w, top: center.y - half_h,
                    right: center.x + half_w, bottom: center.y + half_h }
         }
-
+    
         pub fn width(&self) -> f32 { self.right - self.left }
         pub fn height(&self) -> f32 { self.bottom - self.top }
         pub fn size(&self) -> Size { Size::new(self.width(), self.height()) }
@@ -1538,11 +1718,11 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         }
         pub fn top_left(&self) -> Point { Point::new(self.left, self.top) }
         pub fn bottom_right(&self) -> Point { Point::new(self.right, self.bottom) }
-
+    
         pub fn contains(&self, p: Point) -> bool {
             p.x >= self.left && p.x <= self.right && p.y >= self.top && p.y <= self.bottom
         }
-
+    
         pub fn intersection(&self, other: &Rect) -> Option<Rect> {
             let r = Rect {
                 left: self.left.max(other.left), top: self.top.max(other.top),
@@ -1550,12 +1730,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             };
             if r.left < r.right && r.top < r.bottom { Some(r) } else { None }
         }
-
+    
         pub fn pad(&self, amount: f32) -> Rect {
             Rect { left: self.left - amount, top: self.top - amount,
                    right: self.right + amount, bottom: self.bottom + amount }
         }
-
+    
         /// Returns None if left >= right or top >= bottom.
         pub fn to_tiny_skia(&self) -> Option<tiny_skia::Rect> {
             tiny_skia::Rect::from_ltrb(self.left, self.top, self.right, self.bottom)
@@ -1564,7 +1744,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```
 
 - [x] Verify derives on Transform: `Debug, Clone, Copy, PartialEq`
-- [ ] Add `Display` implementation for Transform:
+
+    ```rust
+    #[derive(Debug, Clone, Copy, PartialEq)]
+    pub struct Transform(pub(crate) tiny_skia::Transform);
+    ```
+- [x] Add `Display` implementation for Transform:
 
     ```rust
     impl std::fmt::Display for Rect {
@@ -1581,21 +1766,21 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```rust
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
     pub struct Color { pub r: u8, pub g: u8, pub b: u8 }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
     pub struct ColorAlpha { pub r: u8, pub g: u8, pub b: u8, pub a: u8 }
-
+    
     impl Color {
         pub const BLACK: Self = Self { r: 0, g: 0, b: 0 };
         pub const WHITE: Self = Self { r: 255, g: 255, b: 255 };
         pub const RED: Self = Self { r: 255, g: 0, b: 0 };
         pub const GREEN: Self = Self { r: 0, g: 255, b: 0 };
         pub const BLUE: Self = Self { r: 0, g: 0, b: 255 };
-
+    
         pub const fn to_f32(self) -> (f32, f32, f32) {
             (self.r as f32 / 255.0, self.g as f32 / 255.0, self.b as f32 / 255.0)
         }
-
+    
         pub fn from_f32(r: f32, g: f32, b: f32) -> Self {
             Self {
                 r: (r.clamp(0.0, 1.0) * 255.0 + 0.5) as u8,
@@ -1603,11 +1788,11 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 b: (b.clamp(0.0, 1.0) * 255.0 + 0.5) as u8,
             }
         }
-
+    
         pub fn to_tiny_skia(self) -> tiny_skia::Color {
             tiny_skia::Color::from_rgba8(self.r, self.g, self.b, 255)
         }
-
+    
         pub fn with_alpha(self, a: u8) -> ColorAlpha {
             ColorAlpha { r: self.r, g: self.g, b: self.b, a }
         }
@@ -1635,12 +1820,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 _ => None,
             }
         }
-
+    
         pub fn to_css_hex(self) -> String {
             format!("#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
         }
     }
-
+    
     impl std::fmt::Display for Color {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
@@ -1661,14 +1846,14 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             let b = linearize(self.b as f64 / 255.0);
             0.2126 * r + 0.7152 * g + 0.0722 * b
         }
-
+    
         pub fn contrast_ratio(self, other: Color) -> f64 {
             let l1 = self.luminance();
             let l2 = other.luminance();
             let (lighter, darker) = if l1 > l2 { (l1, l2) } else { (l2, l1) };
             (lighter + 0.05) / (darker + 0.05)
         }
-
+    
         pub fn lerp(self, other: Color, t: f32) -> Color {
             let t = t.clamp(0.0, 1.0);
             Color {
@@ -1693,6 +1878,13 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
 - [x] Write tests: `from_hex` roundtrip, `from_css_hex` with all formats, luminance black ≈ 0, luminance white ≈ 1, contrast black/white ≈ 21, lerp at 0.0 returns self, lerp at 1.0 returns other.
 
+    ```rust
+    #[test] fn from_hex_roundtrip() { let c = Color::from_hex(0x9634AD); assert_eq!(c.r, 150); }
+    #[test] fn black_luminance() { assert!(Color::BLACK.luminance() < f64::EPSILON); }
+    #[test] fn white_luminance() { assert!((Color::WHITE.luminance() - 1.0).abs() < f64::EPSILON); }
+    #[test] fn contrast_21() { assert_eq!(Color::BLACK.contrast_ratio(Color::WHITE), 21.0); }
+    ```
+
 #### Add the Transform type
 
 - [x] Create a `Transform` newtype wrapping `tiny_skia::Transform`:
@@ -1700,17 +1892,17 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```rust
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct Transform(pub(crate) tiny_skia::Transform);
-
+    
     impl Transform {
         pub fn identity() -> Self { Self(tiny_skia::Transform::identity()) }
         pub fn translate(dx: f32, dy: f32) -> Self { Self(tiny_skia::Transform::from_translate(dx, dy)) }
         pub fn scale(sx: f32, sy: f32) -> Self { Self(tiny_skia::Transform::from_scale(sx, sy)) }
         /// NOTE: tiny-skia takes DEGREES, not radians.
         pub fn rotate_degrees(angle: f32) -> Self { Self(tiny_skia::Transform::from_rotate(angle)) }
-
+    
         pub fn then(self, other: Transform) -> Self { Self(self.0.post_concat(other.0)) }
         pub fn pre_translate(self, dx: f32, dy: f32) -> Self { Self(self.0.pre_translate(dx, dy)) }
-
+    
         pub(crate) fn as_tiny_skia(self) -> tiny_skia::Transform { self.0 }
     }
     ```
@@ -1726,13 +1918,13 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     use crate::error::{Result, StarsightError};
     use crate::primitives::{Color, Point, Rect, Transform};
     use super::super::DrawBackend;
-
+    
     pub struct SkiaBackend {
         pixmap: Pixmap,
         font_system: cosmic_text::FontSystem,
         swash_cache: cosmic_text::SwashCache,
     }
-
+    
     impl SkiaBackend {
         pub fn new(width: u32, height: u32) -> Result<Self> {
             let pixmap = Pixmap::new(width, height)
@@ -1745,11 +1937,11 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 swash_cache: cosmic_text::SwashCache::new(),
             })
         }
-
+    
         pub fn fill(&mut self, color: Color) {
             self.pixmap.fill(color.to_tiny_skia());
         }
-
+    
         pub fn png_bytes(&self) -> Result<Vec<u8>> {
             self.pixmap.encode_png().map_err(|e| StarsightError::Export(e.to_string()))
         }
@@ -1757,24 +1949,107 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```
 
 - [x] Implement `DrawBackend::dimensions()` for SkiaBackend
+
+    ```rust
+    fn dimensions(&self) -> (u32, u32) { (self.pixmap.width(), self.pixmap.height()) }
+    ```
 - [x] Implement `DrawBackend::save_png()` for SkiaBackend
+
+    ```rust
+    fn save_png(&self, path: &std::path::Path) -> Result<()> {
+    self.pixmap.save_png(path).map_err(|e| StarsightError::Export(e.to_string()))
+    }
+    ```
 - [x] Implement `DrawBackend::fill_rect()` for SkiaBackend
+
+    ```rust
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+    let sk_rect = rect.to_tiny_skia().ok_or_else(|| StarsightError::Render("Invalid rect".into()))?;
+    let mut paint = Paint::default();
+    paint.set_color_rgba8(color.r, color.g, color.b, 255);
+    self.pixmap.fill_rect(sk_rect, &paint, tiny_skia::Transform::identity(), None);
+    Ok(())
+    }
+    ```
 - [x] Implement `DrawBackend::draw_path()` for SkiaBackend
-- [ ] Implement `DrawBackend::draw_text()` for SkiaBackend
-- [ ] Implement `DrawBackend::set_clip()` for SkiaBackend
-- [ ] Key methods reference:
+
+    ```rust
+    fn draw_path(&mut self, path: &crate::backend::Path, style: &PathStyle) -> Result<()> {
+    let mut pb = PathBuilder::new();
+    for cmd in path.commands() {
+        match cmd {
+            PathCommand::MoveTo(p) => pb.move_to(p.x, p.y),
+            PathCommand::LineTo(p) => pb.line_to(p.x, p.y),
+            PathCommand::QuadTo(c, p) => pb.quad_to(c.x, c.y, p.x, p.y),
+            PathCommand::CubicTo(c1, c2, p) => pb.cubic_to(c1.x, c1.y, c2.x, c2.y, p.x, p.y),
+            PathCommand::Close => pb.close(),
+        }
+    }
+    let sk_path = pb.finish().ok_or_else(|| StarsightError::Render("Empty path".into()))?;
+    // ... stroke with paint and style
+    Ok(())
+    }
+    ```
+- [x] Implement `DrawBackend::draw_text()` for SkiaBackend:
+
+    ```rust
+    fn draw_text(&mut self, text: &str, position: Point, font_size: f32, color: Color) -> Result<()> {
+        let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
+        let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
+        buffer.set_text(
+            &mut self.font_system, text,
+            &cosmic_text::Attrs::new(), cosmic_text::Shaping::Advanced, None,
+        );
+        buffer.set_size(&mut self.font_system, Some(self.pixmap.width() as f32), None);
+        buffer.shape_until_scroll(&mut self.font_system, true);
+    
+        let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
+        let mut paint = Paint::default();
+        buffer.draw(&mut self.font_system, &mut self.swash_cache, text_color, |x, y, w, h, c| {
+            paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
+            let px = x as f32 + position.x;
+            let py = y as f32 + position.y;
+            if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
+                self.pixmap.fill_rect(rect, &paint, tiny_skia::Transform::identity(), None);
+            }
+        });
+        Ok(())
+    }
+    ```
+
+- [x] Implement `DrawBackend::set_clip()` for SkiaBackend:
+
+    ```rust
+    fn set_clip(&mut self, rect: Option<Rect>) -> Result<()> {
+        match rect {
+            Some(r) => {
+                let mut mask = tiny_skia::Mask::new(self.pixmap.width(), self.pixmap.height())
+                    .ok_or_else(|| StarsightError::Render("Failed to create mask".into()))?;
+                let clip_path = PathBuilder::from_rect(
+                    r.to_tiny_skia().ok_or_else(|| StarsightError::Render("Invalid clip rect".into()))?
+                );
+                mask.fill_path(&clip_path, tiny_skia::FillRule::Winding, false, tiny_skia::Transform::identity());
+                self.clip_mask = Some(mask);
+            }
+            None => { self.clip_mask = None; }
+        }
+        Ok(())
+    }
+    // Add field to SkiaBackend: clip_mask: Option<tiny_skia::Mask>
+    ```
+- [x] Key methods reference:
 
     ```rust
     impl DrawBackend for SkiaBackend {
         fn dimensions(&self) -> (u32, u32) {
             (self.pixmap.width(), self.pixmap.height())
         }
-
+    
         fn save_png(&self, path: &std::path::Path) -> Result<()> {
             self.pixmap.save_png(path)
                 .map_err(|e| StarsightError::Export(e.to_string()))
         }
-
+    
         fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
             let sk_rect = rect.to_tiny_skia()
                 .ok_or_else(|| StarsightError::Render("Invalid rect".into()))?;
@@ -1784,7 +2059,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 tiny_skia::Transform::identity(), None);
             Ok(())
         }
-
+    
         fn draw_path(&mut self, path: &crate::backend::Path,
                      style: &crate::backend::PathStyle) -> Result<()> {
             // Convert PathCommand sequence to tiny_skia::Path
@@ -1801,7 +2076,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             }
             let sk_path = pb.finish()
                 .ok_or_else(|| StarsightError::Render("Empty path".into()))?;
-
+    
             let mut paint = Paint::default();
             paint.set_color_rgba8(style.stroke_color.r, style.stroke_color.g,
                                   style.stroke_color.b, 255);
@@ -1817,12 +2092,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 tiny_skia::Transform::identity(), None);
             Ok(())
         }
-
+    
         // draw_text and save_svg omitted for brevity — see Look up section
     }
     ```
 
-- [ ] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
+- [x] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
 
     ```rust
     pub enum PathCommand {
@@ -1832,7 +2107,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         CubicTo(Point, Point, Point),
         Close,
     }
-
+    
     pub struct PathStyle {
         pub stroke_color: Color,
         pub stroke_width: f32,
@@ -1858,7 +2133,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```rust
     use starsight_layer_1::backend::skia::raster::SkiaBackend;
     use starsight_layer_1::primitives::{Color, Rect};
-
+    
     #[test]
     fn blue_rect_on_white() {
         let mut backend = SkiaBackend::new(200, 100).unwrap();
@@ -1873,20 +2148,138 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
 ### Layer 1: Implement the SVG backend
 
-- [ ] Create `SvgBackend` struct in `starsight-layer-1/src/backend/svg/mod.rs`
-- [ ] Add fields: `svg::Document`, `elements: Vec`, `width: u32`, `height: u32`
-- [ ] Implement `new(width, height)`: create Document with viewBox attribute
+- [ ] Create `SvgBackend` struct and constructor:
 
-- [ ] Implement `DrawBackend::fill_rect()` for SvgBackend — Rectangle element with CSS hex fill
-- [ ] Implement `DrawBackend::draw_path()` for SvgBackend — convert PathCommands to SVG path data
-- [ ] Implement `DrawBackend::draw_text()` for SvgBackend — Text element with positioning attributes
+    ```rust
+    use svg::node::element::{Rectangle, Text as SvgText, Path as SvgPath, Group, ClipPath};
+    use svg::Document;
+    use crate::backend::DrawBackend;
+    use crate::error::{Result, StarsightError};
+    use crate::primitives::{color::Color, geom::{Point, Rect}};
+    
+    pub struct SvgBackend {
+        width: u32,
+        height: u32,
+        elements: Vec<Box<dyn svg::Node>>,
+        clip_id: usize,
+    }
+    
+    impl SvgBackend {
+        pub fn new(width: u32, height: u32) -> Self {
+            Self { width, height, elements: Vec::new(), clip_id: 0 }
+        }
+    
+        fn build_document(&self) -> Document {
+            let mut doc = Document::new()
+                .set("viewBox", (0, 0, self.width, self.height))
+                .set("xmlns", "http://www.w3.org/2000/svg")
+                .set("width", self.width)
+                .set("height", self.height);
+            for el in &self.elements {
+                doc = doc.add((*el).clone());
+            }
+            doc
+        }
+    
+        pub fn svg_string(&self) -> String {
+            self.build_document().to_string()
+        }
+    }
+    ```
+
+- [ ] Implement `DrawBackend` for SvgBackend:
+
+    ```rust
+    impl DrawBackend for SvgBackend {
+        fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+            let r = Rectangle::new()
+                .set("x", rect.left)
+                .set("y", rect.top)
+                .set("width", rect.width())
+                .set("height", rect.height())
+                .set("fill", color.to_css_hex());
+            self.elements.push(Box::new(r));
+            Ok(())
+        }
+    
+        fn draw_path(&mut self, path: &crate::backend::Path, style: &crate::backend::PathStyle) -> Result<()> {
+            let mut data = svg::node::element::path::Data::new();
+            for cmd in path.commands() {
+                match cmd {
+                    PathCommand::MoveTo(p) => { data = data.move_to((p.x, p.y)); }
+                    PathCommand::LineTo(p) => { data = data.line_to((p.x, p.y)); }
+                    PathCommand::Close => { data = data.close(); }
+                    _ => {} // QuadTo, CubicTo — extend later
+                }
+            }
+            let p = SvgPath::new()
+                .set("d", data)
+                .set("stroke", style.stroke_color.to_css_hex())
+                .set("stroke-width", style.stroke_width)
+                .set("fill", style.fill_color.map_or("none".to_string(), |c| c.to_css_hex()));
+            self.elements.push(Box::new(p));
+            Ok(())
+        }
+    
+        fn draw_text(&mut self, text: &str, position: Point, font_size: f32, color: Color) -> Result<()> {
+            let t = SvgText::new(text)
+                .set("x", position.x)
+                .set("y", position.y)
+                .set("font-size", font_size)
+                .set("fill", color.to_css_hex())
+                .set("font-family", "sans-serif");
+            self.elements.push(Box::new(t));
+            Ok(())
+        }
+    
+        fn dimensions(&self) -> (u32, u32) { (self.width, self.height) }
+    
+        fn save_png(&self, _path: &std::path::Path) -> Result<()> {
+            Err(StarsightError::Export("SVG backend cannot save PNG directly".into()))
+        }
+    
+        fn save_svg(&self, path: &std::path::Path) -> Result<()> {
+            svg::save(path, &self.build_document())
+                .map_err(|e| StarsightError::Export(e.to_string()))
+        }
+    }
+    ```
 
 - [ ] Implement save_svg: call svg::save(path, &self.document) and map errors.
 
+    ```rust
+    // Already covered in DrawBackend impl above:
+    fn save_svg(&self, path: &std::path::Path) -> Result<()> {
+    svg::save(path, &self.build_document()).map_err(|e| StarsightError::Export(e.to_string()))
+    }
+    ```
+
 - [ ] Implement `save_svg()`: serialize document to file
+
+    ```rust
+    fn save_svg(&self, path: &std::path::Path) -> Result<()> {
+    svg::save(path, &self.build_document()).map_err(|e| StarsightError::Export(e.to_string()))
+    }
+    ```
 - [ ] Implement `save_png()`: return `StarsightError::Export` (not supported by SVG backend)
 
-- [ ] Write a snapshot test that generates SVG output for a simple chart and asserts the SVG string content with assert_snapshot!.
+    ```rust
+    fn save_png(&self, _path: &std::path::Path) -> Result<()> {
+    Err(StarsightError::Export("SVG backend cannot save PNG directly; use SkiaBackend or resvg".into()))
+    }
+    ```
+
+- [ ] Write SVG snapshot test:
+
+    ```rust
+    #[test]
+    fn svg_blue_rect() {
+        let mut backend = SvgBackend::new(200, 100);
+        backend.fill_rect(Rect::from_xywh(10.0, 10.0, 180.0, 80.0), Color::BLUE).unwrap();
+        let svg = backend.svg_string();
+        insta::assert_snapshot!(svg);
+    }
+    ```
 
 ### Layer 2: Linear scale and Wilkinson ticks
 
@@ -1897,12 +2290,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         fn map(&self, value: f64) -> f64;
         fn inverse(&self, normalized: f64) -> f64;
     }
-
+    
     pub struct LinearScale {
         pub domain_min: f64,
         pub domain_max: f64,
     }
-
+    
     impl Scale for LinearScale {
         fn map(&self, value: f64) -> f64 {
             if (self.domain_max - self.domain_min).abs() < f64::EPSILON { return 0.5; }
@@ -1914,16 +2307,112 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `starsight-layer-2/src/tick.rs`
-- [ ] Implement `wilkinson_extended(dmin, dmax, target_count) -> Vec<f64>`
-- [ ] Implement scoring: `0.2 * simplicity + 0.25 * coverage + 0.5 * density + 0.05 * legibility`
-- [ ] Implement pruning optimization (skip candidates whose upper bound < best score)
-- [ ] Write unit test: ticks for (0, 100, target=5)
-- [ ] Write unit test: ticks for (0.0, 1.0, target=5)
-- [ ] Write unit test: ticks for negative range
-- [ ] Write unit test: zero-width range edge case
-- [ ] Write property test: ticks are always monotonically increasing
-- [ ] Write property test: tick step is always a nice number
+- [ ] Create `starsight-layer-2/src/tick.rs` and implement the algorithm:
+
+    ```rust
+    const Q: &[f64] = &[1.0, 5.0, 2.0, 2.5, 4.0, 3.0];
+    const W: [f64; 4] = [0.2, 0.25, 0.5, 0.05]; // simplicity, coverage, density, legibility
+    
+    pub fn wilkinson_extended(dmin: f64, dmax: f64, target: usize) -> Vec<f64> {
+        if (dmax - dmin).abs() < f64::EPSILON {
+            return vec![dmin];
+        }
+        let mut best_score = -2.0;
+        let mut best_ticks = Vec::new();
+    
+        for i in 0..Q.len() {
+            let q = Q[i];
+            for j in 1..=20 {  // j = skip factor
+                let step_candidates = nice_steps(q, j);
+                for &step in &step_candidates {
+                    let k_min = (dmin / step).ceil() as i64;
+                    let k_max = (dmax / step).floor() as i64;
+                    for k in k_min..=k_max {
+                        let lmin = k as f64 * step;
+                        let lmax = lmin + (target as f64 - 1.0) * step;
+                        if lmin > dmin || lmax < dmax { continue; }
+    
+                        let simp = 1.0 - (i as f64) / (Q.len() as f64 - 1.0);
+                        let cov = coverage_score(dmin, dmax, lmin, lmax);
+                        let dens = density_score(target, ((lmax - lmin) / step) as usize + 1);
+                        let score = W[0]*simp + W[1]*cov + W[2]*dens + W[3];
+    
+                        if score > best_score {
+                            best_score = score;
+                            let n = ((lmax - lmin) / step).round() as usize + 1;
+                            best_ticks = (0..n).map(|i| lmin + i as f64 * step).collect();
+                        }
+                    }
+                }
+            }
+        }
+        best_ticks
+    }
+    
+    fn coverage_score(dmin: f64, dmax: f64, lmin: f64, lmax: f64) -> f64 {
+        let range = dmax - dmin;
+        1.0 - 0.5 * ((dmax - lmax).powi(2) + (dmin - lmin).powi(2)) / (0.1 * range).powi(2)
+    }
+    
+    fn density_score(target: usize, actual: usize) -> f64 {
+        let r = actual as f64 / target as f64;
+        2.0 - r.max(1.0 / r)
+    }
+    
+    fn nice_steps(q: f64, j: usize) -> Vec<f64> {
+        (-10..=10).map(|z| j as f64 * q * 10f64.powi(z)).collect()
+    }
+    ```
+- [ ] Write tick unit tests and property tests:
+
+    ```rust
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+    
+        #[test]
+        fn ticks_0_to_100() {
+            let ticks = wilkinson_extended(0.0, 100.0, 5);
+            assert!(!ticks.is_empty());
+            assert!(ticks[0] <= 0.0);
+            assert!(*ticks.last().unwrap() >= 100.0);
+        }
+    
+        #[test]
+        fn ticks_0_to_1() {
+            let ticks = wilkinson_extended(0.0, 1.0, 5);
+            assert!(!ticks.is_empty());
+            // Steps should be 0.2 or 0.25
+            let step = ticks[1] - ticks[0];
+            assert!(step > 0.0 && step <= 0.5);
+        }
+    
+        #[test]
+        fn ticks_negative_range() {
+            let ticks = wilkinson_extended(-50.0, 50.0, 5);
+            assert!(ticks[0] <= -50.0);
+            assert!(*ticks.last().unwrap() >= 50.0);
+        }
+    
+        #[test]
+        fn ticks_zero_width() {
+            let ticks = wilkinson_extended(42.0, 42.0, 5);
+            assert_eq!(ticks, vec![42.0]);
+        }
+    }
+    
+    // In a separate proptest module:
+    use proptest::prelude::*;
+    proptest! {
+        #[test]
+        fn ticks_monotonic(min in -1e6f64..0.0, max in 0.1f64..1e6) {
+            let ticks = wilkinson_extended(min, max, 5);
+            for pair in ticks.windows(2) {
+                prop_assert!(pair[0] < pair[1], "ticks not monotonic: {:?}", ticks);
+            }
+        }
+    }
+    ```
 
     ```rust
     pub fn extended_ticks(dmin: f64, dmax: f64, target_count: usize) -> Vec<f64> {
@@ -1949,7 +2438,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub tick_positions: Vec<f64>,
         pub tick_labels: Vec<String>,
     }
-
+    
     impl Axis {
         pub fn auto_from_data(values: &[f64], target_ticks: usize) -> Self {
             let dmin = values.iter().copied().fold(f64::INFINITY, f64::min);
@@ -1972,7 +2461,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub y_axis: Axis,
         pub plot_area: Rect,
     }
-
+    
     impl CartesianCoord {
         pub fn data_to_pixel(&self, x: f64, y: f64) -> Point {
             let nx = self.x_axis.scale.map(x);
@@ -1993,18 +2482,99 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     use starsight_layer_1::backend::DrawBackend;
     use starsight_layer_1::error::Result;
     use starsight_layer_2::coord::CartesianCoord;
-
+    
     pub trait Mark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
     }
     ```
 
-- [ ] Create `LineMark` struct in `starsight-layer-3/src/line.rs` with `x: Vec<f64>`, `y: Vec<f64>`, `color`, `width` fields
-- [ ] Implement `Mark` trait for `LineMark`
-- [ ] Implement NaN gap handling: start a new `MoveTo` when encountering NaN (breaks the line)
-- [ ] Write snapshot test: basic line chart
-- [ ] Write snapshot test: line chart with NaN gaps
-- [ ] Write snapshot test: multi-series line chart
+- [ ] Create `LineMark` and implement `Mark` trait:
+
+    ```rust
+    use crate::backend::{DrawBackend, PathCommand, PathStyle};
+    use crate::primitives::{color::Color, geom::Point};
+    
+    #[derive(Debug, Clone)]
+    pub struct LineMark {
+        pub x: Vec<f64>,
+        pub y: Vec<f64>,
+        pub color: Color,
+        pub width: f32,
+    }
+    
+    impl LineMark {
+        pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+            Self { x, y, color: Color::BLUE, width: 2.0 }
+        }
+        pub fn color(mut self, c: Color) -> Self { self.color = c; self }
+        pub fn width(mut self, w: f32) -> Self { self.width = w; self }
+    }
+    
+    impl Mark for LineMark {
+        fn render(
+            &self,
+            coord: &CartesianCoord,
+            backend: &mut dyn DrawBackend,
+        ) -> crate::error::Result<()> {
+            let mut commands = Vec::new();
+            let mut pen_down = false;
+    
+            for i in 0..self.x.len() {
+                if self.x[i].is_nan() || self.y[i].is_nan() {
+                    pen_down = false; // NaN gap: lift pen
+                    continue;
+                }
+                let px = coord.map_x(self.x[i]);
+                let py = coord.map_y(self.y[i]);
+                let pt = Point::new(px as f32, py as f32);
+    
+                if pen_down {
+                    commands.push(PathCommand::LineTo(pt));
+                } else {
+                    commands.push(PathCommand::MoveTo(pt));
+                    pen_down = true;
+                }
+            }
+            // TODO: convert commands to Path and call backend.draw_path()
+            Ok(())
+        }
+    }
+    ```
+
+- [ ] Write snapshot test: basic line chart:
+
+    ```rust
+    #[test]
+    fn snapshot_line_basic() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 1.0, 0.5, 2.0]));
+        let bytes = fig.render_png().unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
+- [ ] Write snapshot test: line chart with NaN gaps:
+
+    ```rust
+    #[test]
+    fn snapshot_line_nan_gaps() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.0, 1.0, 2.0, 3.0, 4.0], vec![0.0, 1.0, f64::NAN, 0.5, 2.0]));
+        let bytes = fig.render_png().unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
+- [ ] Write snapshot test: multi-series line chart:
+
+    ```rust
+    #[test]
+    fn snapshot_line_multi() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0]).color(Color::BLUE))
+            .add(LineMark::new(vec![0.0, 1.0, 2.0], vec![2.0, 1.0, 0.0]).color(Color::RED));
+        let bytes = fig.render_png().unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
 - [ ] Implementation reference (NaN gap handling):
 
     ```rust
@@ -2014,7 +2584,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub width: f32,
     }
-
+    
     impl Mark for LineMark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
             let mut commands = Vec::new();
@@ -2039,11 +2609,73 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `PointMark` struct in `starsight-layer-3/src/point.rs` with `x: Vec<f64>`, `y: Vec<f64>`, `color`, `size` fields
-- [ ] Implement `Mark` trait for `PointMark`
-- [ ] Optimize: batch all circles into one path for single `fill_path` call
-- [ ] Write snapshot test: basic scatter plot
-- [ ] Write snapshot test: scatter with varying point sizes
+- [ ] Create `PointMark` and implement `Mark` trait:
+
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct PointMark {
+        pub x: Vec<f64>,
+        pub y: Vec<f64>,
+        pub color: Color,
+        pub radius: f32,
+    }
+    
+    impl PointMark {
+        pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+            Self { x, y, color: Color::BLUE, radius: 4.0 }
+        }
+        pub fn color(mut self, c: Color) -> Self { self.color = c; self }
+        pub fn radius(mut self, r: f32) -> Self { self.radius = r; self }
+    }
+    
+    impl Mark for PointMark {
+        fn render(
+            &self,
+            coord: &CartesianCoord,
+            backend: &mut dyn DrawBackend,
+        ) -> crate::error::Result<()> {
+            // Batch all circles into one path for performance
+            let mut pb = tiny_skia::PathBuilder::new();
+            for i in 0..self.x.len() {
+                if self.x[i].is_nan() || self.y[i].is_nan() { continue; }
+                let px = coord.map_x(self.x[i]) as f32;
+                let py = coord.map_y(self.y[i]) as f32;
+                pb.push_circle(px, py, self.radius);
+            }
+            let path = pb.finish().ok_or_else(|| StarsightError::Render("Empty scatter".into()))?;
+    
+            let mut paint = Paint::default();
+            paint.set_color_rgba8(self.color.r, self.color.g, self.color.b, 255);
+            // Fill all circles in one call
+            backend.pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::identity(), None);
+            Ok(())
+        }
+    }
+    ```
+
+- [ ] Write snapshot test: basic scatter plot:
+
+    ```rust
+    #[test]
+    fn snapshot_scatter_basic() {
+        let fig = Figure::new(800, 600)
+            .add(PointMark::new(vec![0.5, 1.5, 2.5], vec![1.0, 3.0, 2.0]));
+        let bytes = fig.render_png().unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
+- [ ] Write snapshot test: scatter with varying point sizes:
+
+    ```rust
+    #[test]
+    fn snapshot_scatter_sizes() {
+        let fig = Figure::new(800, 600)
+            .add(PointMark::new(vec![1.0, 2.0, 3.0], vec![1.0, 2.0, 3.0]).radius(8.0))
+            .add(PointMark::new(vec![1.0, 2.0, 3.0], vec![3.0, 2.0, 1.0]).radius(3.0));
+        let bytes = fig.render_png().unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
 - [ ] Implementation reference (batched circles):
 
     ```rust
@@ -2053,7 +2685,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub radius: f32,
     }
-
+    
     impl Mark for PointMark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
             // Batch: collect all pixel positions, draw as one filled path
@@ -2078,7 +2710,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
     ```rust
     use starsight_layer_3::mark::Mark;
-
+    
     pub struct Figure {
         marks: Vec<Box<dyn Mark>>,
         pub x_label: Option<String>,
@@ -2087,7 +2719,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub width: u32,
         pub height: u32,
     }
-
+    
     impl Figure {
         pub fn new() -> Self {
             Self { marks: Vec::new(), x_label: None, y_label: None,
@@ -2100,7 +2732,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub fn add(&mut self, mark: impl Mark + 'static) -> &mut Self {
             self.marks.push(Box::new(mark)); self
         }
-
+    
         pub fn save(&self, path: impl AsRef<std::path::Path>) -> starsight_layer_1::error::Result<()> {
             let mut backend = starsight_layer_1::backend::skia::raster::SkiaBackend::new(self.width, self.height)?;
             backend.fill(Color::WHITE);
@@ -2128,11 +2760,55 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `starsight/src/lib.rs` facade: re-export Figure, Color, Point, Result, Error
-- [ ] Create `starsight/src/prelude.rs` with essential re-exports
-- [ ] Wire the `plot!` macro in `starsight/src/lib.rs`
-- [ ] Write integration test: `plot!([1,2,3], [4,5,6]).save("test.png")` produces valid PNG
+- [ ] Create facade `starsight/src/lib.rs` with re-exports:
+
+    ```rust
+    pub use starsight_layer_1::primitives::color::Color;
+    pub use starsight_layer_1::primitives::geom::{Point, Rect, Size, Vec2};
+    pub use starsight_layer_1::error::{StarsightError, Result};
+    pub use starsight_layer_1::backend::skia::raster::SkiaBackend;
+    pub use starsight_layer_1::backend::DrawBackend;
+    pub use starsight_layer_5::figure::Figure;
+    
+    pub mod prelude;
+    
+    #[macro_export]
+    macro_rules! plot {
+        ($x:expr, $y:expr $(,)?) => {
+            $crate::Figure::from_arrays($x, $y)
+        };
+        ($data:expr $(,)?) => {
+            $crate::Figure::from_single($data)
+        };
+    }
+    ```
+
+- [ ] Create `starsight/src/prelude.rs`:
+
+    ```rust
+    pub use crate::{Color, Point, Figure, Result, SkiaBackend, plot};
+    ```
+
+- [ ] Write integration test `starsight/tests/integration.rs`:
+
+    ```rust
+    use starsight::prelude::*;
+    
+    #[test]
+    fn plot_macro_produces_png() {
+        let fig = plot!(&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]);
+        fig.save("test_output.png").unwrap();
+        assert!(std::path::Path::new("test_output.png").exists());
+        std::fs::remove_file("test_output.png").ok();
+    }
+    ```
+
 - [ ] Verify `cargo test --workspace` passes with the full pipeline
+
+    ```bash
+    cargo test --workspace
+    # Expected: all tests pass, integration test produces test.png
+    ```
 - [ ] Facade wiring reference:
 
     ```rust
@@ -2159,7 +2835,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
     ```rust
     use starsight::prelude::*;
-
+    
     #[test]
     fn quickstart_produces_png() {
         let fig = plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]);
@@ -2170,9 +2846,6 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         std::fs::remove_file(&tmp).ok();
     }
     ```
-
-
-
 
 ## 0.2.0 — Core chart types part 1
 
@@ -2191,7 +2864,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         width: Option<f32>,      // bar width as fraction of band (0.0-1.0, default 0.8)
         orientation: Orientation, // Vertical | Horizontal
     }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     #[non_exhaustive]
     pub enum Orientation {
@@ -2199,7 +2872,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         Vertical,
         Horizontal,
     }
-
+    
     impl BarMark {
         pub fn new(x: Vec<String>, y: Vec<f64>) -> Self {
             Self { x, y, color: None, width: None, orientation: Orientation::default() }
@@ -2224,13 +2897,88 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     backend.fill_rect(rect, color)?;
     ```
 
-- [ ] Implement horizontal bar variant: swap x and y axes, bars grow from left to right
+- [ ] Implement horizontal bar variant:
+
+    ```rust
+    // In BarMark::render(), when self.orientation == Orientation::Horizontal:
+    let y_center = band_scale.map(&label);
+    let bar_height = band_scale.bandwidth() * self.width.unwrap_or(0.8);
+    let y_top = y_center - bar_height / 2.0;
+    let x_left = x_scale.map(0.0);       // bars grow from left
+    let x_right = x_scale.map(value);     // to data value
+    let rect = Rect::from_ltrb(x_left as f32, y_top as f32, x_right as f32, (y_top + bar_height) as f32);
+    backend.fill_rect(rect, color)?;
+    ```
 - [ ] Add grouped bars: accept a `group` field, subdivide each band into sub-bands per group, offset each sub-group's bar within the band
+
+    ```rust
+    // In BarMark:
+    pub fn group(mut self, name: &str) -> Self { self.group = Some(name.to_string()); self }
+    
+    // In render: subdivide band into sub-bands
+    let n_groups = groups.len();
+    let sub_width = band_width / n_groups as f32;
+    let group_idx = groups.iter().position(|g| g == &self.group.as_deref().unwrap_or("")).unwrap_or(0);
+    let x_offset = sub_width * group_idx as f32 - band_width / 2.0 + sub_width / 2.0;
+    ```
 - [ ] Add stacked bars: accept a `stack` field, accumulate y values per category, each bar's baseline is the top of the previous bar
-- [ ] Write snapshot test: single vertical bar chart
-- [ ] Write snapshot test: horizontal bar chart
-- [ ] Write snapshot test: grouped bar chart
-- [ ] Write snapshot test: stacked bar chart
+
+    ```rust
+    pub fn stack(mut self, name: &str) -> Self { self.stack = Some(name.to_string()); self }
+    
+    // In render: accumulate baselines per category
+    let mut baselines: HashMap<String, f64> = HashMap::new();
+    for (label, value) in self.x.iter().zip(self.y.iter()) {
+    let base = baselines.entry(label.clone()).or_insert(0.0);
+    let rect = Rect::from_ltrb(x_left, coord.map_y(*base + value), x_right, coord.map_y(*base));
+    backend.fill_rect(rect, color)?;
+    *base += value;
+    }
+    ```
+- [ ] Write snapshot test: single vertical bar chart:
+
+    ```rust
+    #[test]
+    fn snapshot_bar_vertical() {
+        let fig = Figure::new(800, 600).add(
+            BarMark::new(vec!["A".into(), "B".into(), "C".into()], vec![10.0, 25.0, 15.0])
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: horizontal bar chart:
+
+    ```rust
+    #[test]
+    fn snapshot_bar_horizontal() {
+        let fig = Figure::new(800, 600).add(
+            BarMark::new(vec!["A".into(), "B".into()], vec![10.0, 25.0]).horizontal()
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: grouped bar chart:
+
+    ```rust
+    #[test]
+    fn snapshot_bar_grouped() {
+        let fig = Figure::new(800, 600)
+            .add(BarMark::new(vec!["Q1".into(), "Q2".into()], vec![10.0, 20.0]).group("Sales"))
+            .add(BarMark::new(vec!["Q1".into(), "Q2".into()], vec![15.0, 12.0]).group("Costs"));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: stacked bar chart:
+
+    ```rust
+    #[test]
+    fn snapshot_bar_stacked() {
+        let fig = Figure::new(800, 600)
+            .add(BarMark::new(vec!["A".into(), "B".into()], vec![10.0, 20.0]).stack("s1"))
+            .add(BarMark::new(vec!["A".into(), "B".into()], vec![5.0, 8.0]).stack("s2"));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 3: AreaMark
 
@@ -2245,7 +2993,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         color: Option<Color>,
         alpha: f32,  // fill opacity, default 0.4
     }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     #[non_exhaustive]
     pub enum AreaBaseline {
@@ -2255,15 +3003,99 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     }
     ```
 
-- [ ] Build closed area path: move to (x0, baseline) → line to (x0, y0) → line through all points → line to (xn, baseline) → close
-- [ ] Fill the closed path with semi-transparent color (default alpha 0.4)
-- [ ] Stroke the top edge only (from first to last data point) with full opacity
+- [ ] Build and render area path:
 
-- [ ] Implement stacked area: accept `Vec<AreaMark>`
-- [ ] Compute cumulative baselines: each area's bottom edge is the previous area's top edge
-- [ ] Render stacked areas bottom-to-top so earlier series are behind later ones
-- [ ] Write snapshot test: basic area chart
-- [ ] Write snapshot test: stacked area chart
+    ```rust
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let baseline_px = coord.map_y(match self.baseline {
+            AreaBaseline::Zero => 0.0,
+            AreaBaseline::Fixed(v) => v,
+        }) as f32;
+    
+        // Closed fill path
+        let mut pb = PathBuilder::new();
+        pb.move_to(coord.map_x(self.x[0]) as f32, baseline_px);
+        for i in 0..self.x.len() {
+            pb.line_to(coord.map_x(self.x[i]) as f32, coord.map_y(self.y[i]) as f32);
+        }
+        pb.line_to(coord.map_x(*self.x.last().unwrap()) as f32, baseline_px);
+        pb.close();
+        let fill_path = pb.finish().unwrap();
+    
+        // Fill with semi-transparent color
+        let mut paint = Paint::default();
+        let ca = self.color.unwrap_or(Color::BLUE).with_alpha((self.alpha * 255.0) as u8);
+        paint.set_color_rgba8(ca.r, ca.g, ca.b, ca.a);
+        pixmap.fill_path(&fill_path, &paint, FillRule::Winding, Transform::identity(), None);
+    
+        // Stroke top edge only (full opacity)
+        let mut stroke_pb = PathBuilder::new();
+        stroke_pb.move_to(coord.map_x(self.x[0]) as f32, coord.map_y(self.y[0]) as f32);
+        for i in 1..self.x.len() {
+            stroke_pb.line_to(coord.map_x(self.x[i]) as f32, coord.map_y(self.y[i]) as f32);
+        }
+        let stroke_path = stroke_pb.finish().unwrap();
+        let stroke_color = self.color.unwrap_or(Color::BLUE);
+        paint.set_color_rgba8(stroke_color.r, stroke_color.g, stroke_color.b, 255);
+        pixmap.stroke_path(&stroke_path, &paint, &Stroke { width: 2.0, ..Default::default() },
+            Transform::identity(), None);
+        Ok(())
+    }
+    ```
+
+- [ ] Implement stacked area rendering:
+
+    ```rust
+    fn render_stacked(areas: &[AreaMark], coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let n_points = areas[0].x.len();
+        let mut cumulative = vec![0.0f64; n_points]; // running y-baseline per x position
+    
+        for area in areas {
+            let mut pb = PathBuilder::new();
+            // Bottom edge: previous cumulative (right to left)
+            for i in (0..n_points).rev() {
+                let px = coord.map_x(area.x[i]) as f32;
+                let py = coord.map_y(cumulative[i]) as f32;
+                if i == n_points - 1 { pb.move_to(px, py); } else { pb.line_to(px, py); }
+            }
+            // Top edge: current cumulative (left to right)
+            for i in 0..n_points {
+                let new_y = cumulative[i] + area.y[i];
+                let px = coord.map_x(area.x[i]) as f32;
+                let py = coord.map_y(new_y) as f32;
+                pb.line_to(px, py);
+            }
+            pb.close();
+            // Fill and update cumulative
+            // ...
+            for i in 0..n_points { cumulative[i] += area.y[i]; }
+        }
+        Ok(())
+    }
+    ```
+- [ ] Write snapshot test: basic area chart:
+
+    ```rust
+    #[test]
+    fn snapshot_area_basic() {
+        let fig = Figure::new(800, 600).add(
+            AreaMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 3.0, 1.0, 4.0])
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: stacked area chart:
+
+    ```rust
+    #[test]
+    fn snapshot_area_stacked() {
+        let x = vec![0.0, 1.0, 2.0, 3.0];
+        let fig = Figure::new(800, 600)
+            .add(AreaMark::new(x.clone(), vec![1.0, 2.0, 1.5, 3.0]).color(Color::BLUE))
+            .add(AreaMark::new(x, vec![2.0, 1.0, 2.5, 1.0]).color(Color::RED));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 3: Histogram stat transform
 
@@ -2274,7 +3106,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     pub struct BinTransform {
         bins: BinMethod,
     }
-
+    
     #[derive(Debug, Clone, Copy)]
     #[non_exhaustive]
     pub enum BinMethod {
@@ -2283,7 +3115,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         Auto,                   // Sturges' rule: ceil(1 + log2(n))
         Fd,                     // Freedman-Diaconis: 2 * IQR * n^(-1/3)
     }
-
+    
     impl BinTransform {
         pub fn compute(&self, data: &[f64]) -> Vec<Bin> {
             let n = self.resolve_count(data);
@@ -2305,12 +3137,75 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     }
     ```
 
-- [ ] Create `HistogramMark` wrapping BinTransform + BarMark
-- [ ] Accept raw `Vec<f64>`, run binning, render as vertical bars with no gap between bins
-- [ ] Add optional KDE overlay: if `kde: true`, compute kernel density and overlay as a line
-- [ ] Write snapshot test: basic histogram
-- [ ] Write snapshot test: histogram with KDE overlay
-- [ ] Write snapshot test: histogram with Freedman-Diaconis bins
+- [ ] Create `HistogramMark`:
+
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct HistogramMark {
+        data: Vec<f64>,
+        bins: BinMethod,
+        kde: bool,
+        color: Color,
+    }
+    
+    impl HistogramMark {
+        pub fn new(data: Vec<f64>) -> Self {
+            Self { data, bins: BinMethod::Auto, kde: false, color: Color::from_hex(0x4C72B0) }
+        }
+        pub fn bins(mut self, method: BinMethod) -> Self { self.bins = method; self }
+        pub fn kde(mut self, show: bool) -> Self { self.kde = show; self }
+    }
+    
+    impl Mark for HistogramMark {
+        fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+            let bins = BinTransform { bins: self.bins }.compute(&self.data);
+            for bin in &bins {
+                let rect = Rect::from_ltrb(
+                    coord.map_x(bin.left) as f32,
+                    coord.map_y(bin.count as f64) as f32,
+                    coord.map_x(bin.right) as f32,
+                    coord.map_y(0.0) as f32,
+                );
+                backend.fill_rect(rect, self.color)?;
+            }
+            if self.kde {
+                // Overlay KDE as a LineMark on secondary y-axis (density)
+                // ...
+            }
+            Ok(())
+        }
+    }
+    ```
+- [ ] Write snapshot test: basic histogram:
+
+    ```rust
+    #[test]
+    fn snapshot_histogram_basic() {
+        let data: Vec<f64> = (0..1000).map(|i| (i as f64 / 100.0).sin() * 3.0 + 5.0).collect();
+        let fig = Figure::new(800, 600).add(HistogramMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: histogram with KDE overlay:
+
+    ```rust
+    #[test]
+    fn snapshot_histogram_kde() {
+        let data: Vec<f64> = (0..500).map(|i| (i as f64 * 0.1).sin() * 2.0).collect();
+        let fig = Figure::new(800, 600).add(HistogramMark::new(data).kde(true));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: histogram with Freedman-Diaconis bins:
+
+    ```rust
+    #[test]
+    fn snapshot_histogram_fd() {
+        let data: Vec<f64> = (0..200).map(|i| i as f64 * 0.5).collect();
+        let fig = Figure::new(800, 600).add(HistogramMark::new(data).bins(BinMethod::Fd));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 3: HeatmapMark
 
@@ -2325,13 +3220,57 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     }
     ```
 
-- [ ] Implement cell rendering: normalize each value, sample colormap, fill rect
-- [ ] Implement annotation: render value as centered text in each cell when `annotate: true`
-- [ ] Implement auto text color: choose black or white based on WCAG contrast ratio against cell color
+- [ ] Implement heatmap cell rendering:
 
-- [ ] Write snapshot test: basic heatmap with sequential colormap
-- [ ] Write snapshot test: annotated heatmap with value text
-- [ ] Write snapshot test: heatmap with diverging colormap centered at zero
+    ```rust
+    fn render_cell(&self, row: usize, col: usize, val: f64, vmin: f64, vmax: f64,
+                   cell_rect: Rect, backend: &mut dyn DrawBackend) -> Result<()> {
+        let t = ((val - vmin) / (vmax - vmin)).clamp(0.0, 1.0) as f32;
+        let color: Color = self.colormap.eval(t).into();
+        backend.fill_rect(cell_rect, color)?;
+    
+        if self.annotate {
+            let text = format!("{:.1}", val);
+            // Auto text color: white on dark cells, black on light cells
+            let text_color = if color.luminance() > 0.5 { Color::BLACK } else { Color::WHITE };
+            backend.draw_text(&text, cell_rect.center(), 12.0, text_color)?;
+        }
+        Ok(())
+    }
+    ```
+
+- [ ] Write snapshot test: basic heatmap with sequential colormap:
+
+    ```rust
+    #[test]
+    fn snapshot_heatmap_basic() {
+        let data = vec![vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0], vec![7.0, 8.0, 9.0]];
+        let fig = Figure::new(600, 600).add(HeatmapMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: annotated heatmap with value text:
+
+    ```rust
+    #[test]
+    fn snapshot_heatmap_annotated() {
+        let data = vec![vec![1.0, 2.0], vec![3.0, 4.0]];
+        let fig = Figure::new(400, 400).add(HeatmapMark::new(data).annotate(true));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: heatmap with diverging colormap:
+
+    ```rust
+    #[test]
+    fn snapshot_heatmap_diverging() {
+        let data = vec![vec![-3.0, -1.0, 0.0], vec![1.0, 0.0, -2.0], vec![2.0, 3.0, -1.0]];
+        let fig = Figure::new(600, 600).add(
+            HeatmapMark::new(data).colormap(prismatica::crameri::VIK)
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ---
 
@@ -2353,7 +3292,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         pub max: f64,
         pub outliers: Vec<f64>,  // points beyond 1.5 * IQR from Q1/Q3
     }
-
+    
     impl BoxPlotStats {
         pub fn compute(data: &mut [f64]) -> Self {
             data.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
@@ -2373,13 +3312,74 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Render box body: filled rect from Q1 to Q3
-- [ ] Render median line: horizontal line across the box at median y
-- [ ] Render whiskers: vertical lines from min to Q1 and Q3 to max, with horizontal caps at endpoints
-- [ ] Render outliers: small circles at outlier positions
-- [ ] Write snapshot test: basic box plot
-- [ ] Write snapshot test: grouped box plot (multiple boxes per category)
-- [ ] Write snapshot test: box plot with outliers visible
+- [ ] Render box plot elements:
+
+    ```rust
+    fn render_box(&self, stats: &BoxPlotStats, x_center: f32, half_width: f32,
+                  coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let q1_px = coord.map_y(stats.q1) as f32;
+        let q3_px = coord.map_y(stats.q3) as f32;
+        let med_px = coord.map_y(stats.median) as f32;
+        let min_px = coord.map_y(stats.min) as f32;
+        let max_px = coord.map_y(stats.max) as f32;
+        let cap = half_width * 0.5;
+    
+        // Box body (Q1 to Q3)
+        backend.fill_rect(Rect::from_ltrb(x_center - half_width, q3_px, x_center + half_width, q1_px),
+            Color::from_hex(0x4C72B0).with_alpha(180))?;
+    
+        // Median line
+        draw_hline(backend, med_px, x_center - half_width, x_center + half_width, Color::WHITE, 2.0)?;
+    
+        // Whiskers (vertical lines + horizontal caps)
+        draw_vline(backend, x_center, min_px, q1_px, Color::BLACK, 1.0)?;
+        draw_vline(backend, x_center, q3_px, max_px, Color::BLACK, 1.0)?;
+        draw_hline(backend, min_px, x_center - cap, x_center + cap, Color::BLACK, 1.0)?;
+        draw_hline(backend, max_px, x_center - cap, x_center + cap, Color::BLACK, 1.0)?;
+    
+        // Outliers
+        for &val in &stats.outliers {
+            let py = coord.map_y(val) as f32;
+            draw_circle(backend, x_center, py, 3.0, Color::BLACK)?;
+        }
+        Ok(())
+    }
+    ```
+- [ ] Write snapshot test: basic box plot:
+
+    ```rust
+    #[test]
+    fn snapshot_boxplot_basic() {
+        let data = vec![
+            ("A".into(), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 20.0]),
+            ("B".into(), vec![3.0, 4.0, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0]),
+        ];
+        let fig = Figure::new(600, 400).add(BoxPlotMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: grouped box plot:
+
+    ```rust
+    #[test]
+    fn snapshot_boxplot_grouped() {
+        // Two groups per category
+        let fig = Figure::new(800, 400)
+            .add(BoxPlotMark::from_groups(vec![("A", "G1", vec![1.0,2.0,3.0,4.0])]))
+            .add(BoxPlotMark::from_groups(vec![("A", "G2", vec![2.0,3.0,4.0,5.0])]));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: box plot with outliers:
+
+    ```rust
+    #[test]
+    fn snapshot_boxplot_outliers() {
+        let data = vec![("X".into(), vec![1.0, 2.0, 3.0, 4.0, 5.0, 100.0, -50.0])];
+        let fig = Figure::new(400, 400).add(BoxPlotMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 3: ViolinMark
 
@@ -2395,7 +3395,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         cut: f64,                    // extend KDE beyond data range by cut*bw (default 2.0)
         scale: ViolinScale,          // area | count | width normalization
     }
-
+    
     #[derive(Debug, Clone)]
     pub struct ViolinGroup {
         pub label: String,
@@ -2403,24 +3403,177 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Implement KDE computation: 256 evaluation points spanning data range +/- cut*bandwidth
-- [ ] Build mirrored path: left side is negative density, right side is positive density
-- [ ] Fill mirrored path with semi-transparent color
-- [ ] Implement box overlay: narrow rect from Q1 to Q3, median line, whisker lines (when show_box is true)
+- [ ] Implement violin rendering:
+
+    ```rust
+    fn render_violin(&self, group: &ViolinGroup, x_center: f32, max_width: f32,
+                     coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        // 1. Compute KDE
+        let bw = self.bandwidth.unwrap_or_else(|| silverman_bandwidth(&group.data));
+        let (y_min, y_max) = data_range(&group.data);
+        let eval_points: Vec<f64> = (0..256).map(|i| {
+            y_min - self.cut * bw + (y_max - y_min + 2.0 * self.cut * bw) * i as f64 / 255.0
+        }).collect();
+        let density: Vec<f64> = eval_points.iter().map(|&y| kde_at(y, &group.data, bw)).collect();
+        let d_max = density.iter().cloned().fold(0.0f64, f64::max);
+    
+        // 2. Build mirrored path
+        let mut pb = PathBuilder::new();
+        // Right side (top to bottom)
+        for i in 0..256 {
+            let py = coord.map_y(eval_points[i]) as f32;
+            let dx = (density[i] / d_max * max_width as f64 * 0.5) as f32;
+            if i == 0 { pb.move_to(x_center + dx, py); } else { pb.line_to(x_center + dx, py); }
+        }
+        // Left side (bottom to top, mirrored)
+        for i in (0..256).rev() {
+            let py = coord.map_y(eval_points[i]) as f32;
+            let dx = (density[i] / d_max * max_width as f64 * 0.5) as f32;
+            pb.line_to(x_center - dx, py);
+        }
+        pb.close();
+        // Fill and optionally overlay box plot
+        // ...
+        Ok(())
+    }
+    
+    fn silverman_bandwidth(data: &[f64]) -> f64 {
+        let n = data.len() as f64;
+        let std = std_dev(data);
+        let iqr = percentile(data, 0.75) - percentile(data, 0.25);
+        0.9 * std.min(iqr / 1.34) * n.powf(-0.2)
+    }
+    ```
 
 - [ ] Implement split violins: when two groups share a category, render left/right halves from different groups
-- [ ] Write snapshot test: basic violin plot
+
+    ```rust
+    // When split=true, render group A density on left, group B on right:
+    if self.split && groups.len() == 2 {
+    let left_density = kde(&groups[0].data, bw);
+    let right_density = kde(&groups[1].data, bw);
+    // Left half: x_center - dx for left_density
+    // Right half: x_center + dx for right_density
+    }
+    ```
+- [ ] Write snapshot test: basic violin plot:
+
+    ```rust
+    #[test]
+    fn snapshot_violin_basic() {
+        let data = vec![ViolinGroup { label: "A".into(), data: vec![1.0,2.0,2.5,3.0,3.0,3.5,4.0,5.0] }];
+        let fig = Figure::new(400, 400).add(ViolinMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 - [ ] Write snapshot test: grouped violins
+
+    ```rust
+    #[test]
+    fn snapshot_violin_grouped() {
+    let data = vec![
+        ViolinGroup { label: "A".into(), data: vec![1.0,2.0,3.0,4.0,5.0] },
+        ViolinGroup { label: "B".into(), data: vec![2.0,3.0,4.0,5.0,6.0] },
+    ];
+    let fig = Figure::new(600, 400).add(ViolinMark::new(data));
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 - [ ] Write snapshot test: split violin
+
+    ```rust
+    #[test]
+    fn snapshot_violin_split() {
+    let fig = Figure::new(600, 400).add(
+        ViolinMark::new(data).split(true)
+    );
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 - [ ] Write snapshot test: violin with box overlay disabled
+
+    ```rust
+    #[test]
+    fn snapshot_violin_no_box() {
+    let fig = Figure::new(600, 400).add(
+        ViolinMark::new(data).show_box(false)
+    );
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 3: PieMark and DonutMark
 
-- [ ] Implement PieMark: compute start/end angles from cumulative proportions
-- [ ] Implement arc path approximation using cubic beziers (subdivide arcs > PI/2)
-- [ ] Implement DonutMark: PieMark with configurable inner radius
-- [ ] Write snapshot test: basic pie chart
-- [ ] Write snapshot test: donut chart
+- [ ] Implement PieMark with arc geometry:
+
+    ```rust
+    impl Mark for PieMark {
+        fn render(&self, _coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+            let (cx, cy) = (self.center_x, self.center_y);
+            let total: f64 = self.values.iter().sum();
+            let mut start_angle = -std::f64::consts::FRAC_PI_2; // start at top
+    
+            for (i, &val) in self.values.iter().enumerate() {
+                let sweep = val / total * std::f64::consts::TAU;
+                let end_angle = start_angle + sweep;
+    
+                let mut pb = PathBuilder::new();
+                if self.inner_radius > 0.0 {
+                    // Donut: outer arc then inner arc reversed
+                    arc_to(&mut pb, cx, cy, self.radius, start_angle, end_angle);
+                    arc_to_reverse(&mut pb, cx, cy, self.inner_radius, end_angle, start_angle);
+                } else {
+                    pb.move_to(cx as f32, cy as f32);
+                    arc_to(&mut pb, cx, cy, self.radius, start_angle, end_angle);
+                }
+                pb.close();
+                // Fill with color from palette
+                // ...
+                start_angle = end_angle;
+            }
+            Ok(())
+        }
+    }
+    
+    /// Approximate arc with cubic beziers (one per quarter-circle segment)
+    fn arc_to(pb: &mut PathBuilder, cx: f64, cy: f64, r: f64, start: f64, end: f64) {
+        let segments = ((end - start).abs() / std::f64::consts::FRAC_PI_2).ceil() as usize;
+        let step = (end - start) / segments as f64;
+        for s in 0..segments {
+            let a0 = start + s as f64 * step;
+            let a1 = a0 + step;
+            let k = (4.0 / 3.0) * ((a1 - a0) / 4.0).tan();
+            let p0 = (cx + r * a0.cos(), cy + r * a0.sin());
+            let p1 = (cx + r * a1.cos(), cy + r * a1.sin());
+            let c0 = (p0.0 - k * r * a0.sin(), p0.1 + k * r * a0.cos());
+            let c1 = (p1.0 + k * r * a1.sin(), p1.1 - k * r * a1.cos());
+            if s == 0 { pb.move_to(p0.0 as f32, p0.1 as f32); }
+            pb.cubic_to(c0.0 as f32, c0.1 as f32, c1.0 as f32, c1.1 as f32, p1.0 as f32, p1.1 as f32);
+        }
+    }
+    ```
+- [ ] Write snapshot test: basic pie chart:
+
+    ```rust
+    #[test]
+    fn snapshot_pie_basic() {
+        let fig = Figure::new(400, 400).add(
+            PieMark::new(vec![30.0, 20.0, 50.0], vec!["A".into(), "B".into(), "C".into()])
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: donut chart:
+
+    ```rust
+    #[test]
+    fn snapshot_donut() {
+        let fig = Figure::new(400, 400).add(
+            PieMark::new(vec![30.0, 70.0], vec!["Yes".into(), "No".into()]).inner_radius(0.5)
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
     ```rust
     fn arc_path(cx: f32, cy: f32, r: f32, start_rad: f32, end_rad: f32) -> Path {
@@ -2447,7 +3600,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         body_width: f32,      // candle body width as fraction of available space (default 0.7)
         wick_width: f32,      // wick line width in pixels (default 1.0)
     }
-
+    
     #[derive(Debug, Clone, Copy)]
     pub struct OHLC {
         pub timestamp: f64,   // x-axis position (epoch seconds or index)
@@ -2458,14 +3611,55 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Determine candle color: up_color if close >= open, down_color otherwise
-- [ ] Draw body: filled rect from open to close
-- [ ] Draw upper wick: vertical line from max(open, close) to high
-- [ ] Draw lower wick: vertical line from min(open, close) to low
-- [ ] Support both DateTimeScale and LinearScale for x-axis
+- [ ] Render candlestick elements:
 
-- [ ] Write snapshot test: basic candlestick chart
+    ```rust
+    fn render_candle(&self, ohlc: &OHLC, x_px: f32, half_w: f32,
+                     coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let color = if ohlc.close >= ohlc.open { self.up_color } else { self.down_color };
+        let open_px = coord.map_y(ohlc.open) as f32;
+        let close_px = coord.map_y(ohlc.close) as f32;
+        let high_px = coord.map_y(ohlc.high) as f32;
+        let low_px = coord.map_y(ohlc.low) as f32;
+    
+        // Body: filled rect from open to close
+        let top = open_px.min(close_px);
+        let bottom = open_px.max(close_px);
+        backend.fill_rect(Rect::from_ltrb(x_px - half_w, top, x_px + half_w, bottom), color)?;
+    
+        // Upper wick: from top of body to high
+        draw_vline(backend, x_px, high_px, top, color, self.wick_width)?;
+        // Lower wick: from bottom of body to low
+        draw_vline(backend, x_px, bottom, low_px, color, self.wick_width)?;
+        Ok(())
+    }
+    ```
+
+- [ ] Write snapshot test: basic candlestick chart:
+
+    ```rust
+    #[test]
+    fn snapshot_candlestick() {
+        let data = vec![
+            OHLC { timestamp: 0.0, open: 100.0, high: 110.0, low: 95.0, close: 105.0 },
+            OHLC { timestamp: 1.0, open: 105.0, high: 115.0, low: 100.0, close: 98.0 },
+            OHLC { timestamp: 2.0, open: 98.0, high: 108.0, low: 90.0, close: 107.0 },
+        ];
+        let fig = Figure::new(800, 400).add(CandlestickMark::new(data));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 - [ ] Write snapshot test: candlestick with custom colors
+
+    ```rust
+    #[test]
+    fn snapshot_candlestick_colors() {
+    let fig = Figure::new(800, 400).add(
+        CandlestickMark::new(data).up_color(Color::from_hex(0x00BCD4)).down_color(Color::from_hex(0xFF5722))
+    );
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 5: Polars integration
 
@@ -2473,7 +3667,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
     ```rust
     use polars::prelude::*;
-
+    
     pub fn extract_f64(df: &DataFrame, col: &str) -> Result<Vec<f64>> {
         let series = df.column(col)
             .map_err(|e| StarsightError::Data(format!("Column '{}': {}", col, e)))?;
@@ -2482,7 +3676,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
             .map_err(|e| StarsightError::Data(format!("Cannot convert '{}' to f64: {}", col, e)))?;
         Ok(ca.into_no_null_iter().collect())
     }
-
+    
     pub fn extract_strings(df: &DataFrame, col: &str) -> Result<Vec<String>> {
         let series = df.column(col)?;
         let ca = series.str()?;
@@ -2491,16 +3685,104 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     ```
 
 - [ ] Integrate DataFrame path with `plot!` macro
+
+    ```rust
+    // In plot! macro, DataFrame arm:
+    ($df:expr, x = $x:expr, y = $y:expr $(, $key:ident = $val:expr)* $(,)?) => {{
+    let x_data = extract_f64($df, $x)?;
+    let y_data = extract_f64($df, $y)?;
+    let mut fig = Figure::new(800, 600).add(LineMark::new(x_data, y_data));
+    $( fig = fig.$key($val); )*
+    fig
+    }};
+    ```
 - [ ] Auto-detect column types: numeric columns → LineMark, categorical x → BarMark
+
+    ```rust
+    fn detect_mark(df: &DataFrame, x_col: &str, y_col: &str) -> Box<dyn Mark> {
+    let x_dtype = df.column(x_col).unwrap().dtype().clone();
+    match x_dtype {
+        DataType::String | DataType::Categorical(_, _) => {
+            let labels = extract_strings(df, x_col).unwrap();
+            let values = extract_f64(df, y_col).unwrap();
+            Box::new(BarMark::new(labels, values))
+        }
+        _ => {
+            let x = extract_f64(df, x_col).unwrap();
+            let y = extract_f64(df, y_col).unwrap();
+            Box::new(LineMark::new(x, y))
+        }
+    }
+    }
+    ```
 - [ ] Support `color = "column"` for automatic grouping
 
+    ```rust
+    // When color = "col_name" is specified:
+    let groups = extract_strings(df, color_col)?;
+    let unique: Vec<String> = groups.iter().cloned().collect::<HashSet<_>>().into_iter().collect();
+    for (i, group_val) in unique.iter().enumerate() {
+    let mask: Vec<bool> = groups.iter().map(|g| g == group_val).collect();
+    let x_sub: Vec<f64> = x.iter().zip(&mask).filter(|(_, &m)| m).map(|(v, _)| *v).collect();
+    let y_sub: Vec<f64> = y.iter().zip(&mask).filter(|(_, &m)| m).map(|(v, _)| *v).collect();
+    fig = fig.add(LineMark::new(x_sub, y_sub).color(palette[i % palette.len()]).label(group_val));
+    }
+    ```
+
 - [ ] Accept eager `DataFrame` directly
+
+    ```rust
+    impl From<&DataFrame> for DataSource {
+    fn from(df: &DataFrame) -> Self { DataSource::Polars(df.clone()) }
+    }
+    ```
 - [ ] Accept `LazyFrame`: call `.collect()` before extraction, log warning about materialization
+
+    ```rust
+    impl From<LazyFrame> for DataSource {
+    fn from(lf: LazyFrame) -> Self {
+        log::warn!("Collecting LazyFrame — this materializes the entire frame");
+        DataSource::Polars(lf.collect().unwrap())
+    }
+    }
+    ```
 
 - [ ] Convert Polars null values to f64 NaN for mark rendering pipeline compatibility
 
-- [ ] Write snapshot test: line chart from DataFrame
-- [ ] Write snapshot test: scatter plot with color grouping from DataFrame
+    ```rust
+    fn extract_f64_with_nulls(df: &DataFrame, col: &str) -> Result<Vec<f64>> {
+    let series = df.column(col)?;
+    let ca = series.f64().or_else(|_| series.cast(&DataType::Float64)?.f64())?;
+    Ok(ca.iter().map(|opt| opt.unwrap_or(f64::NAN)).collect())
+    }
+    ```
+
+- [ ] Write snapshot test: line chart from DataFrame:
+
+    ```rust
+    #[test]
+    fn snapshot_polars_line() {
+        use polars::prelude::*;
+        let df = df!("x" => &[0.0, 1.0, 2.0, 3.0], "y" => &[0.0, 1.0, 0.5, 2.0]).unwrap();
+        let fig = plot!(df, x = "x", y = "y");
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: scatter with color grouping:
+
+    ```rust
+    #[test]
+    fn snapshot_polars_scatter_grouped() {
+        use polars::prelude::*;
+        let df = df!(
+            "x" => &[0.0, 1.0, 2.0, 0.5, 1.5, 2.5],
+            "y" => &[0.0, 1.0, 0.5, 1.0, 0.0, 1.5],
+            "group" => &["A", "A", "A", "B", "B", "B"]
+        ).unwrap();
+        let fig = plot!(df, x = "x", y = "y", color = "group");
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ---
 
@@ -2521,7 +3803,7 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
         gap: f32,                           // pixels between panels (default: 10.0)
         title: Option<String>,              // overall title above the grid
     }
-
+    
     impl GridLayout {
         pub fn new(rows: usize, cols: usize) -> Self { /* ... */ }
         pub fn set(&mut self, row: usize, col: usize, figure: Figure) { /* ... */ }
@@ -2531,16 +3813,109 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
     }
     ```
 
-- [ ] Compute pixel bounds for each grid cell from proportional weights and gaps
-- [ ] Render each non-None figure into its cell using clipping mask + translation transform
+- [ ] Implement grid cell layout and rendering:
 
-- [ ] Implement `GridLayout::row(figures)` convenience (1xN layout)
-- [ ] Implement `GridLayout::column(figures)` convenience (Nx1 layout)
-- [ ] Implement `GridLayout::from_figures(figures, ncol)` convenience (auto-wrap)
+    ```rust
+    impl GridLayout {
+        pub fn render(&self, backend: &mut dyn DrawBackend) -> Result<()> {
+            let (total_w, total_h) = backend.dimensions();
+            let rows = self.figures.len();
+            let cols = self.figures[0].len();
+            let gap = self.gap;
+    
+            let col_total: f32 = self.col_widths.iter().sum();
+            let row_total: f32 = self.row_heights.iter().sum();
+            let usable_w = total_w as f32 - gap * (cols as f32 - 1.0);
+            let usable_h = total_h as f32 - gap * (rows as f32 - 1.0);
+    
+            let mut y_offset = 0.0f32;
+            for r in 0..rows {
+                let cell_h = usable_h * self.row_heights[r] / row_total;
+                let mut x_offset = 0.0f32;
+                for c in 0..cols {
+                    let cell_w = usable_w * self.col_widths[c] / col_total;
+                    if let Some(fig) = &self.figures[r][c] {
+                        let cell_rect = Rect::from_xywh(x_offset, y_offset, cell_w, cell_h);
+                        backend.set_clip(Some(cell_rect))?;
+                        fig.render_at(backend, x_offset, y_offset, cell_w as u32, cell_h as u32)?;
+                        backend.set_clip(None)?;
+                    }
+                    x_offset += cell_w + gap;
+                }
+                y_offset += cell_h + gap;
+            }
+            Ok(())
+        }
+    }
+    ```
 
-- [ ] Write snapshot test: 2x2 grid with mixed chart types
-- [ ] Write snapshot test: 1x3 row layout
-- [ ] Write snapshot test: grid with unequal column widths
+- [ ] Implement convenience constructors:
+
+    ```rust
+    impl GridLayout {
+        pub fn row(figures: Vec<Figure>) -> Self {
+            let n = figures.len();
+            Self { figures: vec![figures.into_iter().map(Some).collect()],
+                   row_heights: vec![1.0], col_widths: vec![1.0; n], gap: 10.0, title: None }
+        }
+        pub fn column(figures: Vec<Figure>) -> Self {
+            let n = figures.len();
+            Self { figures: figures.into_iter().map(|f| vec![Some(f)]).collect(),
+                   row_heights: vec![1.0; n], col_widths: vec![1.0], gap: 10.0, title: None }
+        }
+        pub fn from_figures(figures: Vec<Figure>, ncol: usize) -> Self {
+            let chunks: Vec<Vec<Option<Figure>>> = figures.chunks(ncol)
+                .map(|chunk| {
+                    let mut row: Vec<Option<Figure>> = chunk.iter().cloned().map(Some).collect();
+                    row.resize_with(ncol, || None); // pad last row
+                    row
+                }).collect();
+            let nrow = chunks.len();
+            Self { figures: chunks, row_heights: vec![1.0; nrow], col_widths: vec![1.0; ncol],
+                   gap: 10.0, title: None }
+        }
+    }
+    ```
+
+- [ ] Write snapshot test: 2x2 grid with mixed chart types:
+
+    ```rust
+    #[test]
+    fn snapshot_grid_2x2() {
+        let mut grid = GridLayout::new(2, 2);
+        grid.set(0, 0, Figure::new(400, 300).add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,0.5])));
+        grid.set(0, 1, Figure::new(400, 300).add(PointMark::new(vec![0.,1.,2.], vec![1.,0.,2.])));
+        grid.set(1, 0, Figure::new(400, 300).add(BarMark::new(vec!["A".into(),"B".into()], vec![10.,20.])));
+        grid.set(1, 1, Figure::new(400, 300).add(HistogramMark::new(vec![1.,2.,2.,3.,3.,3.,4.])));
+        let bytes = grid.render_png(800, 600).unwrap();
+        insta::assert_binary_snapshot!(".png", bytes);
+    }
+    ```
+- [ ] Write snapshot test: 1x3 row layout:
+
+    ```rust
+    #[test]
+    fn snapshot_grid_row() {
+        let grid = GridLayout::row(vec![
+            Figure::new(200, 200).add(LineMark::new(vec![0.,1.], vec![0.,1.])),
+            Figure::new(200, 200).add(LineMark::new(vec![0.,1.], vec![1.,0.])),
+            Figure::new(200, 200).add(PointMark::new(vec![0.5], vec![0.5])),
+        ]);
+        insta::assert_binary_snapshot!(".png", grid.render_png(600, 200).unwrap());
+    }
+    ```
+- [ ] Write snapshot test: grid with unequal column widths:
+
+    ```rust
+    #[test]
+    fn snapshot_grid_unequal() {
+        let mut grid = GridLayout::new(1, 2);
+        grid = grid.col_width(0, 2.0).col_width(1, 1.0); // left panel twice as wide
+        grid.set(0, 0, Figure::new(400, 300).add(LineMark::new(vec![0.,1.,2.], vec![0.,2.,1.])));
+        grid.set(0, 1, Figure::new(200, 300).add(PointMark::new(vec![0.5], vec![1.0])));
+        insta::assert_binary_snapshot!(".png", grid.render_png(600, 300).unwrap());
+    }
+    ```
 
 ### Layer 4: FacetWrap and FacetGrid
 
@@ -2554,7 +3929,7 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
         scales: FacetScales,        // Free | FreeX | FreeY | Fixed
         label_position: FacetLabelPosition,  // Top (default) | Bottom
     }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     #[non_exhaustive]
     pub enum FacetScales {
@@ -2566,13 +3941,84 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
     }
     ```
 
-- [ ] Implement FacetWrap: split data by unique values of one categorical variable
-- [ ] Create one subplot panel per unique value
-- [ ] Auto-determine grid size: ncol defaults to ceil(sqrt(n_panels))
-- [ ] Arrange panels left-to-right, top-to-bottom
-- [ ] Render title strip above each panel showing the facet value
+- [ ] Implement FacetWrap:
 
-- [ ] Implement FacetGrid: split by two variables (row and column)
+    ```rust
+    impl FacetWrap {
+        pub fn split_data(&self, data: &DataFrame) -> Vec<(String, DataFrame)> {
+            let col = data.column(&self.column).unwrap();
+            let unique_vals: Vec<String> = col.unique().unwrap().str().unwrap()
+                .into_no_null_iter().map(|s| s.to_string()).collect();
+            unique_vals.iter().map(|val| {
+                let mask = col.equal(val).unwrap();
+                (val.clone(), data.filter(&mask).unwrap())
+            }).collect()
+        }
+    
+        pub fn layout(&self, n_panels: usize) -> (usize, usize) {
+            let ncol = self.ncol.unwrap_or_else(|| (n_panels as f64).sqrt().ceil() as usize);
+            let nrow = (n_panels + ncol - 1) / ncol;
+            (nrow, ncol)
+        }
+    
+        pub fn render(&self, figure: &Figure, backend: &mut dyn DrawBackend) -> Result<()> {
+            let panels = self.split_data(figure.data());
+            let (nrow, ncol) = self.layout(panels.len());
+            let (w, h) = backend.dimensions();
+            let cell_w = w as f32 / ncol as f32;
+            let cell_h = h as f32 / nrow as f32;
+            let title_h = 20.0; // pixels for facet label strip
+    
+            for (idx, (label, panel_data)) in panels.iter().enumerate() {
+                let row = idx / ncol;
+                let col = idx % ncol;
+                let x = col as f32 * cell_w;
+                let y = row as f32 * cell_h;
+    
+                // Render facet title strip
+                backend.draw_text(&label, Point::new(x + cell_w / 2.0, y + 10.0), 11.0, Color::BLACK)?;
+    
+                // Render chart in remaining space
+                let chart_rect = Rect::from_xywh(x, y + title_h, cell_w, cell_h - title_h);
+                backend.set_clip(Some(chart_rect))?;
+                figure.render_with_data(backend, &panel_data, chart_rect)?;
+                backend.set_clip(None)?;
+            }
+            Ok(())
+        }
+    }
+    ```
+
+- [ ] Implement FacetGrid:
+
+    ```rust
+    impl FacetGrid {
+        pub fn render(&self, figure: &Figure, backend: &mut dyn DrawBackend) -> Result<()> {
+            let data = figure.data();
+            let row_vals: Vec<String> = data.column(&self.row).unwrap().unique().unwrap()
+                .str().unwrap().into_no_null_iter().map(|s| s.to_string()).collect();
+            let col_vals: Vec<String> = data.column(&self.col).unwrap().unique().unwrap()
+                .str().unwrap().into_no_null_iter().map(|s| s.to_string()).collect();
+    
+            let (w, h) = backend.dimensions();
+            let cell_w = w as f32 / col_vals.len() as f32;
+            let cell_h = h as f32 / row_vals.len() as f32;
+    
+            for (ri, rv) in row_vals.iter().enumerate() {
+                for (ci, cv) in col_vals.iter().enumerate() {
+                    let mask = data.column(&self.row).unwrap().equal(rv).unwrap()
+                        & data.column(&self.col).unwrap().equal(cv).unwrap();
+                    let panel_data = data.filter(&mask).unwrap();
+                    let rect = Rect::from_xywh(ci as f32 * cell_w, ri as f32 * cell_h, cell_w, cell_h);
+                    backend.set_clip(Some(rect))?;
+                    figure.render_with_data(backend, &panel_data, rect)?;
+                    backend.set_clip(None)?;
+                }
+            }
+            Ok(())
+        }
+    }
+    ```
 - [ ] Create subplot matrix: row var determines rows, col var determines columns
 
     ```rust
@@ -2585,13 +4031,72 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
     }
     ```
 
-- [ ] Implement shared axes: single x/y scale across all panels when FacetScales::Fixed
-- [ ] Render x tick labels only on bottom row panels
-- [ ] Render y tick labels only on left column panels
+- [ ] Implement shared axes logic:
 
-- [ ] Write snapshot test: facet wrap with 6 panels (2x3 grid)
-- [ ] Write snapshot test: facet grid with 2 rows x 3 columns
-- [ ] Write snapshot test: facet wrap with free y scales
+    ```rust
+    fn render_shared_axes(&self, nrow: usize, ncol: usize, coord: &CartesianCoord,
+                          backend: &mut dyn DrawBackend) -> Result<()> {
+        match self.scales {
+            FacetScales::Fixed => {
+                // Compute single scale across all panels
+                // Render x tick labels only on bottom row (row == nrow - 1)
+                // Render y tick labels only on left column (col == 0)
+                for row in 0..nrow {
+                    for col in 0..ncol {
+                        let show_x_ticks = row == nrow - 1;
+                        let show_y_ticks = col == 0;
+                        coord.render_axes(backend, show_x_ticks, show_y_ticks)?;
+                    }
+                }
+            }
+            FacetScales::FreeY => {
+                // Independent y scale per panel, shared x
+            }
+            FacetScales::FreeX => {
+                // Independent x scale per panel, shared y
+            }
+            FacetScales::Free => {
+                // Fully independent scales
+            }
+        }
+        Ok(())
+    }
+    ```
+
+- [ ] Write snapshot test: facet wrap with 6 panels:
+
+    ```rust
+    #[test]
+    fn snapshot_facet_wrap_6() {
+        let fig = Figure::new(900, 600)
+            .add(PointMark::new(x.clone(), y.clone()).color_by(&groups))
+            .facet_wrap("group", Some(3)); // 3 columns
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: facet grid 2x3:
+
+    ```rust
+    #[test]
+    fn snapshot_facet_grid() {
+        let fig = Figure::new(900, 600)
+            .add(PointMark::new(x.clone(), y.clone()))
+            .facet_grid("row_var", "col_var");
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: facet wrap with free y:
+
+    ```rust
+    #[test]
+    fn snapshot_facet_free_y() {
+        let fig = Figure::new(900, 600)
+            .add(LineMark::new(x.clone(), y.clone()))
+            .facet_wrap("group", Some(2))
+            .facet_scales(FacetScales::FreeY);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 4: Legend
 
@@ -2604,13 +4109,13 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
         position: LegendPosition,
         title: Option<String>,
     }
-
+    
     #[derive(Debug, Clone)]
     pub struct LegendEntry {
         pub label: String,
         pub swatch: LegendSwatch,   // colored square, line segment, or circle
     }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
     #[non_exhaustive]
     pub enum LegendPosition {
@@ -2624,16 +4129,104 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
     }
     ```
 
-- [ ] Measure widest label text to compute legend bounding box
-- [ ] Render semi-transparent background rect for inside positions (readability)
-- [ ] Adjust plot area margins for outside positions
-- [ ] Render each entry: colored swatch (rect/line/circle per mark type) + label text
+- [ ] Implement legend rendering:
+
+    ```rust
+    impl Legend {
+        pub fn render(&self, backend: &mut dyn DrawBackend, plot_area: Rect) -> Result<()> {
+            let swatch_size = 12.0f32;
+            let padding = 8.0f32;
+            let line_height = 18.0f32;
+    
+            // Measure widest label (approximate: chars * 0.6 * font_size)
+            let max_label_w = self.entries.iter()
+                .map(|e| e.label.len() as f32 * 7.0)
+                .fold(0.0f32, f32::max);
+            let box_w = padding * 2.0 + swatch_size + 6.0 + max_label_w;
+            let box_h = padding * 2.0 + self.entries.len() as f32 * line_height;
+    
+            // Position
+            let (bx, by) = match self.position {
+                LegendPosition::TopRight => (plot_area.right - box_w - 8.0, plot_area.top + 8.0),
+                LegendPosition::TopLeft => (plot_area.left + 8.0, plot_area.top + 8.0),
+                LegendPosition::OutsideRight => (plot_area.right + 8.0, plot_area.top),
+                _ => (plot_area.right - box_w - 8.0, plot_area.bottom - box_h - 8.0),
+            };
+    
+            // Semi-transparent background
+            let bg = Rect::from_xywh(bx, by, box_w, box_h);
+            backend.fill_rect(bg, Color::WHITE.with_alpha(220))?;
+    
+            // Entries
+            for (i, entry) in self.entries.iter().enumerate() {
+                let y = by + padding + i as f32 * line_height;
+                let sx = bx + padding;
+                // Swatch (colored square)
+                backend.fill_rect(Rect::from_xywh(sx, y, swatch_size, swatch_size), entry.color)?;
+                // Label
+                backend.draw_text(&entry.label, Point::new(sx + swatch_size + 6.0, y + 10.0), 12.0, Color::BLACK)?;
+            }
+            Ok(())
+        }
+    }
+    ```
 
 - [ ] Implement auto-generation: Figure creates Legend from marks' color/label mappings when more than one series is present
+
+    ```rust
+    fn auto_legend(&self) -> Option<Legend> {
+    let entries: Vec<LegendEntry> = self.marks.iter()
+        .filter_map(|m| m.label().map(|l| LegendEntry {
+            label: l.to_string(), color: m.primary_color(), swatch: m.legend_swatch(),
+        })).collect();
+    (entries.len() > 1).then(|| Legend { entries, position: LegendPosition::TopRight, title: None })
+    }
+    ```
 - [ ] Allow user to override position, hide legend, or customize entries
-- [ ] Write snapshot test: legend inside top-right
-- [ ] Write snapshot test: legend outside right
-- [ ] Write snapshot test: legend with mixed line and scatter entries
+
+    ```rust
+    impl Figure {
+    pub fn legend(mut self, pos: LegendPosition) -> Self { self.legend_position = Some(pos); self }
+    pub fn hide_legend(mut self) -> Self { self.show_legend = false; self }
+    pub fn legend_entries(mut self, entries: Vec<LegendEntry>) -> Self { self.custom_legend = Some(entries); self }
+    }
+    ```
+- [ ] Write snapshot test: legend inside top-right:
+
+    ```rust
+    #[test]
+    fn snapshot_legend_inside() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,2.]).color(Color::BLUE).label("Series A"))
+            .add(LineMark::new(vec![0.,1.,2.], vec![2.,1.,0.]).color(Color::RED).label("Series B"))
+            .legend(LegendPosition::TopRight);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: legend outside right:
+
+    ```rust
+    #[test]
+    fn snapshot_legend_outside() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.,1.], vec![0.,1.]).label("A"))
+            .add(LineMark::new(vec![0.,1.], vec![1.,0.]).label("B"))
+            .legend(LegendPosition::OutsideRight);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: legend with mixed entries:
+
+    ```rust
+    #[test]
+    fn snapshot_legend_mixed() {
+        let fig = Figure::new(800, 600)
+            .add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,2.]).label("Line"))
+            .add(PointMark::new(vec![0.5, 1.5], vec![0.8, 1.2]).label("Scatter"))
+            .legend(LegendPosition::TopRight);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### Layer 4: Colorbar
 
@@ -2651,13 +4244,61 @@ Exit criteria: faceted charts and multi-panel layouts render correctly.
     }
     ```
 
-- [ ] Render gradient strip: N thin rectangles (N >= 256), each sampled from colormap
-- [ ] Place tick marks and labels along the strip using Wilkinson ticks
-- [ ] Position colorbar to the right (vertical) or below (horizontal) the plot area
-- [ ] Adjust figure margins to accommodate the colorbar
+- [ ] Implement colorbar rendering:
 
-- [ ] Write snapshot test: vertical colorbar with sequential colormap
-- [ ] Write snapshot test: horizontal colorbar with diverging colormap
+    ```rust
+    impl Colorbar {
+        pub fn render(&self, backend: &mut dyn DrawBackend, plot_area: Rect) -> Result<()> {
+            let n_rects = 256;
+            let bar_x = plot_area.right + 10.0;
+            let bar_y = plot_area.top;
+            let bar_h = plot_area.height();
+            let rect_h = bar_h / n_rects as f32;
+    
+            // Gradient strip
+            for i in 0..n_rects {
+                let t = i as f32 / (n_rects - 1) as f32;
+                let color: Color = self.colormap.eval(1.0 - t).into(); // top = max
+                let rect = Rect::from_xywh(bar_x, bar_y + i as f32 * rect_h, self.width, rect_h);
+                backend.fill_rect(rect, color)?;
+            }
+    
+            // Tick marks and labels
+            let ticks = wilkinson_extended(self.domain.0, self.domain.1, self.tick_count);
+            for &tick_val in &ticks {
+                let t = ((tick_val - self.domain.0) / (self.domain.1 - self.domain.0)) as f32;
+                let y = bar_y + (1.0 - t) * bar_h;
+                let label = format!("{:.1}", tick_val);
+                draw_hline(backend, y, bar_x, bar_x + self.width, Color::BLACK, 1.0)?;
+                backend.draw_text(&label, Point::new(bar_x + self.width + 4.0, y + 4.0), 10.0, Color::BLACK)?;
+            }
+            Ok(())
+        }
+    }
+    ```
+
+- [ ] Write snapshot test: vertical colorbar:
+
+    ```rust
+    #[test]
+    fn snapshot_colorbar_vertical() {
+        let fig = Figure::new(700, 500)
+            .add(HeatmapMark::new(vec![vec![0.,1.,2.], vec![3.,4.,5.]]))
+            .colorbar(Colorbar::new(prismatica::crameri::BATLOW, (0.0, 5.0)));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: horizontal colorbar:
+
+    ```rust
+    #[test]
+    fn snapshot_colorbar_horizontal() {
+        let fig = Figure::new(700, 500)
+            .add(HeatmapMark::new(vec![vec![-2., 0., 2.], vec![1., -1., 0.]]))
+            .colorbar(Colorbar::new(prismatica::crameri::VIK, (-2.0, 2.0)).horizontal());
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ---
 
@@ -2667,8 +4308,43 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
 
 ### LogScale and SymlogScale
 
-- [ ] Implement `LogScale::map()`: apply log10, then linear interpolation
-- [ ] Validate domain is strictly positive, return `StarsightError::Scale` otherwise
+- [ ] Implement `LogScale`:
+
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct LogScale {
+        domain: (f64, f64),
+        range: (f64, f64),
+    }
+    
+    impl LogScale {
+        pub fn new(domain: (f64, f64), range: (f64, f64)) -> Result<Self> {
+            if domain.0 <= 0.0 || domain.1 <= 0.0 {
+                return Err(StarsightError::Scale(
+                    format!("LogScale domain must be strictly positive, got ({}, {})", domain.0, domain.1)
+                ));
+            }
+            Ok(Self { domain, range })
+        }
+    }
+    
+    impl Scale for LogScale {
+        fn map(&self, val: f64) -> f64 {
+            let log_val = val.max(f64::MIN_POSITIVE).log10();
+            let log_min = self.domain.0.log10();
+            let log_max = self.domain.1.log10();
+            let t = (log_val - log_min) / (log_max - log_min);
+            self.range.0 + t * (self.range.1 - self.range.0)
+        }
+    
+        fn inverse(&self, px: f64) -> f64 {
+            let log_min = self.domain.0.log10();
+            let log_max = self.domain.1.log10();
+            let t = (px - self.range.0) / (self.range.1 - self.range.0);
+            10f64.powf(log_min + t * (log_max - log_min))
+        }
+    }
+    ```
 - [ ] Implement `LogLocator`: ticks at powers of 10 and sub-ticks at 2 and 5
 
     ```rust
@@ -2682,7 +4358,36 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
     }
     ```
 
+- [ ] Implement `SymlogScale`:
+
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct SymlogScale {
+        domain: (f64, f64),
+        range: (f64, f64),
+        threshold: f64,  // default 1.0
+    }
+    
+    impl Scale for SymlogScale {
+        fn map(&self, val: f64) -> f64 {
+            let t = symlog_transform(val, self.threshold);
+            let t_min = symlog_transform(self.domain.0, self.threshold);
+            let t_max = symlog_transform(self.domain.1, self.threshold);
+            self.range.0 + (t - t_min) / (t_max - t_min) * (self.range.1 - self.range.0)
+        }
+    }
+    
+    fn symlog_transform(x: f64, threshold: f64) -> f64 {
+        x.signum() * (1.0 + x.abs() / threshold).log10()
+    }
+    ```
+
 - [ ] `SymlogScale` uses `sign(x) * log10(1 + |x| / threshold)` with a configurable linear threshold near zero.
+
+    ```rust
+    // Already implemented above in the SymlogScale section.
+    // This checkbox is a duplicate — verify the implementation matches.
+    ```
 
 ### DateTimeScale
 
@@ -2695,7 +4400,7 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
         range: (f64, f64),           // pixel range
         granularity: Option<TimeGranularity>,  // None = auto-detect
     }
-
+    
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     #[non_exhaustive]
     pub enum TimeGranularity {
@@ -2705,14 +4410,96 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
 
 - [ ] Implement auto-detection: compute span in seconds, select granularity by threshold
 
+    ```rust
+    fn auto_granularity(span_seconds: f64) -> TimeGranularity {
+    if span_seconds > 4.0 * 365.25 * 86400.0 { TimeGranularity::Year }
+    else if span_seconds > 180.0 * 86400.0 { TimeGranularity::Month }
+    else if span_seconds > 14.0 * 86400.0 { TimeGranularity::Week }
+    else if span_seconds > 2.0 * 86400.0 { TimeGranularity::Day }
+    else if span_seconds > 4.0 * 3600.0 { TimeGranularity::Hour }
+    else if span_seconds > 4.0 * 60.0 { TimeGranularity::Minute }
+    else { TimeGranularity::Second }
+    }
+    ```
+
 - [ ] Implement tick generation per granularity (Year → Jan 1, Month → 1st, Day → midnight, etc.)
+
+    ```rust
+    fn ticks_for_granularity(domain: (f64, f64), gran: TimeGranularity) -> Vec<f64> {
+    match gran {
+        TimeGranularity::Year => {
+            let start_year = epoch_to_year(domain.0);
+            let end_year = epoch_to_year(domain.1);
+            (start_year..=end_year).map(|y| epoch_from_year(y)).filter(|&t| t >= domain.0 && t <= domain.1).collect()
+        }
+        TimeGranularity::Month => { /* ticks at 1st of each month */ todo!() }
+        TimeGranularity::Day => { /* ticks at midnight */ todo!() }
+        _ => { /* round to nearest hour/minute/second */ todo!() }
+    }
+    }
+    ```
 - [ ] Skip ticks that fall outside the domain
+
+    ```rust
+    // Applied in ticks_for_granularity via:
+    .filter(|&t| t >= domain.0 && t <= domain.1).collect()
+    ```
 
 - [ ] Implement label formatting per granularity (Year → "2024", Month → "Jan", Day → "Jan 15", etc.)
 
-- [ ] Write snapshot test: 10-year time series (year ticks)
-- [ ] Write snapshot test: 6-month time series (month ticks)
-- [ ] Write snapshot test: 48-hour time series (hour ticks)
+    ```rust
+    fn format_tick(epoch: f64, gran: TimeGranularity) -> String {
+    let (y, m, d, h, min, s) = epoch_to_components(epoch);
+    match gran {
+        TimeGranularity::Year => format!("{y}"),
+        TimeGranularity::Month => format!("{}", MONTH_ABBR[m as usize - 1]),
+        TimeGranularity::Day => format!("{} {d}", MONTH_ABBR[m as usize - 1]),
+        TimeGranularity::Hour => format!("{h:02}:00"),
+        TimeGranularity::Minute => format!("{h:02}:{min:02}"),
+        TimeGranularity::Second => format!("{h:02}:{min:02}:{s:02}"),
+        _ => format!("{y}-{m:02}-{d:02}"),
+    }
+    }
+    const MONTH_ABBR: &[&str] = &["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    ```
+
+- [ ] Write snapshot test: 10-year time series:
+
+    ```rust
+    #[test]
+    fn snapshot_datetime_years() {
+        let x: Vec<f64> = (2015..2025).map(|y| epoch_from_year(y)).collect();
+        let y: Vec<f64> = x.iter().enumerate().map(|(i, _)| (i as f64).sin()).collect();
+        let fig = Figure::new(800, 400)
+            .add(LineMark::new(x, y))
+            .x_scale(DateTimeScale::auto());
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: 6-month time series:
+
+    ```rust
+    #[test]
+    fn snapshot_datetime_months() {
+        let start = epoch_from_date(2024, 1, 1);
+        let x: Vec<f64> = (0..180).map(|d| start + d as f64 * 86400.0).collect();
+        let y: Vec<f64> = x.iter().map(|t| (t / 1e6).sin()).collect();
+        let fig = Figure::new(800, 400).add(LineMark::new(x, y)).x_scale(DateTimeScale::auto());
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: 48-hour time series:
+
+    ```rust
+    #[test]
+    fn snapshot_datetime_hours() {
+        let start = epoch_from_date(2024, 6, 15);
+        let x: Vec<f64> = (0..48).map(|h| start + h as f64 * 3600.0).collect();
+        let y: Vec<f64> = x.iter().map(|t| (t / 3600.0).sin()).collect();
+        let fig = Figure::new(800, 400).add(LineMark::new(x, y)).x_scale(DateTimeScale::auto());
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### BandScale and CategoricalScale
 
@@ -2726,14 +4513,14 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
         inner_padding: f64,           // gap between bands as fraction of step (default 0.1)
         outer_padding: f64,           // gap at edges as fraction of step (default 0.05)
     }
-
+    
     impl BandScale {
         pub fn bandwidth(&self) -> f64 {
             let n = self.domain.len() as f64;
             let total = self.range.1 - self.range.0;
             total / (n + (n - 1.0) * self.inner_padding + 2.0 * self.outer_padding)
         }
-
+    
         pub fn map(&self, label: &str) -> Option<f64> {
             let idx = self.domain.iter().position(|l| l == label)?;
             let bw = self.bandwidth();
@@ -2743,14 +4530,84 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
     }
     ```
 
-- [ ] Implement `CategoricalScale`: map categories to point positions (band centers)
+- [ ] Implement `CategoricalScale`:
 
-- [ ] Write property test: all band positions are within range
-- [ ] Write property test: bandwidth * n_categories does not exceed range
-- [ ] Write property test: map returns None for unknown labels
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct CategoricalScale {
+        domain: Vec<String>,
+        range: (f64, f64),
+    }
+    
+    impl CategoricalScale {
+        pub fn new(categories: Vec<String>, range: (f64, f64)) -> Self {
+            Self { domain: categories, range }
+        }
+        pub fn map(&self, label: &str) -> Option<f64> {
+            let idx = self.domain.iter().position(|l| l == label)?;
+            let n = self.domain.len();
+            if n == 1 { return Some((self.range.0 + self.range.1) / 2.0); }
+            let step = (self.range.1 - self.range.0) / (n - 1) as f64;
+            Some(self.range.0 + idx as f64 * step)
+        }
+    }
+    ```
 
-- [ ] Write snapshot test: bar chart using BandScale
-- [ ] Write snapshot test: scatter plot with categorical x-axis
+- [ ] Write property tests for BandScale:
+
+    ```rust
+    use proptest::prelude::*;
+    proptest! {
+        #[test]
+        fn band_positions_in_range(n in 1usize..20) {
+            let cats: Vec<String> = (0..n).map(|i| format!("cat_{i}")).collect();
+            let scale = BandScale::new(cats.clone(), (0.0, 800.0));
+            for cat in &cats {
+                let pos = scale.map(cat).unwrap();
+                prop_assert!(pos >= 0.0 && pos <= 800.0, "pos {} out of range", pos);
+            }
+        }
+        #[test]
+        fn bandwidth_fits(n in 1usize..50) {
+            let cats: Vec<String> = (0..n).map(|i| format!("c{i}")).collect();
+            let scale = BandScale::new(cats.clone(), (0.0, 1000.0));
+            let bw = scale.bandwidth();
+            prop_assert!(bw * n as f64 <= 1000.0 + 1e-10);
+        }
+    }
+    #[test]
+    fn unknown_label_returns_none() {
+        let scale = BandScale::new(vec!["A".into(), "B".into()], (0.0, 100.0));
+        assert!(scale.map("Z").is_none());
+    }
+    ```
+
+- [ ] Write snapshot test: bar chart using BandScale:
+
+    ```rust
+    #[test]
+    fn snapshot_band_scale_bar() {
+        let fig = Figure::new(600, 400).add(
+            BarMark::new(vec!["Mon".into(),"Tue".into(),"Wed".into(),"Thu".into(),"Fri".into()],
+                         vec![5.0, 8.0, 3.0, 9.0, 6.0])
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: scatter with categorical x:
+
+    ```rust
+    #[test]
+    fn snapshot_categorical_scatter() {
+        let fig = Figure::new(600, 400).add(
+            PointMark::new_categorical(
+                vec!["A".into(), "A".into(), "B".into(), "B".into(), "C".into()],
+                vec![1.0, 2.0, 1.5, 3.0, 2.5]
+            )
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### ColorScale
 
@@ -2763,11 +4620,11 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
         colormap: ColormapRef,       // reference to a prismatica colormap
         midpoint: Option<f64>,       // for diverging: the neutral center value
     }
-
+    
     impl ColorScale {
         pub fn sequential(domain: (f64, f64), colormap: ColormapRef) -> Self { /* ... */ }
         pub fn diverging(domain: (f64, f64), colormap: ColormapRef, midpoint: f64) -> Self { /* ... */ }
-
+    
         pub fn map(&self, val: f64) -> Color {
             let t = match self.midpoint {
                 None => (val - self.domain.0) / (self.domain.1 - self.domain.0),
@@ -2781,10 +4638,54 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
     }
     ```
 
-- [ ] Implement diverging midpoint mapping: below midpoint → 0.0-0.5, above → 0.5-1.0
+- [ ] Implement diverging midpoint mapping:
 
-- [ ] Write snapshot test: heatmap with sequential ColorScale
-- [ ] Write snapshot test: heatmap with diverging ColorScale centered at zero
+    ```rust
+    impl ColorScale {
+        pub fn map(&self, val: f64) -> Color {
+            let t = match self.midpoint {
+                None => {
+                    // Sequential: linear 0→1
+                    ((val - self.domain.0) / (self.domain.1 - self.domain.0)).clamp(0.0, 1.0)
+                }
+                Some(mid) => {
+                    // Diverging: below midpoint → 0.0-0.5, above → 0.5-1.0
+                    if val <= mid {
+                        0.5 * (val - self.domain.0) / (mid - self.domain.0)
+                    } else {
+                        0.5 + 0.5 * (val - mid) / (self.domain.1 - mid)
+                    }
+                }
+            };
+            self.colormap.eval(t.clamp(0.0, 1.0) as f32).into()
+        }
+    }
+    ```
+
+- [ ] Write snapshot test: heatmap with sequential ColorScale:
+
+    ```rust
+    #[test]
+    fn snapshot_colorscale_seq() {
+        let data = vec![vec![0.0, 0.25, 0.5], vec![0.75, 1.0, 0.5]];
+        let fig = Figure::new(400, 300).add(
+            HeatmapMark::new(data).color_scale(ColorScale::sequential((0.0, 1.0), prismatica::crameri::BATLOW))
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: heatmap with diverging ColorScale:
+
+    ```rust
+    #[test]
+    fn snapshot_colorscale_div() {
+        let data = vec![vec![-3.0, -1.0, 0.0], vec![1.0, 3.0, -2.0]];
+        let fig = Figure::new(400, 300).add(
+            HeatmapMark::new(data).color_scale(ColorScale::diverging((-3.0, 3.0), prismatica::crameri::VIK, 0.0))
+        );
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### TickLocator and TickFormatter traits
 
@@ -2794,41 +4695,280 @@ Exit criteria: all scale types render correctly. Tick locator and formatter trai
     pub trait TickLocator {
         fn locate(&self, domain: (f64, f64), target_count: usize) -> Vec<f64>;
     }
-
+    
     pub trait TickFormatter {
         fn format(&self, value: f64) -> String;
     }
     ```
 
-- [ ] Implement `WilkinsonLocator` (default TickLocator)
-- [ ] Implement `AutoFormatter` with step-size-based precision auto-detection
+- [ ] Implement `WilkinsonLocator` and `AutoFormatter`:
+
+    ```rust
+    pub struct WilkinsonLocator;
+    
+    impl TickLocator for WilkinsonLocator {
+        fn locate(&self, domain: (f64, f64), target_count: usize) -> Vec<f64> {
+            wilkinson_extended(domain.0, domain.1, target_count)
+        }
+    }
+    
+    pub struct AutoFormatter {
+        precision: Option<usize>,
+    }
+    
+    impl TickFormatter for AutoFormatter {
+        fn format(&self, value: f64) -> String {
+            let p = self.precision.unwrap_or_else(|| {
+                // Auto-detect: use enough decimals to distinguish adjacent ticks
+                if value == 0.0 { return 0; }
+                let abs = value.abs();
+                if abs >= 1.0 { 0 } else { (-abs.log10()).ceil() as usize + 1 }
+            });
+            format!("{:.prec$}", value, prec = p)
+        }
+    }
+    ```
 
 - [ ] Built-in locators: `LogLocator` (ticks at powers of 10 and optionally at 2 and 5 sub-ticks), `DateLocator` (ticks at time boundaries based on granularity), `FixedLocator` (user-specified positions).
 
-- [ ] Implement `PercentFormatter` (multiply by 100, append %)
-- [ ] Implement `SIFormatter` (k, M, G, T suffixes for large; m, u, n for small)
-- [ ] Implement `DateFormatter` (epoch seconds → human-readable)
-- [ ] Implement `FixedFormatter` (user-specified label strings)
+    ```rust
+    pub struct LogLocator { pub sub_ticks: bool }
+    impl TickLocator for LogLocator {
+    fn locate(&self, domain: (f64, f64), _target: usize) -> Vec<f64> {
+        let start = domain.0.max(f64::MIN_POSITIVE).log10().floor() as i32;
+        let end = domain.1.log10().ceil() as i32;
+        let mut ticks = Vec::new();
+        for exp in start..=end {
+            let base = 10f64.powi(exp);
+            ticks.push(base);
+            if self.sub_ticks {
+                for &sub in &[2.0, 5.0] { ticks.push(base * sub); }
+            }
+        }
+        ticks.into_iter().filter(|&t| t >= domain.0 && t <= domain.1).collect()
+    }
+    }
+    
+    pub struct DateLocator;
+    impl TickLocator for DateLocator {
+    fn locate(&self, domain: (f64, f64), target: usize) -> Vec<f64> {
+        let gran = auto_granularity(domain.1 - domain.0);
+        ticks_for_granularity(domain, gran)
+    }
+    }
+    
+    pub struct FixedLocator(pub Vec<f64>);
+    impl TickLocator for FixedLocator {
+    fn locate(&self, _domain: (f64, f64), _target: usize) -> Vec<f64> { self.0.clone() }
+    }
+    ```
+
+- [ ] Implement built-in formatters:
+
+    ```rust
+    pub struct PercentFormatter;
+    impl TickFormatter for PercentFormatter {
+        fn format(&self, value: f64) -> String { format!("{:.0}%", value * 100.0) }
+    }
+    
+    pub struct SIFormatter;
+    impl TickFormatter for SIFormatter {
+        fn format(&self, value: f64) -> String {
+            let abs = value.abs();
+            let (scaled, suffix) = if abs >= 1e12 { (value / 1e12, "T") }
+                else if abs >= 1e9 { (value / 1e9, "G") }
+                else if abs >= 1e6 { (value / 1e6, "M") }
+                else if abs >= 1e3 { (value / 1e3, "k") }
+                else if abs >= 1.0 { (value, "") }
+                else if abs >= 1e-3 { (value * 1e3, "m") }
+                else if abs >= 1e-6 { (value * 1e6, "μ") }
+                else { (value * 1e9, "n") };
+            format!("{:.1}{}", scaled, suffix)
+        }
+    }
+    
+    pub struct DateFormatter;
+    impl TickFormatter for DateFormatter {
+        fn format(&self, epoch_secs: f64) -> String {
+            // Convert epoch to human-readable — use chrono or manual calculation
+            todo!("date formatting")
+        }
+    }
+    
+    pub struct FixedFormatter(pub Vec<String>);
+    impl TickFormatter for FixedFormatter {
+        fn format(&self, _value: f64) -> String {
+            // Called with index; return self.0[index] — needs tick index context
+            todo!("fixed formatter needs tick index")
+        }
+    }
+    ```
 
 - [ ] Ensure traits are object-safe: Axis holds `Box<dyn TickLocator>` and `Box<dyn TickFormatter>`
 
-- [ ] Write snapshot test: default Wilkinson ticks
-- [ ] Write snapshot test: log ticks on LogScale
-- [ ] Write snapshot test: percentage-formatted ticks
-- [ ] Write snapshot test: SI-formatted ticks (k, M, G suffixes)
+    ```rust
+    pub struct Axis {
+    pub locator: Box<dyn TickLocator>,
+    pub formatter: Box<dyn TickFormatter>,
+    pub label: Option<String>,
+    pub visible: bool,
+    }
+    
+    impl Default for Axis {
+    fn default() -> Self {
+        Self {
+            locator: Box::new(WilkinsonLocator),
+            formatter: Box::new(AutoFormatter { precision: None }),
+            label: None,
+            visible: true,
+        }
+    }
+    }
+    ```
 
+- [ ] Write snapshot test: default Wilkinson ticks:
 
+    ```rust
+    #[test]
+    fn snapshot_ticks_default() {
+        let fig = Figure::new(800, 200)
+            .add(LineMark::new(vec![0.0, 100.0], vec![0.0, 100.0]))
+            .x_tick_locator(WilkinsonLocator::new());
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: log ticks:
+
+    ```rust
+    #[test]
+    fn snapshot_ticks_log() {
+        let x: Vec<f64> = (0..100).map(|i| 10f64.powf(i as f64 * 0.04)).collect();
+        let y: Vec<f64> = x.iter().map(|v| v.log10()).collect();
+        let fig = Figure::new(800, 400).add(LineMark::new(x, y)).x_scale(LogScale::new((1.0, 10000.0)));
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: percentage ticks:
+
+    ```rust
+    #[test]
+    fn snapshot_ticks_percent() {
+        let fig = Figure::new(600, 400)
+            .add(BarMark::new(vec!["A".into(),"B".into()], vec![0.35, 0.65]))
+            .y_tick_formatter(PercentFormatter);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
+- [ ] Write snapshot test: SI-formatted ticks:
+
+    ```rust
+    #[test]
+    fn snapshot_ticks_si() {
+        let fig = Figure::new(600, 400)
+            .add(LineMark::new(vec![0., 1., 2., 3.], vec![0., 1e3, 1e6, 1e9]))
+            .y_tick_formatter(SIFormatter);
+        insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+    }
+    ```
 
 ### 0.6.0 — GPU and interactivity
 
 Exit criteria: charts render in a native window with hover tooltips. GPU backend produces identical output to CPU backend.
 
 - [ ] Create `WgpuBackend` struct in `starsight-layer-1/src/backend/wgpu/mod.rs`
+
+    ```rust
+    pub struct WgpuBackend {
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+    surface: Option<wgpu::Surface<'static>>,
+    texture: wgpu::Texture,
+    pipeline: wgpu::RenderPipeline,
+    clip_mask: Option<Rect>,
+    }
+    ```
 - [ ] Initialize wgpu device, queue, and render pipeline
+
+    ```rust
+    impl WgpuBackend {
+    pub async fn new(width: u32, height: u32) -> Result<Self> {
+        let instance = wgpu::Instance::default();
+        let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions::default()).await
+            .ok_or_else(|| StarsightError::Render("No GPU adapter".into()))?;
+        let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor::default(), None).await
+            .map_err(|e| StarsightError::Render(e.to_string()))?;
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+            format: wgpu::TextureFormat::Rgba8Unorm,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            ..Default::default()
+        });
+        // Build pipeline...
+        todo!()
+    }
+    }
+    ```
 - [ ] Write vertex shader: transform data coordinates to clip space
+
+    ```wgsl
+    // shader.wgsl
+    struct VertexInput { @location(0) position: vec2<f32>, @location(1) color: vec4<f32> }
+    struct VertexOutput { @builtin(position) clip_position: vec4<f32>, @location(0) color: vec4<f32> }
+    
+    @vertex fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    out.clip_position = vec4<f32>(in.position * 2.0 - 1.0, 0.0, 1.0); // NDC
+    out.color = in.color;
+    return out;
+    }
+    ```
 - [ ] Write fragment shader: handle solid colors, gradients, and colormaps
+
+    ```wgsl
+    @fragment fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+    return in.color;
+    }
+    ```
 - [ ] Implement Path-to-triangle tessellation (via lyon or manual ear-clipping)
+
+    ```rust
+    use lyon::tessellation::{VertexBuffers, FillTessellator, FillOptions};
+    use lyon::path::Path as LyonPath;
+    
+    fn tessellate_path(commands: &[PathCommand]) -> VertexBuffers<[f32; 2], u16> {
+    let mut buffers = VertexBuffers::new();
+    let mut tessellator = FillTessellator::new();
+    let mut builder = LyonPath::builder();
+    for cmd in commands {
+        match cmd {
+            PathCommand::MoveTo(p) => { builder.begin(lyon::math::point(p.x, p.y)); }
+            PathCommand::LineTo(p) => { builder.line_to(lyon::math::point(p.x, p.y)); }
+            PathCommand::Close => { builder.close(); }
+            _ => {}
+        }
+    }
+    let path = builder.build();
+    tessellator.tessellate_path(&path, &FillOptions::default(), &mut buffers).unwrap();
+    buffers
+    }
+    ```
 - [ ] Implement `DrawBackend` for `WgpuBackend`
+
+    ```rust
+    impl DrawBackend for WgpuBackend {
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+        let vertices = rect_to_triangles(rect, color);
+        self.upload_and_draw(&vertices)
+    }
+    fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()> {
+        let tris = tessellate_path(&path.commands());
+        self.upload_and_draw(&tris)
+    }
+    fn dimensions(&self) -> (u32, u32) { (self.texture.width(), self.texture.height()) }
+    fn save_png(&self, path: &std::path::Path) -> Result<()> { self.readback_and_encode(path) }
+    fn save_svg(&self, _: &std::path::Path) -> Result<()> { Err(StarsightError::Export("GPU cannot SVG".into())) }
+    }
+    ```
 - [ ] Verify GPU output is visually identical to CPU backend
 
     ```rust
@@ -2842,7 +4982,39 @@ Exit criteria: charts render in a native window with hover tooltips. GPU backend
     ```
 
 - [ ] Implement GPU texture readback: copy texture to CPU buffer
+
+    ```rust
+    fn readback(&self) -> Result<Vec<u8>> {
+    let (w, h) = self.dimensions();
+    let buf_size = (w * h * 4) as u64;
+    let buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+        size: buf_size, usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false, label: None,
+    });
+    let mut encoder = self.device.create_command_encoder(&Default::default());
+    encoder.copy_texture_to_buffer(
+        self.texture.as_image_copy(),
+        wgpu::ImageCopyBuffer { buffer: &buffer, layout: wgpu::ImageDataLayout {
+            offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h),
+        }},
+        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+    );
+    self.queue.submit([encoder.finish()]);
+    // Map and read buffer...
+    todo!()
+    }
+    ```
 - [ ] Implement `save_png()` for WgpuBackend using readback buffer
+
+    ```rust
+    fn readback_and_encode(&self, path: &std::path::Path) -> Result<()> {
+    let pixels = self.readback()?;
+    let (w, h) = self.dimensions();
+    let pixmap = Pixmap::from_vec(pixels, tiny_skia::IntSize::from_wh(w, h).unwrap())
+        .ok_or_else(|| StarsightError::Export("Invalid pixel data".into()))?;
+    pixmap.save_png(path).map_err(|e| StarsightError::Export(e.to_string()))
+    }
+    ```
 
 - [ ] Create `InteractiveWindow` struct in `starsight-layer-6/src/window.rs`
 
@@ -2858,17 +5030,170 @@ Exit criteria: charts render in a native window with hover tooltips. GPU backend
     ```
 
 - [ ] Implement winit event loop: create window, initialize WgpuBackend, enter render loop
+
+    ```rust
+    pub fn show(figure: Figure) -> Result<()> {
+    let event_loop = winit::event_loop::EventLoop::new().unwrap();
+    let window = winit::window::WindowBuilder::new()
+        .with_title("starsight").with_inner_size(winit::dpi::LogicalSize::new(800, 600))
+        .build(&event_loop).unwrap();
+    let backend = pollster::block_on(WgpuBackend::new_with_surface(&window))?;
+    let mut state = InteractiveState { figure, backend, hover: None, zoom: ZoomState::default() };
+    event_loop.run(move |event, target| {
+        match event {
+            winit::event::Event::WindowEvent { event, .. } => state.handle_event(event, target),
+            _ => {}
+        }
+    }).unwrap();
+    Ok(())
+    }
+    ```
 - [ ] Implement frame lifecycle: check input events → update state → re-render if dirty
+
+    ```rust
+    fn handle_event(&mut self, event: WindowEvent, target: &EventLoopWindowTarget<()>) {
+    match event {
+        WindowEvent::RedrawRequested => { self.render(); }
+        WindowEvent::CursorMoved { position, .. } => { self.update_hover(position); self.request_redraw(); }
+        WindowEvent::MouseWheel { delta, .. } => { self.handle_zoom(delta); self.request_redraw(); }
+        WindowEvent::CloseRequested => { target.exit(); }
+        _ => {}
+    }
+    }
+    ```
 - [ ] Implement hit-testing: spatial index for mark bounding boxes (grid for scatter, sequential for lines)
+
+    ```rust
+    fn hit_test(&self, px: f64, py: f64) -> Option<HoverInfo> {
+    let point = Point::new(px as f32, py as f32);
+    for mark in &self.figure.marks {
+        if let Some(info) = mark.hit_test(point, &self.coord) {
+            return Some(info);
+        }
+    }
+    None
+    }
+    
+    pub struct HoverInfo { pub label: String, pub x_val: f64, pub y_val: f64, pub position: Point }
+    ```
 - [ ] Implement hover tooltips: on mouse move, hit-test marks, render tooltip box near cursor with data values
+
+    ```rust
+    fn render_tooltip(&self, info: &HoverInfo, backend: &mut dyn DrawBackend) -> Result<()> {
+    let text = format!("{}: ({:.2}, {:.2})", info.label, info.x_val, info.y_val);
+    let w = text.len() as f32 * 7.0 + 16.0;
+    let h = 24.0;
+    let x = info.position.x + 12.0;
+    let y = info.position.y - h - 4.0;
+    backend.fill_rect(Rect::from_xywh(x, y, w, h), Color::from_hex(0x333333).with_alpha(230))?;
+    backend.draw_text(&text, Point::new(x + 8.0, y + 16.0), 12.0, Color::WHITE)?;
+    Ok(())
+    }
+    ```
 - [ ] Implement box zoom: click-drag draws selection rect, on release update scale domains, double-click resets
+
+    ```rust
+    fn handle_box_zoom(&mut self, start: Point, end: Point) {
+    let x_min = self.coord.inverse_x(start.x.min(end.x) as f64);
+    let x_max = self.coord.inverse_x(start.x.max(end.x) as f64);
+    let y_min = self.coord.inverse_y(start.y.max(end.y) as f64); // y inverted
+    let y_max = self.coord.inverse_y(start.y.min(end.y) as f64);
+    self.figure.x_domain(x_min, x_max).y_domain(y_min, y_max);
+    }
+    fn handle_double_click(&mut self) { self.figure.reset_domains(); }
+    ```
 - [ ] Implement wheel zoom: scroll scales both axes around cursor, shift = x only, ctrl = y only
+
+    ```rust
+    fn handle_zoom(&mut self, delta: MouseScrollDelta) {
+    let factor = match delta {
+        MouseScrollDelta::LineDelta(_, y) => 1.0 - y as f64 * 0.1,
+        MouseScrollDelta::PixelDelta(p) => 1.0 - p.y * 0.001,
+    };
+    let cx = self.coord.inverse_x(self.cursor.x as f64);
+    let cy = self.coord.inverse_y(self.cursor.y as f64);
+    self.figure.zoom_around(cx, cy, factor, factor);
+    }
+    ```
 - [ ] Implement pan: middle-click-drag or shift-click-drag translates both axes
+
+    ```rust
+    fn handle_pan(&mut self, dx: f64, dy: f64) {
+    let data_dx = self.coord.inverse_dx(dx);
+    let data_dy = self.coord.inverse_dy(dy);
+    self.figure.pan(-data_dx, -data_dy); // negative because dragging moves viewport
+    }
+    ```
 - [ ] Implement legend toggle: click legend entry to hide/show corresponding mark, dim hidden entries
+
+    ```rust
+    fn handle_legend_click(&mut self, click_pos: Point) {
+    if let Some(idx) = self.legend_hit_test(click_pos) {
+        self.figure.marks[idx].visible = !self.figure.marks[idx].visible;
+    }
+    }
+    ```
 - [ ] Implement `Figure::push_data(series_id, new_points)` for streaming data
+
+    ```rust
+    impl Figure {
+    pub fn push_data(&mut self, series_id: usize, new_x: &[f64], new_y: &[f64]) {
+        if let Some(mark) = self.marks.get_mut(series_id) {
+            mark.extend_data(new_x, new_y);
+            if let Some(window) = self.rolling_window {
+                mark.trim_to_last(window);
+            }
+        }
+    }
+    }
+    ```
 - [ ] Implement rolling window: ring buffer for O(1) append and trim, re-render on each push
+
+    ```rust
+    pub struct RingBuffer<T> {
+    data: Vec<T>,
+    start: usize,
+    len: usize,
+    }
+    impl<T: Clone> RingBuffer<T> {
+    pub fn push(&mut self, item: T) {
+        let idx = (self.start + self.len) % self.data.len();
+        self.data[idx] = item;
+        if self.len < self.data.len() { self.len += 1; }
+        else { self.start = (self.start + 1) % self.data.len(); }
+    }
+    pub fn as_slice(&self) -> (&[T], &[T]) {
+        let end = self.start + self.len;
+        if end <= self.data.len() { (&self.data[self.start..end], &[]) }
+        else { (&self.data[self.start..], &self.data[..end % self.data.len()]) }
+    }
+    }
+    ```
 - [ ] Write snapshot test: static render through WgpuBackend matches SkiaBackend output
+
+    ```rust
+    #[test]
+    fn gpu_matches_cpu() {
+    let fig = Figure::new(400, 300).add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,0.5]));
+    let cpu_bytes = fig.render_png_with(SkiaBackend::new(400, 300).unwrap()).unwrap();
+    let gpu_bytes = pollster::block_on(async {
+        fig.render_png_with(WgpuBackend::new(400, 300).await.unwrap()).unwrap()
+    });
+    assert_eq!(cpu_bytes.len(), gpu_bytes.len(), "PNG sizes differ");
+    }
+    ```
 - [ ] Write integration test: window opens, renders chart, closes without panic
+
+    ```rust
+    #[test]
+    #[ignore] // requires display server
+    fn window_opens_and_closes() {
+    let fig = Figure::new(400, 300).add(LineMark::new(vec![0.,1.], vec![0.,1.]));
+    // Spawn window in a thread, close after 100ms
+    std::thread::spawn(|| { std::thread::sleep(std::time::Duration::from_millis(100)); std::process::exit(0); });
+    fig.show().unwrap();
+    }
+    ```
 
 ### 0.7.0 — 3D visualization
 
@@ -2885,7 +5210,7 @@ Exit criteria: 3D surface, scatter, wireframe, and line charts render with camer
         near: f64,
         far: f64,
     }
-
+    
     impl Camera3D {
         pub fn view_projection(&self, aspect: f64) -> nalgebra::Matrix4<f64> {
             let view = nalgebra::Isometry3::look_at_rh(&self.position, &self.target, &self.up);
@@ -2896,21 +5221,153 @@ Exit criteria: 3D surface, scatter, wireframe, and line charts render with camer
     ```
 
 - [ ] Implement `Surface3DMark`: accept 2D grid of z-values
+
+    ```rust
+    #[derive(Debug, Clone)]
+    pub struct Surface3DMark {
+    pub z_grid: Vec<Vec<f64>>,  // row-major
+    pub x_range: (f64, f64),
+    pub y_range: (f64, f64),
+    pub colormap: ColormapRef,
+    }
+    ```
 - [ ] Tessellate grid into triangles
+
+    ```rust
+    fn tessellate_grid(z: &[Vec<f64>], rows: usize, cols: usize) -> Vec<Triangle3D> {
+    let mut tris = Vec::new();
+    for r in 0..rows-1 {
+        for c in 0..cols-1 {
+            let p00 = point3(c, r, z[r][c]);
+            let p10 = point3(c+1, r, z[r][c+1]);
+            let p01 = point3(c, r+1, z[r+1][c]);
+            let p11 = point3(c+1, r+1, z[r+1][c+1]);
+            tris.push(Triangle3D(p00, p10, p11));
+            tris.push(Triangle3D(p00, p11, p01));
+        }
+    }
+    tris
+    }
+    ```
 - [ ] Project each vertex through camera view-projection matrix
+
+    ```rust
+    fn project(p: nalgebra::Point3<f64>, vp: &nalgebra::Matrix4<f64>, w: f64, h: f64) -> Point {
+    let clip = vp * nalgebra::Vector4::new(p.x, p.y, p.z, 1.0);
+    let ndc_x = clip.x / clip.w;
+    let ndc_y = clip.y / clip.w;
+    Point::new(((ndc_x + 1.0) * 0.5 * w) as f32, ((1.0 - ndc_y) * 0.5 * h) as f32)
+    }
+    ```
 - [ ] Sort triangles by depth (painter's algorithm) for CPU backend
+
+    ```rust
+    fn sort_by_depth(tris: &mut [Triangle3D], camera_pos: &nalgebra::Point3<f64>) {
+    tris.sort_by(|a, b| {
+        let da = (a.centroid() - camera_pos).norm();
+        let db = (b.centroid() - camera_pos).norm();
+        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal) // far first
+    });
+    }
+    ```
 - [ ] Color each face by z-value using prismatica colormap
 
+    ```rust
+    fn face_color(z_avg: f64, z_min: f64, z_max: f64, cmap: &dyn Colormap) -> Color {
+    let t = ((z_avg - z_min) / (z_max - z_min)).clamp(0.0, 1.0) as f32;
+    cmap.eval(t).into()
+    }
+    ```
+
 - [ ] Implement `Scatter3DMark`: project 3D points to 2D screen
+
+    ```rust
+    impl Mark for Scatter3DMark {
+    fn render(&self, coord: &dyn CoordSystem, backend: &mut dyn DrawBackend) -> Result<()> {
+        let (w, h) = backend.dimensions();
+        let vp = self.camera.view_projection(w as f64 / h as f64);
+        let mut points: Vec<(Point, f64, Color)> = self.data.iter().map(|p| {
+            let projected = project(p.pos, &vp, w as f64, h as f64);
+            let depth = (p.pos - self.camera.position).norm();
+            (projected, depth, p.color)
+        }).collect();
+        points.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap()); // back to front
+        for (pt, depth, color) in &points {
+            let r = (self.base_radius / depth.sqrt() * 10.0) as f32;
+            draw_circle(backend, pt.x, pt.y, r, *color)?;
+        }
+        Ok(())
+    }
+    }
+    ```
 - [ ] Attenuate circle size by depth
+
+    ```rust
+    let radius = (self.base_radius / depth.sqrt() * 10.0).max(1.0) as f32;
+    ```
 - [ ] Sort back-to-front for correct overlap
+
+    ```rust
+    points.sort_by(|a, b| b.depth.partial_cmp(&a.depth).unwrap_or(std::cmp::Ordering::Equal));
+    ```
 
 - [ ] `Wireframe3DMark`: same as Surface3D but renders edges only (no filled faces).
 
+    ```rust
+    impl Mark for Wireframe3DMark {
+    fn render(&self, coord: &dyn CoordSystem, backend: &mut dyn DrawBackend) -> Result<()> {
+        // Same tessellation as Surface3D, but draw only edges (no fill)
+        for tri in &self.triangles {
+            let p0 = project(tri.0, &vp, w, h);
+            let p1 = project(tri.1, &vp, w, h);
+            let p2 = project(tri.2, &vp, w, h);
+            draw_line(backend, p0, p1, self.color, 1.0)?;
+            draw_line(backend, p1, p2, self.color, 1.0)?;
+            draw_line(backend, p2, p0, self.color, 1.0)?;
+        }
+        Ok(())
+    }
+    }
+    ```
+
 - [ ] Implement `Line3DMark`: project 3D polyline to 2D
 
+    ```rust
+    impl Mark for Line3DMark {
+    fn render(&self, coord: &dyn CoordSystem, backend: &mut dyn DrawBackend) -> Result<()> {
+        let (w, h) = backend.dimensions();
+        let vp = self.camera.view_projection(w as f64 / h as f64);
+        let projected: Vec<Point> = self.points.iter().map(|p| project(*p, &vp, w as f64, h as f64)).collect();
+        for pair in projected.windows(2) {
+            draw_line(backend, pair[0], pair[1], self.color, self.width)?;
+        }
+        Ok(())
+    }
+    }
+    ```
+
 - [ ] Implement camera orbit: click-drag rotates via spherical coordinates
+
+    ```rust
+    fn orbit(&mut self, dx: f64, dy: f64) {
+    self.theta += dx * 0.01;  // azimuth
+    self.phi = (self.phi + dy * 0.01).clamp(0.1, std::f64::consts::PI - 0.1); // elevation
+    let r = (self.camera.position - self.camera.target).norm();
+    self.camera.position = self.camera.target + nalgebra::Vector3::new(
+        r * self.phi.sin() * self.theta.cos(),
+        r * self.phi.cos(),
+        r * self.phi.sin() * self.theta.sin(),
+    );
+    }
+    ```
 - [ ] Implement camera zoom: scroll moves camera toward/away from target
+
+    ```rust
+    fn zoom_3d(&mut self, factor: f64) {
+    let dir = self.camera.position - self.camera.target;
+    self.camera.position = self.camera.target + dir * factor;
+    }
+    ```
 
 ### 0.8.0 — Terminal backend
 
@@ -2930,59 +5387,408 @@ Exit criteria: `figure.show_terminal()` renders a chart inline in a terminal emu
     Detection: query the terminal with escape sequences and parse the response. Kitty sends `\x1b_Gi=31;OK\x1b\\` in response to a query. Sixel support is indicated by Device Attributes response containing `4`. iTerm2 responds to `\x1b[>0q` with version info.
 
 - [ ] Implement Kitty backend: encode PNG bytes with Kitty graphics protocol
+
+    ```rust
+    pub fn kitty_display(png_bytes: &[u8], width: u32, height: u32) {
+    use base64::Engine;
+    let b64 = base64::engine::general_purpose::STANDARD.encode(png_bytes);
+    // Send in chunks of 4096
+    for (i, chunk) in b64.as_bytes().chunks(4096).enumerate() {
+        let m = if i == 0 { "1" } else { "0" };
+        let cont = if chunk.len() == 4096 { ",m=1" } else { "" };
+        print!("\x1b_Gf=100,a=T,t=d,s={width},v={height}{cont};{}\x1b\\", std::str::from_utf8(chunk).unwrap());
+    }
+    println!();
+    }
+    ```
 - [ ] Send `\x1b_Gf=100,a=T,t=d,s=W,v=H;BASE64DATA\x1b\\` escape sequence
+
+    ```rust
+    // Covered in kitty_display() above — the escape sequence format:
+    // \x1b_G = start Kitty graphics command
+    // f=100 = PNG format
+    // a=T = transmit and display
+    // t=d = direct data transmission
+    // s=W,v=H = image dimensions
+    // ;BASE64 = the payload
+    // \x1b\\ = end command
+    ```
 
 - [ ] Implement Sixel backend: convert Pixmap to Sixel using `icy_sixel`
 
+    ```rust
+    pub fn sixel_display(pixmap: &Pixmap) {
+    let rgba = pixmap.data(); // premultiplied RGBA
+    let (w, h) = (pixmap.width(), pixmap.height());
+    let output = icy_sixel::sixel_string(
+        rgba, w as i32, h as i32, icy_sixel::PixelFormat::RGBA8888,
+        icy_sixel::DiffusionMethod::Stucki,
+    ).unwrap();
+    print!("{output}");
+    }
+    ```
+
 - [ ] iTerm2 backend: encode the PNG bytes as base64, send `\x1b]1337;File=inline=1;size=N:BASE64DATA\x07`.
 
+    ```rust
+    pub fn iterm2_display(png_bytes: &[u8]) {
+    use base64::Engine;
+    let b64 = base64::engine::general_purpose::STANDARD.encode(png_bytes);
+    print!("\x1b]1337;File=inline=1;size={};preserveAspectRatio=1:{b64}\x07", png_bytes.len());
+    println!();
+    }
+    ```
+
 - [ ] Implement Braille backend: map pixel brightness to Braille dot patterns (U+2800-U+28FF)
+
+    ```rust
+    pub fn braille_render(pixmap: &Pixmap) -> String {
+    let (w, h) = (pixmap.width() as usize, pixmap.height() as usize);
+    let mut output = String::new();
+    for row in (0..h).step_by(4) {
+        for col in (0..w).step_by(2) {
+            let mut dots = 0u8;
+            // Braille pattern: 2 columns x 4 rows = 8 dots
+            for dy in 0..4 { for dx in 0..2 {
+                let y = row + dy; let x = col + dx;
+                if y < h && x < w {
+                    let px = pixmap.pixel(x as u32, y as u32).unwrap();
+                    let bright = (px.red() as u16 + px.green() as u16 + px.blue() as u16) / 3;
+                    if bright < 128 { dots |= 1 << (dy + dx * 4); } // dot mapping
+                }
+            }}
+            output.push(char::from_u32(0x2800 + dots as u32).unwrap());
+        }
+        output.push('\n');
+    }
+    output
+    }
+    ```
 - [ ] Each character represents 2x4 pixel grid for sub-character resolution
 
+    ```rust
+    // Braille dot mapping: each char U+2800-U+28FF encodes 8 dots in a 2x4 grid:
+    // Col 0: bits 0,1,2,6  (top to bottom)
+    // Col 1: bits 3,4,5,7  (top to bottom)
+    // dot_index = dy + dx * 4 for dy in 0..4, dx in 0..2 (except row 3 uses bits 6,7)
+    ```
+
 - [ ] Implement half-block backend: use U+2580/U+2584 with ANSI 24-bit color
+
+    ```rust
+    pub fn halfblock_render(pixmap: &Pixmap) -> String {
+    let (w, h) = (pixmap.width() as usize, pixmap.height() as usize);
+    let mut output = String::new();
+    for row in (0..h).step_by(2) {
+        for col in 0..w {
+            let top = pixel_color(pixmap, col, row);
+            let bot = if row + 1 < h { pixel_color(pixmap, col, row + 1) } else { top };
+            // Upper half block with top color as fg, bottom color as bg
+            output.push_str(&format!("\x1b[38;2;{};{};{}m\x1b[48;2;{};{};{}m\u{2580}",
+                top.0, top.1, top.2, bot.0, bot.1, bot.2));
+        }
+        output.push_str("\x1b[0m\n");
+    }
+    output
+    }
+    ```
 - [ ] Each cell represents two vertically stacked pixels
 
+    ```rust
+    // U+2580 (upper half block) fills the top half of the character cell.
+    // Set foreground = top pixel color, background = bottom pixel color.
+    // Effective resolution: width * (height * 2) pixels.
+    ```
+
 - [ ] Implement `ratatui::Widget` for `StarsightWidget`
+
+    ```rust
+    pub struct StarsightWidget { pub figure: Figure, pub protocol: TerminalProtocol }
+    
+    impl ratatui::widgets::Widget for StarsightWidget {
+    fn render(self, area: ratatui::layout::Rect, buf: &mut ratatui::buffer::Buffer) {
+        let w = area.width as u32 * 2; // half-block doubles vertical resolution
+        let h = area.height as u32 * 4; // braille quadruples it
+        let mut backend = SkiaBackend::new(w, h).unwrap();
+        self.figure.render_to(&mut backend).unwrap();
+        match self.protocol {
+            TerminalProtocol::Braille => {
+                let text = braille_render(backend.pixmap());
+                // Write to ratatui buffer...
+            }
+            _ => { /* Kitty/Sixel use escape sequences outside ratatui */ }
+        }
+    }
+    }
+    ```
 - [ ] Render Figure into ratatui buffer area using detected protocol
+
+    ```rust
+    // Covered in StarsightWidget::render() above.
+    // The protocol cascade: Kitty > Sixel > iTerm2 > HalfBlock > Braille
+    ```
 - [ ] Write integration test: StarsightWidget renders in ratatui app
+
+    ```rust
+    #[test]
+    fn starsight_widget_renders() {
+    let mut terminal = ratatui::Terminal::new(ratatui::backend::TestBackend::new(80, 24)).unwrap();
+    let fig = Figure::new(160, 96).add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,0.5]));
+    terminal.draw(|frame| {
+        frame.render_widget(StarsightWidget { figure: fig, protocol: TerminalProtocol::Braille }, frame.area());
+    }).unwrap();
+    }
+    ```
 
 ### 0.9.0 — All chart types
 
 Exit criteria: every chart type from the gallery reference (70 types) has an implementation and a snapshot test.
 
+Each mark follows this template:
+
+```rust
+// Example: ErrorBarMark
+#[derive(Debug, Clone)]
+pub struct ErrorBarMark {
+    pub x: Vec<f64>,
+    pub y: Vec<f64>,
+    pub y_err: Vec<f64>,       // mark-specific fields
+    pub color: Color,
+}
+
+impl ErrorBarMark {
+    pub fn new(x: Vec<f64>, y: Vec<f64>, y_err: Vec<f64>) -> Self {
+        Self { x, y, y_err, color: Color::BLACK }
+    }
+    pub fn color(mut self, c: Color) -> Self { self.color = c; self }
+}
+
+impl Mark for ErrorBarMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        for i in 0..self.x.len() {
+            let px = coord.map_x(self.x[i]) as f32;
+            let py = coord.map_y(self.y[i]) as f32;
+            let err_px = (coord.map_y(self.y[i] - self.y_err[i]) - coord.map_y(self.y[i] + self.y_err[i])).abs() as f32 / 2.0;
+            draw_vline(backend, px, py - err_px, py + err_px, self.color, 1.5)?;
+            draw_hline(backend, py - err_px, px - 3.0, px + 3.0, self.color, 1.5)?;
+            draw_hline(backend, py + err_px, px - 3.0, px + 3.0, self.color, 1.5)?;
+        }
+        Ok(())
+    }
+}
+
+#[test]
+fn snapshot_error_bar() {
+    let fig = Figure::new(600, 400)
+        .add(PointMark::new(vec![1.,2.,3.], vec![10.,20.,15.]))
+        .add(ErrorBarMark::new(vec![1.,2.,3.], vec![10.,20.,15.], vec![2.,3.,1.5]));
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+}
+```
+
 - [ ] ErrorBarMark: vertical and horizontal error bars (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct ErrorBarMark { pub x: Vec<f64>, pub y: Vec<f64>, pub y_err: Vec<f64>, pub color: Color }
+    // Render: vertical lines from y-err to y+err with horizontal caps
+    ```
 - [ ] StepMark: staircase interpolation between points (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct StepMark { pub x: Vec<f64>, pub y: Vec<f64>, pub color: Color, pub where_: StepWhere }
+    pub enum StepWhere { Pre, Post, Mid } // step before, after, or at midpoint
+    // Render: horizontal line to next x, then vertical line to next y
+    ```
 - [ ] RidgelineMark: overlapping KDE distributions per category (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct RidgelineMark { pub groups: Vec<(String, Vec<f64>)>, pub overlap: f64, pub color_cycle: Vec<Color> }
+    // Render: stacked KDE curves with vertical offset per group
+    ```
 - [ ] StripMark: categorical scatter with random jitter (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct StripMark { pub x: Vec<String>, pub y: Vec<f64>, pub jitter: f32, pub color: Color }
+    // Render: for each point, add random horizontal offset within [-jitter, jitter]
+    ```
 - [ ] SwarmMark: beeswarm layout for categorical scatter (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct SwarmMark { pub x: Vec<String>, pub y: Vec<f64>, pub radius: f32, pub color: Color }
+    // Render: position dots to avoid overlap using simple collision detection
+    ```
 - [ ] RugMark: tick marks along an axis edge (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct RugMark { pub values: Vec<f64>, pub axis: RugAxis, pub length: f32, pub color: Color }
+    pub enum RugAxis { X, Y }
+    // Render: short perpendicular lines at each value position along the axis
+    ```
 - [ ] LollipopMark: stem + dot (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct LollipopMark { pub x: Vec<String>, pub y: Vec<f64>, pub color: Color, pub radius: f32 }
+    // Render: vertical line from baseline to y, circle at (x, y)
+    ```
 - [ ] DumbbellMark: two dots connected by a line (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct DumbbellMark { pub x: Vec<String>, pub y1: Vec<f64>, pub y2: Vec<f64>, pub color: Color }
+    // Render: circle at y1, circle at y2, line connecting them
+    ```
 - [ ] WaterfallMark: cumulative bar chart with color for up/down (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct WaterfallMark { pub labels: Vec<String>, pub values: Vec<f64>, pub up_color: Color, pub down_color: Color }
+    // Render: bars where each starts at the previous cumulative sum, green for + red for -
+    ```
 - [ ] PolarMark: data on polar coordinates (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct PolarMark { pub r: Vec<f64>, pub theta: Vec<f64>, pub color: Color }
+    // Render: convert (r, theta) to Cartesian, draw on circular grid
+    ```
 - [ ] RadarMark: multi-variable radar/spider chart (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct RadarMark { pub axes: Vec<String>, pub values: Vec<Vec<f64>>, pub colors: Vec<Color> }
+    // Render: n axes radiating from center, polygon connecting values on each axis
+    ```
 - [ ] TreemapMark: nested rectangles via squarified algorithm (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct TreemapMark { pub labels: Vec<String>, pub values: Vec<f64>, pub colors: Vec<Color> }
+    // Render: squarified treemap layout — subdivide rectangle proportional to values
+    ```
 - [ ] SunburstMark: nested arcs for hierarchical data (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct SunburstMark { pub root: TreeNode, pub colormap: ColormapRef }
+    pub struct TreeNode { pub label: String, pub value: f64, pub children: Vec<TreeNode> }
+    // Render: concentric rings of arcs, each ring = one tree depth level
+    ```
 - [ ] SankeyMark: flow diagram with node-link layout (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct SankeyMark { pub nodes: Vec<String>, pub links: Vec<(usize, usize, f64)>, pub colors: Vec<Color> }
+    // Render: nodes as vertical bars in columns, curved bands connecting them
+    ```
 - [ ] ChordMark: circular flow between groups (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct ChordMark { pub matrix: Vec<Vec<f64>>, pub labels: Vec<String>, pub colors: Vec<Color> }
+    // Render: circular layout with arcs per group, ribbons connecting groups proportional to flow
+    ```
 - [ ] NetworkMark: force-directed graph layout (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct NetworkMark { pub nodes: Vec<String>, pub edges: Vec<(usize, usize)>, pub iterations: usize }
+    // Render: force-directed placement (repulsion between nodes, attraction along edges)
+    ```
 - [ ] ParallelCoordsMark: multi-axis parallel lines (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct ParallelCoordsMark { pub axes: Vec<String>, pub data: Vec<Vec<f64>>, pub colors: Vec<Color> }
+    // Render: n vertical axes side by side, one polyline per data row crossing all axes
+    ```
 - [ ] StreamgraphMark: stacked area with baseline centering (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct StreamgraphMark { pub x: Vec<f64>, pub layers: Vec<Vec<f64>>, pub colors: Vec<Color> }
+    // Render: stacked areas centered around y=0 (wiggle baseline algorithm)
+    ```
 - [ ] SlopeMark: paired line segments between two positions (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct SlopeMark { pub labels: Vec<String>, pub left: Vec<f64>, pub right: Vec<f64>, pub colors: Vec<Color> }
+    // Render: two vertical axes (left, right), line segment from left value to right value per item
+    ```
 - [ ] FunnelMark: horizontally centered decreasing bars (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct FunnelMark { pub labels: Vec<String>, pub values: Vec<f64>, pub colors: Vec<Color> }
+    // Render: stacked horizontal bars centered on x-axis, widths proportional to values
+    ```
 - [ ] GaugeMark: arc-based indicator (struct + Mark impl + snapshot test)
+
+    ```rust
+    pub struct GaugeMark { pub value: f64, pub min: f64, pub max: f64, pub color: Color }
+    // Render: semicircular arc from min to max, filled arc from min to value, needle at value
+    ```
 - [ ] Run `cargo xtask gallery` to generate all reference images
+
+    ```bash
+    cargo xtask gallery
+    # Expected: gallery/*.png files generated for every example
+    ls gallery/*.png | wc -l
+    # Should match the number of examples
+    ```
 - [ ] Compare gallery output against GALLERY_REFERENCE.md entries
+
+    ```bash
+    cargo xtask gallery --compare
+    # Compares gallery/*.png against gallery/reference/*.png
+    # Reports visual differences
+    ```
 
 ### 0.10.0 — Export and WASM
 
 Exit criteria: charts export to PDF and render in a web browser via WASM.
 
 - [ ] Create `PdfBackend` struct wrapping krilla's Document and Page
+
+    ```rust
+    pub struct PdfBackend {
+    document: krilla::Document,
+    page: krilla::Page,
+    width: u32,
+    height: u32,
+    }
+    ```
 - [ ] Implement `DrawBackend::fill_rect()` for `PdfBackend`
+
+    ```rust
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+    self.page.push();
+    self.page.set_fill_color(krilla::color::rgb(color.r, color.g, color.b));
+    self.page.fill_rect(rect.left, rect.top, rect.width(), rect.height());
+    self.page.pop();
+    Ok(())
+    }
+    ```
 - [ ] Implement `DrawBackend::draw_path()` for `PdfBackend`
+
+    ```rust
+    fn draw_path(&mut self, path: &Path, style: &PathStyle) -> Result<()> {
+    self.page.push();
+    self.page.set_stroke_color(krilla::color::rgb(style.stroke_color.r, style.stroke_color.g, style.stroke_color.b));
+    self.page.set_line_width(style.stroke_width);
+    // Convert PathCommands to krilla path...
+    self.page.stroke();
+    self.page.pop();
+    Ok(())
+    }
+    ```
 - [ ] Implement `DrawBackend::draw_text()` for `PdfBackend`
+
+    ```rust
+    fn draw_text(&mut self, text: &str, pos: Point, font_size: f32, color: Color) -> Result<()> {
+    self.page.push();
+    self.page.set_fill_color(krilla::color::rgb(color.r, color.g, color.b));
+    self.page.set_font(&self.font, font_size);
+    self.page.fill_text(pos.x, pos.y, text);
+    self.page.pop();
+    Ok(())
+    }
+    ```
 - [ ] Embed fonts as subsets in PDF output
+
+    ```rust
+    // krilla handles font subsetting automatically when you provide a font:
+    let font_data = include_bytes!("fonts/Inter.ttf");
+    let font = krilla::Font::new(font_data.to_vec(), 0).unwrap();
+    // Only glyphs actually used in the document are embedded.
+    ```
 - [ ] Write snapshot test: PDF output opens correctly
 
     ```rust
@@ -2991,7 +5797,7 @@ Exit criteria: charts export to PDF and render in a web browser via WASM.
         page: krilla::Page,
         font: krilla::Font,
     }
-
+    
     impl DrawBackend for PdfBackend {
         fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
             self.page.fill_rect(rect.to_krilla(), color.to_krilla());
@@ -3002,29 +5808,239 @@ Exit criteria: charts export to PDF and render in a web browser via WASM.
     ```
 
 - [ ] Generate self-contained HTML file with embedded SVG chart
+
+    ```rust
+    pub fn export_html(figure: &Figure, path: &std::path::Path) -> Result<()> {
+    let mut svg_backend = SvgBackend::new(800, 600);
+    figure.render_to(&mut svg_backend)?;
+    let svg = svg_backend.svg_string();
+    let html = format!(r#"<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{{margin:0;display:flex;justify-content:center;align-items:center;height:100vh}}</style></head><body>{svg}<script>{JS_RUNTIME}</script></body></html>"#);
+    std::fs::write(path, html)?;
+    Ok(())
+    }
+    ```
 - [ ] Write JS runtime (< 5KB) for pan, zoom, and tooltip interactions
+
+    ```javascript
+    // Inline JS runtime (~3KB minified):
+    const svg = document.querySelector("svg");
+    let zoom = 1, panX = 0, panY = 0;
+    svg.addEventListener("wheel", e => {
+    e.preventDefault();
+    zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+    svg.style.transform = `scale(${zoom}) translate(${panX}px, ${panY}px)`;
+    });
+    let dragging = false, lastX, lastY;
+    svg.addEventListener("mousedown", e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+    svg.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    panX += (e.clientX - lastX) / zoom; panY += (e.clientY - lastY) / zoom;
+    lastX = e.clientX; lastY = e.clientY;
+    svg.style.transform = `scale(${zoom}) translate(${panX}px, ${panY}px)`;
+    });
+    svg.addEventListener("mouseup", () => dragging = false);
+    ```
 - [ ] Ensure HTML file has zero external dependencies
 
+    ```rust
+    // The HTML export is fully self-contained:
+    // - SVG is inline (not a linked file)
+    // - JS is inline (not a CDN script)
+    // - CSS is inline (not a stylesheet link)
+    // - No fonts loaded from external URLs
+    assert!(!html.contains("src=\"http"), "HTML must not reference external resources");
+    ```
+
 - [ ] Implement GIF frame rendering: render each frame as Pixmap
+
+    ```rust
+    pub fn export_gif<F>(path: &std::path::Path, frames: usize, fps: u16, mut render_frame: F) -> Result<()>
+    where F: FnMut(usize) -> Figure {
+    let mut encoder = gif::Encoder::new(std::fs::File::create(path)?, 800, 600, &[]).unwrap();
+    encoder.set_repeat(gif::Repeat::Infinite).unwrap();
+    for i in 0..frames {
+        let fig = render_frame(i);
+        let mut backend = SkiaBackend::new(800, 600)?;
+        fig.render_to(&mut backend)?;
+        let rgba = backend.pixmap().data();
+        let quantized = median_cut_quantize(rgba, 256);
+        let mut frame = gif::Frame::from_rgba(800, 600, &mut quantized.pixels);
+        frame.delay = 100 / fps;
+        encoder.write_frame(&frame).unwrap();
+    }
+    Ok(())
+    }
+    ```
 - [ ] Implement color quantization: median-cut algorithm to 256 colors
+
+    ```rust
+    fn median_cut_quantize(rgba: &[u8], max_colors: usize) -> QuantizedImage {
+    // 1. Build a list of all unique colors
+    // 2. Find the channel (R/G/B) with the widest range
+    // 3. Sort by that channel and split at the median
+    // 4. Recurse until max_colors buckets
+    // 5. Map each pixel to the nearest bucket center
+    todo!("median cut quantization")
+    }
+    ```
 - [ ] Encode frames with `gif` crate
+
+    ```rust
+    use gif::{Encoder, Frame, Repeat};
+    let mut encoder = Encoder::new(file, width, height, &global_palette)?;
+    encoder.set_repeat(Repeat::Infinite)?;
+    for frame_data in &frames {
+    let frame = Frame::from_palette_pixels(width, height, frame_data, &palette, None);
+    encoder.write_frame(&frame)?;
+    }
+    ```
 - [ ] Accept frame iterator or per-frame closure API
 
+    ```rust
+    // Closure API (shown above):
+    export_gif("anim.gif", 60, 30, |frame_idx| {
+    let t = frame_idx as f64 / 60.0;
+    Figure::new(800, 600).add(LineMark::new(x.clone(), y.iter().map(|v| v + t.sin()).collect()))
+    });
+    
+    // Iterator API:
+    export_gif_from_iter("anim.gif", 30, figures.into_iter());
+    ```
+
 - [ ] Compile starsight to `wasm32-unknown-unknown`
+
+    ```bash
+    cargo build --target wasm32-unknown-unknown -p starsight --no-default-features --features web
+    ```
 - [ ] Verify wgpu backend works via WebGPU in browsers
+
+    ```rust
+    // In wasm entry point:
+    #[wasm_bindgen(start)]
+    pub async fn main() {
+    let canvas = web_sys::window().unwrap().document().unwrap()
+        .get_element_by_id("canvas").unwrap().dyn_into::<web_sys::HtmlCanvasElement>().unwrap();
+    let backend = WgpuBackend::new_from_canvas(&canvas).await.unwrap();
+    let fig = Figure::new(800, 600).add(LineMark::new(vec![0.,1.,2.], vec![0.,1.,0.5]));
+    fig.render_to(&mut backend).unwrap();
+    }
+    ```
 - [ ] Implement SVG fallback for browsers without WebGPU (via web-sys)
+
+    ```rust
+    fn render_to_svg_dom(figure: &Figure, container: &web_sys::Element) {
+    let mut svg_backend = SvgBackend::new(800, 600);
+    figure.render_to(&mut svg_backend).unwrap();
+    container.set_inner_html(&svg_backend.svg_string());
+    }
+    ```
 - [ ] Bundle font data for cosmic-text (no system font access in WASM)
+
+    ```rust
+    #[cfg(target_arch = "wasm32")]
+    static BUNDLED_FONT: &[u8] = include_bytes!("../fonts/Inter-Regular.ttf");
+    
+    #[cfg(target_arch = "wasm32")]
+    fn init_font_system() -> cosmic_text::FontSystem {
+    let mut fs = cosmic_text::FontSystem::new_with_locale_and_db("en", cosmic_text::fontdb::Database::new());
+    fs.db_mut().load_font_data(BUNDLED_FONT.to_vec());
+    fs
+    }
+    ```
 - [ ] Write test: chart renders correctly in WASM target
+
+    ```rust
+    #[cfg(target_arch = "wasm32")]
+    #[wasm_bindgen_test]
+    async fn wasm_renders() {
+    let fig = Figure::new(400, 300).add(LineMark::new(vec![0.,1.], vec![0.,1.]));
+    let svg = fig.render_svg_string().unwrap();
+    assert!(svg.contains("<svg"));
+    assert!(svg.contains("line"));
+    }
+    ```
 
 ### 0.11.0 — Polish
 
 Exit criteria: the API is clean, all major input formats are supported, and the recipe system works.
 
 - [ ] Design recipe proc macro: `#[starsight::recipe]` on a function
+
+    ```rust
+    // The proc macro reads the function signature and generates:
+    // 1. A struct with the same name + "Recipe" suffix
+    // 2. A builder with setter methods for each parameter
+    // 3. A Mark trait impl that calls the original function
+    
+    // Input:
+    #[starsight::recipe]
+    fn sparkline(data: &[f64], width: f32, color: Color) -> Figure { ... }
+    
+    // Generated:
+    pub struct SparklineRecipe { data: Vec<f64>, width: f32, color: Color }
+    impl SparklineRecipe {
+    pub fn new(data: &[f64]) -> Self { ... }
+    pub fn width(mut self, w: f32) -> Self { self.width = w; self }
+    pub fn color(mut self, c: Color) -> Self { self.color = c; self }
+    }
+    impl Mark for SparklineRecipe { ... }
+    ```
 - [ ] Generate struct from function parameters
+
+    ```rust
+    // In the proc macro (starsight-macros/src/lib.rs):
+    use syn::{parse_macro_input, ItemFn, FnArg};
+    use quote::quote;
+    
+    #[proc_macro_attribute]
+    pub fn recipe(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let func = parse_macro_input!(item as ItemFn);
+    let name = &func.sig.ident;
+    let struct_name = format_ident!("{}Recipe", name.to_string().to_pascal_case());
+    let fields: Vec<_> = func.sig.inputs.iter().filter_map(|arg| {
+        if let FnArg::Typed(pat_type) = arg { Some((&pat_type.pat, &pat_type.ty)) } else { None }
+    }).collect();
+    // Generate struct, builder, and Mark impl...
+    quote! { /* ... */ }.into()
+    }
+    ```
 - [ ] Generate builder-style setters for each parameter
+
+    ```rust
+    // Generated for each non-first parameter:
+    impl SparklineRecipe {
+    pub fn width(mut self, val: f32) -> Self { self.width = val; self }
+    pub fn color(mut self, val: impl Into<Color>) -> Self { self.color = val.into(); self }
+    }
+    ```
 - [ ] Generate `Mark` trait implementation
+
+    ```rust
+    impl Mark for SparklineRecipe {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        // Call the original function with the stored parameters
+        let fig = sparkline(&self.data, self.width, self.color);
+        fig.render_to_coord(coord, backend)
+    }
+    }
+    ```
 - [ ] Write the proc macro in a separate `starsight-macros` crate
+
+    ```toml
+    # starsight-macros/Cargo.toml
+    [package]
+    name = "starsight-macros"
+    version.workspace = true
+    edition.workspace = true
+    
+    [lib]
+    proc-macro = true
+    
+    [dependencies]
+    syn = { version = "2", features = ["full"] }
+    quote = "1"
+    proc-macro2 = "1"
+    ```
 - [ ] Write test: recipe macro compiles and produces a usable mark type
 
     ```rust
@@ -3037,40 +6053,319 @@ Exit criteria: the API is clean, all major input formats are supported, and the 
     ```
 
 - [ ] Implement `From<Array1<f64>>` for DataSource (ndarray integration)
+
+    ```rust
+    #[cfg(feature = "ndarray")]
+    impl From<ndarray::Array1<f64>> for DataSource {
+    fn from(arr: ndarray::Array1<f64>) -> Self {
+        DataSource::Vec(arr.to_vec())
+    }
+    }
+    ```
 - [ ] Implement `From<Array2<f64>>` for MatrixSource (ndarray integration)
 
+    ```rust
+    #[cfg(feature = "ndarray")]
+    impl From<ndarray::Array2<f64>> for MatrixSource {
+    fn from(arr: ndarray::Array2<f64>) -> Self {
+        let rows = arr.nrows();
+        let data: Vec<Vec<f64>> = (0..rows).map(|r| arr.row(r).to_vec()).collect();
+        MatrixSource::NestedVec(data)
+    }
+    }
+    ```
+
 - [ ] Accept `arrow::RecordBatch` as data source
+
+    ```rust
+    #[cfg(feature = "arrow")]
+    impl DataSource {
+    pub fn from_record_batch(batch: &arrow::record_batch::RecordBatch, col: &str) -> Result<Self> {
+        let col_idx = batch.schema().index_of(col)
+            .map_err(|e| StarsightError::Data(format!("Column '{col}': {e}")))?;
+        let array = batch.column(col_idx);
+        // Convert to f64...
+        Ok(DataSource::Vec(values))
+    }
+    }
+    ```
 - [ ] Extract columns by name from RecordBatch
+
+    ```rust
+    fn extract_f64_arrow(batch: &RecordBatch, col: &str) -> Result<Vec<f64>> {
+    let idx = batch.schema().index_of(col)?;
+    let array = batch.column(idx);
+    let float_arr = arrow::compute::cast(array, &arrow::datatypes::DataType::Float64)?;
+    let f64_arr = float_arr.as_any().downcast_ref::<arrow::array::Float64Array>().unwrap();
+    Ok(f64_arr.iter().map(|v| v.unwrap_or(f64::NAN)).collect())
+    }
+    ```
 - [ ] Use zero-copy conversion from Arrow arrays where possible
 
+    ```rust
+    // Arrow Float64Array can be zero-copy sliced:
+    let values: &[f64] = f64_arr.values().as_ref();
+    // Pass as slice reference instead of collecting into Vec
+    ```
+
 - [ ] Walk through every public type against Rust API Guidelines checklist
+
+    ```bash
+    # Checklist items to verify for each public type:
+    # [ ] Debug implemented
+    # [ ] Display implemented where meaningful
+    # [ ] Clone implemented where reasonable
+    # [ ] Default implemented where there is a sensible default
+    # [ ] From/Into for obvious conversions
+    # [ ] #[non_exhaustive] on enums and config structs
+    # [ ] #[must_use] on builder methods
+    cargo doc --workspace --all-features --open
+    # Walk through every type in the docs
+    ```
 - [ ] Fix naming inconsistencies
+
+    ```bash
+    # Check: all types use CamelCase, all functions use snake_case
+    # Check: getter methods have no get_ prefix (width() not get_width())
+    # Check: conversion methods follow as_/to_/into_ conventions
+    # Check: builder methods consume self and return Self
+    grep -rn "pub fn get_" starsight-*/src/
+    grep -rn "pub fn set_" starsight-*/src/
+    ```
 - [ ] Add missing trait implementations (Debug, Clone, Display, Default)
+
+    ```bash
+    # Find public types missing standard derives:
+    cargo doc --workspace 2>&1 | grep "missing"
+    # Add #[derive(Debug, Clone)] to every pub struct/enum
+    # Add Default where there is a sensible zero/empty state
+    ```
 - [ ] Ensure all builders follow the same pattern consistently
+
+    ```rust
+    // All builders should follow this pattern:
+    impl FooBuilder {
+    pub fn new(required: Type) -> Self { /* ... */ }
+    pub fn optional_field(mut self, val: Type) -> Self { self.field = val; self }
+    pub fn build(self) -> Result<Foo> { /* validate and construct */ }
+    }
+    // Verify: no builder uses &mut self (should consume self)
+    // Verify: no builder has a set_ prefix (use field name directly)
+    ```
 
 ### 0.12.0 — Documentation
 
 Exit criteria: every public item has documentation. The gallery is complete.
 
 - [ ] Run `RUSTDOCFLAGS="-D missing_docs" cargo doc --workspace`
+
+    ```bash
+    RUSTDOCFLAGS="-D missing_docs" cargo doc --workspace --all-features
+    # Expected: zero warnings. Every public item has a doc comment.
+    ```
 - [ ] Fix every missing_docs warning
+
+    ```bash
+    # Each warning looks like:
+    # warning: missing documentation for a function
+    #  --> starsight-layer-2/src/scale.rs:42:5
+    # Fix by adding /// doc comment above the item
+    ```
 - [ ] Ensure each doc comment has: one-line summary, parameter descriptions, example, links to related types
 
+    ```rust
+    /// Creates a linear scale mapping data values to pixel coordinates.
+    ///
+    /// # Arguments
+    /// * `domain` - The data range (min, max)
+    /// * `range` - The pixel range (min, max)
+    ///
+    /// # Example
+    /// ```
+    /// let scale = LinearScale::new((0.0, 100.0), (0.0, 800.0));
+    /// assert_eq!(scale.map(50.0), 400.0);
+    /// ```
+    ///
+    /// See also: [`LogScale`], [`SymlogScale`]
+    pub fn new(domain: (f64, f64), range: (f64, f64)) -> Self { ... }
+    ```
+
 - [ ] Write `examples/quickstart.rs` — the simplest possible chart (3 lines)
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    plot!(&[0.0, 1.0, 2.0, 3.0], &[0.0, 1.0, 0.5, 2.0]).save("quickstart.png")
+    }
+    ```
 - [ ] Write `examples/line_chart.rs` — basic line chart with title and labels
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let x: Vec<f64> = (0..100).map(|i| i as f64 * 0.1).collect();
+    let y: Vec<f64> = x.iter().map(|v| v.sin()).collect();
+    Figure::new(800, 600)
+        .add(LineMark::new(x, y).color(Color::BLUE).width(2.0))
+        .title("Sine Wave")
+        .x_label("x").y_label("sin(x)")
+        .save("line_chart.png")
+    }
+    ```
 - [ ] Write `examples/scatter.rs` — scatter plot with colored groups
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let x = vec![1.0, 2.0, 3.0, 1.5, 2.5, 3.5];
+    let y = vec![2.0, 3.0, 1.0, 3.5, 1.5, 2.5];
+    let groups = vec!["A", "A", "A", "B", "B", "B"];
+    Figure::new(600, 400)
+        .add(PointMark::new(x, y).color_by(&groups))
+        .title("Grouped Scatter").save("scatter.png")
+    }
+    ```
 - [ ] Write `examples/bar_chart.rs` — grouped bar chart
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    Figure::new(600, 400)
+        .add(BarMark::new(vec!["Q1".into(),"Q2".into(),"Q3".into(),"Q4".into()],
+                         vec![120.0, 150.0, 90.0, 200.0]).color(Color::from_hex(0x4C72B0)))
+        .title("Quarterly Revenue").y_label("USD (thousands)").save("bar_chart.png")
+    }
+    ```
 - [ ] Write `examples/histogram.rs` — histogram with KDE overlay
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let data: Vec<f64> = (0..1000).map(|_| rand_normal() * 15.0 + 50.0).collect();
+    Figure::new(800, 500)
+        .add(HistogramMark::new(data).bins(BinMethod::Fd).kde(true))
+        .title("Distribution").x_label("Value").save("histogram.png")
+    }
+    ```
 - [ ] Write `examples/heatmap.rs` — annotated heatmap with diverging colormap
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let data: Vec<Vec<f64>> = (0..10).map(|r| (0..10).map(|c| ((r+c) as f64 - 9.0)).collect()).collect();
+    Figure::new(600, 500)
+        .add(HeatmapMark::new(data).colormap(prismatica::crameri::VIK).annotate(true))
+        .title("Correlation Matrix").save("heatmap.png")
+    }
+    ```
 - [ ] Write `examples/statistical.rs` — box plot + violin side by side
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let groups = vec![
+        ("A".into(), vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,20.]),
+        ("B".into(), vec![3.,4.,5.,5.5,6.,6.5,7.,8.]),
+    ];
+    let grid = GridLayout::row(vec![
+        Figure::new(400, 300).add(BoxPlotMark::new(groups.clone())).title("Box Plot"),
+        Figure::new(400, 300).add(ViolinMark::from_groups(groups)).title("Violin Plot"),
+    ]);
+    grid.save("statistical.png")
+    }
+    ```
 - [ ] Write `examples/faceting.rs` — faceted scatter by category
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    // Generate scatter data with 4 categories
+    Figure::new(900, 600)
+        .add(PointMark::new(x, y).color_by(&groups))
+        .facet_wrap("category", Some(2))
+        .title("Faceted Scatter").save("faceting.png")
+    }
+    ```
 - [ ] Write `examples/custom_theme.rs` — applying a chromata theme
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let theme = chromata::popular::gruvbox::DARK_HARD;
+    Figure::new(800, 600)
+        .add(LineMark::new(vec![0.,1.,2.,3.], vec![0.,2.,1.,3.]))
+        .theme(theme.into())
+        .save("custom_theme.png")
+    }
+    ```
 - [ ] Write `examples/terminal.rs` — inline terminal rendering
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let x: Vec<f64> = (0..50).map(|i| i as f64 * 0.2).collect();
+    let y: Vec<f64> = x.iter().map(|v| v.sin()).collect();
+    Figure::new(160, 48) // small for terminal
+        .add(LineMark::new(x, y))
+        .show_terminal() // auto-detect protocol: Kitty > Sixel > Braille
+    }
+    ```
 - [ ] Write `examples/interactive.rs` — windowed chart with hover and zoom
+
+    ```rust
+    use starsight::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let x: Vec<f64> = (0..1000).map(|i| i as f64 * 0.01).collect();
+    let y: Vec<f64> = x.iter().map(|v| v.sin() * v.cos()).collect();
+    Figure::new(800, 600)
+        .add(LineMark::new(x, y).color(Color::BLUE))
+        .title("Interactive — scroll to zoom, drag to pan")
+        .show() // opens native window with hover, zoom, pan
+    }
+    ```
 - [ ] Write `examples/polars_integration.rs` — chart from a Polars DataFrame
 
+    ```rust
+    use starsight::prelude::*;
+    use polars::prelude::*;
+    
+    fn main() -> starsight::Result<()> {
+    let df = CsvReader::from_path("data.csv")?.finish()?;
+    let fig = plot!(df, x = "date", y = "price", color = "symbol");
+    fig.title("Stock Prices").save("polars_integration.png")
+    }
+    ```
+
 - [ ] Verify `cargo xtask gallery` runs all examples and saves PNGs to `gallery/`
+
+    ```bash
+    cargo xtask gallery
+    ls -la gallery/*.png
+    # Verify one PNG per example file
+    for ex in examples/*.rs; do
+    name=$(basename "$ex" .rs)
+    test -f "gallery/$name.png" && echo "OK: $name" || echo "MISSING: $name"
+    done
+    ```
 - [ ] Update GALLERY_REFERENCE.md with generated images
+
+    ```bash
+    # Uncomment image placeholders in GALLERY_REFERENCE.md:
+    # Change: <!-- ![starsight](gallery/line_chart.png) -->
+    # To:     ![starsight](gallery/line_chart.png)
+    sed -i 's/<!-- !\[starsight\]/![starsight]/g; s/\.png) -->/\.png)/g' .spec/GALLERY_REFERENCE.md
+    ```
 
 - [ ] docs.rs configuration in workspace Cargo.toml:
 
@@ -3088,33 +6383,156 @@ Exit criteria: the library is production-ready. The public API is stable and wil
 
 - [ ] cargo-semver-checks clean pass: no public API changes that violate semver since the last pre-release.
 
+    ```bash
+    cargo semver-checks check-release
+    # Expected: no breaking changes detected
+    ```
+
 - [ ] CI green on stable Rust (Linux, macOS, Windows)
+
+    ```bash
+    # Verified via GitHub Actions matrix:
+    # runs-on: [ubuntu-latest, macos-latest, windows-latest]
+    # toolchain: [stable]
+    cargo test --workspace
+    ```
 - [ ] CI green on MSRV 1.85 (Linux, macOS, Windows)
+
+    ```bash
+    cargo +1.85.0 check --workspace
+    cargo +1.85.0 test --workspace
+    ```
 - [ ] All feature combinations compile (`cargo hack check --each-feature`)
+
+    ```bash
+    cargo hack check --each-feature --workspace
+    # Tests every feature in isolation
+    ```
 - [ ] All tests pass (`cargo test --workspace --all-features`)
+
+    ```bash
+    cargo test --workspace --all-features
+    ```
 - [ ] All snapshot baselines match (`cargo insta test`)
 
+    ```bash
+    cargo insta test --workspace
+    # Expected: all snapshots match, zero pending reviews
+    ```
+
 - [ ] Create benchmark suite with criterion
+
+    ```rust
+    // benches/render.rs
+    use criterion::{criterion_group, criterion_main, Criterion};
+    use starsight::prelude::*;
+    
+    fn bench_line_1000(c: &mut Criterion) {
+    let x: Vec<f64> = (0..1000).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|v| v.sin()).collect();
+    c.bench_function("line_1000pt_800x600", |b| {
+        b.iter(|| {
+            let fig = Figure::new(800, 600).add(LineMark::new(x.clone(), y.clone()));
+            fig.render_png().unwrap();
+        })
+    });
+    }
+    criterion_group!(benches, bench_line_1000);
+    criterion_main!(benches);
+    ```
 - [ ] Benchmark: 1000-point line chart at 800x600 renders under 50ms
+
+    ```bash
+    cargo bench --bench render -- line_1000
+    # Check that mean time is < 50ms
+    ```
 - [ ] Benchmark: 100,000-point scatter plot renders under 500ms
+
+    ```bash
+    cargo bench --bench render -- scatter_100k
+    # Check that mean time is < 500ms
+    ```
 
 - [ ] Security audit: `cargo audit` and `cargo deny check advisories` report no known vulnerabilities in the dependency tree.
 
+    ```bash
+    cargo audit
+    cargo deny check advisories
+    # Expected: no known vulnerabilities
+    ```
+
 - [ ] Generate complete changelog with git-cliff from all pre-release versions
+
+    ```bash
+    git cliff --output CHANGELOG.md
+    # Generates from all conventional commits
+    ```
 - [ ] Review every changelog entry
+
+    ```bash
+    # Manual review: read CHANGELOG.md, verify:
+    # - All breaking changes documented
+    # - All new features listed
+    # - No internal/CI-only changes polluting the public changelog
+    ```
 - [ ] Publish changelog on GitHub releases
 
+    ```bash
+    gh release create v1.0.0 --title "starsight 1.0.0" --notes-file CHANGELOG.md
+    ```
+
 - [ ] Write announcement blog post with example charts and comparisons
+
+    ```markdown
+    # starsight 1.0.0: A Unified Visualization Library for Rust
+    
+    ## What is starsight?
+    [screenshot of gallery]
+    
+    ## How it compares
+    [benchmark table vs Plotters]
+    
+    ## Quick start
+    ```rust
+use starsight::prelude::*;
+plot!(&[1,2,3], &[4,5,6]).save("chart.png")?;
+```
+
+## What's next
+[roadmap beyond 1.0]
+```
 - [ ] Post to Reddit r/rust
+
+    ```
+    Title: starsight 1.0.0 — unified scientific visualization for Rust
+    URL: https://github.com/resonant-jovian/starsight
+    Subreddit: r/rust
+    ```
 - [ ] Post to Hacker News
+
+    ```
+    Title: Show HN: starsight — scientific visualization library for Rust
+    URL: https://github.com/resonant-jovian/starsight
+    ```
 - [ ] Post to Rust users forum
+
+    ```
+    https://users.rust-lang.org/
+    Category: announcements
+    Title: starsight 1.0.0 released — unified visualization from one-liners to GPU 3D
+    ```
 - [ ] Post to Twitter/Mastodon
 
+    ```
+    starsight 1.0.0 is out! Unified scientific visualization for Rust.
+    From `plot!([1,2,3]).save("chart.png")` to GPU-accelerated 3D.
+    70 chart types, terminal rendering, chromata themes.
+    https://github.com/resonant-jovian/starsight
+    #rustlang
+    ```
 
 ---
 ---
-
-
 
 ---
 ---
@@ -3556,7 +6974,6 @@ Primary dependencies and their documentation.
 ---
 ---
 
-
 ---
 
 ## Scale math formulas
@@ -3824,7 +7241,6 @@ buffer.draw(&mut font_system, &mut cache, cosmic_text::Color::rgba(0, 0, 0, 255)
 8. Update scale ranges to match plot area pixel dimensions
 9. Re-run tick algorithm if scale ranges changed significantly
 ```
-
 
 ---
 ---
