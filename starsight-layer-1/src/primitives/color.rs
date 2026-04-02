@@ -43,6 +43,32 @@ impl Color {
     pub fn with_alpha(self, a: u8) -> ColorAlpha {
         ColorAlpha { r: self.r, g: self.g, b: self.b, a }
     }
+    pub fn from_css_hex(s: &str) -> Option<Self> {
+        let hex = s.strip_prefix('#').unwrap_or(s);
+        match hex.len() {
+            6 => {
+                let val = u32::from_str_radix(hex, 16).ok()?;
+                Some(Self::from_hex(val))
+            }
+            3 => {
+                let mut chars = hex.chars();
+                let r = chars.next().and_then(|c| c.to_digit(16))? as u8;
+                let g = chars.next().and_then(|c| c.to_digit(16))? as u8;
+                let b = chars.next().and_then(|c| c.to_digit(16))? as u8;
+                Some(Self { r: r << 4 | r, g: g << 4 | g, b: b << 4 | b })
+            }
+            _ => None,
+        }
+    }
+
+    pub fn to_css_hex(self) -> String {
+        format!("#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
+    }
+}
+impl std::fmt::Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
+    }
 }
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
