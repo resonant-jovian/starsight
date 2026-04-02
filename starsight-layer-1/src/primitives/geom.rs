@@ -44,9 +44,13 @@ impl From<Point> for (f32, f32) {
         (p.x, p.y)
     }
 }
-
+impl std::fmt::Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Point({}, {})", self.x, self.y)
+    }
+}
 // -------------------------------------------------------------------------------------------------
-// Same four impls for Vec2
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rect {
     pub left: f32,
     pub top: f32,
@@ -148,8 +152,13 @@ impl Rect {
         tiny_skia::Rect::from_ltrb(self.left, self.top, self.right, self.bottom)
     }
 }
+impl std::fmt::Display for Rect {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Rect({}, {}, {}, {})", self.left, self.top, self.right, self.bottom)
+    }
+}
 // -------------------------------------------------------------------------------------------------
-
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Size {
     width: f32,
     height: f32,
@@ -165,6 +174,11 @@ impl From<tiny_skia::Size> for Size {
             width: value.width(),
             height: value.height(),
         }
+    }
+}
+impl std::fmt::Display for Size {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Size({}, {})", self.width, self.height)
     }
 }
 // -------------------------------------------------------------------------------------------------
@@ -195,6 +209,11 @@ impl Vec2 {
                 y: self.y / len,
             }
         }
+    }
+}
+impl std::fmt::Display for Vec2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Vec2({}, {})", self.x, self.y)
     }
 }
 // -------------------------------------------------------------------------------------------------

@@ -2253,7 +2253,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Add derives: `#[derive(Debug, Clone, Copy, PartialEq)]` (already have some, verify all present). Add `Display`:
+- [x] Add derives: `#[derive(Debug, Clone, Copy, PartialEq)]` (already have some, verify all present). Add `Display`:
 
     ```rust
     impl std::fmt::Display for Rect {
