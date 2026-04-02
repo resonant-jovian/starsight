@@ -4,6 +4,7 @@
 use thiserror::Error;
 
 /// Error handling enum
+#[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum StarsightError {
     /// Rendering backend failures
