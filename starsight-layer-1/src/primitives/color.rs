@@ -91,6 +91,12 @@ impl Color {
         }
     }
 }
+impl From<chromata::Color> for Color {
+    fn from(c: chromata::Color) -> Self { Self { r: c.r, g: c.g, b: c.b } }
+}
+impl From<prismatica::Color> for Color {
+    fn from(c: prismatica::Color) -> Self { Self { r: c.r, g: c.g, b: c.b } }
+}
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)

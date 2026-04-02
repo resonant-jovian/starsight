@@ -2369,7 +2369,7 @@ Exit criteria: plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).save("test.png") produces
     }
     ```
 
-- [ ] Add sister crate conversions:
+- [x] Add sister crate conversions:
 
     ```rust
     impl From<chromata::Color> for Color {
