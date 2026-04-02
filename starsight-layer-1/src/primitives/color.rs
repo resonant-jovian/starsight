@@ -1,5 +1,3 @@
-use crate::primitives::geom::Rect;
-
 // -------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Color {
@@ -118,7 +116,7 @@ impl ColorAlpha {
             r: ((hex >> 16) & 0xFF) as u8,
             g: ((hex >> 8) & 0xFF) as u8,
             b: (hex & 0xFF) as u8,
-            a: ((hex >> 24) & 0xFF) as u8,
+            a: (hex >> 24) as u8,
         }
     }
     pub const BLACK: Self = Self { r: 0, g: 0, b: 0, a: 255 };
@@ -149,3 +147,47 @@ impl ColorAlpha {
     }
 }
 // -------------------------------------------------------------------------------------------------
+#[cfg(test)]
+mod tests {
+    use crate::primitives::color::Color;
+
+    #[test]
+    fn from_hex_roundtrip() {
+        let hex = 9843885u32;
+        let color = Color::from_hex(hex);
+        assert_eq!(150, color.r);
+        assert_eq!(52, color.g);
+        assert_eq!(173, color.b);
+    }
+    #[test]
+    fn from_css_hex_roundtrip() {
+        let hex = "#9634AD";
+        let color = Color::from_css_hex(hex).unwrap();
+        assert_eq!(150, color.r);
+        assert_eq!(52, color.g);
+        assert_eq!(173, color.b);
+    }
+    #[test]
+    fn black_luminance() {
+        let black = Color::BLACK;
+        assert!(black.luminance() < f64::EPSILON);
+    }
+    #[test]
+    fn white_luminance() {
+        let white = Color::WHITE;
+        assert!((white.luminance() - 1.0).abs() < f64::EPSILON);
+    }
+    #[test]
+    fn black_white_contrast_ratio() {
+        let black = Color::BLACK;
+        let white = Color::WHITE;
+        assert_eq!(black.contrast_ratio(white), 21.0);
+    }
+    #[test]
+    fn lerp_roundtrip() {
+        let black = Color::BLACK;
+        let white = Color::WHITE;
+        assert_eq!(black.lerp(white, 0.0), black);
+        assert_eq!(black.lerp(white, 1.0), white);
+    }
+}
