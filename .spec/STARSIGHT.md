@@ -598,7 +598,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct Transform(pub(crate) tiny_skia::Transform);
     ```
-- [ ] Add `Display` implementation for Transform:
+- [x] Add `Display` implementation for Transform:
 
     ```rust
     impl std::fmt::Display for Rect {
@@ -839,7 +839,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     Ok(())
     }
     ```
-- [ ] Implement `DrawBackend::draw_text()` for SkiaBackend:
+- [x] Implement `DrawBackend::draw_text()` for SkiaBackend:
 
     ```rust
     fn draw_text(&mut self, text: &str, position: Point, font_size: f32, color: Color) -> Result<()> {
@@ -866,7 +866,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Implement `DrawBackend::set_clip()` for SkiaBackend:
+- [x] Implement `DrawBackend::set_clip()` for SkiaBackend:
 
     ```rust
     fn set_clip(&mut self, rect: Option<Rect>) -> Result<()> {
@@ -886,7 +886,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     // Add field to SkiaBackend: clip_mask: Option<tiny_skia::Mask>
     ```
-- [ ] Key methods reference:
+- [x] Key methods reference:
 
     ```rust
     impl DrawBackend for SkiaBackend {
@@ -946,7 +946,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
+- [x] Uncomment the commented-out methods and `PathCommand` variants in `backend/mod.rs`:
 
     ```rust
     pub enum PathCommand {
@@ -997,7 +997,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
 ### Layer 1: Implement the SVG backend
 
-- [ ] Create `SvgBackend` struct and constructor:
+- [x] Create `SvgBackend` struct and constructor:
 
     ```rust
     use svg::node::element::{Rectangle, Text as SvgText, Path as SvgPath, Group, ClipPath};
@@ -1036,7 +1036,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Implement `DrawBackend` for SvgBackend:
+- [x] Implement `DrawBackend` for SvgBackend:
 
     ```rust
     impl DrawBackend for SvgBackend {
@@ -1094,7 +1094,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Implement save_svg: call svg::save(path, &self.document) and map errors.
+- [x] Implement save_svg: call svg::save(path, &self.document) and map errors.
 
     ```rust
     // Already covered in DrawBackend impl above:
@@ -1103,14 +1103,14 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Implement `save_svg()`: serialize document to file
+- [x] Implement `save_svg()`: serialize document to file
 
     ```rust
     fn save_svg(&self, path: &std::path::Path) -> Result<()> {
     svg::save(path, &self.build_document()).map_err(|e| StarsightError::Export(e.to_string()))
     }
     ```
-- [ ] Implement `save_png()`: return `StarsightError::Export` (not supported by SVG backend)
+- [x] Implement `save_png()`: return `StarsightError::Export` (not supported by SVG backend)
 
     ```rust
     fn save_png(&self, _path: &std::path::Path) -> Result<()> {
@@ -1118,7 +1118,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Write SVG snapshot test:
+- [x] Write SVG snapshot test:
 
     ```rust
     #[test]

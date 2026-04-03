@@ -161,9 +161,10 @@ impl DrawBackend for SkiaBackend {
             .save_png(path)
             .map_err(|e| StarsightError::Export(e.to_string()))
     }
-
     fn save_svg(&self, path: &Path) -> Result<()> {
-        todo!()
+        Err(StarsightError::Export(
+            "Raster backend cannot save SVG directly; use SvgBackend".into(),
+        ))
     }
 
     fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
