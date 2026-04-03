@@ -19,6 +19,7 @@ chromata.workspace = true
 prismatica.workspace = true
 cosmic-text.workspace = true
 insta.workspace = true
+svg.workspace = true
 
 [lints]
 workspace = true
