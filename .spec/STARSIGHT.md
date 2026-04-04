@@ -1132,7 +1132,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
 ### Layer 2: Linear scale and Wilkinson ticks
 
-- [ ] Create `starsight-layer-2/src/scale.rs`:
+- [x] Create `starsight-layer-2/src/scale.rs`:
 
     ```rust
     pub trait Scale {
@@ -1156,7 +1156,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `starsight-layer-2/src/tick.rs` and implement the algorithm:
+- [x] Create `starsight-layer-2/src/tick.rs` and implement the algorithm:
 
     ```rust
     const Q: &[f64] = &[1.0, 5.0, 2.0, 2.5, 4.0, 3.0];
@@ -1212,7 +1212,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         (-10..=10).map(|z| j as f64 * q * 10f64.powi(z)).collect()
     }
     ```
-- [ ] Write tick unit tests and property tests:
+- [x] Write tick unit tests and property tests:
 
     ```rust
     #[cfg(test)]
