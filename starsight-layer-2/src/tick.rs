@@ -9,7 +9,7 @@ pub fn wilkinson_extended(mut dmin: f64, mut dmax: f64, m: usize, only_loose: bo
     }
 
     if dmax - dmin < eps || (dmax - dmin) > f64::MAX.sqrt() {
-        return linspace(dmin, dmax, m as usize);
+        return linspace(dmin, dmax, m);
     }
 
     let mut best_score = -2.0_f64;
@@ -129,7 +129,7 @@ fn coverage_max(dmin: f64, dmax: f64, span: f64) -> f64 {
     let range = dmax - dmin;
     if span > range {
         let half = (span - range) / 2.;
-        (1. - 0.5 * (half.powi(2) + half.powi(2)) / ((0.1 * range).powi(2)))
+        1. - 0.5 * (half.powi(2) + half.powi(2)) / ((0.1 * range).powi(2))
     } else {
         1.
     }
@@ -141,20 +141,6 @@ fn density(k: f64, m: f64, dmin: f64, dmax: f64, lmin: f64, lmax: f64) -> f64 {
 }
 fn density_max(k: f64, m: f64) -> f64 {
     if k >= m { 2. - (k - 1.) / (m - 1.) } else { 1. }
-}
-
-fn coverage_score(dmin: f64, dmax: f64, lmin: f64, lmax: f64) -> f64 {
-    let range = dmax - dmin;
-    1.0 - 0.5 * ((dmax - lmax).powi(2) + (dmin - lmin).powi(2)) / (0.1 * range).powi(2)
-}
-
-fn density_score(target: usize, actual: usize) -> f64 {
-    let r = actual as f64 / target as f64;
-    2.0 - r.max(1.0 / r)
-}
-
-fn nice_steps(q: f64, j: usize) -> Vec<f64> {
-    (-10..=10).map(|z| j as f64 * q * 10f64.powi(z)).collect()
 }
 #[cfg(test)]
 mod tests {
