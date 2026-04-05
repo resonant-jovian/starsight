@@ -1278,7 +1278,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
     Tests: `extended_ticks(0.0, 100.0, 5)` returns round numbers, always sorted, always >= 2 elements.
 
-- [ ] Create `starsight-layer-2/src/axis.rs`:
+- [x] Create `starsight-layer-2/src/axis.rs`:
 
     ```rust
     pub struct Axis {
@@ -1302,7 +1302,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `starsight-layer-2/src/coord.rs`:
+- [x] Create `starsight-layer-2/src/coord.rs`:
 
     ```rust
     pub struct CartesianCoord {
