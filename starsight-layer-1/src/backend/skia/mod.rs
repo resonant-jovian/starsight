@@ -46,14 +46,15 @@ impl DrawBackend for SkiaBackend {
         path: &crate::backend::Path,
         style: &crate::backend::PathStyle,
     ) -> Result<()> {
-        // Convert PathCommand sequence to tiny_skia::Path
         let mut pb = PathBuilder::new();
-        for cmd in path.commands() {
+        for cmd in &path.commands {
             match cmd {
                 PathCommand::MoveTo(p) => pb.move_to(p.x, p.y),
                 PathCommand::LineTo(p) => pb.line_to(p.x, p.y),
                 PathCommand::QuadTo(c, p) => pb.quad_to(c.x, c.y, p.x, p.y),
-                PathCommand::CubicTo(c1, c2, p) => pb.cubic_to(c1.x, c1.y, c2.x, c2.y, p.x, p.y),
+                PathCommand::CubicTo(c1, c2, p) => {
+                    pb.cubic_to(c1.x, c1.y, c2.x, c2.y, p.x, p.y);
+                }
                 PathCommand::Close => pb.close(),
             }
         }
@@ -62,28 +63,45 @@ impl DrawBackend for SkiaBackend {
             .ok_or_else(|| StarsightError::Render("Empty path".into()))?;
 
         let mut paint = Paint::default();
-        paint.set_color_rgba8(
-            style.stroke_color.r,
-            style.stroke_color.g,
-            style.stroke_color.b,
-            255,
-        );
-        let stroke = Stroke {
-            width: style.stroke_width,
-            line_cap: style.line_cap,
-            line_join: style.line_join,
-            dash: style
-                .dash_pattern
-                .and_then(|(len, gap)| tiny_skia::StrokeDash::new(vec![len, gap], 0.0)),
-            ..Stroke::default()
-        };
-        self.pixmap.stroke_path(
-            &sk_path,
-            &paint,
-            &stroke,
-            tiny_skia::Transform::identity(),
-            None,
-        );
+
+        // Fill first if requested
+        if let Some(fill) = style.fill_color {
+            paint.set_color_rgba8(fill.r, fill.g, fill.b, (style.opacity * 255.0) as u8);
+            self.pixmap.fill_path(
+                &sk_path,
+                &paint,
+                tiny_skia::FillRule::Winding,
+                tiny_skia::Transform::identity(),
+                None,
+            );
+        }
+
+        // Stroke
+        if style.stroke_width > 0.0 {
+            paint.set_color_rgba8(
+                style.stroke_color.r,
+                style.stroke_color.g,
+                style.stroke_color.b,
+                (style.opacity * 255.0) as u8,
+            );
+            let stroke = Stroke {
+                width: style.stroke_width,
+                line_cap: style.line_cap.to_tiny_skia(),
+                line_join: style.line_join.to_tiny_skia(),
+                dash: style
+                    .dash_pattern
+                    .and_then(|(len, gap)| tiny_skia::StrokeDash::new(vec![len, gap], 0.0)),
+                ..Stroke::default()
+            };
+            self.pixmap.stroke_path(
+                &sk_path,
+                &paint,
+                &stroke,
+                tiny_skia::Transform::identity(),
+                None,
+            );
+        }
+
         Ok(())
     }
 

@@ -1325,7 +1325,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
 ### Layer 3: Line mark and point mark
 
-- [ ] Create `starsight-layer-3/src/mark.rs`:
+- [x] Create `starsight-layer-3/src/mark.rs`:
 
     ```rust
     use starsight_layer_1::backend::DrawBackend;
@@ -1337,7 +1337,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `LineMark` and implement `Mark` trait:
+- [x] Create `LineMark` and implement `Mark` trait:
 
     ```rust
     use crate::backend::{DrawBackend, PathCommand, PathStyle};

@@ -48,7 +48,7 @@ impl DrawBackend for SvgBackend {
         style: &crate::backend::PathStyle,
     ) -> Result<()> {
         let mut data = svg::node::element::path::Data::new();
-        for cmd in path.commands() {
+        for cmd in &path.commands {
             match cmd {
                 PathCommand::MoveTo(p) => {
                     data = data.move_to((p.x, p.y));
@@ -56,10 +56,13 @@ impl DrawBackend for SvgBackend {
                 PathCommand::LineTo(p) => {
                     data = data.line_to((p.x, p.y));
                 }
+                PathCommand::CubicTo(c1, c2, p) => {
+                    data = data.cubic_curve_to((c1.x, c1.y, c2.x, c2.y, p.x, p.y));
+                }
                 PathCommand::Close => {
                     data = data.close();
                 }
-                _ => {} // QuadTo, CubicTo — extend later
+                _ => {}
             }
         }
         let p = SvgPath::new()

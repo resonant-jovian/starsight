@@ -25,17 +25,101 @@ pub trait DrawBackend {
     fn save_svg(&self, path: &std::path::Path) -> Result<()>;
     fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum LineCap {
+    #[default]
+    Butt,
+    Round,
+    Square,
+}
+
+impl LineCap {
+    pub(crate) fn to_tiny_skia(self) -> tiny_skia::LineCap {
+        match self {
+            Self::Butt => tiny_skia::LineCap::Butt,
+            Self::Round => tiny_skia::LineCap::Round,
+            Self::Square => tiny_skia::LineCap::Square,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum LineJoin {
+    #[default]
+    Miter,
+    Round,
+    Bevel,
+}
+
+impl LineJoin {
+    pub(crate) fn to_tiny_skia(self) -> tiny_skia::LineJoin {
+        match self {
+            Self::Miter => tiny_skia::LineJoin::Miter,
+            Self::Round => tiny_skia::LineJoin::Round,
+            Self::Bevel => tiny_skia::LineJoin::Bevel,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PathStyle {
     pub stroke_color: Color,
     pub stroke_width: f32,
     pub fill_color: Option<Color>,
     pub dash_pattern: Option<(f32, f32)>,
-    pub line_cap: tiny_skia::LineCap,
-    pub line_join: tiny_skia::LineJoin,
+    pub line_cap: LineCap,
+    pub line_join: LineJoin,
     pub opacity: f32,
 }
-pub type Path = PathCommand;
+
+impl Default for PathStyle {
+    fn default() -> Self {
+        Self {
+            stroke_color: Color::BLACK,
+            stroke_width: 1.0,
+            fill_color: None,
+            dash_pattern: None,
+            line_cap: LineCap::default(),
+            line_join: LineJoin::default(),
+            opacity: 1.0,
+        }
+    }
+}
+
+impl PathStyle {
+    pub fn stroke(color: Color, width: f32) -> Self {
+        Self { stroke_color: color, stroke_width: width, ..Self::default() }
+    }
+    pub fn fill(color: Color) -> Self {
+        Self { fill_color: Some(color), stroke_width: 0.0, ..Self::default() }
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct Path {
+    pub commands: Vec<PathCommand>,
+}
+
+impl Path {
+    pub fn new() -> Self {
+        Self { commands: Vec::new() }
+    }
+
+    pub fn move_to(mut self, p: Point) -> Self {
+        self.commands.push(PathCommand::MoveTo(p));
+        self
+    }
+
+    pub fn line_to(mut self, p: Point) -> Self {
+        self.commands.push(PathCommand::LineTo(p));
+        self
+    }
+
+    pub fn close(mut self) -> Self {
+        self.commands.push(PathCommand::Close);
+        self
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PathCommand {
     MoveTo(Point),
@@ -43,11 +127,6 @@ pub enum PathCommand {
     QuadTo(Point, Point),
     CubicTo(Point, Point, Point),
     Close,
-}
-impl PathCommand {
-    pub fn commands(self) -> Vec<Path> {
-        todo!()
-    }
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Transform(pub(crate) tiny_skia::Transform);

@@ -16,6 +16,10 @@ publish = true
 starsight-layer-1.workspace = true
 starsight-layer-2.workspace = true
 
+[dev-dependencies]
+insta = { workspace = true }
+starsight-layer-5 = { workspace = true }
+
 [lints]
 workspace = true
 
