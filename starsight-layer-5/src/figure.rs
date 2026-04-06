@@ -1,5 +1,5 @@
-use starsight_layer_1::backend::skia::SkiaBackend;
 use starsight_layer_1::backend::DrawBackend;
+use starsight_layer_1::backend::skia::SkiaBackend;
 use starsight_layer_1::error::Result;
 use starsight_layer_1::primitives::color::Color;
 use starsight_layer_1::primitives::geom::Rect;
@@ -49,10 +49,7 @@ impl Figure {
     }
 
     /// Convenience constructor for the `plot!` macro.
-    pub fn from_arrays(
-        x: impl IntoIterator<Item = f64>,
-        y: impl IntoIterator<Item = f64>,
-    ) -> Self {
+    pub fn from_arrays(x: impl IntoIterator<Item = f64>, y: impl IntoIterator<Item = f64>) -> Self {
         let line = starsight_layer_3::mark::LineMark::new(
             x.into_iter().collect(),
             y.into_iter().collect(),

@@ -88,10 +88,18 @@ impl Default for PathStyle {
 
 impl PathStyle {
     pub fn stroke(color: Color, width: f32) -> Self {
-        Self { stroke_color: color, stroke_width: width, ..Self::default() }
+        Self {
+            stroke_color: color,
+            stroke_width: width,
+            ..Self::default()
+        }
     }
     pub fn fill(color: Color) -> Self {
-        Self { fill_color: Some(color), stroke_width: 0.0, ..Self::default() }
+        Self {
+            fill_color: Some(color),
+            stroke_width: 0.0,
+            ..Self::default()
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq)]
@@ -101,7 +109,9 @@ pub struct Path {
 
 impl Path {
     pub fn new() -> Self {
-        Self { commands: Vec::new() }
+        Self {
+            commands: Vec::new(),
+        }
     }
 
     pub fn move_to(mut self, p: Point) -> Self {

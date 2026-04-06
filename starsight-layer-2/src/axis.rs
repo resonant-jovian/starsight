@@ -14,8 +14,13 @@ impl Axis {
         let ticks = crate::tick::wilkinson_extended(dmin, dmax, target_ticks, true);
         let labels: Vec<String> = ticks.iter().map(|t| format!("{t}")).collect();
         Some(Self {
-            scale: LinearScale { domain_min: ticks[0], domain_max: *ticks.last()? },
-            label: None, tick_positions: ticks, tick_labels: labels,
+            scale: LinearScale {
+                domain_min: ticks[0],
+                domain_max: *ticks.last()?,
+            },
+            label: None,
+            tick_positions: ticks,
+            tick_labels: labels,
         })
     }
 }

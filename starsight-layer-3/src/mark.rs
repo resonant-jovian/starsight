@@ -17,7 +17,7 @@ pub trait Mark {
     fn data_extent(&self) -> Option<DataExtent>;
 }
 
-// ── LineMark ────────────────────────────────────────────────────────────────
+// ── LineMark ─────────────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
 pub struct LineMark {
@@ -29,10 +29,21 @@ pub struct LineMark {
 
 impl LineMark {
     pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
-        Self { x, y, color: Color::BLUE, width: 2.0 }
+        Self {
+            x,
+            y,
+            color: Color::BLUE,
+            width: 2.0,
+        }
     }
-    pub fn color(mut self, c: Color) -> Self { self.color = c; self }
-    pub fn width(mut self, w: f32) -> Self { self.width = w; self }
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = c;
+        self
+    }
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = w;
+        self
+    }
 }
 
 impl Mark for LineMark {
@@ -75,7 +86,7 @@ impl Mark for LineMark {
     }
 }
 
-// ── PointMark ───────────────────────────────────────────────────────────────
+// ── PointMark ────────────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
 pub struct PointMark {
@@ -87,10 +98,21 @@ pub struct PointMark {
 
 impl PointMark {
     pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
-        Self { x, y, color: Color::BLUE, radius: 4.0 }
+        Self {
+            x,
+            y,
+            color: Color::BLUE,
+            radius: 4.0,
+        }
     }
-    pub fn color(mut self, c: Color) -> Self { self.color = c; self }
-    pub fn radius(mut self, r: f32) -> Self { self.radius = r; self }
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = c;
+        self
+    }
+    pub fn radius(mut self, r: f32) -> Self {
+        self.radius = r;
+        self
+    }
 }
 
 impl Mark for PointMark {
@@ -124,7 +146,7 @@ impl Mark for PointMark {
     }
 }
 
-// ── helpers ─────────────────────────────────────────────────────────────────
+// ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 
 /// Approximate a circle with 4 cubic bezier arcs.
 fn push_circle(cmds: &mut Vec<PathCommand>, c: Point, r: f32) {
@@ -174,5 +196,14 @@ fn extent_from_xy(x: &[f64], y: &[f64]) -> Option<DataExtent> {
         any = true;
     }
 
-    if any { Some(DataExtent { x_min, x_max, y_min, y_max }) } else { None }
+    if any {
+        Some(DataExtent {
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+        })
+    } else {
+        None
+    }
 }

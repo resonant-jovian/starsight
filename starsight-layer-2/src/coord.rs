@@ -1,6 +1,6 @@
+use crate::axis::Axis;
 use crate::scale::Scale;
 use starsight_layer_1::primitives::geom::{Point, Rect};
-use crate::axis::Axis;
 
 pub struct CartesianCoord {
     pub x_axis: Axis,

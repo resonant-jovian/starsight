@@ -4,8 +4,10 @@ use starsight_layer_5::Figure;
 
 #[test]
 fn snapshot_line_basic() {
-    let fig = Figure::new(800, 600)
-        .add(LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 1.0, 0.5, 2.0]));
+    let fig = Figure::new(800, 600).add(LineMark::new(
+        vec![0.0, 1.0, 2.0, 3.0],
+        vec![0.0, 1.0, 0.5, 2.0],
+    ));
     let bytes = fig.render_png().unwrap();
     insta::assert_binary_snapshot!(".png", bytes);
 }
@@ -31,8 +33,7 @@ fn snapshot_line_multi() {
 
 #[test]
 fn snapshot_scatter_basic() {
-    let fig = Figure::new(800, 600)
-        .add(PointMark::new(vec![0.5, 1.5, 2.5], vec![1.0, 3.0, 2.0]));
+    let fig = Figure::new(800, 600).add(PointMark::new(vec![0.5, 1.5, 2.5], vec![1.0, 3.0, 2.0]));
     let bytes = fig.render_png().unwrap();
     insta::assert_binary_snapshot!(".png", bytes);
 }
