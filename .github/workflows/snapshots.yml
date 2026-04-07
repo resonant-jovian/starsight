@@ -3,25 +3,58 @@ name: Snapshots
 on:
   push:
     branches: [main]
+    paths:
+      - "starsight-layer-1/**"
+      - "starsight-layer-2/**"
+      - "starsight-layer-3/**"
+      - "starsight-layer-4/**"
+      - "starsight-layer-5/**"
+      - "starsight-layer-6/**"
+      - "starsight-layer-7/**"
+      - "starsight/**"
   pull_request:
+    paths:
+      - "starsight-layer-1/**"
+      - "starsight-layer-2/**"
+      - "starsight-layer-3/**"
+      - "starsight-layer-4/**"
+      - "starsight-layer-5/**"
+      - "starsight-layer-6/**"
+      - "starsight-layer-7/**"
+      - "starsight/**"
+  workflow_dispatch:
+
+concurrency:
+  group: snapshots-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
 
 jobs:
   snapshots:
+    name: insta snapshot tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Install insta
-        run: cargo install cargo-insta
+      # Use the prebuilt binary instead of `cargo install` to save 1-2 minutes.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-insta
       - name: Run snapshot tests
-        run: cargo insta test --check --unreferenced reject
-      - name: Upload snapshots
+        run: cargo insta test --workspace --locked --check --unreferenced reject
+      - name: Upload mismatched snapshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: snapshot-failures
-          path: "**/snapshots/*.snap.new"
+          path: |
+            **/snapshots/*.snap.new
+            **/snapshots/*.snap.new.png
+          if-no-files-found: ignore
+          retention-days: 14

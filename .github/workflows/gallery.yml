@@ -6,25 +6,50 @@ on:
     paths:
       - "examples/**"
       - "starsight/**"
-      - "starsight-export/**"
+      - "starsight-layer-1/**"
+      - "starsight-layer-2/**"
+      - "starsight-layer-3/**"
+      - "starsight-layer-4/**"
+      - "starsight-layer-5/**"
+      - "starsight-layer-6/**"
+      - "starsight-layer-7/**"
+      - "xtask/**"
   workflow_dispatch:
+
+concurrency:
+  group: gallery-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
 
 jobs:
   gallery:
+    name: render gallery
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      # TODO: run gallery generation via xtask once it exists
-      # - run: cargo xtask gallery
-      - run: echo "TODO — generate gallery images"
+      # `cargo xtask gallery` is planned for 0.2.0; until then this is a stub
+      # that builds the workspace and uploads any pre-existing PNGs from the
+      # snapshot test directories so the README screenshots stay in sync.
+      - run: cargo build --workspace --locked
+      - name: Collect snapshot PNGs as gallery preview
+        run: |
+          mkdir -p gallery
+          find . -path '*/tests/snapshots/*.snap.png' -exec cp {} gallery/ \; || true
+          ls -la gallery/ || true
       - name: Upload gallery
         uses: actions/upload-artifact@v4
         with:
           name: gallery
           path: gallery/
-          if-no-files-found: ignore
+          if-no-files-found: warn
+          retention-days: 14
+      # TODO(0.2.0): replace the snapshot-collection step above with the real
+      # gallery generator once it lands in `xtask/src/gallery.rs`:
+      # - run: cargo xtask gallery --output gallery/

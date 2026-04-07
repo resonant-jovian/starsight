@@ -1,16 +1,26 @@
 name: Coverage
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
   workflow_dispatch:
 
+concurrency:
+  group: coverage-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
 
 jobs:
   coverage:
+    name: cargo llvm-cov
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -19,10 +29,17 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
-      - name: Generate coverage
-        run: cargo llvm-cov --workspace --lcov --output-path lcov.info
+      - name: Generate LCOV report
+        run: cargo llvm-cov --workspace --all-features --locked --lcov --output-path lcov.info
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:
           files: lcov.info
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcov
+          path: lcov.info
+          retention-days: 30
