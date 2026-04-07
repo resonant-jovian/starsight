@@ -47,7 +47,7 @@ edition                         = "2024"    # def = "2015"
 # Possible values: "Compressed", "Tall", "Vertical"
 fn_params_layout                = "Tall"
 # [DEPRECATED] Renamed to fn_params_layout. Left in for older toolchains.
-fn_args_layout                  = "Tall"
+#fn_args_layout                  = "Tall"
 
 # ── Imports ───────────────────────────────────────────────────────────────
 reorder_imports                 = true
@@ -136,7 +136,7 @@ skip_children                   = false
 # Possible values: "Preserve", "Upper", "Lower"
 hex_literal_case                = "Preserve"
 # Possible values: "Preserve", "Always", "IfNoPostfix", "Never"
-float_literal_trailing_zero     = "Preserve"
+#float_literal_trailing_zero     = "Preserve"
 
 # ── Functions ─────────────────────────────────────────────────────────────
 fn_single_line                  = false
@@ -152,7 +152,7 @@ imports_granularity             = "Preserve"
 # Possible values: "Preserve", "StdExternalCrate", "One"
 group_imports                   = "Preserve"
 # [DEPRECATED] Use imports_granularity = "Crate" instead.
-merge_imports                   = false     # Consider changing
+#merge_imports                   = false     # Consider changing
 
 # ── Indentation style ─────────────────────────────────────────────────────
 # Possible values: "Block", "Visual"
@@ -169,7 +169,7 @@ skip_macro_invocations          = []
 
 # ── Match arms ────────────────────────────────────────────────────────────
 match_arm_blocks                = true
-match_arm_indent                = true
+#match_arm_indent                = true
 
 # ── Ordering ──────────────────────────────────────────────────────────────
 reorder_impl_items              = false
