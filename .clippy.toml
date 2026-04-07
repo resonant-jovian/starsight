@@ -80,7 +80,7 @@ allow-renamed-params-for = [
 ]
 
 # module_name_repetitions
-allow-exact-repetitions = true
+allow-exact-repetitions = false
 allowed-prefixes = ["to", "as", "into", "from", "try_into", "try_from"]
 
 # disallowed_script_idents

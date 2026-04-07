@@ -1,5 +1,5 @@
-use starsight_layer_1::primitives::color::Color;
-use starsight_layer_3::mark::{LineMark, PointMark};
+use starsight_layer_1::primitives::Color;
+use starsight_layer_3::marks::{LineMark, PointMark};
 use starsight_layer_5::Figure;
 
 #[test]

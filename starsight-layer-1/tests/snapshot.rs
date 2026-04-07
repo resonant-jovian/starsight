@@ -1,7 +1,7 @@
-use starsight_layer_1::backend::DrawBackend;
-use starsight_layer_1::backend::skia::SkiaBackend;
-use starsight_layer_1::backend::svg::SvgBackend;
-use starsight_layer_1::primitives::{color::Color, geom::Rect};
+use starsight_layer_1::backends::DrawBackend;
+use starsight_layer_1::backends::rasters::SkiaBackend;
+use starsight_layer_1::backends::vectors::SvgBackend;
+use starsight_layer_1::primitives::{Color, Rect};
 
 #[test]
 fn blue_rect_on_white() {
