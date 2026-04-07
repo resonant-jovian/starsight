@@ -1,8 +1,14 @@
 //! Snapshot tests for layer-3 mark rendering.
 //!
 //! Each test uses realistic, deterministic data drawn from a recognizable
-//! domain (physics, weather, statistics) so the resulting PNGs both verify the
-//! pipeline and double as honest demo material for the README screenshots.
+//! domain (physics, weather, statistics) so the resulting snapshots both
+//! verify the pipeline and double as honest demo material.
+//!
+//! Note: snapshots are taken against the SVG backend, not PNG. SVG keeps text
+//! as `<text>` elements (no glyph rasterization), so the output is byte-exact
+//! reproducible across operating systems and font setups. The PNG raster path
+//! is exercised by `starsight/tests/integration.rs` and the layer-1
+//! `blue_rect_on_white` test, neither of which depends on font rendering.
 
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{LineMark, PointMark};
@@ -33,8 +39,8 @@ fn snapshot_line_basic() {
     // Exercises smooth-curve rendering across positive and negative y values.
     let (x, y) = damped_cosine(50);
     let fig = Figure::new(800, 600).add(LineMark::new(x, y));
-    let bytes = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", bytes);
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
 }
 
 #[test]
@@ -57,8 +63,8 @@ fn snapshot_line_nan_gaps() {
     y[8..12].fill(f64::NAN);
     y[25..28].fill(f64::NAN);
     let fig = Figure::new(800, 600).add(LineMark::new(x, y));
-    let bytes = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", bytes);
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
 }
 
 #[test]
@@ -78,8 +84,8 @@ fn snapshot_line_multi() {
     let fig = Figure::new(800, 600)
         .add(LineMark::new(days.clone(), highs).color(Color::RED))
         .add(LineMark::new(days, lows).color(Color::BLUE));
-    let bytes = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", bytes);
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
 }
 
 // ── scatter tests ────────────────────────────────────────────────────────────────────────────────
@@ -94,8 +100,8 @@ fn snapshot_scatter_basic() {
         8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68,
     ];
     let fig = Figure::new(800, 600).add(PointMark::new(x, y));
-    let bytes = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", bytes);
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
 }
 
 #[test]
@@ -122,6 +128,6 @@ fn snapshot_scatter_sizes() {
                 .radius(3.0)
                 .color(Color::RED),
         );
-    let bytes = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", bytes);
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
 }

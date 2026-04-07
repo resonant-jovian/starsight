@@ -181,13 +181,15 @@ fn main() -> starsight::Result<()> {
 
 ### What it actually renders today
 
-These are raw outputs from the layer-3 snapshot tests — the polished gallery will be wired up via `cargo xtask gallery` (planned 0.2.0). Until then, these prove the full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end on the current code.
+Frozen reference renders of the same data the layer-3 snapshot tests use. The full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end on the current code; the polished gallery wired up via `cargo xtask gallery` will land in 0.2.0.
 
 <p align="center">
-  <img src="starsight-layer-3/tests/snapshots/snapshot__snapshot_line_basic.snap.png" width="280" alt="Line chart with axes and tick labels"/>
-  <img src="starsight-layer-3/tests/snapshots/snapshot__snapshot_line_multi.snap.png" width="280" alt="Two-series line chart with colors"/>
-  <img src="starsight-layer-3/tests/snapshots/snapshot__snapshot_scatter_basic.snap.png" width="280" alt="Scatter plot"/>
+  <img src="docs/screenshots/line_damped_cosine.png" width="280" alt="Damped cosine line chart with axes and tick labels"/>
+  <img src="docs/screenshots/line_two_series.png" width="280" alt="Two-series line chart (daily high/low temperatures) with colors"/>
+  <img src="docs/screenshots/scatter_anscombe.png" width="280" alt="Anscombe's quartet scatter plot"/>
 </p>
+
+> Note: snapshot tests in CI use the SVG backend (deterministic across operating systems and font setups). The PNGs above are committed reference renders from a Linux box; they update when someone re-renders them locally.
 
 ---
 
@@ -279,7 +281,7 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 |---|---|---|---|
 | Wilkinson Extended ticks | working | 0.1.0 | Novel Rust implementation, property-tested |
 | CPU rendering (tiny-skia) | wip | 0.1.0 | Headless rasterization → PNG |
-| SVG export | wip | 0.1.0 | Resolution-independent vector |
+| SVG export | wip | 0.1.0 | Resolution-independent vector; `Figure::render_svg()` and `.save("foo.svg")` work today |
 | `LineMark` / `PointMark` | wip | 0.1.0 | Core 2D mark types |
 | `Figure` builder + `plot!` macro | wip | 0.1.0 | High-level API and one-liner |
 | `BarMark` / `AreaMark` / `HeatmapMark` | planned | 0.2.0 | More chart types |
