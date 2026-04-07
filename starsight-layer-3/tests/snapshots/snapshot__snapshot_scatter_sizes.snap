@@ -1,5 +1,5 @@
 ---
-source: starsight-layer-3/tests/snapshot_marks.rs
+source: starsight-layer-3/tests/snapshot.rs
 expression: bytes
 extension: png
 snapshot_kind: binary
