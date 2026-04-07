@@ -47,7 +47,9 @@ jobs:
         with:
           tool: cargo-insta
       - name: Run snapshot tests
-        run: cargo insta test --workspace --locked --check --unreferenced reject
+        # `--locked` is a cargo flag, not a cargo-insta flag, so it must come
+        # after `--` to be forwarded to the underlying `cargo test` invocation.
+        run: cargo insta test --workspace --check --unreferenced reject -- --locked
       - name: Upload mismatched snapshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
