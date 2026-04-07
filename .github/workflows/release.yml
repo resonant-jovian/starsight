@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Validate everything but don't actually publish or create the release."
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
+
+jobs:
+  # ── Pre-flight: tag must match Cargo.toml workspace.package.version ──────────
+  verify:
+    name: verify tag vs Cargo.toml
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+      tag: ${{ steps.read.outputs.tag }}
+      dry-run: ${{ steps.read.outputs.dry-run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          set -euo pipefail
+          # Workspace version
+          version=$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Tag (only on tag push) or workflow_dispatch
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            tag="${GITHUB_REF#refs/tags/v}"
+          else
+            tag="$version"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          # Dry-run flag
+          dry_run="${{ github.event.inputs.dry-run || 'false' }}"
+          echo "dry-run=$dry_run" >> "$GITHUB_OUTPUT"
+          # Verify match on tag pushes
+          if [[ "${{ github.event_name }}" == "push" && "$tag" != "$version" ]]; then
+            echo "::error::Tag v$tag does not match Cargo.toml version $version"
+            exit 1
+          fi
+          echo "Releasing v$version (dry-run: $dry_run)"
+
+  # ── Sanity: full CI must succeed before we publish anything ──────────────────
+  pre-publish-check:
+    name: pre-publish workspace check
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+      - run: cargo test --workspace --all-features --locked
+      - run: cargo doc --workspace --no-deps --all-features --locked
+        env:
+          RUSTDOCFLAGS: "-D missing-docs -D rustdoc::broken-intra-doc-links"
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check all
+
+  # ── Publish to crates.io in dependency order ─────────────────────────────────
+  publish:
+    name: cargo publish (bottom-up)
+    needs: [verify, pre-publish-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: crates-io
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Publish workspace crates
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          DRY_RUN: ${{ needs.verify.outputs.dry-run }}
+        run: |
+          set -euo pipefail
+          flags=""
+          if [[ "$DRY_RUN" == "true" ]]; then
+            flags="--dry-run"
+            echo "::notice::Dry-run mode — nothing will be uploaded to crates.io"
+          fi
+          # Each layer depends only on layers below it; the facade depends on all.
+          # See .spec/STARSIGHT.md § "Crate dependency graph" for the rule.
+          for crate in \
+            starsight-layer-1 \
+            starsight-layer-2 \
+            starsight-layer-3 \
+            starsight-layer-4 \
+            starsight-layer-5 \
+            starsight-layer-6 \
+            starsight-layer-7 \
+            starsight; do
+            echo "::group::cargo publish -p $crate $flags"
+            cargo publish -p "$crate" --locked $flags
+            echo "::endgroup::"
+            # Crates.io needs a moment to register the new version before the
+            # next crate that depends on it can resolve it.
+            if [[ "$DRY_RUN" != "true" ]]; then
+              sleep 30
+            fi
+          done
+
+  # ── Generate release notes from the CHANGELOG and create the GitHub release ──
+  github-release:
+    name: GitHub release
+    needs: [verify, publish]
+    if: needs.verify.outputs.dry-run != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate release notes from CHANGELOG.md
+        id: notes
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        continue-on-error: true
+      - name: Fallback to CHANGELOG section
+        if: steps.notes.outcome != 'success'
+        run: |
+          # If git-cliff isn't configured, just paste the [Unreleased] section.
+          awk '/^## /{n++} n==1' CHANGELOG.md > RELEASE_NOTES.md || true
+          echo "Generated fallback release notes from CHANGELOG.md"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ steps.notes.outputs.changelog || 'RELEASE_NOTES.md' }}
+          tag_name: v${{ needs.verify.outputs.version }}
+          name: starsight v${{ needs.verify.outputs.version }}
+          draft: false
+          prerelease: ${{ startsWith(needs.verify.outputs.version, '0.') }}
+          generate_release_notes: false

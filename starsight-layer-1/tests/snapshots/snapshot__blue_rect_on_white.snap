@@ -1,0 +1,6 @@
+---
+source: starsight-layer-1/tests/snapshot_basic.rs
+expression: bytes
+extension: png
+snapshot_kind: binary
+---

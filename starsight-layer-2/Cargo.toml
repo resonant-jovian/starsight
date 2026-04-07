@@ -1,0 +1,23 @@
+[package]
+name = "starsight-layer-2"
+version.workspace = true
+edition.workspace = true
+description = "Layer 2: Scale, axis, coordinate"
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+documentation.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish = true
+
+[dependencies]
+starsight-layer-1.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

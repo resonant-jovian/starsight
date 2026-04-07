@@ -1,0 +1,77 @@
+name: Snapshots
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "starsight-layer-1/**"
+      - "starsight-layer-2/**"
+      - "starsight-layer-3/**"
+      - "starsight-layer-4/**"
+      - "starsight-layer-5/**"
+      - "starsight-layer-6/**"
+      - "starsight-layer-7/**"
+      - "starsight/**"
+  pull_request:
+    paths:
+      - "starsight-layer-1/**"
+      - "starsight-layer-2/**"
+      - "starsight-layer-3/**"
+      - "starsight-layer-4/**"
+      - "starsight-layer-5/**"
+      - "starsight-layer-6/**"
+      - "starsight-layer-7/**"
+      - "starsight/**"
+  workflow_dispatch:
+
+concurrency:
+  group: snapshots-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
+
+jobs:
+  snapshots:
+    name: insta snapshot tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # Use the prebuilt binary instead of `cargo install` to save 1-2 minutes.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-insta
+      # cargo-insta has no way to forward `--locked` to its internal cargo
+      # invocation: putting `--locked` before `--` is rejected by cargo-insta's
+      # own parser, and putting it after `--` forwards it to the test binary
+      # (libtest), which also doesn't recognize it. Workaround: run a separate
+      # `cargo test --no-run --locked` step first — this both verifies the
+      # lockfile *and* pre-builds the test binaries, so the subsequent
+      # `cargo insta test` only runs the existing binaries.
+      #
+      # NB: we deliberately do NOT set CARGO_NET_OFFLINE=true here. cargo-insta
+      # invokes `cargo metadata` to enumerate the workspace, and that resolves
+      # every entry in `[workspace.dependencies]` — including ones (like
+      # `anyhow`) that are declared for future use but not consumed by any
+      # member, so they wouldn't have been pre-fetched by the build step.
+      # Allowing network access for the metadata call is harmless: cargo-insta
+      # doesn't modify Cargo.toml, so the lockfile can't drift after step 1.
+      - name: Verify lockfile and pre-build test binaries
+        run: cargo test --workspace --no-run --locked
+      - name: Run snapshot tests
+        run: cargo insta test --workspace --check --unreferenced reject
+      - name: Upload mismatched snapshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-failures
+          path: |
+            **/snapshots/*.snap.new
+            **/snapshots/*.snap.new.png
+          if-no-files-found: ignore
+          retention-days: 14

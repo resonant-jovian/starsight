@@ -1,0 +1,25 @@
+[package]
+name = "starsight-layer-5"
+version.workspace = true
+edition.workspace = true
+description = "Layer 5: High-level API"
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+documentation.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish = true
+
+[dependencies]
+starsight-layer-1.workspace = true
+starsight-layer-2.workspace = true
+starsight-layer-3.workspace = true
+starsight-layer-4.workspace = true
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true

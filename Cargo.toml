@@ -1,0 +1,114 @@
+[workspace]
+members = [
+  "starsight",
+  "starsight-layer-1",
+  "starsight-layer-2",
+  "starsight-layer-3",
+  "starsight-layer-4",
+  "starsight-layer-5",
+  "starsight-layer-6",
+  "starsight-layer-7",
+  "xtask",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "A unified scientific visualization crate for Rust — from zero-config one-liners to GPU-accelerated interactive 3D."
+license = "GPL-3.0-only"
+authors = ["Albin Sjögren <albin@sjoegren.se>"]
+repository = "https://github.com/resonant-jovian/starsight"
+documentation = "https://docs.rs/starsight"
+readme = "README.md"
+keywords = ["plot", "chart", "scientific", "visualization", "data-viz"]
+categories = ["no-std", "science", "visualization"]
+
+# Dependency comments are globally aligned: name+version padded to col 25,
+# `#` at col 26, description padded to 32 chars, license at the end.
+# Keep this as one block (no blank lines between groups) so the formatter
+# aligns the whole table together rather than per-group.
+[workspace.dependencies]
+# Rendering & graphics
+wgpu                     = "29.0.1"        # WebGPU / native GPU API          MIT OR Apache-2.0
+vello                    = "0.8.0"         # GPU 2D vector renderer           Apache-2.0 OR MIT
+tiny-skia                = "0.12.0"        # CPU 2D rasterizer                BSD-3-Clause
+lyon                     = "1.0.19"        # Vector path tessellation         MIT OR Apache-2.0
+cosmic-text              = "0.18.2"        # Unicode text shaping             MIT OR Apache-2.0
+parley                   = "0.8.0"         # Rich text layout                 Apache-2.0 OR MIT
+ab_glyph                 = "0.2.32"        # OpenType glyph loading           Apache-2.0
+# Data & math
+polars                   = "0.53.0"        # DataFrame library                MIT
+ndarray                  = "0.17.2"        # N-dimensional arrays             MIT OR Apache-2.0
+nalgebra                 = "0.34.2"        # Linear algebra                   Apache-2.0
+arrow                    = "58.1.0"        # Apache Arrow columnar            Apache-2.0
+# Color
+palette                  = "0.7.6"         # Color spaces & conversion        MIT OR Apache-2.0
+chromata                 = "1.0.0"         # 1,104 editor colour themes       GPL-3.0-only
+prismatica               = "1.0.0"         # 260+ scientific colormaps        GPL-3.0-only
+# Statistics
+statrs                   = "0.18.0"        # Statistical distributions        MIT
+contour                  = "0.13.1"        # Contour line generation          MIT OR Apache-2.0
+delaunator               = "1.0.2"         # Delaunay triangulation           ISC
+# Export
+image                    = "0.25.10"       # Image format I/O                 MIT OR Apache-2.0
+resvg                    = "0.47.0"        # SVG renderer                     Apache-2.0 OR MIT
+usvg                     = "0.47.0"        # SVG simplification               Apache-2.0 OR MIT
+svg                      = "0.18.0"        # SVG document writer              Apache-2.0 OR MIT
+krilla                   = "0.7.0"         # PDF writer (high level)          MIT OR Apache-2.0
+pdf-writer               = "0.14.0"        # PDF writer (low level)           MIT OR Apache-2.0
+printpdf                 = "0.9.1"         # PDF builder                      MIT
+# Terminal
+crossterm                = "0.29.0"        # Cross-platform terminal          MIT
+ratatui                  = "0.30.0"        # Terminal UI framework            MIT
+ratatui-image            = "10.0.6"        # Inline images in ratatui         MIT
+viuer                    = "0.11.0"        # Terminal image viewer            MIT
+# GUI
+winit                    = "0.31.0-beta.2" # Cross-platform windowing         Apache-2.0
+egui                     = "0.34.1"        # Immediate-mode GUI               MIT OR Apache-2.0
+egui-plotter             = "0.6.0"         # Plotting widget for egui         MIT
+# WASM
+wasm-bindgen             = "0.2.117"       # Rust ↔ JS bindings               MIT OR Apache-2.0
+web-sys                  = "0.3.94"        # Web API bindings                 MIT OR Apache-2.0
+# Geospatial
+geo                      = "0.32.0"        # Geometric primitives             MIT OR Apache-2.0
+proj                     = "0.31.0"        # Coordinate transforms            MIT OR Apache-2.0
+geojson                  = "1.0.0"         # GeoJSON parser                   MIT OR Apache-2.0
+# Utilities
+serde                    = "1.0.228"       # Serialization framework          MIT OR Apache-2.0
+clap                     = "4.6.0"         # CLI argument parser              MIT OR Apache-2.0
+insta                    = "1.47.2"        # Snapshot testing                 Apache-2.0
+proptest                 = "1.11.0"        # Property-based testing           MIT OR Apache-2.0
+# Logging & error handling
+log                      = "0.4.29"        # Logging facade                   MIT OR Apache-2.0
+tracing                  = "0.1.44"        # Structured logging               MIT
+thiserror                = "2.0.18"        # Error derive macro               MIT OR Apache-2.0
+anyhow                   = "1.0.102"       # Trait-object error type          MIT OR Apache-2.0
+# Reference & comparison (not actually used; kept for benchmarking only)
+plotters                 = "0.3.7"         # Mature Rust plotting             MIT
+charming                 = "0.6.0"         # Apache ECharts wrapper           MIT OR Apache-2.0
+plotly                   = "0.14.1"        # Plotly.js wrapper                MIT
+plotlars                 = "0.11.8"        # Plotly + Polars integration      MIT
+# Internal — workspace path dependencies (all GPL-3.0-only)
+starsight                = { path = "starsight" }
+starsight-layer-1        = { path = "starsight-layer-1" }
+starsight-layer-2        = { path = "starsight-layer-2" }
+starsight-layer-3        = { path = "starsight-layer-3" }
+starsight-layer-4        = { path = "starsight-layer-4" }
+starsight-layer-5        = { path = "starsight-layer-5" }
+starsight-layer-6        = { path = "starsight-layer-6" }
+starsight-layer-7        = { path = "starsight-layer-7" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1

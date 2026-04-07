@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "starsight: unified scientific visualization for Rust"
+abstract: >-
+  A unified scientific visualization crate for Rust — from zero-config one-liners
+  to GPU-accelerated interactive 3D. Organized into seven layered crates with a
+  single facade. Part of the resonant-jovian ecosystem.
+type: software
+authors:
+  - family-names: "Sjögren"
+    given-names: "Albin"
+    orcid: "https://orcid.org/0009-0008-1372-1727"
+repository-code: "https://github.com/resonant-jovian/starsight"
+url: "https://github.com/resonant-jovian/starsight"
+license: GPL-3.0-only
+keywords:
+  - plot
+  - chart
+  - scientific
+  - visualization
+  - data-viz
+  - rust
+  - tiny-skia
+  - wgpu
