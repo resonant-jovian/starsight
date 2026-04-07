@@ -46,10 +46,20 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-insta
+      # cargo-insta has no way to forward `--locked` to its internal cargo
+      # invocation: putting `--locked` before `--` is rejected by cargo-insta's
+      # own parser, and putting it after `--` forwards it to the test binary
+      # (libtest), which also doesn't recognize it. Workaround: pre-build the
+      # test binaries with `--locked` (which both verifies the lockfile *and*
+      # produces the artifacts), then run `cargo insta test` against the
+      # already-built binaries with `CARGO_NET_OFFLINE=true` so it can never
+      # silently re-resolve.
+      - name: Verify lockfile and pre-build test binaries
+        run: cargo test --workspace --no-run --locked
       - name: Run snapshot tests
-        # `--locked` is a cargo flag, not a cargo-insta flag, so it must come
-        # after `--` to be forwarded to the underlying `cargo test` invocation.
-        run: cargo insta test --workspace --check --unreferenced reject -- --locked
+        env:
+          CARGO_NET_OFFLINE: "true"
+        run: cargo insta test --workspace --check --unreferenced reject
       - name: Upload mismatched snapshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
