@@ -30,7 +30,7 @@ absolute-paths-max-segments = 2
 # ── Safety comments ───────────────────────────────────────────────────────
 # undocumented_unsafe_blocks
 accept-comment-above-attributes = true
-accept-comment-above-statement   = true
+accept-comment-above-statement = true
 
 # ── Test helpers ──────────────────────────────────────────────────────────
 # dbg_macro
@@ -38,11 +38,11 @@ allow-dbg-in-tests = false
 
 # expect_used
 allow-expect-in-consts = true
-allow-expect-in-tests  = false
+allow-expect-in-tests = false
 
 # unwrap_used
 allow-unwrap-in-consts = true
-allow-unwrap-in-tests  = false
+allow-unwrap-in-tests = false
 
 # expect_used + unwrap_used
 # allow-unwrap-types = []
@@ -74,9 +74,9 @@ allow-useless-vec-in-tests = false
 # ── Naming ────────────────────────────────────────────────────────────────
 # renamed_function_params
 allow-renamed-params-for = [
-    "core::convert::From",
-    "core::convert::TryFrom",
-    "core::str::FromStr",
+  "core::convert::From",
+  "core::convert::TryFrom",
+  "core::str::FromStr",
 ]
 
 # module_name_repetitions
@@ -97,7 +97,7 @@ min-ident-chars-threshold = 1
 struct-field-name-threshold = 3
 
 # enum_variant_names
-enum-variant-name-threshold  = 3
+enum-variant-name-threshold = 3
 
 # many_single_char_names
 single-char-binding-names-threshold = 4
@@ -177,30 +177,89 @@ max-trait-bounds = 3
 # ── Lints / documentation ─────────────────────────────────────────────────
 # doc_markdown
 doc-valid-idents = [
-    "KiB", "MiB", "GiB", "TiB", "PiB", "EiB",
-    "MHz", "GHz", "THz",
-    "AccessKit", "CoAP", "CoreFoundation", "CoreGraphics", "CoreText",
-    "DevOps", "Direct2D", "Direct3D", "DirectWrite", "DirectX",
-    "ECMAScript", "GPLv2", "GPLv3", "GitHub", "GitLab",
-    "IPv4", "IPv6", "InfiniBand", "RoCE",
-    "ClojureScript", "CoffeeScript", "JavaScript", "PostScript",
-    "PureScript", "TypeScript", "PowerPC", "PowerShell", "WebAssembly",
-    "NaN", "NaNs", "OAuth", "GraphQL",
-    "OCaml", "OpenAL", "OpenDNS", "OpenGL", "OpenMP",
-    "OpenSSH", "OpenSSL", "OpenStreetMap", "OpenTelemetry", "OpenType",
-    "WebGL", "WebGL2", "WebGPU", "WebRTC", "WebSocket",
-    "WebTransport", "WebP", "OpenExr", "YCbCr", "sRGB",
-    "TensorFlow", "TrueType",
-    "iOS", "macOS", "FreeBSD", "NetBSD", "OpenBSD", "NixOS",
-    "TeX", "LaTeX", "BibTeX", "BibLaTeX", "MinGW", "CamelCase",
+  "KiB",
+  "MiB",
+  "GiB",
+  "TiB",
+  "PiB",
+  "EiB",
+  "MHz",
+  "GHz",
+  "THz",
+  "AccessKit",
+  "CoAP",
+  "CoreFoundation",
+  "CoreGraphics",
+  "CoreText",
+  "DevOps",
+  "Direct2D",
+  "Direct3D",
+  "DirectWrite",
+  "DirectX",
+  "ECMAScript",
+  "GPLv2",
+  "GPLv3",
+  "GitHub",
+  "GitLab",
+  "IPv4",
+  "IPv6",
+  "InfiniBand",
+  "RoCE",
+  "ClojureScript",
+  "CoffeeScript",
+  "JavaScript",
+  "PostScript",
+  "PureScript",
+  "TypeScript",
+  "PowerPC",
+  "PowerShell",
+  "WebAssembly",
+  "NaN",
+  "NaNs",
+  "OAuth",
+  "GraphQL",
+  "OCaml",
+  "OpenAL",
+  "OpenDNS",
+  "OpenGL",
+  "OpenMP",
+  "OpenSSH",
+  "OpenSSL",
+  "OpenStreetMap",
+  "OpenTelemetry",
+  "OpenType",
+  "WebGL",
+  "WebGL2",
+  "WebGPU",
+  "WebRTC",
+  "WebSocket",
+  "WebTransport",
+  "WebP",
+  "OpenExr",
+  "YCbCr",
+  "sRGB",
+  "TensorFlow",
+  "TrueType",
+  "iOS",
+  "macOS",
+  "FreeBSD",
+  "NetBSD",
+  "OpenBSD",
+  "NixOS",
+  "TeX",
+  "LaTeX",
+  "BibTeX",
+  "BibLaTeX",
+  "MinGW",
+  "CamelCase",
 ]
 
 # missing_errors_doc + missing_panics_doc + missing_safety_doc + unnecessary_safety_doc
 check-private-items = false
 
 # missing_docs_in_private_items
-missing-docs-allow-unused    = false
-missing-docs-in-crate-items  = false
+missing-docs-allow-unused = false
+missing-docs-in-crate-items = false
 
 # ── API surface ───────────────────────────────────────────────────────────
 # box_collection, enum_variant_names, large_types_passed_by_value, linkedlist,
@@ -326,13 +385,57 @@ source-item-ordering = ["enum", "impl", "module", "struct", "trait"]
 trait-assoc-item-kinds-order = ["const", "type", "fn"]
 module-items-ordered-within-groupings = "none"
 module-item-order-groupings = [
-    ["modules",        ["extern_crate", "mod", "foreign_mod"]],
-    ["use",            ["use"]],
-    ["macros",         ["macro"]],
-    ["global_asm",     ["global_asm"]],
-    ["UPPER_SNAKE_CASE", ["static", "const"]],
-    ["PascalCase",     ["ty_alias", "enum", "struct", "union", "trait", "trait_alias", "impl"]],
-    ["lower_snake_case", ["fn"]],
+  [
+    "modules",
+    [
+      "extern_crate",
+      "mod",
+      "foreign_mod",
+    ],
+  ],
+  [
+    "use",
+    [
+      "use",
+    ],
+  ],
+  [
+    "macros",
+    [
+      "macro",
+    ],
+  ],
+  [
+    "global_asm",
+    [
+      "global_asm",
+    ],
+  ],
+  [
+    "UPPER_SNAKE_CASE",
+    [
+      "static",
+      "const",
+    ],
+  ],
+  [
+    "PascalCase",
+    [
+      "ty_alias",
+      "enum",
+      "struct",
+      "union",
+      "trait",
+      "trait_alias",
+      "impl",
+    ],
+  ],
+  [
+    "lower_snake_case",
+    [
+      "fn",
+    ],
+  ],
 ]
 
 # ── indexing_slicing  (restriction) ───────────────────────────────────────

@@ -16,52 +16,52 @@
 # when it is set to "Default" or "Max". Set them here to fix their values
 # regardless of `max_width`.
 # Possible values: "Default", "Off", "Max"
-use_small_heuristics            = "Default"
+use_small_heuristics = "Default"
 
-max_width                       = 100
-array_width                     = 60        # 60% of max_width (Default)
-attr_fn_like_width              = 70        # 70% of max_width (Default)
-chain_width                     = 60        # 60% of max_width (Default)
-fn_call_width                   = 60        # 60% of max_width (Default)
-single_line_if_else_max_width   = 50        # 50% of max_width (Default)
-single_line_let_else_max_width  = 50        # 50% of max_width (Default)
-struct_lit_width                = 18        # 18% of max_width (Default)
-struct_variant_width            = 35        # 35% of max_width (Default)
+max_width = 100
+array_width = 60                         # 60% of max_width (Default)
+attr_fn_like_width = 70                  # 70% of max_width (Default)
+chain_width = 60                         # 60% of max_width (Default)
+fn_call_width = 60                       # 60% of max_width (Default)
+single_line_if_else_max_width = 50       # 50% of max_width (Default)
+single_line_let_else_max_width = 50      # 50% of max_width (Default)
+struct_lit_width = 18                    # 18% of max_width (Default)
+struct_variant_width = 35                # 35% of max_width (Default)
 short_array_element_width_threshold = 10
 
 # ── Indentation ───────────────────────────────────────────────────────────
-hard_tabs                       = false
-tab_spaces                      = 4
+hard_tabs = false
+tab_spaces = 4
 
 # ── Line endings ──────────────────────────────────────────────────────────
 # Possible values: "Auto", "Native", "Unix", "Windows"
-newline_style                   = "Auto"
+newline_style = "Auto"
 
 # ── Edition / style ───────────────────────────────────────────────────────
 # Determines the parser edition. `cargo fmt` reads this from Cargo.toml
 # automatically; set explicitly when running `rustfmt` directly.
 # Possible values: "2015", "2018", "2021", "2024"
-edition                         = "2024"    # def = "2015"
+edition = "2024" # def = "2015"
 
 # ── Function / parameter layout ───────────────────────────────────────────
 # Possible values: "Compressed", "Tall", "Vertical"
-fn_params_layout                = "Tall"
+fn_params_layout = "Tall"
 # [DEPRECATED] Renamed to fn_params_layout. Left in for older toolchains.
 #fn_args_layout                  = "Tall"
 
 # ── Imports ───────────────────────────────────────────────────────────────
-reorder_imports                 = true
-reorder_modules                 = true
+reorder_imports = true
+reorder_modules = true
 
 # ── Misc formatting ───────────────────────────────────────────────────────
-disable_all_formatting          = false
-force_explicit_abi              = true
-match_arm_leading_pipes         = "Never"   # Possible: "Always", "Never", "Preserve"
-match_block_trailing_comma      = false
-merge_derives                   = true
-remove_nested_parens            = true
-use_field_init_shorthand        = false
-use_try_shorthand               = false
+disable_all_formatting = false
+force_explicit_abi = true
+match_arm_leading_pipes = "Never"  # Possible: "Always", "Never", "Preserve"
+match_block_trailing_comma = false
+merge_derives = true
+remove_nested_parens = true
+use_field_init_shorthand = false
+use_try_shorthand = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -72,107 +72,107 @@ use_try_shorthand               = false
 # │ This gate must be `true` for any option in this section to take      │
 # │ effect. Set it to `false` to silently ignore all unstable options.   │
 # └──────────────────────────────────────────────────────────────────────┘
-unstable_features               = false     # <--- IMPORTANT
+unstable_features = false # <--- IMPORTANT
 
 # ── Style edition (unstable variant) ─────────────────────────────────────
 # Controls which edition of the Rust Style Guide is applied.
 # Inferred from `edition` if not set. Prefer this over the deprecated
 # `version` key below.
 # Possible values: "2015", "2018", "2021", "2024" (2024 is unstable)
-style_edition                   = "2024"    # def = "2015"
+style_edition = "2024" # def = "2015"
 
 # ── Binary operator placement ─────────────────────────────────────────────
 # Possible values: "Front", "Back"
-binop_separator                 = "Front"
+binop_separator = "Front"
 
 # ── Blank lines ───────────────────────────────────────────────────────────
-blank_lines_lower_bound         = 0
-blank_lines_upper_bound         = 1
+blank_lines_lower_bound = 0
+blank_lines_upper_bound = 1
 
 # ── Brace style ───────────────────────────────────────────────────────────
 # Possible values: "AlwaysNextLine", "PreferSameLine", "SameLineWhere"
-brace_style                     = "SameLineWhere"
+brace_style = "SameLineWhere"
 # Possible values: "AlwaysNextLine", "AlwaysSameLine", "ClosingNextLine"
-control_brace_style             = "AlwaysSameLine"
+control_brace_style = "AlwaysSameLine"
 
 # ── Color output ──────────────────────────────────────────────────────────
 # Possible values: "Auto", "Always", "Never"
-color                           = "Auto"
+color = "Auto"
 
 # ── Comments ──────────────────────────────────────────────────────────────
-wrap_comments                   = false
-comment_width                   = 80        # Only active when wrap_comments = true
-normalize_comments              = false
-normalize_doc_attributes        = false
+wrap_comments = false
+comment_width = 80               # Only active when wrap_comments = true
+normalize_comments = false
+normalize_doc_attributes = false
 
 # ── Control flow ──────────────────────────────────────────────────────────
-combine_control_expr            = true
-condense_wildcard_suffixes      = false
+combine_control_expr = true
+condense_wildcard_suffixes = false
 
 # ── Doc comments / code blocks ────────────────────────────────────────────
-format_code_in_doc_comments     = false     # Consider changing
-doc_comment_code_block_width    = 100       # Only active when format_code_in_doc_comments = true
+format_code_in_doc_comments = false # Consider changing
+doc_comment_code_block_width = 100  # Only active when format_code_in_doc_comments = true
 
 # ── Empty items ───────────────────────────────────────────────────────────
-empty_item_single_line          = true
+empty_item_single_line = true
 
 # ── Enum discriminants ────────────────────────────────────────────────────
-enum_discrim_align_threshold    = 0
+enum_discrim_align_threshold = 0
 
 # ── Error handling ────────────────────────────────────────────────────────
-error_on_line_overflow          = false
-error_on_unformatted            = false
-show_parse_errors               = true
+error_on_line_overflow = false
+error_on_unformatted = false
+show_parse_errors = true
 # [DEPRECATED] Renamed to show_parse_errors (inverted polarity).
 # hide_parse_errors             = false
 
 # ── File / generation control ─────────────────────────────────────────────
-format_generated_files          = true
+format_generated_files = true
 generated_marker_line_search_limit = 5
-skip_children                   = false
+skip_children = false
 # ignore = []                             # gitignore-style patterns
 
 # ── Floats and hex ────────────────────────────────────────────────────────
 # Possible values: "Preserve", "Upper", "Lower"
-hex_literal_case                = "Preserve"
+hex_literal_case = "Preserve"
 # Possible values: "Preserve", "Always", "IfNoPostfix", "Never"
 #float_literal_trailing_zero     = "Preserve"
 
 # ── Functions ─────────────────────────────────────────────────────────────
-fn_single_line                  = false
-force_multiline_blocks          = false
+fn_single_line = false
+force_multiline_blocks = false
 
 # ── Imports ───────────────────────────────────────────────────────────────
 # Possible values: "Block", "Visual"
-imports_indent                  = "Block"
+imports_indent = "Block"
 # Possible values: "Horizontal", "HorizontalVertical", "Mixed", "Vertical"
-imports_layout                  = "Mixed"
+imports_layout = "Mixed"
 # Possible values: "Preserve", "Crate", "Module", "Item", "One"
-imports_granularity             = "Preserve"
+imports_granularity = "Preserve"
 # Possible values: "Preserve", "StdExternalCrate", "One"
-group_imports                   = "Preserve"
+group_imports = "Preserve"
 # [DEPRECATED] Use imports_granularity = "Crate" instead.
 #merge_imports                   = false     # Consider changing
 
 # ── Indentation style ─────────────────────────────────────────────────────
 # Possible values: "Block", "Visual"
-indent_style                    = "Block"
+indent_style = "Block"
 
 # ── Inline attributes ─────────────────────────────────────────────────────
-inline_attribute_width          = 0
+inline_attribute_width = 0
 
 # ── Macros ────────────────────────────────────────────────────────────────
-format_macro_matchers           = false
-format_macro_bodies             = true
-format_strings                  = false
-skip_macro_invocations          = []
+format_macro_matchers = false
+format_macro_bodies = true
+format_strings = false
+skip_macro_invocations = []
 
 # ── Match arms ────────────────────────────────────────────────────────────
-match_arm_blocks                = true
+match_arm_blocks = true
 #match_arm_indent                = true
 
 # ── Ordering ──────────────────────────────────────────────────────────────
-reorder_impl_items              = false
+reorder_impl_items = false
 
 # ── Required version ──────────────────────────────────────────────────────
 # Uncomment to pin the exact rustfmt version used in CI.
@@ -180,25 +180,25 @@ reorder_impl_items              = false
 # required_version              = CARGO_PKG_VERSION
 
 # ── Spacing ───────────────────────────────────────────────────────────────
-space_after_colon               = true
-space_before_colon              = false
-spaces_around_ranges            = false
+space_after_colon = true
+space_before_colon = false
+spaces_around_ranges = false
 
 # ── Struct formatting ─────────────────────────────────────────────────────
-struct_field_align_threshold    = 0
-struct_lit_single_line          = true
+struct_field_align_threshold = 0
+struct_lit_single_line = true
 
 # ── Trailing tokens ───────────────────────────────────────────────────────
 # Possible values: "Always", "Never", "Vertical"
-trailing_comma                  = "Vertical"
-trailing_semicolon              = true
+trailing_comma = "Vertical"
+trailing_semicolon = true
 
 # ── Type punctuation ──────────────────────────────────────────────────────
 # Possible values: "Compressed", "Wide"
-type_punctuation_density        = "Wide"
+type_punctuation_density = "Wide"
 
 # ── Where clause ──────────────────────────────────────────────────────────
-where_single_line               = false
+where_single_line = false
 
 # ── Version (deprecated) ──────────────────────────────────────────────────
 # [DEPRECATED] Replaced by style_edition.
