@@ -49,16 +49,21 @@ jobs:
       # cargo-insta has no way to forward `--locked` to its internal cargo
       # invocation: putting `--locked` before `--` is rejected by cargo-insta's
       # own parser, and putting it after `--` forwards it to the test binary
-      # (libtest), which also doesn't recognize it. Workaround: pre-build the
-      # test binaries with `--locked` (which both verifies the lockfile *and*
-      # produces the artifacts), then run `cargo insta test` against the
-      # already-built binaries with `CARGO_NET_OFFLINE=true` so it can never
-      # silently re-resolve.
+      # (libtest), which also doesn't recognize it. Workaround: run a separate
+      # `cargo test --no-run --locked` step first — this both verifies the
+      # lockfile *and* pre-builds the test binaries, so the subsequent
+      # `cargo insta test` only runs the existing binaries.
+      #
+      # NB: we deliberately do NOT set CARGO_NET_OFFLINE=true here. cargo-insta
+      # invokes `cargo metadata` to enumerate the workspace, and that resolves
+      # every entry in `[workspace.dependencies]` — including ones (like
+      # `anyhow`) that are declared for future use but not consumed by any
+      # member, so they wouldn't have been pre-fetched by the build step.
+      # Allowing network access for the metadata call is harmless: cargo-insta
+      # doesn't modify Cargo.toml, so the lockfile can't drift after step 1.
       - name: Verify lockfile and pre-build test binaries
         run: cargo test --workspace --no-run --locked
       - name: Run snapshot tests
-        env:
-          CARGO_NET_OFFLINE: "true"
         run: cargo insta test --workspace --check --unreferenced reject
       - name: Upload mismatched snapshots on failure
         if: failure()
