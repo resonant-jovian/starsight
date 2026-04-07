@@ -90,15 +90,20 @@ plotters                 = "0.3.7"         # Mature Rust plotting             MI
 charming                 = "0.6.0"         # Apache ECharts wrapper           MIT OR Apache-2.0
 plotly                   = "0.14.1"        # Plotly.js wrapper                MIT
 plotlars                 = "0.11.8"        # Plotly + Polars integration      MIT
-# Internal — workspace path dependencies (all GPL-3.0-only)
-starsight                = { path = "starsight" }
-starsight-layer-1        = { path = "starsight-layer-1" }
-starsight-layer-2        = { path = "starsight-layer-2" }
-starsight-layer-3        = { path = "starsight-layer-3" }
-starsight-layer-4        = { path = "starsight-layer-4" }
-starsight-layer-5        = { path = "starsight-layer-5" }
-starsight-layer-6        = { path = "starsight-layer-6" }
-starsight-layer-7        = { path = "starsight-layer-7" }
+# Internal — workspace path dependencies (all GPL-3.0-only).
+# Both `version` and `path` are required: `path` is used during local
+# `cargo build`, and `version` is required by `cargo publish` (which strips
+# `path` from the published manifest, leaving only the version requirement
+# against crates.io). When bumping `[workspace.package].version`, bump these
+# too — or use a tool like `cargo-release` to keep them in sync.
+starsight                = { version = "0.1.0", path = "starsight" }
+starsight-layer-1        = { version = "0.1.0", path = "starsight-layer-1" }
+starsight-layer-2        = { version = "0.1.0", path = "starsight-layer-2" }
+starsight-layer-3        = { version = "0.1.0", path = "starsight-layer-3" }
+starsight-layer-4        = { version = "0.1.0", path = "starsight-layer-4" }
+starsight-layer-5        = { version = "0.1.0", path = "starsight-layer-5" }
+starsight-layer-6        = { version = "0.1.0", path = "starsight-layer-6" }
+starsight-layer-7        = { version = "0.1.0", path = "starsight-layer-7" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
