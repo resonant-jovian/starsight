@@ -1,10 +1,10 @@
-pub use starsight_layer_1::backend::DrawBackend;
-pub use starsight_layer_1::backend::skia::SkiaBackend;
-pub use starsight_layer_1::error::{Result, StarsightError};
-pub use starsight_layer_1::primitives::color::Color;
-pub use starsight_layer_1::primitives::geom::{Point, Rect, Size, Vec2};
-pub use starsight_layer_3::mark::{LineMark, Mark, PointMark};
-pub use starsight_layer_5::Figure;
+pub use starsight_layer_1 as background;
+pub use starsight_layer_2 as modifiers;
+pub use starsight_layer_3 as components;
+pub use starsight_layer_4 as composition;
+pub use starsight_layer_5 as common;
+pub use starsight_layer_6 as interactivity;
+pub use starsight_layer_7 as export;
 
 pub mod prelude;
 
@@ -12,7 +12,7 @@ pub mod prelude;
 #[macro_export]
 macro_rules! plot {
     ($x:expr, $y:expr $(,)?) => {{
-        $crate::Figure::from_arrays(
+        $crate::common::Figure::from_arrays(
             $x.into_iter().map(|&v| v as f64),
             $y.into_iter().map(|&v| v as f64),
         )

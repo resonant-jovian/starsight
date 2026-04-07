@@ -1,7 +1,4 @@
 //!
-pub mod headless;
-pub mod png;
-pub mod raster;
 use crate::backend::{DrawBackend, PathCommand};
 use crate::error::{Result, StarsightError};
 use crate::primitives::color::Color;
@@ -179,7 +176,7 @@ impl DrawBackend for SkiaBackend {
             .save_png(path)
             .map_err(|e| StarsightError::Export(e.to_string()))
     }
-    fn save_svg(&self, path: &Path) -> Result<()> {
+    fn save_svg(&self, _path: &Path) -> Result<()> {
         Err(StarsightError::Export(
             "Raster backend cannot save SVG directly; use SvgBackend".into(),
         ))

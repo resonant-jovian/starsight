@@ -5,22 +5,23 @@ use crate::primitives::{
     geom::{Point, Rect},
 };
 use svg::Document;
-use svg::node::element::{ClipPath, Group, Path as SvgPath, Rectangle, Text as SvgText};
+use svg::node::element::{Path as SvgPath, Rectangle, Text as SvgText};
 // -------------------------------------------------------------------------------------------------
 pub struct SvgBackend {
     width: u32,
     height: u32,
     elements: Vec<Box<dyn svg::Node>>,
-    clip_id: usize,
+    //clip_id: usize,
 }
 // -------------------------------------------------------------------------------------------------
 impl SvgBackend {
+    #[must_use]
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             width,
             height,
             elements: Vec::new(),
-            clip_id: 0,
+            //clip_id: 0,
         }
     }
 
@@ -36,6 +37,7 @@ impl SvgBackend {
         doc
     }
 
+    #[must_use]
     pub fn svg_string(&self) -> String {
         self.build_document().to_string()
     }
@@ -71,9 +73,10 @@ impl DrawBackend for SvgBackend {
             .set("stroke-width", style.stroke_width)
             .set(
                 "fill",
-                style
-                    .fill_color
-                    .map_or("none".to_string(), |c| c.to_css_hex()),
+                style.fill_color.map_or(
+                    "none".to_string(),
+                    super::super::primitives::color::Color::to_css_hex,
+                ),
             );
         self.elements.push(Box::new(p));
         Ok(())
@@ -96,7 +99,7 @@ impl DrawBackend for SvgBackend {
         Ok(())
     }
 
-    fn set_clip(&mut self, rect: Option<Rect>) -> Result<()> {
+    fn set_clip(&mut self, _rect: Option<Rect>) -> Result<()> {
         todo!()
     }
 

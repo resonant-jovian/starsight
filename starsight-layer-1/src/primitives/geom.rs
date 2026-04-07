@@ -12,6 +12,7 @@ impl Point {
     pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
     pub const X: Self = Self { x: 1.0, y: 0.0 };
     pub const Y: Self = Self { x: 0.0, y: 1.0 };
+    #[must_use]
     pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
@@ -58,6 +59,7 @@ pub struct Rect {
     pub bottom: f32,
 }
 impl Rect {
+    #[must_use]
     pub fn new(left: f32, top: f32, right: f32, bottom: f32) -> Self {
         Self {
             left,
@@ -78,6 +80,7 @@ impl From<tiny_skia::Rect> for Rect {
     }
 }
 impl Rect {
+    #[must_use]
     pub fn from_xywh(x: f32, y: f32, width: f32, height: f32) -> Self {
         Self {
             left: x,
@@ -87,6 +90,7 @@ impl Rect {
         }
     }
 
+    #[must_use]
     pub fn from_center_size(center: Point, size: Size) -> Self {
         let half_w = size.width * 0.5;
         let half_h = size.height * 0.5;
@@ -98,32 +102,40 @@ impl Rect {
         }
     }
 
+    #[must_use]
     pub fn width(&self) -> f32 {
         self.right - self.left
     }
+    #[must_use]
     pub fn height(&self) -> f32 {
         self.bottom - self.top
     }
+    #[must_use]
     pub fn size(&self) -> Size {
         Size::new(self.width(), self.height())
     }
+    #[must_use]
     pub fn center(&self) -> Point {
         Point::new(
             (self.left + self.right) * 0.5,
             (self.top + self.bottom) * 0.5,
         )
     }
+    #[must_use]
     pub fn top_left(&self) -> Point {
         Point::new(self.left, self.top)
     }
+    #[must_use]
     pub fn bottom_right(&self) -> Point {
         Point::new(self.right, self.bottom)
     }
 
+    #[must_use]
     pub fn contains(&self, p: Point) -> bool {
         p.x >= self.left && p.x <= self.right && p.y >= self.top && p.y <= self.bottom
     }
 
+    #[must_use]
     pub fn intersection(&self, other: &Rect) -> Option<Rect> {
         let r = Rect {
             left: self.left.max(other.left),
@@ -138,6 +150,7 @@ impl Rect {
         }
     }
 
+    #[must_use]
     pub fn pad(&self, amount: f32) -> Rect {
         Rect {
             left: self.left - amount,
@@ -148,6 +161,7 @@ impl Rect {
     }
 
     /// Returns None if left >= right or top >= bottom.
+    #[must_use]
     pub fn to_tiny_skia(&self) -> Option<tiny_skia::Rect> {
         tiny_skia::Rect::from_ltrb(self.left, self.top, self.right, self.bottom)
     }
@@ -168,6 +182,7 @@ pub struct Size {
     height: f32,
 }
 impl Size {
+    #[must_use]
     pub fn new(width: f32, height: f32) -> Self {
         Self { width, height }
     }
@@ -197,12 +212,15 @@ impl Vec2 {
     pub const ZERO: Self = Self { x: 0.0, y: 0.0 };
     pub const X: Self = Self { x: 1.0, y: 0.0 };
     pub const Y: Self = Self { x: 0.0, y: 1.0 };
+    #[must_use]
     pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
+    #[must_use]
     pub fn length(self) -> f32 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
+    #[must_use]
     pub fn normalize(self) -> Self {
         let len = self.length();
         if len == 0.0 {

@@ -28,6 +28,7 @@ pub struct LineMark {
 }
 
 impl LineMark {
+    #[must_use]
     pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
         Self {
             x,
@@ -36,10 +37,12 @@ impl LineMark {
             width: 2.0,
         }
     }
+    #[must_use]
     pub fn color(mut self, c: Color) -> Self {
         self.color = c;
         self
     }
+    #[must_use]
     pub fn width(mut self, w: f32) -> Self {
         self.width = w;
         self
@@ -97,6 +100,7 @@ pub struct PointMark {
 }
 
 impl PointMark {
+    #[must_use]
     pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
         Self {
             x,
@@ -105,10 +109,12 @@ impl PointMark {
             radius: 4.0,
         }
     }
+    #[must_use]
     pub fn color(mut self, c: Color) -> Self {
         self.color = c;
         self
     }
+    #[must_use]
     pub fn radius(mut self, r: f32) -> Self {
         self.radius = r;
         self
@@ -151,7 +157,7 @@ impl Mark for PointMark {
 /// Approximate a circle with 4 cubic bezier arcs.
 fn push_circle(cmds: &mut Vec<PathCommand>, c: Point, r: f32) {
     // Magic constant: 4/3 * (sqrt(2) - 1)
-    const K: f32 = 0.552_284_75;
+    const K: f32 = 0.552_284_8;
     let kr = K * r;
 
     cmds.push(PathCommand::MoveTo(Point::new(c.x + r, c.y)));

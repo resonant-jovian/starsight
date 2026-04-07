@@ -17,6 +17,7 @@ pub struct Figure {
 }
 
 impl Figure {
+    #[must_use]
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             marks: Vec::new(),
@@ -76,6 +77,7 @@ impl Figure {
         merged
     }
 
+    #[must_use]
     pub fn marks(&self) -> &[Box<dyn Mark>] {
         &self.marks
     }

@@ -1,6 +1,7 @@
 const Q: [f64; 6] = [1.0, 5.0, 2.0, 2.5, 4.0, 3.0];
 const W: [f64; 4] = [0.25, 0.2, 0.5, 0.05];
 
+#[must_use]
 pub fn wilkinson_extended(mut dmin: f64, mut dmax: f64, m: usize, only_loose: bool) -> Vec<f64> {
     let eps = f64::EPSILON * 100.0;
 

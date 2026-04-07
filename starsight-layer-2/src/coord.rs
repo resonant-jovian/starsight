@@ -10,17 +10,20 @@ pub struct CartesianCoord {
 
 impl CartesianCoord {
     /// Map a single data-space x value to a pixel-space x coordinate.
+    #[must_use]
     pub fn map_x(&self, x: f64) -> f64 {
         let nx = self.x_axis.scale.map(x);
-        self.plot_area.left as f64 + nx * self.plot_area.width() as f64
+        f64::from(self.plot_area.left) + nx * f64::from(self.plot_area.width())
     }
 
     /// Map a single data-space y value to a pixel-space y coordinate.
+    #[must_use]
     pub fn map_y(&self, y: f64) -> f64 {
         let ny = self.y_axis.scale.map(y);
-        self.plot_area.bottom as f64 - ny * self.plot_area.height() as f64
+        f64::from(self.plot_area.bottom) - ny * f64::from(self.plot_area.height())
     }
 
+    #[must_use]
     pub fn data_to_pixel(&self, x: f64, y: f64) -> Point {
         Point::new(self.map_x(x) as f32, self.map_y(y) as f32)
     }

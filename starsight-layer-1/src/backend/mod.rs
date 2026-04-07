@@ -87,6 +87,7 @@ impl Default for PathStyle {
 }
 
 impl PathStyle {
+    #[must_use]
     pub fn stroke(color: Color, width: f32) -> Self {
         Self {
             stroke_color: color,
@@ -94,6 +95,7 @@ impl PathStyle {
             ..Self::default()
         }
     }
+    #[must_use]
     pub fn fill(color: Color) -> Self {
         Self {
             fill_color: Some(color),
@@ -107,23 +109,33 @@ pub struct Path {
     pub commands: Vec<PathCommand>,
 }
 
+impl Default for Path {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Path {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             commands: Vec::new(),
         }
     }
 
+    #[must_use]
     pub fn move_to(mut self, p: Point) -> Self {
         self.commands.push(PathCommand::MoveTo(p));
         self
     }
 
+    #[must_use]
     pub fn line_to(mut self, p: Point) -> Self {
         self.commands.push(PathCommand::LineTo(p));
         self
     }
 
+    #[must_use]
     pub fn close(mut self) -> Self {
         self.commands.push(PathCommand::Close);
         self
@@ -142,29 +154,31 @@ pub enum PathCommand {
 pub struct Transform(pub(crate) tiny_skia::Transform);
 
 impl Transform {
+    #[must_use]
     pub fn identity() -> Self {
         Self(tiny_skia::Transform::identity())
     }
+    #[must_use]
     pub fn translate(dx: f32, dy: f32) -> Self {
         Self(tiny_skia::Transform::from_translate(dx, dy))
     }
+    #[must_use]
     pub fn scale(sx: f32, sy: f32) -> Self {
         Self(tiny_skia::Transform::from_scale(sx, sy))
     }
     /// NOTE: tiny-skia takes DEGREES, not radians.
+    #[must_use]
     pub fn rotate_degrees(angle: f32) -> Self {
         Self(tiny_skia::Transform::from_rotate(angle))
     }
 
+    #[must_use]
     pub fn then(self, other: Transform) -> Self {
         Self(self.0.post_concat(other.0))
     }
+    #[must_use]
     pub fn pre_translate(self, dx: f32, dy: f32) -> Self {
         Self(self.0.pre_translate(dx, dy))
-    }
-
-    pub(crate) fn as_tiny_skia(self) -> tiny_skia::Transform {
-        self.0
     }
 }
 impl std::fmt::Display for Transform {

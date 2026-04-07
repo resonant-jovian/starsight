@@ -6,9 +6,11 @@ pub struct Color {
     pub b: u8,
 }
 impl Color {
+    #[must_use]
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self { r, g, b }
     }
+    #[must_use]
     pub const fn from_hex(hex: u32) -> Self {
         Self {
             r: ((hex >> 16) & 0xFF) as u8,
@@ -26,6 +28,7 @@ impl Color {
     pub const GREEN: Self = Self { r: 0, g: 255, b: 0 };
     pub const BLUE: Self = Self { r: 0, g: 0, b: 255 };
 
+    #[must_use]
     pub const fn to_f32(self) -> (f32, f32, f32) {
         (
             self.r as f32 / 255.0,
@@ -34,6 +37,7 @@ impl Color {
         )
     }
 
+    #[must_use]
     pub fn from_f32(r: f32, g: f32, b: f32) -> Self {
         Self {
             r: (r.clamp(0.0, 1.0) * 255.0 + 0.5) as u8,
@@ -42,10 +46,12 @@ impl Color {
         }
     }
 
+    #[must_use]
     pub fn to_tiny_skia(self) -> tiny_skia::Color {
         tiny_skia::Color::from_rgba8(self.r, self.g, self.b, 255)
     }
 
+    #[must_use]
     pub fn with_alpha(self, a: u8) -> ColorAlpha {
         ColorAlpha {
             r: self.r,
@@ -54,6 +60,7 @@ impl Color {
             a,
         }
     }
+    #[must_use]
     pub fn from_css_hex(s: &str) -> Option<Self> {
         let hex = s.strip_prefix('#').unwrap_or(s);
         match hex.len() {
@@ -76,10 +83,12 @@ impl Color {
         }
     }
 
+    #[must_use]
     pub fn to_css_hex(self) -> String {
         format!("#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
     /// Based on WCAG calc
+    #[must_use]
     pub fn luminance(self) -> f64 {
         fn linearize(c: f64) -> f64 {
             if c <= 0.03928 {
@@ -88,12 +97,13 @@ impl Color {
                 ((c + 0.055) / 1.055).powf(2.4)
             }
         }
-        let r = linearize(self.r as f64 / 255.0);
-        let g = linearize(self.g as f64 / 255.0);
-        let b = linearize(self.b as f64 / 255.0);
+        let r = linearize(f64::from(self.r) / 255.0);
+        let g = linearize(f64::from(self.g) / 255.0);
+        let b = linearize(f64::from(self.b) / 255.0);
         0.2126 * r + 0.7152 * g + 0.0722 * b
     }
 
+    #[must_use]
     pub fn contrast_ratio(self, other: Color) -> f64 {
         let l1 = self.luminance();
         let l2 = other.luminance();
@@ -101,12 +111,13 @@ impl Color {
         (lighter + 0.05) / (darker + 0.05)
     }
 
+    #[must_use]
     pub fn lerp(self, other: Color, t: f32) -> Color {
         let t = t.clamp(0.0, 1.0);
         Color {
-            r: (self.r as f32 + (other.r as f32 - self.r as f32) * t) as u8,
-            g: (self.g as f32 + (other.g as f32 - self.g as f32) * t) as u8,
-            b: (self.b as f32 + (other.b as f32 - self.b as f32) * t) as u8,
+            r: (f32::from(self.r) + (f32::from(other.r) - f32::from(self.r)) * t) as u8,
+            g: (f32::from(self.g) + (f32::from(other.g) - f32::from(self.g)) * t) as u8,
+            b: (f32::from(self.b) + (f32::from(other.b) - f32::from(self.b)) * t) as u8,
         }
     }
 }
@@ -142,9 +153,11 @@ pub struct ColorAlpha {
     pub a: u8,
 }
 impl ColorAlpha {
+    #[must_use]
     pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
+    #[must_use]
     pub const fn from_hex(hex: u32) -> Self {
         Self {
             r: ((hex >> 16) & 0xFF) as u8,
@@ -184,6 +197,7 @@ impl ColorAlpha {
         a: 255,
     };
 
+    #[must_use]
     pub const fn to_f32(self) -> (f32, f32, f32) {
         (
             self.r as f32 / 255.0,
@@ -192,6 +206,7 @@ impl ColorAlpha {
         )
     }
 
+    #[must_use]
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
             r: (r.clamp(0.0, 1.0) * 255.0 + 0.5) as u8,
@@ -201,10 +216,12 @@ impl ColorAlpha {
         }
     }
 
+    #[must_use]
     pub fn to_tiny_skia(self) -> tiny_skia::Color {
         tiny_skia::Color::from_rgba8(self.r, self.g, self.b, self.a)
     }
 
+    #[must_use]
     pub fn without_alpha(self) -> Color {
         Color {
             r: self.r,
