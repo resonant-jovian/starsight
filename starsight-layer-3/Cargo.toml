@@ -16,9 +16,10 @@ publish = true
 starsight-layer-1.workspace = true
 starsight-layer-2.workspace = true
 
-[dev-dependencies]
-insta = { workspace = true }
-starsight-layer-5 = { workspace = true }
+# No dev-dependencies: layer-3 has no integration tests of its own. Tests
+# that exercise marks via the high-level `Figure` API live in
+# `starsight-layer-5/tests/snapshot.rs` to avoid a layer-3 → layer-5 → layer-3
+# dev-dep cycle that would block `cargo publish`.
 
 [lints]
 workspace = true

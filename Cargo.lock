@@ -733,10 +733,8 @@ dependencies = [
 name = "starsight-layer-3"
 version = "0.1.0"
 dependencies = [
- "insta",
  "starsight-layer-1",
  "starsight-layer-2",
- "starsight-layer-5",
 ]
 
 [[package]]
@@ -752,6 +750,7 @@ dependencies = [
 name = "starsight-layer-5"
 version = "0.1.0"
 dependencies = [
+ "insta",
  "starsight-layer-1",
  "starsight-layer-2",
  "starsight-layer-3",
