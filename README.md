@@ -13,7 +13,7 @@
 [![Downloads](https://img.shields.io/crates/d/starsight?style=for-the-badge&logo=rust&logoColor=white&color=e6761b)](https://crates.io/crates/starsight)
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-3366cc?style=for-the-badge&logo=gnu&logoColor=white)](https://www.gnu.org/licenses/gpl-3.0)
-[![MSRV](https://img.shields.io/badge/MSRV-1.85-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://releases.rs/docs/1.85.0/)
+[![MSRV](https://img.shields.io/badge/MSRV-1.89-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://releases.rs/docs/1.89.0/)
 [![Edition](https://img.shields.io/badge/Edition-2024-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://doc.rust-lang.org/edition-guide/)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=ci)](https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml)
@@ -384,7 +384,7 @@ Full task-level roadmap with 338 checkboxes: [`.spec/STARSIGHT.md`](.spec/STARSI
 
 ## Minimum supported Rust version
 
-Rust edition 2024, targeting **stable Rust 1.85+**. MSRV tracks latest stable minus two releases, consistent with wgpu and ratatui.
+Rust edition 2024, targeting **stable Rust 1.89+** — enforced via the `rust-version` field in `[workspace.package]`. MSRV tracks the minimum version required by direct dependencies (currently `cosmic-text` at 1.89). The long-term policy is _latest stable minus two_, consistent with `wgpu` and `ratatui`; if the dependency floor lets us, we will bump MSRV in step with that policy.
 
 ---
 

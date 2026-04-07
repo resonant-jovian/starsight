@@ -91,7 +91,9 @@ After `1.0.0`: no LTS branch for now. Patch versions are bug-fix only and minor 
 
 ## Minimum Supported Rust Version (MSRV)
 
-Rust **1.85** (edition 2024). MSRV tracks latest stable minus two releases, consistent with `wgpu` and `ratatui`. Bumping the MSRV is a minor version change.
+Rust **1.89** (edition 2024). Enforced by `rust-version = "1.89"` in `[workspace.package]`, so `cargo` refuses to build with an older toolchain instead of failing deep inside a dependency.
+
+The current floor is set by `cosmic-text 0.18` (which declares `rust-version = 1.89`); any bump in cosmic-text or another core dependency that raises its MSRV will pull ours up too. The long-term policy is _latest stable minus two_, consistent with `wgpu` and `ratatui`. Bumping the MSRV is a minor version change post-`1.0.0`.
 
 ## Versioning Policy
 
