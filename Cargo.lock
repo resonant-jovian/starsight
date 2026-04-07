@@ -696,7 +696,7 @@ checksum = "4aaa7368fcf4852a4c2dd92df0cace6a71f2091ca0a23391ce7f3a31833f1523"
 
 [[package]]
 name = "starsight"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "starsight-layer-1",
@@ -710,7 +710,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-1"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chromata",
  "cosmic-text",
@@ -723,7 +723,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-2"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proptest",
  "starsight-layer-1",
@@ -731,7 +731,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-3"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "starsight-layer-1",
  "starsight-layer-2",
@@ -739,7 +739,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-4"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "starsight-layer-1",
  "starsight-layer-2",
@@ -748,7 +748,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-5"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "starsight-layer-1",
@@ -759,7 +759,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-6"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "starsight-layer-1",
  "starsight-layer-2",
@@ -770,7 +770,7 @@ dependencies = [
 
 [[package]]
 name = "starsight-layer-7"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "starsight-layer-1",
  "starsight-layer-2",
@@ -1120,7 +1120,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "yazi"

@@ -13,7 +13,7 @@ members = [
 resolver = "3"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.89"
 description = "A unified scientific visualization crate for Rust — from zero-config one-liners to GPU-accelerated interactive 3D."
@@ -23,7 +23,7 @@ repository = "https://github.com/resonant-jovian/starsight"
 documentation = "https://docs.rs/starsight"
 readme = "README.md"
 keywords = ["plot", "chart", "scientific", "visualization", "data-viz"]
-categories = ["no-std", "science", "visualization"]
+categories = ["graphics", "science", "visualization"]
 
 # Dependency comments are globally aligned: name+version padded to col 25,
 # `#` at col 26, description padded to 32 chars, license at the end.
@@ -96,14 +96,14 @@ plotlars                 = "0.11.8"        # Plotly + Polars integration      MI
 # `path` from the published manifest, leaving only the version requirement
 # against crates.io). When bumping `[workspace.package].version`, bump these
 # too — or use a tool like `cargo-release` to keep them in sync.
-starsight                = { version = "0.1.0", path = "starsight" }
-starsight-layer-1        = { version = "0.1.0", path = "starsight-layer-1" }
-starsight-layer-2        = { version = "0.1.0", path = "starsight-layer-2" }
-starsight-layer-3        = { version = "0.1.0", path = "starsight-layer-3" }
-starsight-layer-4        = { version = "0.1.0", path = "starsight-layer-4" }
-starsight-layer-5        = { version = "0.1.0", path = "starsight-layer-5" }
-starsight-layer-6        = { version = "0.1.0", path = "starsight-layer-6" }
-starsight-layer-7        = { version = "0.1.0", path = "starsight-layer-7" }
+starsight                = { version = "0.1.1", path = "starsight" }
+starsight-layer-1        = { version = "0.1.1", path = "starsight-layer-1" }
+starsight-layer-2        = { version = "0.1.1", path = "starsight-layer-2" }
+starsight-layer-3        = { version = "0.1.1", path = "starsight-layer-3" }
+starsight-layer-4        = { version = "0.1.1", path = "starsight-layer-4" }
+starsight-layer-5        = { version = "0.1.1", path = "starsight-layer-5" }
+starsight-layer-6        = { version = "0.1.1", path = "starsight-layer-6" }
+starsight-layer-7        = { version = "0.1.1", path = "starsight-layer-7" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
