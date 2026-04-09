@@ -8,11 +8,11 @@
 
 ### 09:00–10:30 — BarMark implementation
 
-- [ ] Define `BarMark` struct in `starsight-layer-3/src/marks.rs`
+- [x] Define `BarMark` struct in `starsight-layer-3/src/marks.rs`
   - Fields: `x: Vec<f64>`, `y: Vec<f64>`, `color: Color`, `bar_width: f32`
   - Follow the same `new()` + builder pattern as `LineMark` and `PointMark`
   - `DataExtent` impl must force `y_min = y_min.min(0.0)` so the baseline is always visible
-- [ ] Implement `Mark for BarMark` — iterate data, map through `CartesianCoord`, emit `fill_rect` calls
+- [x] Implement `Mark for BarMark` — iterate data, map through `CartesianCoord`, emit `fill_rect` calls
   - Handle y-values below zero (bars extend downward from axis)
   - Bar centering: offset x by `bar_width / 2`
 - [ ] Unit tests: empty data, single bar, negative values, NaN skip

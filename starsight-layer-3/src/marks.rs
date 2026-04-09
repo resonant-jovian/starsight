@@ -13,7 +13,7 @@
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
-use starsight_layer_1::primitives::{Color, Point};
+use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::CartesianCoord;
 
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
@@ -204,7 +204,75 @@ impl Mark for PointMark {
 }
 
 // ── BarMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.2.0): pub struct BarMark { categories: Vec<String>, values: Vec<f64>, color: Color, width: f32 }
+/// Bar chart for individual values
+#[derive(Debug, Clone)]
+pub struct BarMark {
+    /// X data values.
+    x: Vec<f64>,
+    /// Y data values (must be the same length as `x`)
+    y: Vec<f64>,
+    /// Bar color
+    color: Color,
+    /// Define the width of each bar
+    bar_width: f32
+}
+impl BarMark {
+    /// New bar chart from x and y data with default color and bar width.
+    #[must_use]
+    pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+        Self {
+            x,
+            y,
+            color: Color::BLUE,
+            bar_width: 2.0,
+        }
+    }
+
+    /// Builder: set bar color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = c;
+        self
+    }
+
+    /// Builder: set bar width in pixels.
+    #[must_use]
+    pub fn bar_width(mut self, r: f32) -> Self {
+        self.bar_width = r;
+        self
+    }
+}
+impl Mark for BarMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        Ok(for (x, y) in self.x.iter().zip(&self.y) {
+            if x.is_nan() || y.is_nan() {
+                continue;
+            }
+            let left = *x as f32 - (self.bar_width / 2.);
+            let mut top = 0f32;
+            let mut bottom = 0f32;
+            if y > &0. {
+                top = *y as f32;
+                bottom = 0.;
+            } else {
+                top = 0.;
+                bottom = *y as f32;
+            }
+            let right = *x as f32 + (self.bar_width / 2.);
+            let rect = Rect::new(left, top, right, bottom);
+
+            backend.fill_rect(rect, self.color)?
+        })
+    }
+    // No clue if this works
+    fn data_extent(&self) -> Option<DataExtent> {
+        let y_min = self.y.iter().cloned().fold(f64::NAN, f64::min);
+        if y_min == y_min.min(0.0) {
+            extent_from_xy(&self.x, &self.y)
+        }
+        else { None }
+    }
+}
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
 // TODO(0.2.0): pub struct AreaMark { x: Vec<f64>, y_low: Vec<f64>, y_high: Vec<f64>, fill: Color }
