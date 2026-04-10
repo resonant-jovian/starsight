@@ -31,14 +31,14 @@
 
 ### 10:30–10:45 — Break + small tasks
 
-- [ ] **Fix CHANGELOG.md** — still says "No release has been published yet" and only has `[Unreleased]`. Add `[0.1.0]` and `[0.1.1]` sections (use `git-cliff` or write manually). Move the existing items under `0.1.0`, add a `0.1.1` patch section.
-- [ ] **Update README roadmap** — check the `0.1.0` checkbox, it shipped
+- [x] **Fix CHANGELOG.md** — still says "No release has been published yet" and only has `[Unreleased]`. Add `[0.1.0]` and `[0.1.1]` sections (use `git-cliff` or write manually). Move the existing items under `0.1.0`, add a `0.1.1` patch section.
+- [x] **Update README roadmap** — check the `0.1.0` checkbox, it shipped
 
 ### 10:45–12:00 — BarMark snapshots + AreaMark struct
 
 - [ ] Snapshot test: basic vertical bars (monthly rainfall data)
 - [ ] Snapshot test: mixed positive/negative bars (profit/loss)
-- [ ] Define `AreaMark` struct — `x: Vec<f64>`, `y: Vec<f64>`, `fill: Color`, `opacity: f32`
+- [x] Define `AreaMark` struct — `x: Vec<f64>`, `y: Vec<f64>`, `fill: Color`, `opacity: f32`
   - Baseline is always y=0 for now (0.2.0 scope)
   - `DataExtent` must include the baseline (`y_min = y_min.min(0.0)`)
 - [ ] Implement `Mark for AreaMark` — build a closed `Path`: forward along data points, then back along baseline, then `Close`

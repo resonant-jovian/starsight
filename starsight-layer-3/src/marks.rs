@@ -243,14 +243,15 @@ impl BarMark {
     }
 }
 impl Mark for BarMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    // coord unused for now?
+    fn render(&self, _coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
         Ok(for (x, y) in self.x.iter().zip(&self.y) {
             if x.is_nan() || y.is_nan() {
                 continue;
             }
             let left = *x as f32 - (self.bar_width / 2.);
-            let mut top = 0f32;
-            let mut bottom = 0f32;
+            let top;
+            let bottom;
             if y > &0. {
                 top = *y as f32;
                 bottom = 0.;
@@ -275,8 +276,56 @@ impl Mark for BarMark {
 }
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.2.0): pub struct AreaMark { x: Vec<f64>, y_low: Vec<f64>, y_high: Vec<f64>, fill: Color }
+/// Area chart for stacked values
+pub struct AreaMark {
+    /// X data values.
+    x: Vec<f64>,
+    /// Y data values (must be the same length as `x`)
+    y: Vec<f64>,
+    /// Area fill color
+    fill: Color,
+    /// Area opacity, 1 to 0
+    opacity: f32,
+}
+impl AreaMark {
+    /// New area chart from x and y data with default color and full opacity.
+    #[must_use]
+    pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+        Self {
+            x,
+            y,
+            fill: Color::RED,
+            opacity: 1.,
+        }
+    }
 
+    /// Builder: set area color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.fill = c;
+        self
+    }
+
+    /// Builder: set area opacity 1 to 0.
+    #[must_use]
+    pub fn opacity(mut self, o: f32) -> Self {
+        self.opacity = o;
+        self
+    }
+}
+impl Mark for AreaMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        todo!()
+    }
+    // No clue if this works either
+    fn data_extent(&self) -> Option<DataExtent> {
+        let y_min = self.y.iter().cloned().fold(f64::NAN, f64::min);
+        if y_min == y_min.min(0.0) {
+            extent_from_xy(&self.x, &[0.])
+        }
+        else { None }
+    }
+}
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────
 // TODO(0.3.0): pub struct HeatmapMark { data: Vec<Vec<f64>>, colormap: Colormap, ... }
 
