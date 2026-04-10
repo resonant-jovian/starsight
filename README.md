@@ -277,14 +277,14 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 > [!IMPORTANT]
 > Only rows marked **`working`** are usable today. `wip` rows compile but are pre-MVP. `planned` rows are stub files with `TODO` markers. Don't depend on either in production.
 
-| Feature | Status | Milestone | Description |
-|---|---|---|---|
+| Feature | Status  | Milestone | Description |
+|---|---------|---|---|
 | Wilkinson Extended ticks | working | 0.1.0 | Novel Rust implementation, property-tested |
-| CPU rendering (tiny-skia) | wip | 0.1.0 | Headless rasterization → PNG |
-| SVG export | wip | 0.1.0 | Resolution-independent vector; `Figure::render_svg()` and `.save("foo.svg")` work today |
-| `LineMark` / `PointMark` | wip | 0.1.0 | Core 2D mark types |
-| `Figure` builder + `plot!` macro | wip | 0.1.0 | High-level API and one-liner |
-| `BarMark` / `AreaMark` / `HeatmapMark` | planned | 0.2.0 | More chart types |
+| CPU rendering (tiny-skia) | working | 0.1.0 | Headless rasterization → PNG |
+| SVG export | working | 0.1.0 | Resolution-independent vector; `Figure::render_svg()` and `.save("foo.svg")` work today |
+| `LineMark` / `PointMark` | working | 0.1.0 | Core 2D mark types |
+| `Figure` builder + `plot!` macro | working | 0.1.0 | High-level API and one-liner |
+| `BarMark` / `AreaMark` / `HeatmapMark` | wip     | 0.2.0 | More chart types |
 | Statistical transforms (Bin, KDE, ...) | planned | 0.3.0 | Histograms, density, regression |
 | Layout + faceting + legends | planned | 0.4.0 | `GridLayout`, `FacetWrap`, `Colorbar` |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
@@ -347,7 +347,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 > [!TIP]
 > Pin an exact version while the workspace evolves toward `1.0.0`. The high-level milestones are below; the full task-level roadmap with checkboxes lives in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md). See also: [CHANGELOG](CHANGELOG.md).
 
-- [ ] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
+- [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
 - [ ] 0.2.0 Core charts — `BarMark`, `AreaMark`, `HeatmapMark`, histogram
 - [ ] 0.3.0 Statistical charts — `BoxMark`, `ViolinMark`, `KDE`, `PieMark`
 - [ ] 0.4.0 Layout — `GridLayout`, faceting, legends, colorbars
