@@ -1,4 +1,4 @@
-//! Lorenz attractor family — starsight 0.1.0 showcase (example 1)
+//! Lorenz attractor family — starsight 0.1.0 showcase
 //!
 //! 11 trajectories sweeping ρ ∈ {13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250}.
 //! σ = 10, β = 8/3.  IC (1+ε, 1+ε, 1+ε), ε = 0.001·i.
@@ -8,7 +8,7 @@
 
 use starsight::prelude::*;
 
-// ── Lorenz derivatives ───────────────────────────────────────────────────────
+// ── Lorenz derivatives ───────────────────────────────────────────────────────────────────────────
 
 #[derive(Clone, Copy)]
 struct State { x: f64, y: f64, z: f64 }
@@ -36,7 +36,7 @@ fn rk4(s: State, dt: f64, sigma: f64, rho: f64, beta: f64) -> State {
     }
 }
 
-// ── Integrate one trajectory ─────────────────────────────────────────────────
+// ── Integrate one trajectory ─────────────────────────────────────────────────────────────────────
 
 fn integrate(rho: f64, ic_jitter: f64) -> (Vec<f64>, Vec<f64>) {
     const SIGMA: f64 = 10.0;
@@ -64,7 +64,7 @@ fn integrate(rho: f64, ic_jitter: f64) -> (Vec<f64>, Vec<f64>) {
     (xs, zs)
 }
 
-// ── main ─────────────────────────────────────────────────────────────────────
+// ── main ─────────────────────────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
     let rho_values: &[f64] = &[13.0, 15.0, 18.0, 21.0, 24.06, 28.0, 35.0, 50.0, 100.0, 160.0, 250.0];

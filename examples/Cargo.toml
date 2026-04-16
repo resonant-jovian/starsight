@@ -10,10 +10,13 @@ publish = false
 starsight.workspace = true
 prismatica = { version = "1.0.0", features = ["matplotlib"] }
 
-
 [[example]]
 name = "lorenz_line"
 path = "showcases/lorenz_line.rs"
+
+[[example]]
+name = "kruskal_szekeres_line"
+path = "showcases/kruskal_szekeres_line.rs"
 
 [lints]
 workspace = true
