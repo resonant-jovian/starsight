@@ -315,7 +315,37 @@ impl AreaMark {
 }
 impl Mark for AreaMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        todo!()
+        let mut commands = Vec::new();
+        let mut need_move = true;
+
+        for (x, y) in self.x.iter().zip(&self.y) {
+            if x.is_nan() || y.is_nan() {
+                need_move = true;
+                continue;
+            }
+            let p = coord.data_to_pixel(*x, *y);
+            if need_move {
+                commands.push(PathCommand::MoveTo(p));
+                need_move = false;
+            } else {
+                commands.push(PathCommand::LineTo(p));
+                commands.push(PathCommand::LineTo(Point::new(p.x, 0.)));
+                commands.push(PathCommand::LineTo(Point::new(0., 0.)));
+                commands.push(PathCommand::Close);
+            }
+        }
+
+        if commands.is_empty() {
+            return Ok(());
+        }
+
+        let path = Path { commands };
+        let style = PathStyle {
+            fill_color: Some(self.fill),
+            opacity: self.opacity,
+            ..PathStyle::default()
+        };
+        backend.draw_path(&path, &style)
     }
     // No clue if this works either
     fn data_extent(&self) -> Option<DataExtent> {

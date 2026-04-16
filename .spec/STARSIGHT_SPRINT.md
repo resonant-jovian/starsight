@@ -41,7 +41,7 @@
 - [x] Define `AreaMark` struct — `x: Vec<f64>`, `y: Vec<f64>`, `fill: Color`, `opacity: f32`
   - Baseline is always y=0 for now (0.2.0 scope)
   - `DataExtent` must include the baseline (`y_min = y_min.min(0.0)`)
-- [ ] Implement `Mark for AreaMark` — build a closed `Path`: forward along data points, then back along baseline, then `Close`
+- [x] Implement `Mark for AreaMark` — build a closed `Path`: forward along data points, then back along baseline, then `Close`
 
 > [!tip] Area path construction
 > The SVG equivalent is `M x0,y0 L x1,y1 ... L xn,yn L xn,baseline L x0,baseline Z`. In starsight terms: `MoveTo(first_data_point)` → `LineTo` for each subsequent point → `LineTo(last_x, baseline_y)` → `LineTo(first_x, baseline_y)` → `Close`. Set `PathStyle.fill_color = Some(fill)` and `PathStyle.opacity` to the desired alpha.
