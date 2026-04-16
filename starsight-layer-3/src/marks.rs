@@ -214,7 +214,15 @@ pub struct BarMark {
     /// Bar color
     color: Color,
     /// Define the width of each bar
-    bar_width: f32
+    width: f32,
+    orientation: Orientation,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
+pub enum Orientation {
+    #[default]
+    Vertical,
+    Horizontal,
 }
 impl BarMark {
     /// New bar chart from x and y data with default color and bar width.
@@ -224,7 +232,8 @@ impl BarMark {
             x,
             y,
             color: Color::BLUE,
-            bar_width: 2.0,
+            width: 2.0,
+            orientation: Orientation::Vertical,
         }
     }
 
@@ -237,8 +246,8 @@ impl BarMark {
 
     /// Builder: set bar width in pixels.
     #[must_use]
-    pub fn bar_width(mut self, r: f32) -> Self {
-        self.bar_width = r;
+    pub fn width(mut self, r: f32) -> Self {
+        self.width = r;
         self
     }
 }
@@ -249,7 +258,7 @@ impl Mark for BarMark {
             if x.is_nan() || y.is_nan() {
                 continue;
             }
-            let left = *x as f32 - (self.bar_width / 2.);
+            let left = *x as f32 - (self.width / 2.);
             let top;
             let bottom;
             if y > &0. {
@@ -259,7 +268,7 @@ impl Mark for BarMark {
                 top = 0.;
                 bottom = *y as f32;
             }
-            let right = *x as f32 + (self.bar_width / 2.);
+            let right = *x as f32 + (self.width / 2.);
             let rect = Rect::new(left, top, right, bottom);
 
             backend.fill_rect(rect, self.color)?
@@ -277,15 +286,24 @@ impl Mark for BarMark {
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
 /// Area chart for stacked values
+#[derive(Debug, Clone)]
 pub struct AreaMark {
     /// X data values.
     x: Vec<f64>,
     /// Y data values (must be the same length as `x`)
     y: Vec<f64>,
+    baseline: AreaBaseline,
     /// Area fill color
     fill: Color,
     /// Area opacity, 1 to 0
     opacity: f32,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[non_exhaustive]
+pub enum AreaBaseline {
+    #[default]
+    Zero,                    // fill between y and y=0
+    Fixed(f64),              // fill between y and a fixed value
 }
 impl AreaMark {
     /// New area chart from x and y data with default color and full opacity.
@@ -294,6 +312,7 @@ impl AreaMark {
         Self {
             x,
             y,
+            baseline: AreaBaseline::Zero,
             fill: Color::RED,
             opacity: 1.,
         }

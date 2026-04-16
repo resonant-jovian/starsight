@@ -77,8 +77,7 @@
               "title": "SHOWCASE_INPUTS"
             }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "vertical"
@@ -214,13 +213,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SHOWCASE_INPUTS.md",
+                "file": "STARSIGHT.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of SHOWCASE_INPUTS"
+              "title": "Outline of STARSIGHT"
             }
           }
         ],
@@ -241,14 +240,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "743135c0744b95f8",
+  "active": "05b5c78fa7cc94a0",
   "lastOpenFiles": [
+    "LEARN_CHEATSHEET.md",
     "STARSIGHT_SPRINT.md",
     "SHOWCASE_INPUTS.md",
     "agents.md",
     "STARSIGHT.md",
     "LEARN.md",
-    "LEARN_CHEATSHEET.md",
     "PULL_REQUEST_TEMPLATE.md",
     "STARSIGHT.md~",
     "Welcome.md"
