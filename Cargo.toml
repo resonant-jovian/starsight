@@ -9,6 +9,7 @@ members = [
   "starsight-layer-6",
   "starsight-layer-7",
   "xtask",
+  "examples",
 ]
 resolver = "3"
 
