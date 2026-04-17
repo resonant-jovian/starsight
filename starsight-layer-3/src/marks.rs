@@ -10,12 +10,13 @@
 //! - 0.3.0+: `HeatmapMark`, `BoxMark`, `ViolinMark`, `PieMark`, `ContourMark`,
 //!   `RidgeMark`, `StepMark`, `ErrorBarMark`, `RugMark`.
 
+use std::ops::IntoBounds;
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::CartesianCoord;
-
+use starsight_layer_2::scales::Scale;
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.
@@ -207,14 +208,15 @@ impl Mark for PointMark {
 /// Bar chart for individual values
 #[derive(Debug, Clone)]
 pub struct BarMark {
-    /// X data values.
-    x: Vec<f64>,
-    /// Y data values (must be the same length as `x`)
+    /// X category labels.
+    x: Vec<String>,
+    /// Y data height
     y: Vec<f64>,
     /// Bar color
-    color: Color,
+    color: Option<Color>,
     /// Define the width of each bar
-    width: f32,
+    width: Option<f32>,
+    /// Set bar origin axis
     orientation: Orientation,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -227,37 +229,68 @@ pub enum Orientation {
 impl BarMark {
     /// New bar chart from x and y data with default color and bar width.
     #[must_use]
-    pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+    pub fn new(x: Vec<String>, y: Vec<f64>) -> Self {
         Self {
             x,
             y,
-            color: Color::BLUE,
-            width: 2.0,
+            color: Some(Color::BLUE),
+            width: Some(0.8),
             orientation: Orientation::Vertical,
         }
     }
 
+    pub fn horizontal(mut self) -> Self { self.orientation = Orientation::Horizontal; self }
+
     /// Builder: set bar color.
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
-        self.color = c;
+        self.color = Some(c);
         self
     }
 
     /// Builder: set bar width in pixels.
     #[must_use]
     pub fn width(mut self, r: f32) -> Self {
-        self.width = r;
+        self.width = Some(r);
         self
     }
 }
 impl Mark for BarMark {
     // coord unused for now?
-    fn render(&self, _coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let label = (self.x, self.x.len());
+
         Ok(for (x, y) in self.x.iter().zip(&self.y) {
-            if x.is_nan() || y.is_nan() {
+            if x == "" || y.is_nan() {
                 continue;
             }
+            let bar_width;
+            let bandwidth;
+            let band_scale;
+            if self.orientation == Orientation::Vertical {
+                let max = coord.x_axis.scale.domain_max;
+                let min = coord.x_axis.scale.domain_min;
+                band_scale = min..max;
+                bandwidth = max - min;
+                bar_width = bandwidth as f32 * self.width.unwrap_or(0.8);
+            }
+            else {
+                let max = coord.y_axis.scale.domain_max;
+                let min = coord.y_axis.scale.domain_min;
+                iter::successors(Some(START), |i| {
+                    let next = i + INCREMENT;
+                    (next < END).then_some(next)
+                })
+                    .for_each(|i| println!("{i}"));
+                band_scale = (min..max).step_by(self.width.unwrap_or(0.8));
+                bandwidth = max - min;
+                bar_width = bandwidth as f32 * self.width.unwrap_or(0.8);
+            }
+            let x_center = band_scale.;
+            let x_left = x_center - bar_width / 2.0;
+            let y_top = y_scale.map(value);
+            let y_bottom = y_scale.map(0.0);  // bars grow from baseline
+            let rect = Rect::from_ltrb(x_left, y_top, x_left + bar_width, y_bottom);
             let left = *x as f32 - (self.width / 2.);
             let top;
             let bottom;
@@ -271,7 +304,7 @@ impl Mark for BarMark {
             let right = *x as f32 + (self.width / 2.);
             let rect = Rect::new(left, top, right, bottom);
 
-            backend.fill_rect(rect, self.color)?
+            backend.fill_rect(rect, self.color.unwrap_or(Color::BLUE))?
         })
     }
     // No clue if this works

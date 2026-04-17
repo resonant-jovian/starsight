@@ -11,7 +11,7 @@
 //! `blue_rect_on_white` test, neither of which depends on font rendering.
 
 use starsight_layer_1::primitives::Color;
-use starsight_layer_3::marks::{LineMark, PointMark};
+use starsight_layer_3::marks::{BarMark, LineMark, PointMark};
 use starsight_layer_5::Figure;
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
@@ -130,4 +130,33 @@ fn snapshot_scatter_sizes() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+}
+// ── bar tests ────────────────────────────────────────────────────────────────────────────────────
+#[test]
+fn snapshot_bar_vertical() {
+    let fig = Figure::new(800, 600).add(
+        BarMark::new(vec!["A".into(), "B".into(), "C".into()], vec![10.0, 25.0, 15.0])
+    );
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+}
+#[test]
+fn snapshot_bar_horizontal() {
+    let fig = Figure::new(800, 600).add(
+        BarMark::new(vec!["A".into(), "B".into()], vec![10.0, 25.0]).horizontal()
+    );
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+}
+#[test]
+fn snapshot_bar_grouped() {
+    let fig = Figure::new(800, 600)
+        .add(BarMark::new(vec!["Q1".into(), "Q2".into()], vec![10.0, 20.0]).group("Sales"))
+        .add(BarMark::new(vec!["Q1".into(), "Q2".into()], vec![15.0, 12.0]).group("Costs"));
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
+}
+#[test]
+fn snapshot_bar_stacked() {
+    let fig = Figure::new(800, 600)
+        .add(BarMark::new(vec!["A".into(), "B".into()], vec![10.0, 20.0]).stack("s1"))
+        .add(BarMark::new(vec!["A".into(), "B".into()], vec![5.0, 8.0]).stack("s2"));
+    insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
 }
