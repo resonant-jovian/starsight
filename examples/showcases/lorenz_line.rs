@@ -67,7 +67,9 @@ fn integrate(rho: f64, ic_jitter: f64) -> (Vec<f64>, Vec<f64>) {
 // ── main ─────────────────────────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    let rho_values: &[f64] = &[13.0, 15.0, 18.0, 21.0, 24.06, 28.0, 35.0, 50.0, 100.0, 160.0, 250.0]; // set to 28. to get the classic
+    // let rho_values: &[f64] = &[13.0, 15.0, 18.0, 21.0, 24.06, 28.0, 35.0, 50.0, 100.0, 160.0, 250.0];
+    // series above if you want that instead
+    let rho_values: &[f64] = &[28.];
     let n = rho_values.len() as f64;
 
     let mut fig = Figure::new(1600, 1000);
@@ -81,13 +83,14 @@ fn main() -> Result<()> {
 
         // map trajectory index to [0, 1] for inferno colormap
         let t = i as f64 / (n - 1.0);
+        // only valid for series
         let c: prismatica::Color = prismatica::matplotlib::INFERNO.eval(t as f32);
 
         fig = fig.add(LineMark {
             x: x_data,
             y: z_data,
             color: Color::from(c),
-            width: 0.8,
+            width: 0.5,
         });
     }
 
