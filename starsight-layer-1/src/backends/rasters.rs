@@ -141,14 +141,12 @@ impl DrawBackend for SkiaBackend {
         let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
         let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
         buffer.set_text(
-            &mut self.font_system,
             text,
             &cosmic_text::Attrs::new(),
             cosmic_text::Shaping::Advanced,
             None,
         );
         buffer.set_size(
-            &mut self.font_system,
             Some(self.pixmap.width() as f32),
             None,
         );

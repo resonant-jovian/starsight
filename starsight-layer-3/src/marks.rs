@@ -16,6 +16,7 @@ use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::CartesianCoord;
 use starsight_layer_2::scales::Scale;
+use std::collections::HashMap;
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.
@@ -30,6 +31,17 @@ pub struct DataExtent {
     pub y_max: f64,
 }
 
+/// Context for bar rendering that enables grouped/stacked modes.
+#[derive(Debug, Default)]
+pub struct BarRenderContext {
+    /// Cumulative baselines for stacked bars: category -> baseline value.
+    pub stacked_baselines: HashMap<String, f64>,
+    /// Group offsets: group_name -> (group_index, total_groups).
+    pub group_offsets: HashMap<String, (i32, i32)>,
+    /// Whether this is the first render pass (for computing baselines).
+    pub first_pass: bool,
+}
+
 // ── Mark ─────────────────────────────────────────────────────────────────────────────────────────
 
 /// Object-safe trait every visual mark implements.
@@ -39,11 +51,24 @@ pub struct DataExtent {
 /// the figure can compute appropriate scales.
 pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
-    ///
-    /// # Errors
-    /// Forwards any error returned by the backend's drawing methods. Marks
-    /// themselves do not produce errors — they only propagate them.
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
+    /// Render with bar context for grouped/stacked bar rendering.
+    fn render_bar(
+        &self,
+        coord: &CartesianCoord,
+        backend: &mut dyn DrawBackend,
+        context: &BarRenderContext,
+    ) -> Result<()> {
+        self.render(coord, backend)
+    }
+    /// Check if this is a bar mark with group/stack info.
+    fn as_bar_info(&self) -> Option<(Option<&str>, Option<&str>, Orientation)> {
+        None
+    }
+    /// Get bar data for stacking calculations. Returns (labels, values).
+    fn as_bar_data(&self) -> Option<(&[String], &[f64])> {
+        None
+    }
     /// Bounding box of this mark's data, or `None` if it is empty.
     fn data_extent(&self) -> Option<DataExtent>;
 }
@@ -208,15 +233,21 @@ impl Mark for PointMark {
 #[derive(Debug, Clone)]
 pub struct BarMark {
     /// X category labels.
-    x: Vec<String>,
+    pub x: Vec<String>,
     /// Y data height
-    y: Vec<f64>,
+    pub y: Vec<f64>,
     /// Bar color
-    color: Option<Color>,
+    pub color: Option<Color>,
     /// Define the width of each bar
-    width: Option<f32>,
+    pub width: Option<f32>,
     /// Set bar origin axis
-    orientation: Orientation,
+    pub orientation: Orientation,
+    /// Group name for grouped bars (dodged within band)
+    pub group: Option<String>,
+    /// Stack name for stacked bars (accumulated baseline)
+    pub stack: Option<String>,
+    /// Base value for waterfall chart (defaults to 0)
+    pub base: Option<f64>,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[non_exhaustive]
@@ -235,10 +266,37 @@ impl BarMark {
             color: Some(Color::BLUE),
             width: Some(0.8),
             orientation: Orientation::Vertical,
+            group: None,
+            stack: None,
+            base: None,
         }
     }
 
-    pub fn horizontal(mut self) -> Self { self.orientation = Orientation::Horizontal; self }
+    pub fn horizontal(mut self) -> Self {
+        self.orientation = Orientation::Horizontal;
+        self
+    }
+
+    /// Builder: set group name for grouped bars (bars are dodged within each band).
+    #[must_use]
+    pub fn group(mut self, name: impl Into<String>) -> Self {
+        self.group = Some(name.into());
+        self
+    }
+
+    /// Builder: set stack name for stacked bars (bars are accumulated).
+    #[must_use]
+    pub fn stack(mut self, name: impl Into<String>) -> Self {
+        self.stack = Some(name.into());
+        self
+    }
+
+    /// Builder: set base value for waterfall chart (where bar starts).
+    #[must_use]
+    pub fn base(mut self, b: f64) -> Self {
+        self.base = Some(b);
+        self
+    }
 
     /// Builder: set bar color.
     #[must_use]
@@ -283,10 +341,8 @@ impl Mark for BarMark {
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
-                    let y_top = area.bottom
-                        - coord.y_axis.scale.map(*value) as f32 * area.height();
-                    let y_bottom = area.bottom
-                        - coord.y_axis.scale.map(0.0) as f32 * area.height();
+                    let y_top = area.bottom - coord.y_axis.scale.map(*value) as f32 * area.height();
+                    let y_bottom = area.bottom - coord.y_axis.scale.map(0.0) as f32 * area.height();
 
                     let rect = Rect::new(x_left, y_top, x_right, y_bottom);
                     backend.fill_rect(rect, fill)?;
@@ -301,10 +357,8 @@ impl Mark for BarMark {
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
-                    let x_left = area.left
-                        + coord.x_axis.scale.map(0.0) as f32 * area.width();
-                    let x_right = area.left
-                        + coord.x_axis.scale.map(*value) as f32 * area.width();
+                    let x_left = area.left + coord.x_axis.scale.map(0.0) as f32 * area.width();
+                    let x_right = area.left + coord.x_axis.scale.map(*value) as f32 * area.width();
 
                     let rect = Rect::new(x_left, y_top, x_right, y_bottom);
                     backend.fill_rect(rect, fill)?;
@@ -314,14 +368,159 @@ impl Mark for BarMark {
 
         Ok(())
     }
+
+    fn render_bar(
+        &self,
+        coord: &CartesianCoord,
+        backend: &mut dyn DrawBackend,
+        context: &BarRenderContext,
+    ) -> Result<()> {
+        let valid: Vec<(&str, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
+            .map(|(x, y)| (x.as_str(), *y))
+            .collect();
+
+        let n = valid.len();
+        if n == 0 {
+            return Ok(());
+        }
+
+        let area = coord.plot_area;
+        let fill = self.color.unwrap_or(Color::BLUE);
+        let width_fraction = self.width.unwrap_or(0.8);
+
+        match self.orientation {
+            Orientation::Vertical => {
+                let band_width = area.width() / n as f32;
+                let total_groups = context
+                    .group_offsets
+                    .values()
+                    .map(|(_, t)| *t)
+                    .max()
+                    .unwrap_or(1);
+                let group_gap = 0.15;
+                let bar_width = if total_groups > 1 {
+                    band_width * width_fraction * (1.0 - group_gap) / total_groups as f32
+                } else {
+                    band_width * width_fraction
+                };
+
+                for (i, (label, value)) in valid.iter().enumerate() {
+                    let base_x_center = area.left + (i as f32 + 0.5) * band_width;
+                    let x_offset = if let Some(group_name) = &self.group {
+                        if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
+                            let sub_band = band_width * (1.0 - group_gap) / total as f32;
+                            (idx as f32 - (total - 1) as f32 / 2.0) * sub_band
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        0.0
+                    };
+                    let x_center = base_x_center + x_offset;
+                    let x_left = x_center - bar_width / 2.0;
+                    let x_right = x_center + bar_width / 2.0;
+
+                    // For stacked or floating bars: y_bottom is baseline, y_top is baseline + value
+                    let (y_bottom_val, y_top_val) = if self.stack.is_some() {
+                        let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
+                        (baseline, baseline + value)
+                    } else if let Some(base) = self.base {
+                        (base, base + value)
+                    } else {
+                        (0.0, *value)
+                    };
+                    
+                    let y_top = area.bottom - coord.y_axis.scale.map(y_top_val) as f32 * area.height();
+                    let y_bottom = area.bottom - coord.y_axis.scale.map(y_bottom_val) as f32 * area.height();
+                    
+                    // Ensure valid rect 
+                    let rect_top = y_top.min(y_bottom);
+                    let rect_bottom = y_top.max(y_bottom);
+                    
+                    let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+            Orientation::Horizontal => {
+                let band_height = area.height() / n as f32;
+                let total_groups = context
+                    .group_offsets
+                    .values()
+                    .map(|(_, t)| *t)
+                    .max()
+                    .unwrap_or(1);
+                let group_gap = 0.15;
+                let bar_height = if total_groups > 1 {
+                    band_height * width_fraction * (1.0 - group_gap) / total_groups as f32
+                } else {
+                    band_height * width_fraction
+                };
+
+                for (i, (label, value)) in valid.iter().enumerate() {
+                    let base_y_center = area.top + (i as f32 + 0.5) * band_height;
+                    let y_offset = if let Some(group_name) = &self.group {
+                        if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
+                            let sub_band = band_height * (1.0 - group_gap) / total as f32;
+                            (idx as f32 - (total - 1) as f32 / 2.0) * sub_band
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        0.0
+                    };
+                    let y_center = base_y_center + y_offset;
+                    let y_top = y_center - bar_height / 2.0;
+                    let y_bottom = y_center + bar_height / 2.0;
+
+                    // For stacked or floating horizontal bars: x_left is baseline, x_right is baseline + value
+                    let (x_left_val, x_right_val) = if self.stack.is_some() {
+                        let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
+                        (baseline, baseline + value)
+                    } else if let Some(base) = self.base {
+                        (base, base + value)
+                    } else {
+                        (0.0, *value)
+                    };
+                    let x_left = area.left + coord.x_axis.scale.map(x_left_val) as f32 * area.width();
+                    let x_right = area.left + coord.x_axis.scale.map(x_right_val) as f32 * area.width();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn as_bar_info(&self) -> Option<(Option<&str>, Option<&str>, Orientation)> {
+        Some((self.group.as_deref(), self.stack.as_deref(), self.orientation))
+    }
+
+    fn as_bar_data(&self) -> Option<(&[String], &[f64])> {
+        Some((&self.x, &self.y))
+    }
+
     // No clue if this works
     fn data_extent(&self) -> Option<DataExtent> {
         let valid_y: Vec<f64> = self.y.iter().copied().filter(|v| !v.is_nan()).collect();
         if valid_y.is_empty() {
             return None;
         }
-        let y_min = valid_y.iter().cloned().fold(f64::INFINITY, f64::min).min(0.0);
-        let y_max = valid_y.iter().cloned().fold(f64::NEG_INFINITY, f64::max).max(0.0);
+        let y_min = valid_y
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min)
+            .min(0.0);
+        let y_max = valid_y
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max)
+            .max(0.0);
         Some(DataExtent {
             x_min: 0.0,
             x_max: self.x.len() as f64,
@@ -349,8 +548,8 @@ pub struct AreaMark {
 #[non_exhaustive]
 pub enum AreaBaseline {
     #[default]
-    Zero,                    // fill between y and y=0
-    Fixed(f64),              // fill between y and a fixed value
+    Zero, // fill between y and y=0
+    Fixed(f64), // fill between y and a fixed value
 }
 impl AreaMark {
     /// New area chart from x and y data with default color and full opacity.
@@ -418,8 +617,9 @@ impl Mark for AreaMark {
         let y_min = self.y.iter().cloned().fold(f64::NAN, f64::min);
         if y_min == y_min.min(0.0) {
             extent_from_xy(&self.x, &[0.])
+        } else {
+            None
         }
-        else { None }
     }
 }
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────

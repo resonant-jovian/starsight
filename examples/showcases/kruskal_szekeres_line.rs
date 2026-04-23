@@ -13,7 +13,9 @@ const CLIP: f64 = 4.5;
 // ── Transform ──────────────────────────────────────────────────────────────────
 
 fn kruskal(r: f64, t: f64, su: f64, sv: f64) -> Option<(f64, f64)> {
-    if (r - 2.0 * M).abs() < 1e-9 { return None; }
+    if (r - 2.0 * M).abs() < 1e-9 {
+        return None;
+    }
     let exp_r = (r / (4.0 * M)).exp();
     let tau = t / (4.0 * M);
     let (u, v) = if r > 2.0 * M {
@@ -41,8 +43,14 @@ fn r_arc(r: f64, su: f64, sv: f64, steps: usize) -> (Vec<f64>, Vec<f64>) {
     for i in 0..=steps {
         let t = -20.0 + 40.0 * (i as f64) / (steps as f64);
         match kruskal(r, t, su, sv) {
-            Some((u, v)) => { xs.push(u); ys.push(v); }
-            None if !xs.is_empty() => { xs.push(f64::NAN); ys.push(f64::NAN); }
+            Some((u, v)) => {
+                xs.push(u);
+                ys.push(v);
+            }
+            None if !xs.is_empty() => {
+                xs.push(f64::NAN);
+                ys.push(f64::NAN);
+            }
             None => {}
         }
     }
@@ -60,8 +68,14 @@ fn t_arc(t: f64, su: f64, steps: usize) -> (Vec<f64>, Vec<f64>) {
         let r = 2.0 * M + 0.005 + 18.0 * (i as f64) / (steps as f64);
         // sv=1.0: for r > 2M with su fixed, sv is redundant (sinh covers ±)
         match kruskal(r, t, su, 1.0) {
-            Some((u, v)) => { xs.push(u); ys.push(v); }
-            None if !xs.is_empty() => { xs.push(f64::NAN); ys.push(f64::NAN); }
+            Some((u, v)) => {
+                xs.push(u);
+                ys.push(v);
+            }
+            None if !xs.is_empty() => {
+                xs.push(f64::NAN);
+                ys.push(f64::NAN);
+            }
             None => {}
         }
     }
@@ -87,7 +101,12 @@ fn main() -> Result<()> {
         for su in [1.0_f64, -1.0] {
             let (xs, ys) = r_arc(r, su, 1.0, 600);
             if xs.iter().any(|x| x.is_finite()) {
-                fig = fig.add(LineMark { x: xs, y: ys, color: Color::BLUE, width: 0.9 });
+                fig = fig.add(LineMark {
+                    x: xs,
+                    y: ys,
+                    color: Color::BLUE,
+                    width: 0.9,
+                });
             }
         }
     }
@@ -95,7 +114,12 @@ fn main() -> Result<()> {
         for sv in [1.0_f64, -1.0] {
             let (xs, ys) = r_arc(r, 1.0, sv, 600);
             if xs.iter().any(|x| x.is_finite()) {
-                fig = fig.add(LineMark { x: xs, y: ys, color: Color::BLUE, width: 0.9 });
+                fig = fig.add(LineMark {
+                    x: xs,
+                    y: ys,
+                    color: Color::BLUE,
+                    width: 0.9,
+                });
             }
         }
     }
@@ -106,7 +130,12 @@ fn main() -> Result<()> {
         for su in [1.0_f64, -1.0] {
             let (xs, ys) = t_arc(t, su, 500);
             if xs.iter().any(|x| x.is_finite()) {
-                fig = fig.add(LineMark { x: xs, y: ys, color: Color::RED, width: 0.8 });
+                fig = fig.add(LineMark {
+                    x: xs,
+                    y: ys,
+                    color: Color::RED,
+                    width: 0.8,
+                });
             }
         }
     }
@@ -119,9 +148,19 @@ fn main() -> Result<()> {
         .collect();
     let neg: Vec<f64> = ss.iter().map(|&s| -s).collect();
     // u = v
-    fig = fig.add(LineMark { x: ss.clone(), y: ss.clone(), color: Color::BLACK, width: 2.5 });
+    fig = fig.add(LineMark {
+        x: ss.clone(),
+        y: ss.clone(),
+        color: Color::BLACK,
+        width: 2.5,
+    });
     // u = -v
-    fig = fig.add(LineMark { x: neg, y: ss.clone(), color: Color::BLACK, width: 2.5 });
+    fig = fig.add(LineMark {
+        x: neg,
+        y: ss.clone(),
+        color: Color::BLACK,
+        width: 2.5,
+    });
 
     // ── Singularity r = 0: v² − u² = 1 (future and past, separate) ───────────
     // Parametrize by u; clip where |v| > CLIP (occurs near |u| ≈ sqrt(CLIP²−1)).
@@ -133,8 +172,18 @@ fn main() -> Result<()> {
     let vs_fut: Vec<f64> = us.iter().map(|&u| (1.0 + u * u).sqrt()).collect();
     let vs_past: Vec<f64> = us.iter().map(|&u| -(1.0 + u * u).sqrt()).collect();
 
-    fig = fig.add(LineMark { x: us.clone(), y: vs_fut,  color: Color::BLACK, width: 3.5 });
-    fig = fig.add(LineMark { x: us.clone(), y: vs_past, color: Color::BLACK, width: 3.5 });
+    fig = fig.add(LineMark {
+        x: us.clone(),
+        y: vs_fut,
+        color: Color::BLACK,
+        width: 3.5,
+    });
+    fig = fig.add(LineMark {
+        x: us.clone(),
+        y: vs_past,
+        color: Color::BLACK,
+        width: 3.5,
+    });
 
     fig.save("examples/showcases/kruskal_szekeres_line.png")?;
     println!("Saved kruskal_szekeres_line.png");

@@ -1,0 +1,59 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="10" y="149">
+2022
+</text>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="10" y="419">
+2023
+</text>
+<path d="M60,560 L60,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
+0
+</text>
+<path d="M240,560 L240,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="230" y="574">
+0.5
+</text>
+<path d="M420,560 L420,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="410" y="574">
+1
+</text>
+<path d="M600,560 L600,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="590" y="574">
+1.5
+</text>
+<path d="M780,560 L780,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="770" y="574">
+2
+</text>
+<path d="M60,560 L65,560" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="554">
+0
+</text>
+<path d="M60,380 L65,380" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="374">
+50
+</text>
+<path d="M60,200 L65,200" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="194">
+100
+</text>
+<path d="M60,20 L65,20" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="14">
+150
+</text>
+<path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
+<rect fill="#0000ff" height="432" width="288" x="96" y="128"/>
+<rect fill="#0000ff" height="486" width="288" x="456" y="74"/>
+<rect fill="#ff0000" height="288" width="288" x="96" y="272"/>
+<rect fill="#ff0000" height="342" width="288" x="456" y="218"/>
+<rect fill="#0000ff" height="432" width="288" x="96" y="-592"/>
+<rect fill="#0000ff" height="486" width="288" x="456" y="-754"/>
+<rect fill="#ff0000" height="288" width="288" x="96" y="-448"/>
+<rect fill="#ff0000" height="342" width="288" x="456" y="-610"/>
+</svg>

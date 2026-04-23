@@ -1702,7 +1702,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
 
 ### Layer 3: BarMark
 
-- [ ] Create `BarMark` in `starsight-layer-3/src/marks/bar.rs`:
+- [x] Create `BarMark` in `starsight-layer-3/src/marks/bar.rs`:
 
     ```rust
     #[derive(Debug, Clone)]
@@ -1732,7 +1732,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     }
     ```
 
-- [ ] Implement `Mark` for `BarMark` — vertical variant first:
+- [x] Implement `Mark` for `BarMark` — vertical variant first:
 
     ```rust
     // For vertical bars:
@@ -1746,7 +1746,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     backend.fill_rect(rect, color)?;
     ```
 
-- [ ] Implement horizontal bar variant:
+- [x] Implement horizontal bar variant:
 
     ```rust
     // In BarMark::render(), when self.orientation == Orientation::Horizontal:

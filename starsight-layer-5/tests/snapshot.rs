@@ -144,6 +144,8 @@ fn snapshot_bar_vertical() {
     ));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -152,42 +154,20 @@ fn snapshot_bar_horizontal() {
     // transposed band/value axis path and left-to-right bar growth.
     let fig = Figure::new(800, 600).add(
         BarMark::new(
-            vec!["Oslo".into(), "Stockholm".into(), "Copenhagen".into(), "Helsinki".into()],
+            vec![
+                "Oslo".into(),
+                "Stockholm".into(),
+                "Copenhagen".into(),
+                "Helsinki".into(),
+            ],
             vec![1.0, 2.4, 0.8, 0.7],
         )
-            .horizontal(),
+        .horizontal(),
     );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-}
-
-/*#[test]
-fn snapshot_bar_vertical() {
-    // Monthly rainfall totals (mm) for three months — simple positive-only
-    // dataset that exercises the baseline-to-value vertical bar path.
-    let fig = Figure::new(800, 600).add(
-        BarMark::new(
-            vec!["Jan".into(), "Feb".into(), "Mar".into()],
-            vec![42.0, 18.5, 67.3],
-        ),
-    );
-    let svg = fig.render_svg().unwrap();
-    insta::assert_snapshot!(svg);
-}
-
-#[test]
-fn snapshot_bar_horizontal() {
-    // Population (millions) of four cities — horizontal layout exercises
-    // the transposed band/value axis path and left-to-right bar growth.
-    let fig = Figure::new(800, 600).add(
-        BarMark::new(
-            vec!["Oslo".into(), "Stockholm".into(), "Copenhagen".into(), "Helsinki".into()],
-            vec![1.0, 2.4, 0.8, 0.7],
-        )
-            .horizontal(),
-    );
-    let svg = fig.render_svg().unwrap();
-    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -195,10 +175,26 @@ fn snapshot_bar_grouped() {
     // Quarterly sales vs costs — two series sharing the same category axis.
     // Exercises dodge positioning so bars sit side-by-side within each band.
     let fig = Figure::new(800, 600)
-        .add(BarMark::new(vec!["Q1".into(), "Q2".into(), "Q3".into()], vec![40.0, 55.0, 48.0]).group("Sales"))
-        .add(BarMark::new(vec!["Q1".into(), "Q2".into(), "Q3".into()], vec![30.0, 38.0, 35.0]).group("Costs"));
+        .add(
+            BarMark::new(
+                vec!["Q1".into(), "Q2".into(), "Q3".into()],
+                vec![40.0, 55.0, 48.0],
+            )
+            .group("Sales")
+            .color(Color::BLUE),
+        )
+        .add(
+            BarMark::new(
+                vec!["Q1".into(), "Q2".into(), "Q3".into()],
+                vec![30.0, 38.0, 35.0],
+            )
+            .group("Costs")
+            .color(Color::RED),
+        );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -206,8 +202,10 @@ fn snapshot_bar_stacked() {
     // Energy mix (GWh) stacked by source — exercises cumulative baseline
     // offsets so the second series begins where the first ends.
     let fig = Figure::new(800, 600)
-        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![120.0, 135.0]).stack("wind"))
-        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![80.0, 95.0]).stack("solar"));
+        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![120.0, 135.0]).stack("wind").color(Color::BLUE))
+        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![80.0, 95.0]).stack("solar").color(Color::RED));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-}*/
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}

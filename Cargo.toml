@@ -36,8 +36,8 @@ wgpu                     = "29.0.1"        # WebGPU / native GPU API          MI
 vello                    = "0.8.0"         # GPU 2D vector renderer           Apache-2.0 OR MIT
 tiny-skia                = "0.12.0"        # CPU 2D rasterizer                BSD-3-Clause
 lyon                     = "1.0.19"        # Vector path tessellation         MIT OR Apache-2.0
-cosmic-text              = "0.18.2"        # Unicode text shaping             MIT OR Apache-2.0
-parley                   = "0.8.0"         # Rich text layout                 Apache-2.0 OR MIT
+cosmic-text              = "0.19.0"        # Unicode text shaping             MIT OR Apache-2.0
+parley                   = "0.9.0"         # Rich text layout                 Apache-2.0 OR MIT
 ab_glyph                 = "0.2.32"        # OpenType glyph loading           Apache-2.0
 # Data & math
 polars                   = "0.53.0"        # DataFrame library                MIT
@@ -70,15 +70,15 @@ winit                    = "0.31.0-beta.2" # Cross-platform windowing         Ap
 egui                     = "0.34.1"        # Immediate-mode GUI               MIT OR Apache-2.0
 egui-plotter             = "0.6.0"         # Plotting widget for egui         MIT
 # WASM
-wasm-bindgen             = "0.2.117"       # Rust ↔ JS bindings               MIT OR Apache-2.0
-web-sys                  = "0.3.94"        # Web API bindings                 MIT OR Apache-2.0
+wasm-bindgen             = "0.2.118"       # Rust ↔ JS bindings               MIT OR Apache-2.0
+web-sys                  = "0.3.95"        # Web API bindings                 MIT OR Apache-2.0
 # Geospatial
-geo                      = "0.32.0"        # Geometric primitives             MIT OR Apache-2.0
+geo                      = "0.33.1"        # Geometric primitives             MIT OR Apache-2.0
 proj                     = "0.31.0"        # Coordinate transforms            MIT OR Apache-2.0
 geojson                  = "1.0.0"         # GeoJSON parser                   MIT OR Apache-2.0
 # Utilities
 serde                    = "1.0.228"       # Serialization framework          MIT OR Apache-2.0
-clap                     = "4.6.0"         # CLI argument parser              MIT OR Apache-2.0
+clap                     = "4.6.1"         # CLI argument parser              MIT OR Apache-2.0
 insta                    = "1.47.2"        # Snapshot testing                 Apache-2.0
 proptest                 = "1.11.0"        # Property-based testing           MIT OR Apache-2.0
 # Logging & error handling
@@ -90,7 +90,7 @@ anyhow                   = "1.0.102"       # Trait-object error type          MI
 plotters                 = "0.3.7"         # Mature Rust plotting             MIT
 charming                 = "0.6.0"         # Apache ECharts wrapper           MIT OR Apache-2.0
 plotly                   = "0.14.1"        # Plotly.js wrapper                MIT
-plotlars                 = "0.11.8"        # Plotly + Polars integration      MIT
+plotlars                 = "0.12.3"        # Plotly + Polars integration      MIT
 # Internal — workspace path dependencies (all GPL-3.0-only).
 # Both `version` and `path` are required: `path` is used during local
 # `cargo build`, and `version` is required by `cargo publish` (which strips

@@ -14,55 +14,146 @@ use starsight_layer_2::coords::CartesianCoord;
 
 // ── render_axes ──────────────────────────────────────────────────────────────────────────────────
 
-/// Render tick marks and labels for both axes.
-///
-/// # Errors
-/// Forwards any error from the backend's `draw_path` or `draw_text` calls.
-pub fn render_axes(coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+/// Render tick marks and labels for both axes, plus category labels for bar charts.
+pub fn render_axes(
+    coord: &CartesianCoord,
+    backend: &mut dyn DrawBackend,
+    category_labels: &[String],
+    horizontal_labels: bool,
+) -> Result<()> {
     let area = &coord.plot_area;
     let tick_len: f32 = 5.0;
     let label_offset: f32 = 14.0;
     let tick_color = Color::new(80, 80, 80);
     let font_size: f32 = 12.0;
 
-    // X-axis ticks.
-    for (pos, label) in coord
-        .x_axis
-        .tick_positions
-        .iter()
-        .zip(&coord.x_axis.tick_labels)
-    {
-        let px = coord.map_x(*pos) as f32;
-        let path = Path::new()
-            .move_to(Point::new(px, area.bottom))
-            .line_to(Point::new(px, area.bottom + tick_len));
-        backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-        backend.draw_text(
-            label,
-            Point::new(px - 10.0, area.bottom + label_offset),
-            font_size,
-            tick_color,
-        )?;
-    }
+    let n_categories = category_labels.len();
 
-    // Y-axis ticks.
-    for (pos, label) in coord
-        .y_axis
-        .tick_positions
-        .iter()
-        .zip(&coord.y_axis.tick_labels)
-    {
-        let py = coord.map_y(*pos) as f32;
-        let path = Path::new()
-            .move_to(Point::new(area.left - tick_len, py))
-            .line_to(Point::new(area.left, py));
-        backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-        backend.draw_text(
-            label,
-            Point::new(area.left - 40.0, py - 6.0),
-            font_size,
-            tick_color,
-        )?;
+    // === Category labels (bar charts) ===
+    if n_categories > 0 {
+        if horizontal_labels {
+            // Horizontal bars: labels on X-axis (bottom)
+            let band_width = area.width() / n_categories as f32;
+            for (i, label) in category_labels.iter().enumerate() {
+                let px = area.left + (i as f32 + 0.5) * band_width;
+                backend.draw_text(
+                    label,
+                    Point::new(px - 20.0, area.bottom + label_offset + 10.0),
+                    font_size,
+                    tick_color,
+                )?;
+            }
+            // X-axis ticks: point UP (data side, into plot)
+            for (pos, label) in coord
+                .x_axis
+                .tick_positions
+                .iter()
+                .zip(&coord.x_axis.tick_labels)
+            {
+                let px = coord.map_x(*pos) as f32;
+                let path = Path::new()
+                    .move_to(Point::new(px, area.bottom))
+                    .line_to(Point::new(px, area.bottom - tick_len));
+                backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
+                backend.draw_text(
+                    label,
+                    Point::new(px - 10.0, area.bottom + label_offset),
+                    font_size,
+                    tick_color,
+                )?;
+            }
+            // NO Y-axis ticks/labels - category labels are on Y positions
+        } else {
+            // Vertical bars: labels on Y-axis (left side)
+            let band_height = area.height() / n_categories as f32;
+            for (i, label) in category_labels.iter().enumerate() {
+                let py = area.top + (i as f32 + 0.5) * band_height;
+                backend.draw_text(
+                    label,
+                    Point::new(10.0, py - 6.0),
+                    font_size,
+                    tick_color,
+                )?;
+            }
+            // X-axis ticks: point LEFT (to label side, outside plot)
+            for (pos, label) in coord
+                .x_axis
+                .tick_positions
+                .iter()
+                .zip(&coord.x_axis.tick_labels)
+            {
+                let px = coord.map_x(*pos) as f32;
+                let path = Path::new()
+                    .move_to(Point::new(px, area.bottom))
+                    .line_to(Point::new(px, area.bottom + tick_len));
+                backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
+                backend.draw_text(
+                    label,
+                    Point::new(px - 10.0, area.bottom + label_offset),
+                    font_size,
+                    tick_color,
+                )?;
+            }
+            // Y-axis ticks: point RIGHT (data side, into plot)
+            for (pos, label) in coord
+                .y_axis
+                .tick_positions
+                .iter()
+                .zip(&coord.y_axis.tick_labels)
+            {
+                let py = coord.map_y(*pos) as f32;
+                let path = Path::new()
+                    .move_to(Point::new(area.left, py))
+                    .line_to(Point::new(area.left + tick_len, py));
+                backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
+                backend.draw_text(
+                    label,
+                    Point::new(area.left - 40.0, py - 6.0),
+                    font_size,
+                    tick_color,
+                )?;
+            }
+        }
+    } else {
+        // === No category labels - regular numeric axes ===
+        // X-axis ticks: point UP (data side, into plot)
+        for (pos, label) in coord
+            .x_axis
+            .tick_positions
+            .iter()
+            .zip(&coord.x_axis.tick_labels)
+        {
+            let px = coord.map_x(*pos) as f32;
+            let path = Path::new()
+                .move_to(Point::new(px, area.bottom))
+                .line_to(Point::new(px, area.bottom - tick_len));
+            backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
+            backend.draw_text(
+                label,
+                Point::new(px - 10.0, area.bottom + label_offset),
+                font_size,
+                tick_color,
+            )?;
+        }
+        // Y-axis ticks: point RIGHT (data side, into plot)
+        for (pos, label) in coord
+            .y_axis
+            .tick_positions
+            .iter()
+            .zip(&coord.y_axis.tick_labels)
+        {
+            let py = coord.map_y(*pos) as f32;
+            let path = Path::new()
+                .move_to(Point::new(area.left, py))
+                .line_to(Point::new(area.left + tick_len, py));
+            backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
+            backend.draw_text(
+                label,
+                Point::new(area.left - 40.0, py - 6.0),
+                font_size,
+                tick_color,
+            )?;
+        }
     }
 
     // Axis lines (bottom and left edges of plot area).
@@ -89,5 +180,5 @@ pub fn render_background(plot_area: &Rect, backend: &mut dyn DrawBackend) -> Res
     backend.fill_rect(*plot_area, Color::WHITE)
 }
 
-// ── render_legend ────────────────────────────────────────────────────────────────────────────────
+// ── render_legend ───────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub fn render_legend(legend: &Legend, backend: &mut dyn DrawBackend) -> Result<()>

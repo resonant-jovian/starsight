@@ -11,7 +11,11 @@ use starsight::prelude::*;
 // ── Lorenz derivatives ───────────────────────────────────────────────────────────────────────────
 
 #[derive(Clone, Copy)]
-struct State { x: f64, y: f64, z: f64 }
+struct State {
+    x: f64,
+    y: f64,
+    z: f64,
+}
 
 fn deriv(s: State, sigma: f64, rho: f64, beta: f64) -> State {
     State {
@@ -23,16 +27,28 @@ fn deriv(s: State, sigma: f64, rho: f64, beta: f64) -> State {
 
 fn rk4(s: State, dt: f64, sigma: f64, rho: f64, beta: f64) -> State {
     let k1 = deriv(s, sigma, rho, beta);
-    let s2 = State { x: s.x + 0.5*dt*k1.x, y: s.y + 0.5*dt*k1.y, z: s.z + 0.5*dt*k1.z };
+    let s2 = State {
+        x: s.x + 0.5 * dt * k1.x,
+        y: s.y + 0.5 * dt * k1.y,
+        z: s.z + 0.5 * dt * k1.z,
+    };
     let k2 = deriv(s2, sigma, rho, beta);
-    let s3 = State { x: s.x + 0.5*dt*k2.x, y: s.y + 0.5*dt*k2.y, z: s.z + 0.5*dt*k2.z };
+    let s3 = State {
+        x: s.x + 0.5 * dt * k2.x,
+        y: s.y + 0.5 * dt * k2.y,
+        z: s.z + 0.5 * dt * k2.z,
+    };
     let k3 = deriv(s3, sigma, rho, beta);
-    let s4 = State { x: s.x + dt*k3.x, y: s.y + dt*k3.y, z: s.z + dt*k3.z };
+    let s4 = State {
+        x: s.x + dt * k3.x,
+        y: s.y + dt * k3.y,
+        z: s.z + dt * k3.z,
+    };
     let k4 = deriv(s4, sigma, rho, beta);
     State {
-        x: s.x + dt/6.0 * (k1.x + 2.0*k2.x + 2.0*k3.x + k4.x),
-        y: s.y + dt/6.0 * (k1.y + 2.0*k2.y + 2.0*k3.y + k4.y),
-        z: s.z + dt/6.0 * (k1.z + 2.0*k2.z + 2.0*k3.z + k4.z),
+        x: s.x + dt / 6.0 * (k1.x + 2.0 * k2.x + 2.0 * k3.x + k4.x),
+        y: s.y + dt / 6.0 * (k1.y + 2.0 * k2.y + 2.0 * k3.y + k4.y),
+        z: s.z + dt / 6.0 * (k1.z + 2.0 * k2.z + 2.0 * k3.z + k4.z),
     }
 }
 
@@ -40,12 +56,16 @@ fn rk4(s: State, dt: f64, sigma: f64, rho: f64, beta: f64) -> State {
 
 fn integrate(rho: f64, ic_jitter: f64) -> (Vec<f64>, Vec<f64>) {
     const SIGMA: f64 = 10.0;
-    const BETA:  f64 = 8.0 / 3.0;
-    const DT:    f64 = 0.005;
+    const BETA: f64 = 8.0 / 3.0;
+    const DT: f64 = 0.005;
     const STEPS: usize = 80_000;
     const DISCARD: usize = 5_000;
 
-    let mut s = State { x: 1.0 + ic_jitter, y: 1.0 + ic_jitter, z: 1.0 + ic_jitter };
+    let mut s = State {
+        x: 1.0 + ic_jitter,
+        y: 1.0 + ic_jitter,
+        z: 1.0 + ic_jitter,
+    };
 
     // burn-in: discard transient
     for _ in 0..DISCARD {
@@ -73,7 +93,8 @@ fn main() -> Result<()> {
     let n = rho_values.len() as f64;
 
     let mut fig = Figure::new(1600, 1000);
-    fig = fig.title("Lorenz attractor family — x–z projection")
+    fig = fig
+        .title("Lorenz attractor family — x–z projection")
         .x_label("x")
         .y_label("z");
 

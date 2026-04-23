@@ -17,7 +17,7 @@ use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::primitives::{Color, Rect};
 use starsight_layer_2::axes::Axis;
 use starsight_layer_2::coords::CartesianCoord;
-use starsight_layer_3::marks::{DataExtent, Mark};
+use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
 
@@ -106,6 +106,136 @@ impl Figure {
         merged
     }
 
+    /// Check if any marks need bar context (have group, stack, or base set).
+    fn has_bar_marks(&self) -> bool {
+        self.marks.iter().any(|m| m.as_bar_info().is_some())
+    }
+    fn compute_bar_context(&self) -> BarRenderContext {
+        let mut ctx = BarRenderContext::default();
+
+        // First: check if ANY marks have group or stack (need special rendering)
+        let has_any_grouped = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| g.is_some()).unwrap_or(false));
+        let has_any_stacked = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| s.is_some()).unwrap_or(false));
+
+        if has_any_grouped {
+            // For grouped bars: collect all unique groups and calculate total
+            let mut groups: Vec<String> = Vec::new();
+            for mark in &self.marks {
+                if let Some((group, _, _)) = mark.as_bar_info() {
+                    if let Some(g) = group {
+                        if !groups.contains(&g.to_string()) {
+                            groups.push(g.to_string());
+                        }
+                    }
+                }
+            }
+
+            // Total groups = count of ALL marks that have group set, not per-group count
+            let total_groups = self.marks.iter()
+                .filter(|m| m.as_bar_info().map(|(g, _, _)| g.is_some()).unwrap_or(false))
+                .count() as i32;
+
+            // Assign index to each group
+            for (idx, g) in groups.iter().enumerate() {
+                ctx.group_offsets.insert(g.clone(), (idx as i32, total_groups));
+            }
+        }
+
+        if has_any_stacked {
+            // For stacked bars: compute cumulative baselines per category
+            // We need to iterate in order (first mark adds to baseline 0, second adds to that, etc.)
+            // The issue is we can't access BarMark fields from dyn Mark
+            
+            // For now: use simple approach - same width as non-stacked, will fix stacking in render_bar
+            // ctx.first_pass = false
+        }
+
+        ctx
+    }
+
+    /// Render marks, passing bar context for grouped/stacked bar rendering.
+    fn render_marks(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let has_any_stacked = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| s.is_some()).unwrap_or(false));
+        
+        if has_any_stacked {
+            // First pass: compute stacked baselines
+            let mut ctx = BarRenderContext::default();
+            ctx.first_pass = true;
+            for mark in &self.marks {
+                mark.render_bar(coord, backend, &ctx)?;
+            }
+            
+            // Second pass: render with accumulated baselines  
+            let mut ctx = BarRenderContext::default();
+            ctx.first_pass = false;
+            ctx.stacked_baselines = self.compute_stacked_baselines();
+            for mark in &self.marks {
+                mark.render_bar(coord, backend, &ctx)?;
+            }
+        } else if self.has_bar_marks() {
+            let bar_ctx = self.compute_bar_context();
+            for mark in &self.marks {
+                mark.render_bar(coord, backend, &bar_ctx)?;
+            }
+        } else {
+            for mark in &self.marks {
+                mark.render(coord, backend)?;
+            }
+        }
+        Ok(())
+    }
+    
+    /// Compute stacked baselines - returns map of label -> cumulative END position after EACH bar.
+    /// This is used by render_bar to know where each bar should start.
+    fn compute_stacked_baselines(&self) -> std::collections::HashMap<String, f64> {
+        let mut baselines = std::collections::HashMap::new();
+        
+        // Iterate marks in order - each stacked bar adds to the baseline
+        for mark in &self.marks {
+            if let Some((_, stack, _)) = mark.as_bar_info() {
+                if stack.is_some() {
+                    if let Some((labels, values)) = mark.as_bar_data() {
+                        for (label, value) in labels.iter().zip(values.iter()) {
+                            if !label.is_empty() && !value.is_nan() {
+                                // Get current baseline (where previous stack ended)
+                                let current_baseline = *baselines.get(label).unwrap_or(&0.0);
+                                // Store the END position (baseline + this bar's value)
+                                // This becomes the baseline for the NEXT stacked bar
+                                baselines.insert(label.clone(), current_baseline + value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        baselines
+    }
+
+    /// Get category labels from bar marks (for category axis labels).
+    fn category_labels(&self) -> Vec<String> {
+        for mark in &self.marks {
+            if let Some((labels, _)) = mark.as_bar_data() {
+                if !labels.is_empty() {
+                    return labels.to_vec();
+                }
+            }
+        }
+        vec![]
+    }
+
+    /// Check if we have horizontal bar marks (labels go on Y-axis).
+    fn has_horizontal_bars(&self) -> bool {
+        for mark in &self.marks {
+            if let Some((_, _, o)) = mark.as_bar_info() {
+                if matches!(o, Orientation::Horizontal) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     /// Borrow the underlying mark list.
     #[must_use]
     pub fn marks(&self) -> &[Box<dyn Mark>] {
@@ -144,18 +274,16 @@ impl Figure {
         };
 
         crate::renders::render_background(&plot_area, backend)?;
-        crate::renders::render_axes(&coord, backend)?;
+        let category_labels = self.category_labels();
+        let horizontal_labels = self.has_horizontal_bars();
+        crate::renders::render_axes(&coord, backend, &category_labels, horizontal_labels)?;
 
         backend.set_clip(Some(plot_area))?;
-        for mark in &self.marks {
-            mark.render(&coord, backend)?;
-        }
+        self.render_marks(&coord, backend)?;
         backend.set_clip(None)?;
 
         Ok(())
     }
-
-    /// Render the figure to in-memory PNG bytes via the raster backend.
     ///
     /// # Errors
     /// - [`StarsightError::Render`](starsight_layer_1::errors::StarsightError::Render)
