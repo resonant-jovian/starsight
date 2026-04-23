@@ -10,7 +10,6 @@
 //! - 0.3.0+: `HeatmapMark`, `BoxMark`, `ViolinMark`, `PieMark`, `ContourMark`,
 //!   `RidgeMark`, `StepMark`, `ErrorBarMark`, `RugMark`.
 
-use std::ops::IntoBounds;
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
@@ -256,64 +255,79 @@ impl BarMark {
     }
 }
 impl Mark for BarMark {
-    // coord unused for now?
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let label = (self.x, self.x.len());
+        let valid: Vec<(&str, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
+            .map(|(x, y)| (x.as_str(), *y))
+            .collect();
 
-        Ok(for (x, y) in self.x.iter().zip(&self.y) {
-            if x == "" || y.is_nan() {
-                continue;
-            }
-            let bar_width;
-            let bandwidth;
-            let band_scale;
-            if self.orientation == Orientation::Vertical {
-                let max = coord.x_axis.scale.domain_max;
-                let min = coord.x_axis.scale.domain_min;
-                band_scale = min..max;
-                bandwidth = max - min;
-                bar_width = bandwidth as f32 * self.width.unwrap_or(0.8);
-            }
-            else {
-                let max = coord.y_axis.scale.domain_max;
-                let min = coord.y_axis.scale.domain_min;
-                iter::successors(Some(START), |i| {
-                    let next = i + INCREMENT;
-                    (next < END).then_some(next)
-                })
-                    .for_each(|i| println!("{i}"));
-                band_scale = (min..max).step_by(self.width.unwrap_or(0.8));
-                bandwidth = max - min;
-                bar_width = bandwidth as f32 * self.width.unwrap_or(0.8);
-            }
-            let x_center = band_scale.;
-            let x_left = x_center - bar_width / 2.0;
-            let y_top = y_scale.map(value);
-            let y_bottom = y_scale.map(0.0);  // bars grow from baseline
-            let rect = Rect::from_ltrb(x_left, y_top, x_left + bar_width, y_bottom);
-            let left = *x as f32 - (self.width / 2.);
-            let top;
-            let bottom;
-            if y > &0. {
-                top = *y as f32;
-                bottom = 0.;
-            } else {
-                top = 0.;
-                bottom = *y as f32;
-            }
-            let right = *x as f32 + (self.width / 2.);
-            let rect = Rect::new(left, top, right, bottom);
+        let n = valid.len();
+        if n == 0 {
+            return Ok(());
+        }
 
-            backend.fill_rect(rect, self.color.unwrap_or(Color::BLUE))?
-        })
+        let area = coord.plot_area;
+        let fill = self.color.unwrap_or(Color::BLUE);
+        let width_fraction = self.width.unwrap_or(0.8);
+
+        match self.orientation {
+            Orientation::Vertical => {
+                let band_width = area.width() / n as f32;
+                let bar_width = band_width * width_fraction;
+
+                for (i, (_label, value)) in valid.iter().enumerate() {
+                    let x_center = area.left + (i as f32 + 0.5) * band_width;
+                    let x_left = x_center - bar_width / 2.0;
+                    let x_right = x_center + bar_width / 2.0;
+
+                    let y_top = area.bottom
+                        - coord.y_axis.scale.map(*value) as f32 * area.height();
+                    let y_bottom = area.bottom
+                        - coord.y_axis.scale.map(0.0) as f32 * area.height();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+            Orientation::Horizontal => {
+                let band_height = area.height() / n as f32;
+                let bar_height = band_height * width_fraction;
+
+                for (i, (_label, value)) in valid.iter().enumerate() {
+                    let y_center = area.top + (i as f32 + 0.5) * band_height;
+                    let y_top = y_center - bar_height / 2.0;
+                    let y_bottom = y_center + bar_height / 2.0;
+
+                    let x_left = area.left
+                        + coord.x_axis.scale.map(0.0) as f32 * area.width();
+                    let x_right = area.left
+                        + coord.x_axis.scale.map(*value) as f32 * area.width();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+        }
+
+        Ok(())
     }
     // No clue if this works
     fn data_extent(&self) -> Option<DataExtent> {
-        let y_min = self.y.iter().cloned().fold(f64::NAN, f64::min);
-        if y_min == y_min.min(0.0) {
-            extent_from_xy(&self.x, &self.y)
+        let valid_y: Vec<f64> = self.y.iter().copied().filter(|v| !v.is_nan()).collect();
+        if valid_y.is_empty() {
+            return None;
         }
-        else { None }
+        let y_min = valid_y.iter().cloned().fold(f64::INFINITY, f64::min).min(0.0);
+        let y_max = valid_y.iter().cloned().fold(f64::NEG_INFINITY, f64::max).max(0.0);
+        Some(DataExtent {
+            x_min: 0.0,
+            x_max: self.x.len() as f64,
+            y_min,
+            y_max,
+        })
     }
 }
 

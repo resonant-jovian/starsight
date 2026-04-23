@@ -1,0 +1,57 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
+<path d="M60,560 L60,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
+0
+</text>
+<path d="M240,560 L240,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="230" y="574">
+1
+</text>
+<path d="M420,560 L420,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="410" y="574">
+2
+</text>
+<path d="M600,560 L600,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="590" y="574">
+3
+</text>
+<path d="M780,560 L780,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="770" y="574">
+4
+</text>
+<path d="M55,560 L60,560" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="554">
+0
+</text>
+<path d="M55,452 L60,452" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="446">
+0.5
+</text>
+<path d="M55,344 L60,344" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="338">
+1
+</text>
+<path d="M55,236 L60,236" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="230">
+1.5
+</text>
+<path d="M55,128 L60,128" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="122">
+2
+</text>
+<path d="M55,20 L60,20" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="14">
+2.5
+</text>
+<path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
+<rect fill="#0000ff" height="108" width="180" x="60" y="33.5"/>
+<rect fill="#0000ff" height="108" width="432.00003" x="60" y="168.5"/>
+<rect fill="#0000ff" height="108" width="144" x="60" y="303.5"/>
+<rect fill="#0000ff" height="108" width="126" x="60" y="438.5"/>
+</svg>

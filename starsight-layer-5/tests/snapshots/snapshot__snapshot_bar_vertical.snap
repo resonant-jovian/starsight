@@ -1,0 +1,60 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
+<path d="M60,560 L60,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
+0
+</text>
+<path d="M300,560 L300,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="290" y="574">
+1
+</text>
+<path d="M540,560 L540,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="530" y="574">
+2
+</text>
+<path d="M780,560 L780,565" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="770" y="574">
+3
+</text>
+<path d="M55,560 L60,560" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="554">
+0
+</text>
+<path d="M55,482.85715 L60,482.85715" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="476.85715">
+10
+</text>
+<path d="M55,405.7143 L60,405.7143" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="399.7143">
+20
+</text>
+<path d="M55,328.57144 L60,328.57144" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="322.57144">
+30
+</text>
+<path d="M55,251.42857 L60,251.42857" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="245.42857">
+40
+</text>
+<path d="M55,174.28572 L60,174.28572" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="168.28572">
+50
+</text>
+<path d="M55,97.14286 L60,97.14286" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="91.14286">
+60
+</text>
+<path d="M55,20 L60,20" fill="none" stroke="#505050" stroke-width="1"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="14">
+70
+</text>
+<path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
+<rect fill="#0000ff" height="324" width="192" x="84" y="236"/>
+<rect fill="#0000ff" height="142.7143" width="192" x="324" y="417.2857"/>
+<rect fill="#0000ff" height="519.17145" width="192" x="564" y="40.828552"/>
+</svg>
