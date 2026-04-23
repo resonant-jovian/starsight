@@ -57,7 +57,7 @@ The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×6
 |---|---|---|
 | `plt.plot(x, y)` | `plot!(x, y)` | No global state |
 | `plt.scatter(x, y, c=c)` | `PointMark::new(x, y).color_by(&c)` | Builder pattern |
-| `plt.bar(labels, vals)` | `BarMark::new(labels, vals)` | Grammar of graphics |
+| `plt.bar(labels, vals)` | `BarMark::new(categories, values)` | Grammar of graphics |
 | `plt.savefig("out.png")` | `.save("out.png")?` | Returns `Result` |
 | `plt.show()` | `.show()?` | Feature `interactive` |
 | `sns.heatmap(data)` | `HeatmapMark::new(data)` | prismatica colormaps |
@@ -284,7 +284,7 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 | SVG export | working | 0.1.0 | Resolution-independent vector; `Figure::render_svg()` and `.save("foo.svg")` work today |
 | `LineMark` / `PointMark` | working | 0.1.0 | Core 2D mark types |
 | `Figure` builder + `plot!` macro | working | 0.1.0 | High-level API and one-liner |
-| `BarMark` / `AreaMark` / `HeatmapMark` | wip     | 0.2.0 | More chart types |
+| `BarMark` / `AreaMark` | wip     | 0.2.0 | Vertical/horizontal/stacked bars, area fills; grouped bars + HeatmapMark pending |
 | Statistical transforms (Bin, KDE, ...) | planned | 0.3.0 | Histograms, density, regression |
 | Layout + faceting + legends | planned | 0.4.0 | `GridLayout`, `FacetWrap`, `Colorbar` |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
@@ -348,7 +348,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 > Pin an exact version while the workspace evolves toward `1.0.0`. The high-level milestones are below; the full task-level roadmap with checkboxes lives in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md). See also: [CHANGELOG](CHANGELOG.md).
 
 - [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
-- [ ] 0.2.0 Core charts — `BarMark`, `AreaMark`, `HeatmapMark`, histogram
+- [ ] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
 - [ ] 0.3.0 Statistical charts — `BoxMark`, `ViolinMark`, `KDE`, `PieMark`
 - [ ] 0.4.0 Layout — `GridLayout`, faceting, legends, colorbars
 - [ ] 0.5.0 Scale infrastructure — `LogScale`, `SymLogScale`, `DateTimeScale`, `BandScale`

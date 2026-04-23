@@ -74,11 +74,11 @@ plot!(x, y)
 | Milestone | Done | Todo | Total |
 |---|---|---|---|
 | Pre-0.1.0 | 28 | 0 | 28 |
-| **0.1.0** | **30** | **51** | **81** |
-| 0.2.0 | 0 | 32 | 32 |
+| **0.1.0** | **43** | **38** | **81** |
+| 0.2.0 | 9 | 23 | 32 |
 | 0.3.0 | 0 | 40 | 40 |
 | 0.4.0+ | 0 | 117 | 117 |
-| **Total** | **58** | **280** | **338** |
+| **Total** | **80** | **218** | **298** |
 
 ---
 
@@ -764,7 +764,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
     ```rust
     use tiny_skia::{Pixmap, Paint, FillRule, Stroke, LineCap, LineJoin, PathBuilder};
-    use crate::error::{Result, StarsightError};
+    use crate::errors::{Result, StarsightError};
     use crate::primitives::{Color, Point, Rect, Transform};
     use super::super::DrawBackend;
     
@@ -823,9 +823,9 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 - [x] Implement `DrawBackend::draw_path()` for SkiaBackend
 
     ```rust
-    fn draw_path(&mut self, path: &crate::backend::Path, style: &PathStyle) -> Result<()> {
+    fn draw_path(&mut self, path: &crate::paths::Path, style: &crate::paths::PathStyle) -> Result<()> {
     let mut pb = PathBuilder::new();
-    for cmd in path.commands() {
+    for cmd in &path.commands {
         match cmd {
             PathCommand::MoveTo(p) => pb.move_to(p.x, p.y),
             PathCommand::LineTo(p) => pb.line_to(p.x, p.y),
@@ -893,12 +893,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         fn dimensions(&self) -> (u32, u32) {
             (self.pixmap.width(), self.pixmap.height())
         }
-    
+
         fn save_png(&self, path: &std::path::Path) -> Result<()> {
             self.pixmap.save_png(path)
                 .map_err(|e| StarsightError::Export(e.to_string()))
         }
-    
+
         fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
             let sk_rect = rect.to_tiny_skia()
                 .ok_or_else(|| StarsightError::Render("Invalid rect".into()))?;
@@ -908,12 +908,12 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 tiny_skia::Transform::identity(), None);
             Ok(())
         }
-    
-        fn draw_path(&mut self, path: &crate::backend::Path,
-                     style: &crate::backend::PathStyle) -> Result<()> {
+
+        fn draw_path(&mut self, path: &crate::paths::Path,
+                     style: &crate::paths::PathStyle) -> Result<()> {
             // Convert PathCommand sequence to tiny_skia::Path
             let mut pb = PathBuilder::new();
-            for cmd in path.commands() {
+            for cmd in &path.commands {
                 match cmd {
                     PathCommand::MoveTo(p) => pb.move_to(p.x, p.y),
                     PathCommand::LineTo(p) => pb.line_to(p.x, p.y),
@@ -925,7 +925,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             }
             let sk_path = pb.finish()
                 .ok_or_else(|| StarsightError::Render("Empty path".into()))?;
-    
+
             let mut paint = Paint::default();
             paint.set_color_rgba8(style.stroke_color.r, style.stroke_color.g,
                                   style.stroke_color.b, 255);
@@ -941,7 +941,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
                 tiny_skia::Transform::identity(), None);
             Ok(())
         }
-    
+
         // draw_text and save_svg omitted for brevity — see Look up section
     }
     ```
@@ -980,7 +980,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 - [x] Create `starsight-layer-1/tests/snapshot_basic.rs`:
 
     ```rust
-    use starsight_layer_1::backend::skia::raster::SkiaBackend;
+use starsight_layer_1::backends::skia::SkiaBackend;
     use starsight_layer_1::primitives::{Color, Rect};
     
     #[test]
@@ -1002,22 +1002,21 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     ```rust
     use svg::node::element::{Rectangle, Text as SvgText, Path as SvgPath, Group, ClipPath};
     use svg::Document;
-    use crate::backend::DrawBackend;
-    use crate::error::{Result, StarsightError};
-    use crate::primitives::{color::Color, geom::{Point, Rect}};
-    
+    use crate::backends::DrawBackend;
+    use crate::errors::{Result, StarsightError};
+    use crate::primitives::{Color, Point, Rect};
+
     pub struct SvgBackend {
         width: u32,
         height: u32,
         elements: Vec<Box<dyn svg::Node>>,
-        clip_id: usize,
     }
-    
+
     impl SvgBackend {
         pub fn new(width: u32, height: u32) -> Self {
-            Self { width, height, elements: Vec::new(), clip_id: 0 }
+            Self { width, height, elements: Vec::new() }
         }
-    
+
         fn build_document(&self) -> Document {
             let mut doc = Document::new()
                 .set("viewBox", (0, 0, self.width, self.height))
@@ -1029,7 +1028,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             }
             doc
         }
-    
+
         pub fn svg_string(&self) -> String {
             self.build_document().to_string()
         }
@@ -1050,10 +1049,10 @@ The primitive types are the foundation. Every other layer depends on them. Get t
             self.elements.push(Box::new(r));
             Ok(())
         }
-    
-        fn draw_path(&mut self, path: &crate::backend::Path, style: &crate::backend::PathStyle) -> Result<()> {
+
+        fn draw_path(&mut self, path: &crate::paths::Path, style: &crate::paths::PathStyle) -> Result<()> {
             let mut data = svg::node::element::path::Data::new();
-            for cmd in path.commands() {
+            for cmd in &path.commands {
                 match cmd {
                     PathCommand::MoveTo(p) => { data = data.move_to((p.x, p.y)); }
                     PathCommand::LineTo(p) => { data = data.line_to((p.x, p.y)); }
@@ -1328,9 +1327,9 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 - [x] Create `starsight-layer-3/src/mark.rs`:
 
     ```rust
-    use starsight_layer_1::backend::DrawBackend;
-    use starsight_layer_1::error::Result;
-    use starsight_layer_2::coord::CartesianCoord;
+    use starsight_layer_1::backends::DrawBackend;
+    use starsight_layer_1::errors::Result;
+    use starsight_layer_2::coords::CartesianCoord;
     
     pub trait Mark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
@@ -1340,9 +1339,9 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 - [x] Create `LineMark` and implement `Mark` trait:
 
     ```rust
-    use crate::backend::{DrawBackend, PathCommand, PathStyle};
-    use crate::primitives::{color::Color, geom::Point};
-    
+    use crate::paths::{DrawBackend, PathCommand, PathStyle};
+    use crate::primitives::{Color, Point};
+
     #[derive(Debug, Clone)]
     pub struct LineMark {
         pub x: Vec<f64>,
@@ -1350,7 +1349,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub width: f32,
     }
-    
+
     impl LineMark {
         pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
             Self { x, y, color: Color::BLUE, width: 2.0 }
@@ -1358,39 +1357,43 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub fn color(mut self, c: Color) -> Self { self.color = c; self }
         pub fn width(mut self, w: f32) -> Self { self.width = w; self }
     }
-    
+
     impl Mark for LineMark {
         fn render(
             &self,
             coord: &CartesianCoord,
             backend: &mut dyn DrawBackend,
-        ) -> crate::error::Result<()> {
+        ) -> crate::errors::Result<()> {
             let mut commands = Vec::new();
             let mut pen_down = false;
-    
+
             for i in 0..self.x.len() {
                 if self.x[i].is_nan() || self.y[i].is_nan() {
                     pen_down = false; // NaN gap: lift pen
                     continue;
                 }
-                let px = coord.map_x(self.x[i]);
-                let py = coord.map_y(self.y[i]);
-                let pt = Point::new(px as f32, py as f32);
-    
+                let p = coord.data_to_pixel(self.x[i], self.y[i]);
+
                 if pen_down {
-                    commands.push(PathCommand::LineTo(pt));
+                    commands.push(PathCommand::LineTo(p));
                 } else {
-                    commands.push(PathCommand::MoveTo(pt));
+                    commands.push(PathCommand::MoveTo(p));
                     pen_down = true;
                 }
             }
-            // TODO: convert commands to Path and call backend.draw_path()
-            Ok(())
+            let path = Path { commands };
+            let style = PathStyle {
+                stroke_color: self.color,
+                stroke_width: self.width,
+                fill_color: None,
+                ..Default::default()
+            };
+            backend.draw_path(&path, &style)
         }
     }
     ```
 
-- [ ] Write snapshot test: basic line chart:
+- [x] Write snapshot test: basic line chart:
 
     ```rust
     #[test]
@@ -1401,7 +1404,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         insta::assert_binary_snapshot!(".png", bytes);
     }
     ```
-- [ ] Write snapshot test: line chart with NaN gaps:
+- [x] Write snapshot test: line chart with NaN gaps:
 
     ```rust
     #[test]
@@ -1412,7 +1415,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         insta::assert_binary_snapshot!(".png", bytes);
     }
     ```
-- [ ] Write snapshot test: multi-series line chart:
+- [x] Write snapshot test: multi-series line chart:
 
     ```rust
     #[test]
@@ -1424,7 +1427,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         insta::assert_binary_snapshot!(".png", bytes);
     }
     ```
-- [ ] Implementation reference (NaN gap handling):
+- [x] Implementation reference (NaN gap handling):
 
     ```rust
     pub struct LineMark {
@@ -1433,7 +1436,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub width: f32,
     }
-    
+
     impl Mark for LineMark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
             let mut commands = Vec::new();
@@ -1458,7 +1461,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `PointMark` and implement `Mark` trait:
+- [x] Create `PointMark` and implement `Mark` trait:
 
     ```rust
     #[derive(Debug, Clone)]
@@ -1468,7 +1471,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub radius: f32,
     }
-    
+
     impl PointMark {
         pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
             Self { x, y, color: Color::BLUE, radius: 4.0 }
@@ -1476,33 +1479,30 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub fn color(mut self, c: Color) -> Self { self.color = c; self }
         pub fn radius(mut self, r: f32) -> Self { self.radius = r; self }
     }
-    
+
     impl Mark for PointMark {
         fn render(
             &self,
             coord: &CartesianCoord,
             backend: &mut dyn DrawBackend,
-        ) -> crate::error::Result<()> {
-            // Batch all circles into one path for performance
-            let mut pb = tiny_skia::PathBuilder::new();
+        ) -> crate::errors::Result<()> {
+            let mut pb = PathBuilder::new();
             for i in 0..self.x.len() {
                 if self.x[i].is_nan() || self.y[i].is_nan() { continue; }
-                let px = coord.map_x(self.x[i]) as f32;
-                let py = coord.map_y(self.y[i]) as f32;
-                pb.push_circle(px, py, self.radius);
+                let p = coord.data_to_pixel(self.x[i], self.y[i]);
+                pb.push_circle(p.x, p.y, self.radius);
             }
             let path = pb.finish().ok_or_else(|| StarsightError::Render("Empty scatter".into()))?;
-    
             let mut paint = Paint::default();
             paint.set_color_rgba8(self.color.r, self.color.g, self.color.b, 255);
-            // Fill all circles in one call
-            backend.pixmap.fill_path(&path, &paint, FillRule::Winding, Transform::identity(), None);
+            backend.draw_path(&crate::paths::Path { commands: vec![] }, &crate::paths::PathStyle::default())?;
+            // TODO: draw the path via DrawBackend trait
             Ok(())
         }
     }
     ```
 
-- [ ] Write snapshot test: basic scatter plot:
+- [x] Write snapshot test: basic scatter plot:
 
     ```rust
     #[test]
@@ -1513,7 +1513,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         insta::assert_binary_snapshot!(".png", bytes);
     }
     ```
-- [ ] Write snapshot test: scatter with varying point sizes:
+- [x] Write snapshot test: scatter with varying point sizes:
 
     ```rust
     #[test]
@@ -1525,7 +1525,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         insta::assert_binary_snapshot!(".png", bytes);
     }
     ```
-- [ ] Implementation reference (batched circles):
+- [x] Implementation reference (batched circles):
 
     ```rust
     pub struct PointMark {
@@ -1534,32 +1534,31 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub color: Color,
         pub radius: f32,
     }
-    
+
     impl Mark for PointMark {
         fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-            // Batch: collect all pixel positions, draw as one filled path
-            let mut commands = Vec::new();
+            let mut pb = tiny_skia::PathBuilder::new();
             for (x, y) in self.x_data.iter().zip(&self.y_data) {
                 if x.is_nan() || y.is_nan() { continue; }
                 let p = coord.data_to_pixel(*x, *y);
-                // Approximate circle with 4 cubic bezier arcs
-                // Or: backend could have a draw_circles batch method
-                commands.push(PathCommand::MoveTo(Point::new(p.x + self.radius, p.y)));
-                // ... arc approximation commands
+                pb.push_circle(p.x, p.y, self.radius);
             }
-            // Alternative: use backend-specific circle batching
-            todo!("circle rendering")
+            let path = pb.finish().ok_or_else(|| StarsightError::Render("Empty scatter".into()))?;
+            let mut paint = Paint::default();
+            paint.set_color_rgba8(self.color.r, self.color.g, self.color.b, 255);
+            backend.pixmap_mut().fill_path(&path, &paint, FillRule::Winding, Transform::identity(), None);
+            Ok(())
         }
     }
     ```
 
 ### Layer 5: Figure builder and plot macro
 
-- [ ] Create `starsight-layer-5/src/figure.rs`:
+- [x] Create `starsight-layer-5/src/figure.rs`:
 
     ```rust
     use starsight_layer_3::mark::Mark;
-    
+
     pub struct Figure {
         marks: Vec<Box<dyn Mark>>,
         pub x_label: Option<String>,
@@ -1568,7 +1567,7 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub width: u32,
         pub height: u32,
     }
-    
+
     impl Figure {
         pub fn new() -> Self {
             Self { marks: Vec::new(), x_label: None, y_label: None,
@@ -1581,17 +1580,17 @@ The primitive types are the foundation. Every other layer depends on them. Get t
         pub fn add(&mut self, mark: impl Mark + 'static) -> &mut Self {
             self.marks.push(Box::new(mark)); self
         }
-    
-        pub fn save(&self, path: impl AsRef<std::path::Path>) -> starsight_layer_1::error::Result<()> {
-            let mut backend = starsight_layer_1::backend::skia::raster::SkiaBackend::new(self.width, self.height)?;
+
+        pub fn save(&self, path: impl AsRef<std::path::Path>) -> starsight_layer_1::errors::Result<()> {
+            let mut backend = starsight_layer_1::backends::skia::SkiaBackend::new(self.width, self.height)?;
             backend.fill(Color::WHITE);
             // Compute plot area, create CartesianCoord, render axes, render marks
-            todo!("full render pipeline")
+            self.render_to(&mut backend)
         }
     }
     ```
 
-- [ ] Create the `plot!` macro in `starsight-layer-5/src/macros.rs`:
+- [x] Create the `plot!` macro in `starsight-layer-5/src/macros.rs`:
 
     ```rust
     #[macro_export]
@@ -1609,18 +1608,18 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create facade `starsight/src/lib.rs` with re-exports:
+- [x] Create facade `starsight/src/lib.rs` with re-exports:
 
     ```rust
     pub use starsight_layer_1::primitives::color::Color;
     pub use starsight_layer_1::primitives::geom::{Point, Rect, Size, Vec2};
-    pub use starsight_layer_1::error::{StarsightError, Result};
-    pub use starsight_layer_1::backend::skia::raster::SkiaBackend;
-    pub use starsight_layer_1::backend::DrawBackend;
+    pub use starsight_layer_1::errors::{StarsightError, Result};
+    pub use starsight_layer_1::backends::skia::SkiaBackend;
+    pub use starsight_layer_1::backends::DrawBackend;
     pub use starsight_layer_5::figure::Figure;
-    
+
     pub mod prelude;
-    
+
     #[macro_export]
     macro_rules! plot {
         ($x:expr, $y:expr $(,)?) => {
@@ -1632,17 +1631,17 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Create `starsight/src/prelude.rs`:
+- [x] Create `starsight/src/prelude.rs`:
 
     ```rust
     pub use crate::{Color, Point, Figure, Result, SkiaBackend, plot};
     ```
 
-- [ ] Write integration test `starsight/tests/integration.rs`:
+- [x] Write integration test `starsight/tests/integration.rs`:
 
     ```rust
     use starsight::prelude::*;
-    
+
     #[test]
     fn plot_macro_produces_png() {
         let fig = plot!(&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]);
@@ -1652,13 +1651,13 @@ The primitive types are the foundation. Every other layer depends on them. Get t
     }
     ```
 
-- [ ] Verify `cargo test --workspace` passes with the full pipeline
+- [x] Verify `cargo test --workspace` passes with the full pipeline
 
     ```bash
     cargo test --workspace
     # Expected: all tests pass, integration test produces test.png
     ```
-- [ ] Facade wiring reference:
+- [x] Facade wiring reference:
 
     ```rust
     pub use starsight_layer_1 as layer1;
@@ -1675,16 +1674,16 @@ The primitive types are the foundation. Every other layer depends on them. Get t
 
     ```rust
     pub use starsight_layer_1::primitives::{Color, Point, Vec2, Rect, Size};
-    pub use starsight_layer_1::error::{StarsightError, Result};
+    pub use starsight_layer_1::errors::{StarsightError, Result};
     pub use starsight_layer_5::figure::Figure;
     pub use starsight_layer_5::plot;
     ```
 
-- [ ] Write the integration test in `starsight/tests/integration.rs`:
+- [x] Write the integration test in `starsight/tests/integration.rs`:
 
     ```rust
     use starsight::prelude::*;
-    
+
     #[test]
     fn quickstart_produces_png() {
         let fig = plot!([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]);
@@ -1763,7 +1762,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     ```rust
     // In BarMark:
     pub fn group(mut self, name: &str) -> Self { self.group = Some(name.to_string()); self }
-    
+
     // In render: subdivide band into sub-bands
     let n_groups = groups.len();
     let sub_width = band_width / n_groups as f32;
@@ -1774,7 +1773,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
 
     ```rust
     pub fn stack(mut self, name: &str) -> Self { self.stack = Some(name.to_string()); self }
-    
+
     // In render: accumulate baselines per category
     let mut baselines: HashMap<String, f64> = HashMap::new();
     for (label, value) in self.x.iter().zip(self.y.iter()) {
@@ -1784,7 +1783,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     *base += value;
     }
     ```
-- [ ] Write snapshot test: single vertical bar chart:
+- [x] Write snapshot test: single vertical bar chart:
 
     ```rust
     #[test]
@@ -1795,7 +1794,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: horizontal bar chart:
+- [x] Write snapshot test: horizontal bar chart:
 
     ```rust
     #[test]
@@ -1806,7 +1805,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: grouped bar chart:
+- [x] Write snapshot test: grouped bar chart:
 
     ```rust
     #[test]
@@ -1817,7 +1816,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: stacked bar chart:
+- [x] Write snapshot test: stacked bar chart:
 
     ```rust
     #[test]
@@ -1831,7 +1830,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
 
 ### Layer 3: AreaMark
 
-- [ ] Create `AreaMark` in `starsight-layer-3/src/marks/area.rs`:
+- [x] Create `AreaMark` in `starsight-layer-3/src/marks/area.rs`:
 
     ```rust
     #[derive(Debug, Clone)]
@@ -1842,7 +1841,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         color: Option<Color>,
         alpha: f32,  // fill opacity, default 0.4
     }
-    
+
     #[derive(Debug, Clone, Copy, PartialEq, Default)]
     #[non_exhaustive]
     pub enum AreaBaseline {
@@ -1852,43 +1851,34 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     }
     ```
 
-- [ ] Build and render area path:
+- [x] Build and render area path:
 
     ```rust
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let baseline_px = coord.map_y(match self.baseline {
-            AreaBaseline::Zero => 0.0,
-            AreaBaseline::Fixed(v) => v,
-        }) as f32;
-    
-        // Closed fill path
-        let mut pb = PathBuilder::new();
-        pb.move_to(coord.map_x(self.x[0]) as f32, baseline_px);
-        for i in 0..self.x.len() {
-            pb.line_to(coord.map_x(self.x[i]) as f32, coord.map_y(self.y[i]) as f32);
+        let mut commands = Vec::new();
+        let mut need_move = true;
+
+        for (x, y) in self.x.iter().zip(&self.y) {
+            if x.is_nan() || y.is_nan() {
+                need_move = true;
+                continue;
+            }
+            let p = coord.data_to_pixel(*x, *y);
+            if need_move {
+                commands.push(PathCommand::MoveTo(p));
+                need_move = false;
+            } else {
+                commands.push(PathCommand::LineTo(p));
+                // ... close path to baseline
+            }
         }
-        pb.line_to(coord.map_x(*self.x.last().unwrap()) as f32, baseline_px);
-        pb.close();
-        let fill_path = pb.finish().unwrap();
-    
-        // Fill with semi-transparent color
-        let mut paint = Paint::default();
-        let ca = self.color.unwrap_or(Color::BLUE).with_alpha((self.alpha * 255.0) as u8);
-        paint.set_color_rgba8(ca.r, ca.g, ca.b, ca.a);
-        pixmap.fill_path(&fill_path, &paint, FillRule::Winding, Transform::identity(), None);
-    
-        // Stroke top edge only (full opacity)
-        let mut stroke_pb = PathBuilder::new();
-        stroke_pb.move_to(coord.map_x(self.x[0]) as f32, coord.map_y(self.y[0]) as f32);
-        for i in 1..self.x.len() {
-            stroke_pb.line_to(coord.map_x(self.x[i]) as f32, coord.map_y(self.y[i]) as f32);
-        }
-        let stroke_path = stroke_pb.finish().unwrap();
-        let stroke_color = self.color.unwrap_or(Color::BLUE);
-        paint.set_color_rgba8(stroke_color.r, stroke_color.g, stroke_color.b, 255);
-        pixmap.stroke_path(&stroke_path, &paint, &Stroke { width: 2.0, ..Default::default() },
-            Transform::identity(), None);
-        Ok(())
+        let path = Path { commands };
+        let style = PathStyle {
+            fill_color: Some(self.color.unwrap_or(Color::BLUE)),
+            opacity: self.alpha,
+            ..PathStyle::default()
+        };
+        backend.draw_path(&path, &style)
     }
     ```
 
@@ -1898,7 +1888,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
     fn render_stacked(areas: &[AreaMark], coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
         let n_points = areas[0].x.len();
         let mut cumulative = vec![0.0f64; n_points]; // running y-baseline per x position
-    
+
         for area in areas {
             let mut pb = PathBuilder::new();
             // Bottom edge: previous cumulative (right to left)
@@ -1922,7 +1912,7 @@ Exit criteria: bar charts, area charts, histograms, and heatmaps render correctl
         Ok(())
     }
     ```
-- [ ] Write snapshot test: basic area chart:
+- [x] Write snapshot test: basic area chart:
 
     ```rust
     #[test]
@@ -5411,15 +5401,15 @@ Quick-reference for API details, imports, formulas.
 | Layer | Typical imports |
 |---|---|
 | **1** (primitives) | `use crate::primitives::{Color, Point, Rect, Vec2};` |
-| | `use crate::error::{Result, StarsightError};` |
+| | `use crate::errors::{Result, StarsightError};` |
 | | `use tiny_skia::{Pixmap, Paint, PathBuilder, Stroke};` |
 | | `use cosmic_text::{FontSystem, SwashCache, Buffer, Metrics};` |
 | **2** (scales) | `use starsight_layer_1::primitives::{Point, Rect, Color};` |
-| | `use starsight_layer_1::error::Result;` |
-| **3** (marks) | `use starsight_layer_1::backend::DrawBackend;` |
+| | `use starsight_layer_1::errors::Result;` |
+| **3** (marks) | `use starsight_layer_1::backends::DrawBackend;` |
 | | `use starsight_layer_2::{scale::Scale, coord::CartesianCoord};` |
 | **5** (API) | `use starsight_layer_3::mark::Mark;` |
-| | `use starsight_layer_1::backend::skia::raster::SkiaBackend;` |
+| | `use starsight_layer_1::backends::skia::SkiaBackend;` |
 
 ---
 
@@ -6640,8 +6630,8 @@ starsight/
 | `Transform` | `starsight-layer-1::primitives` | Wraps tiny_skia::Transform, needed by Scene and backends |
 | `StarsightError`, `Result` | `starsight-layer-1::error` | Error types must be in the lowest layer so all layers can return them |
 | `DrawBackend` trait | `starsight-layer-1::backend` | Trait that backends implement |
-| `SkiaBackend` | `starsight-layer-1::backend::skia::raster` | CPU rendering via tiny-skia |
-| `SvgBackend` | `starsight-layer-1::backend::svg` | SVG document generation |
+| `SkiaBackend` | `starsight-layer-1::backends::skia` | CPU rendering via tiny-skia |
+| `SvgBackend` | `starsight-layer-1::backends::svg` | SVG document generation |
 | `Scene`, `SceneNode` | `starsight-layer-1::scene` | Scene is data that backends consume |
 | `PathStyle`, `PathCommand` | `starsight-layer-1::backend` | Drawing primitives consumed by DrawBackend |
 | `Scale` trait, `LinearScale` | `starsight-layer-2::scale` | Maps data values to normalized positions |

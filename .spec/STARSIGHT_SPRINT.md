@@ -15,7 +15,7 @@
 - [x] Implement `Mark for BarMark` — iterate data, map through `CartesianCoord`, emit `fill_rect` calls
   - Handle y-values below zero (bars extend downward from axis)
   - Bar centering: offset x by `bar_width / 2`
-- [ ] Unit tests: empty data, single bar, negative values, NaN skip
+- [x] Unit tests: empty data, single bar, negative values, NaN skip
 
 > [!warning] Design note
 > The existing TODO stub says `categories: Vec<String>` — ignore that. The coord system is purely numeric (`CartesianCoord` only does `f64 → pixel`). Use `x: Vec<f64>` matching LineMark's pattern. Categorical x-axis is a 0.5.0 `BandScale` concern.
@@ -36,8 +36,8 @@
 
 ### 10:45–12:00 — BarMark snapshots + AreaMark struct
 
-- [ ] Snapshot test: basic vertical bars (monthly rainfall data)
-- [ ] Snapshot test: mixed positive/negative bars (profit/loss)
+- [x] Snapshot test: basic vertical bars (monthly rainfall data)
+- [x] Snapshot test: mixed positive/negative bars (profit/loss)
 - [x] Define `AreaMark` struct — `x: Vec<f64>`, `y: Vec<f64>`, `fill: Color`, `opacity: f32`
   - Baseline is always y=0 for now (0.2.0 scope)
   - `DataExtent` must include the baseline (`y_min = y_min.min(0.0)`)
@@ -50,8 +50,8 @@
 
 ### 13:00–14:30 — AreaMark rendering + snapshots
 
-- [ ] Handle NaN gaps in AreaMark (split into separate closed polygons, same logic as LineMark's `need_move` but each segment needs its own baseline closure)
-- [ ] Semi-transparent fill: `PathStyle.opacity` already works in SkiaBackend (it feeds into `set_color_rgba8`'s alpha byte)
+- [x] Handle NaN gaps in AreaMark (split into separate closed polygons, same logic as LineMark's `need_move` but each segment needs its own baseline closure)
+- [x] Semi-transparent fill: `PathStyle.opacity` already works in SkiaBackend (it feeds into `set_color_rgba8`'s alpha byte)
 
 > [!bug] SvgBackend ignores `PathStyle.opacity`
 > The `draw_path` impl in `vectors.rs` never sets `fill-opacity` or `opacity` on the `<path>` element. Fix this now — add `.set("opacity", style.opacity)` (or separate `fill-opacity` / `stroke-opacity`) to the `SvgPath` builder. Without this, SVG snapshots for area charts will show fully opaque fills regardless of the opacity field.
@@ -76,9 +76,9 @@
 
 ### 14:30–14:45 — Break + small tasks
 
-- [ ] **Update marks.rs header comment** — currently lists StepMark under 0.3.0 but the TODO comment says 0.2.0. Pick one and be consistent.
-- [ ] **Fix README "Coming from" table** — row says `BarMark::new(labels, vals)` but you just built it with `x: Vec<f64>`, not string labels. Update to `BarMark::new(x, y)`.
-- [ ] **Update README Features table** — `LineMark` / `PointMark`, CPU rendering, and SVG export are all `working` now, not `wip`. Same for Wilkinson ticks.
+- [x] **Update marks.rs header comment** — currently lists StepMark under 0.3.0 but the TODO comment says 0.2.0. Pick one and be consistent.
+- [x] **Fix README "Coming from" table** — row says `BarMark::new(labels, vals)` but you just built it with `x: Vec<f64>`, not string labels. Update to `BarMark::new(x, y)`.
+- [x] **Update README Features table** — `LineMark` / `PointMark`, CPU rendering, and SVG export are all `working` now, not `wip`. Same for Wilkinson ticks.
 
 ### 14:45–16:00 — StepMark
 
@@ -101,13 +101,13 @@
 
 ### 16:00–17:00 — Cleanup + commit
 
-- [ ] Run full `cargo test --workspace`, `cargo clippy`, `cargo fmt`
-- [ ] Review all new public API: doc comments, `#[must_use]` where appropriate
-- [ ] **Update facade re-exports:**
+- [x] Run full `cargo test --workspace`, `cargo clippy`, `cargo fmt`
+- [x] Review all new public API: doc comments, `#[must_use]` where appropriate
+- [x] **Update facade re-exports:**
   - `starsight/src/marks.rs` — add `BarMark, AreaMark, StepMark` to the `pub use` line
   - `starsight/src/prelude.rs` — add `BarMark, AreaMark, StepMark` to prelude exports
 - [ ] Commit: `feat(layer-3): add BarMark, AreaMark, StepMark`
-- [ ] Update CHANGELOG.md draft under `[Unreleased]`
+- [x] Update CHANGELOG.md draft under `[Unreleased]`
 
 ---
 
