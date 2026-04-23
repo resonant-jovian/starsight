@@ -4,31 +4,11 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="10" y="149">
+<text fill="#505050" font-family="sans-serif" font-size="12" x="220" y="584">
 2022
 </text>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="10" y="419">
+<text fill="#505050" font-family="sans-serif" font-size="12" x="580" y="584">
 2023
-</text>
-<path d="M60,560 L60,565" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
-0
-</text>
-<path d="M240,560 L240,565" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="230" y="574">
-0.5
-</text>
-<path d="M420,560 L420,565" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="410" y="574">
-1
-</text>
-<path d="M600,560 L600,565" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="590" y="574">
-1.5
-</text>
-<path d="M780,560 L780,565" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="770" y="574">
-2
 </text>
 <path d="M60,560 L65,560" fill="none" stroke="#505050" stroke-width="1"/>
 <text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="554">

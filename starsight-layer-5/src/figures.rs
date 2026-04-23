@@ -275,8 +275,9 @@ impl Figure {
 
         crate::renders::render_background(&plot_area, backend)?;
         let category_labels = self.category_labels();
-        let horizontal_labels = self.has_horizontal_bars();
-        crate::renders::render_axes(&coord, backend, &category_labels, horizontal_labels)?;
+        // use_y_axis_labels: true = labels on Y-axis (horizontal bars), false = labels on X-axis (vertical bars)
+        let use_y_axis_labels = self.has_horizontal_bars();
+        crate::renders::render_axes(&coord, backend, &category_labels, use_y_axis_labels)?;
 
         backend.set_clip(Some(plot_area))?;
         self.render_marks(&coord, backend)?;
