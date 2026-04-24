@@ -14,7 +14,8 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::backends::rasters::SkiaBackend;
 use starsight_layer_1::backends::vectors::SvgBackend;
 use starsight_layer_1::errors::{Result, StarsightError};
-use starsight_layer_1::primitives::{Color, Rect};
+use starsight_layer_1::primitives::Rect;
+use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_2::coords::CartesianCoord;
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
@@ -34,6 +35,8 @@ pub struct Figure {
     pub width: u32,
     /// Output height in pixels.
     pub height: u32,
+    /// Theme for colors.
+    pub theme: Theme,
 }
 
 impl Figure {
@@ -47,7 +50,15 @@ impl Figure {
             y_label: None,
             width,
             height,
+            theme: Theme::default(),
         }
+    }
+
+    /// Builder: set the theme for colors.
+    #[must_use]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
     }
 
     /// Builder: set chart title.
@@ -114,14 +125,14 @@ impl Figure {
         let mut ctx = BarRenderContext::default();
 
         // First: check if ANY marks have group or stack (need special rendering)
-        let has_any_grouped = self.marks.iter().any(|m| {
-            m.as_bar_info()
-                .is_some_and(|(group, _, _)| group.is_some())
-        });
-        let has_any_stacked = self.marks.iter().any(|m| {
-            m.as_bar_info()
-                .is_some_and(|(_, stack, _)| stack.is_some())
-        });
+        let has_any_grouped = self
+            .marks
+            .iter()
+            .any(|m| m.as_bar_info().is_some_and(|(group, _, _)| group.is_some()));
+        let has_any_stacked = self
+            .marks
+            .iter()
+            .any(|m| m.as_bar_info().is_some_and(|(_, stack, _)| stack.is_some()));
 
         if has_any_grouped {
             // For grouped bars: collect all unique groups and calculate total
@@ -129,19 +140,17 @@ impl Figure {
             for mark in &self.marks {
                 if let Some((group, _, _)) = mark.as_bar_info()
                     && let Some(g) = group
-                        && !groups.contains(&g.to_string()) {
-                            groups.push(g.to_string());
-                        }
+                    && !groups.contains(&g.to_string())
+                {
+                    groups.push(g.to_string());
+                }
             }
 
             // Total groups = count of ALL marks that have group set, not per-group count
             let total_groups = self
                 .marks
                 .iter()
-                .filter(|m| {
-                    m.as_bar_info()
-                        .is_some_and(|(g, _, _)| g.is_some())
-                })
+                .filter(|m| m.as_bar_info().is_some_and(|(g, _, _)| g.is_some()))
                 .count() as i32;
 
             // Assign index to each group
@@ -165,10 +174,10 @@ impl Figure {
 
     /// Render marks, passing bar context for grouped/stacked bar rendering.
     fn render_marks(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let has_any_stacked = self.marks.iter().any(|m| {
-            m.as_bar_info()
-                .is_some_and(|(_, stack, _)| stack.is_some())
-        });
+        let has_any_stacked = self
+            .marks
+            .iter()
+            .any(|m| m.as_bar_info().is_some_and(|(_, stack, _)| stack.is_some()));
 
         if has_any_stacked {
             // First pass: compute stacked baselines
@@ -207,17 +216,18 @@ impl Figure {
         for mark in &self.marks {
             if let Some((_, stack, _)) = mark.as_bar_info()
                 && stack.is_some()
-                    && let Some((labels, values)) = mark.as_bar_data() {
-                        for (label, value) in labels.iter().zip(values.iter()) {
-                            if !label.is_empty() && !value.is_nan() {
-                                // Get current baseline (where previous stack ended)
-                                let current_baseline = *baselines.get(label).unwrap_or(&0.0);
-                                // Store the END position (baseline + this bar's value)
-                                // This becomes the baseline for the NEXT stacked bar
-                                baselines.insert(label.clone(), current_baseline + value);
-                            }
-                        }
+                && let Some((labels, values)) = mark.as_bar_data()
+            {
+                for (label, value) in labels.iter().zip(values.iter()) {
+                    if !label.is_empty() && !value.is_nan() {
+                        // Get current baseline (where previous stack ended)
+                        let current_baseline = *baselines.get(label).unwrap_or(&0.0);
+                        // Store the END position (baseline + this bar's value)
+                        // This becomes the baseline for the NEXT stacked bar
+                        baselines.insert(label.clone(), current_baseline + value);
                     }
+                }
+            }
         }
 
         baselines
@@ -227,9 +237,10 @@ impl Figure {
     fn category_labels(&self) -> Vec<String> {
         for mark in &self.marks {
             if let Some((labels, _)) = mark.as_bar_data()
-                && !labels.is_empty() {
-                    return labels.to_vec();
-                }
+                && !labels.is_empty()
+            {
+                return labels.to_vec();
+            }
         }
         vec![]
     }
@@ -238,9 +249,10 @@ impl Figure {
     fn has_horizontal_bars(&self) -> bool {
         for mark in &self.marks {
             if let Some((_, _, o)) = mark.as_bar_info()
-                && matches!(o, Orientation::Horizontal) {
-                    return true;
-                }
+                && matches!(o, Orientation::Horizontal)
+            {
+                return true;
+            }
         }
         false
     }
@@ -282,10 +294,10 @@ impl Figure {
             plot_area,
         };
 
-        crate::renders::render_background(&plot_area, backend)?;
+        crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            crate::renders::render_title(title, self.width, backend)?;
+            crate::renders::render_title(title, self.width, backend, &self.theme)?;
         }
 
         crate::renders::render_axis_labels(
@@ -293,6 +305,7 @@ impl Figure {
             self.y_label.as_deref(),
             &plot_area,
             backend,
+            &self.theme,
         )?;
 
         let category_labels = self.category_labels();
@@ -300,29 +313,36 @@ impl Figure {
         let use_y_axis_labels = self.has_horizontal_bars();
 
         backend.set_clip(Some(plot_area))?;
-        crate::renders::render_grid_lines(&coord, backend)?;
+        crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
         self.render_marks(&coord, backend)?;
         backend.set_clip(None)?;
 
-        crate::renders::render_axes(&coord, backend, &category_labels, use_y_axis_labels)?;
+        crate::renders::render_axes(
+            &coord,
+            backend,
+            &category_labels,
+            use_y_axis_labels,
+            &self.theme,
+        )?;
 
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()
             .filter_map(|mark| {
                 if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
-                    && !label.is_empty() {
-                        return Some(crate::renders::LegendEntry {
-                            color,
-                            label: label.to_string(),
-                        });
-                    }
+                    && !label.is_empty()
+                {
+                    return Some(crate::renders::LegendEntry {
+                        color,
+                        label: label.to_string(),
+                    });
+                }
                 None
             })
             .collect();
 
         if !legend_entries.is_empty() {
-            crate::renders::render_legend(&legend_entries, &plot_area, backend)?;
+            crate::renders::render_legend(&legend_entries, &plot_area, backend, &self.theme)?;
         }
 
         Ok(())
@@ -339,7 +359,7 @@ impl Figure {
     ///   if PNG encoding fails.
     pub fn render_png(&self) -> Result<Vec<u8>> {
         let mut backend = SkiaBackend::new(self.width, self.height)?;
-        backend.fill(Color::WHITE);
+        backend.fill(self.theme.background);
         self.render_to(&mut backend)?;
         backend.png_bytes()
     }

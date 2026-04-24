@@ -321,7 +321,7 @@ impl BarMark {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn horizontal(mut self) -> Self {
         self.orientation = Orientation::Horizontal;
         self
@@ -659,53 +659,99 @@ impl AreaMark {
         self
     }
 }
+
+fn render_segment(
+    coord: &CartesianCoord,
+    backend: &mut dyn DrawBackend,
+    points: &[(f64, f64)],
+    baseline_y: f64,
+    fill: Color,
+    opacity: f32,
+) -> Result<()> {
+    let mut commands = Vec::new();
+
+    if let Some((first_x, first_y)) = points.first() {
+        commands.push(PathCommand::MoveTo(coord.data_to_pixel(*first_x, *first_y)));
+    }
+
+    for (x, y) in points.iter().skip(1) {
+        commands.push(PathCommand::LineTo(coord.data_to_pixel(*x, *y)));
+    }
+
+    if let Some((last_x, _)) = points.last() {
+        commands.push(PathCommand::LineTo(
+            coord.data_to_pixel(*last_x, baseline_y),
+        ));
+    }
+    if let Some((first_x, _)) = points.first() {
+        commands.push(PathCommand::LineTo(
+            coord.data_to_pixel(*first_x, baseline_y),
+        ));
+    }
+    commands.push(PathCommand::Close);
+
+    let path = Path { commands };
+    let style = PathStyle {
+        fill_color: Some(fill),
+        opacity,
+        ..PathStyle::default()
+    };
+    backend.draw_path(&path, &style)
+}
+
 impl Mark for AreaMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let mut commands = Vec::new();
-        let mut need_move = true;
-
         let baseline_y = match self.baseline {
             AreaBaseline::Zero => 0.0,
             AreaBaseline::Fixed(y) => y,
         };
-        let _baseline = coord.data_to_pixel(0.0, baseline_y);
 
-        for (x, y) in self.x.iter().zip(&self.y) {
-            if x.is_nan() || y.is_nan() {
-                need_move = true;
+        let n = self.x.len().min(self.y.len());
+        let mut segment_start: Option<usize> = None;
+        let mut segment_points: Vec<(f64, f64)> = Vec::new();
+
+        for i in 0..n {
+            let xi = self.x[i];
+            let yi = self.y[i];
+
+            if xi.is_nan() || yi.is_nan() {
+                if let Some(_start) = segment_start {
+                    if segment_points.len() >= 2 {
+                        render_segment(
+                            coord,
+                            backend,
+                            &segment_points,
+                            baseline_y,
+                            self.fill,
+                            self.opacity,
+                        )?;
+                    }
+                    segment_points.clear();
+                    segment_start = None;
+                }
                 continue;
             }
-            let p = coord.data_to_pixel(*x, *y);
-            if need_move {
-                commands.push(PathCommand::MoveTo(p));
-                need_move = false;
-            } else {
-                commands.push(PathCommand::LineTo(p));
+
+            if segment_start.is_none() {
+                segment_start = Some(i);
+            }
+            segment_points.push((xi, yi));
+        }
+
+        if let Some(_) = segment_start {
+            if segment_points.len() >= 2 {
+                render_segment(
+                    coord,
+                    backend,
+                    &segment_points,
+                    baseline_y,
+                    self.fill,
+                    self.opacity,
+                )?;
             }
         }
 
-        if !commands.is_empty() && commands.len() > 1 {
-            // Close path back to baseline
-            let first_x = self.x.first().map_or(0.0, |v| *v);
-            let last_x = self.x.last().map_or(0.0, |v| *v);
-            commands.push(PathCommand::LineTo(coord.data_to_pixel(last_x, baseline_y)));
-            commands.push(PathCommand::LineTo(
-                coord.data_to_pixel(first_x, baseline_y),
-            ));
-            commands.push(PathCommand::Close);
-        }
-
-        if commands.is_empty() {
-            return Ok(());
-        }
-
-        let path = Path { commands };
-        let style = PathStyle {
-            fill_color: Some(self.fill),
-            opacity: self.opacity,
-            ..PathStyle::default()
-        };
-        backend.draw_path(&path, &style)
+        Ok(())
     }
 
     fn data_extent(&self) -> Option<DataExtent> {
@@ -733,8 +779,127 @@ impl Mark for AreaMark {
         })
     }
 }
+
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct HeatmapMark { data: Vec<Vec<f64>>, colormap: Colormap, ... }
+
+use starsight_layer_1::colormap::Colormap;
+
+/// Heatmap: a 2D grid of values mapped to colors via a colormap.
+#[derive(Debug, Clone)]
+pub struct HeatmapMark {
+    /// 2D grid of values (row = y, col = x).
+    pub data: Vec<Vec<f64>>,
+    /// Colormap for mapping values to colors.
+    pub colormap: Colormap,
+    /// Optional label for legend.
+    pub label: Option<String>,
+}
+
+impl HeatmapMark {
+    /// Create a new heatmap from a 2D grid of values.
+    #[must_use]
+    pub fn new(data: Vec<Vec<f64>>) -> Self {
+        Self {
+            data,
+            colormap: Colormap::default(),
+            label: None,
+        }
+    }
+
+    /// Set the colormap for mapping values to colors.
+    #[must_use]
+    pub fn colormap(mut self, colormap: Colormap) -> Self {
+        self.colormap = colormap;
+        self
+    }
+
+    /// Set the legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    fn value_range(&self) -> (f64, f64) {
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+        for row in &self.data {
+            for &v in row {
+                if !v.is_nan() {
+                    min = min.min(v);
+                    max = max.max(v);
+                }
+            }
+        }
+        (min, max)
+    }
+}
+
+impl Mark for HeatmapMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        if self.data.is_empty() || self.data[0].is_empty() {
+            return Ok(());
+        }
+
+        let (data_min, data_max) = self.value_range();
+        let range = if (data_max - data_min).abs() < f64::EPSILON {
+            1.0
+        } else {
+            data_max - data_min
+        };
+
+        let n_rows = self.data.len();
+        let n_cols = self.data[0].len();
+
+        let cell_width = coord.plot_area.width() / n_cols as f32;
+        let cell_height = coord.plot_area.height() / n_rows as f32;
+
+        for (row_idx, row) in self.data.iter().enumerate() {
+            for (col_idx, &value) in row.iter().enumerate() {
+                if value.is_nan() {
+                    continue;
+                }
+
+                let normalized = (value - data_min) / range;
+                let color = self.colormap.sample(normalized);
+
+                let x = coord.plot_area.left + (col_idx as f32 + 0.5) * cell_width;
+                let y = coord.plot_area.top + (row_idx as f32 + 0.5) * cell_height;
+
+                let rect = Rect::from_xywh(
+                    x - cell_width / 2.0,
+                    y - cell_height / 2.0,
+                    cell_width,
+                    cell_height,
+                );
+                backend.fill_rect(rect, color)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        if self.data.is_empty() || self.data[0].is_empty() {
+            return None;
+        }
+        let n_cols = self.data[0].len();
+        Some(DataExtent {
+            x_min: 0.0,
+            x_max: n_cols as f64,
+            y_min: 0.0,
+            y_max: self.data.len() as f64,
+        })
+    }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.colormap.sample(0.5))
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
+}
 
 // ── BoxMark ──────────────────────────────────────────────────────────────────────────────────────
 // TODO(0.3.0): pub struct BoxMark { groups: Vec<Vec<f64>>, color: Color, ... }

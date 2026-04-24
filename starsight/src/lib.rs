@@ -30,6 +30,7 @@ pub use starsight_layer_7 as export;
 pub mod aesthetics;
 pub mod axes;
 pub mod backends;
+pub mod colormap;
 pub mod coords;
 pub mod exports;
 pub mod figures;
@@ -42,6 +43,7 @@ pub mod primitives;
 pub mod scales;
 pub mod sources;
 pub mod statistics;
+pub mod theme;
 pub mod ticks;
 
 // ── Top-level convenience aliases ────────────────────────────────────────────────────────────────

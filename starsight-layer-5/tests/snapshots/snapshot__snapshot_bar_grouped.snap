@@ -4,58 +4,58 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<path d="M60,560 L60,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M300,560 L300,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M540,560 L540,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M780,560 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,560 L780,560" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,470 L780,470" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,380 L780,380" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,290 L780,290" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,200 L780,200" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,110 L780,110" fill="none" stroke="#dcdcdc" stroke-width="1"/>
-<path d="M60,20 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L60,20" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,560 L300,20" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M540,560 L540,20" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M780,560 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,560 L780,560" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,470 L780,470" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,380 L780,380" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,290 L780,290" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,200 L780,200" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,110 L780,110" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M60,20 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
 <rect fill="#0000ff" height="360" width="81.600006" x="88.2" y="200"/>
 <rect fill="#0000ff" height="495" width="81.599976" x="328.2" y="65"/>
 <rect fill="#0000ff" height="432" width="81.599976" x="568.2" y="128"/>
 <rect fill="#ff0000" height="270" width="81.59999" x="190.2" y="290"/>
 <rect fill="#ff0000" height="342" width="81.599976" x="430.2" y="218"/>
 <rect fill="#ff0000" height="315" width="81.599976" x="670.2" y="245"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="165" y="584">
+<text fill="#666666" font-family="sans-serif" font-size="12" x="165" y="584">
 Q1
 </text>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="405" y="584">
+<text fill="#666666" font-family="sans-serif" font-size="12" x="405" y="584">
 Q2
 </text>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="645" y="584">
+<text fill="#666666" font-family="sans-serif" font-size="12" x="645" y="584">
 Q3
 </text>
-<path d="M60,560 L65,560" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="554">
+<path d="M60,560 L65,560" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="554">
 0
 </text>
-<path d="M60,470 L65,470" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="464">
+<path d="M60,470 L65,470" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="464">
 10
 </text>
-<path d="M60,380 L65,380" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="374">
+<path d="M60,380 L65,380" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="374">
 20
 </text>
-<path d="M60,290 L65,290" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="284">
+<path d="M60,290 L65,290" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="284">
 30
 </text>
-<path d="M60,200 L65,200" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="194">
+<path d="M60,200 L65,200" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="194">
 40
 </text>
-<path d="M60,110 L65,110" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="104">
+<path d="M60,110 L65,110" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="104">
 50
 </text>
-<path d="M60,20 L65,20" fill="none" stroke="#505050" stroke-width="1"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="20" y="14">
+<path d="M60,20 L65,20" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="14">
 60
 </text>
 <path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>

@@ -10,9 +10,10 @@
 //! is exercised by `starsight/tests/integration.rs` and the layer-1
 //! `blue_rect_on_white` test, neither of which depends on font rendering.
 
+use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, HistogramMark, LineMark, PointMark, StepMark, StepPosition,
+    AreaMark, BarMark, HeatmapMark, HistogramMark, LineMark, PointMark, StepMark, StepPosition,
 };
 use starsight_layer_5::Figure;
 
@@ -336,6 +337,52 @@ fn snapshot_with_title_and_labels() {
         .x_label("Time (s)")
         .y_label("Amplitude (m)")
         .add(LineMark::new(x, y));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+// ── heatmap tests ───────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_heatmap_basic() {
+    let data: Vec<Vec<f64>> = (0..30)
+        .map(|i| (0..30).map(|j| (i * j) as f64).collect())
+        .collect();
+    let fig = Figure::new(600, 600).add(HeatmapMark::new(data));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_heatmap_viridis() {
+    let data: Vec<Vec<f64>> = (0..20)
+        .map(|i| {
+            (0..20)
+                .map(|j| (i as f64 - 10.0).powi(2) + (j as f64 - 10.0).powi(2))
+                .collect()
+        })
+        .collect();
+    let fig = Figure::new(600, 600).add(HeatmapMark::new(data).colormap(VIRIDIS));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_heatmap_plasma() {
+    let data: Vec<Vec<f64>> = (0..20)
+        .map(|i| {
+            (0..20)
+                .map(|j| (i as f64 - 10.0).powi(2) + (j as f64 - 10.0).powi(2))
+                .collect()
+        })
+        .collect();
+    let fig = Figure::new(600, 600).add(HeatmapMark::new(data).colormap(PLASMA));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
     let png = fig.render_png().unwrap();

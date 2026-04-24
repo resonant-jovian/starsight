@@ -10,6 +10,7 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{Path, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
+use starsight_layer_1::theme::Theme;
 use starsight_layer_2::coords::CartesianCoord;
 
 // ── render_axes ──────────────────────────────────────────────────────────────────────────────────
@@ -22,11 +23,12 @@ pub fn render_axes(
     backend: &mut dyn DrawBackend,
     category_labels: &[String],
     use_y_axis_labels: bool,
+    theme: &Theme,
 ) -> Result<()> {
     let area = &coord.plot_area;
     let tick_len: f32 = 5.0;
     let label_offset: f32 = 14.0;
-    let tick_color = Color::new(80, 80, 80);
+    let tick_color = theme.axis;
     let font_size: f32 = 12.0;
 
     let n_categories = category_labels.len();
@@ -152,9 +154,13 @@ pub fn render_axes(
 // ── render_grid_lines ────────────────────────────────────────────────────────────────────────────
 
 /// Render light grid lines for both axes.
-pub fn render_grid_lines(coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+pub fn render_grid_lines(
+    coord: &CartesianCoord,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
     let area = &coord.plot_area;
-    let grid_color = Color::new(220, 220, 220);
+    let grid_color = theme.grid;
     let line_style = PathStyle::stroke(grid_color, 1.0);
 
     for pos in &coord.x_axis.tick_positions {
@@ -178,12 +184,16 @@ pub fn render_grid_lines(coord: &CartesianCoord, backend: &mut dyn DrawBackend) 
 
 // ── render_background ────────────────────────────────────────────────────────────────────────────
 
-/// Fill the plot area background with white.
+/// Fill the plot area background with the theme background color.
 ///
 /// # Errors
 /// Forwards any error from the backend's `fill_rect` call.
-pub fn render_background(plot_area: &Rect, backend: &mut dyn DrawBackend) -> Result<()> {
-    backend.fill_rect(*plot_area, Color::WHITE)
+pub fn render_background(
+    plot_area: &Rect,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
+    backend.fill_rect(*plot_area, theme.background)
 }
 
 // ── render_legend ───────────────────────────────────────────────────────────────────────────────
@@ -199,13 +209,14 @@ pub fn render_legend(
     entries: &[LegendEntry],
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
+    theme: &Theme,
 ) -> Result<()> {
     if entries.is_empty() {
         return Ok(());
     }
 
     let font_size: f32 = 12.0;
-    let label_color = Color::new(60, 60, 60);
+    let label_color = theme.tick_label;
     let sample_size: f32 = 12.0;
     let padding: f32 = 8.0;
     let line_spacing: f32 = 20.0;
@@ -217,7 +228,7 @@ pub fn render_legend(
     let legend_x = plot_area.right - legend_width - 10.0;
     let legend_y = plot_area.top + 10.0;
 
-    let bg_color = Color::new(255, 255, 255);
+    let bg_color = theme.background.with_alpha(230).without_alpha();
     let bg_rect = Rect::new(
         legend_x,
         legend_y,
@@ -248,9 +259,14 @@ pub fn render_legend(
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
 /// Render chart title above the plot area.
-pub fn render_title(title: &str, width: u32, backend: &mut dyn DrawBackend) -> Result<()> {
+pub fn render_title(
+    title: &str,
+    width: u32,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
     let font_size: f32 = 16.0;
-    let title_color = Color::new(30, 30, 30);
+    let title_color = theme.title;
     let x = width as f32 / 2.0;
     let y = 10.0;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
@@ -262,9 +278,10 @@ pub fn render_axis_labels(
     y_label: Option<&str>,
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
+    theme: &Theme,
 ) -> Result<()> {
     let font_size: f32 = 12.0;
-    let label_color = Color::new(60, 60, 60);
+    let label_color = theme.tick_label;
 
     if let Some(label) = x_label {
         let x = plot_area.left + plot_area.width() / 2.0;
