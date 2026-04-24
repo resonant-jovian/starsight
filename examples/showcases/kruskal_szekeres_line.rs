@@ -106,6 +106,7 @@ fn main() -> Result<()> {
                     y: ys,
                     color: Color::BLUE,
                     width: 0.9,
+                    label: None,
                 });
             }
         }
@@ -119,6 +120,7 @@ fn main() -> Result<()> {
                     y: ys,
                     color: Color::BLUE,
                     width: 0.9,
+                    label: None,
                 });
             }
         }
@@ -135,6 +137,7 @@ fn main() -> Result<()> {
                     y: ys,
                     color: Color::RED,
                     width: 0.8,
+                    label: None,
                 });
             }
         }
@@ -153,6 +156,7 @@ fn main() -> Result<()> {
         y: ss.clone(),
         color: Color::BLACK,
         width: 2.5,
+        label: None,
     });
     // u = -v
     fig = fig.add(LineMark {
@@ -160,6 +164,7 @@ fn main() -> Result<()> {
         y: ss.clone(),
         color: Color::BLACK,
         width: 2.5,
+        label: None,
     });
 
     // ── Singularity r = 0: v² − u² = 1 (future and past, separate) ───────────
@@ -177,12 +182,14 @@ fn main() -> Result<()> {
         y: vs_fut,
         color: Color::BLACK,
         width: 3.5,
+        label: None,
     });
     fig = fig.add(LineMark {
         x: us.clone(),
         y: vs_past,
         color: Color::BLACK,
         width: 3.5,
+        label: None,
     });
 
     fig.save("examples/showcases/kruskal_szekeres_line.png")?;

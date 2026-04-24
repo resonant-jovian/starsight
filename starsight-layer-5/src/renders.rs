@@ -67,7 +67,7 @@ pub fn render_axes(
                 let px = area.left + (i as f32 + 0.5) * band_width;
                 backend.draw_text(
                     label,
-                    Point::new(px - 20.0, area.bottom + label_offset + 10.0),
+                    Point::new(px - 15.0, area.bottom + label_offset + 10.0),
                     font_size,
                     tick_color,
                 )?;
@@ -149,6 +149,33 @@ pub fn render_axes(
     Ok(())
 }
 
+// ── render_grid_lines ────────────────────────────────────────────────────────────────────────────
+
+/// Render light grid lines for both axes.
+pub fn render_grid_lines(coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    let area = &coord.plot_area;
+    let grid_color = Color::new(220, 220, 220);
+    let line_style = PathStyle::stroke(grid_color, 1.0);
+
+    for pos in &coord.x_axis.tick_positions {
+        let px = coord.map_x(*pos) as f32;
+        let path = Path::new()
+            .move_to(Point::new(px, area.bottom))
+            .line_to(Point::new(px, area.top));
+        backend.draw_path(&path, &line_style)?;
+    }
+
+    for pos in &coord.y_axis.tick_positions {
+        let py = coord.map_y(*pos) as f32;
+        let path = Path::new()
+            .move_to(Point::new(area.left, py))
+            .line_to(Point::new(area.right, py));
+        backend.draw_path(&path, &line_style)?;
+    }
+
+    Ok(())
+}
+
 // ── render_background ────────────────────────────────────────────────────────────────────────────
 
 /// Fill the plot area background with white.
@@ -160,7 +187,63 @@ pub fn render_background(plot_area: &Rect, backend: &mut dyn DrawBackend) -> Res
 }
 
 // ── render_legend ───────────────────────────────────────────────────────────────────────────────
-// TODO(0.4.0): pub fn render_legend(legend: &Legend, backend: &mut dyn DrawBackend) -> Result<()>
+
+/// A single entry in the legend.
+pub struct LegendEntry {
+    pub color: Color,
+    pub label: String,
+}
+
+/// Render a legend with colored line/box samples and labels.
+pub fn render_legend(
+    entries: &[LegendEntry],
+    plot_area: &Rect,
+    backend: &mut dyn DrawBackend,
+) -> Result<()> {
+    if entries.is_empty() {
+        return Ok(());
+    }
+
+    let font_size: f32 = 12.0;
+    let label_color = Color::new(60, 60, 60);
+    let sample_size: f32 = 12.0;
+    let padding: f32 = 8.0;
+    let line_spacing: f32 = 20.0;
+
+    let max_label_len = entries.iter().map(|e| e.label.len()).max().unwrap_or(0);
+    let legend_width = max_label_len as f32 * 7.0 + 30.0;
+    let legend_height = (entries.len() as f32 * line_spacing) + padding * 2.0;
+
+    let legend_x = plot_area.right - legend_width - 10.0;
+    let legend_y = plot_area.top + 10.0;
+
+    let bg_color = Color::new(255, 255, 255);
+    let bg_rect = Rect::new(
+        legend_x,
+        legend_y,
+        legend_x + legend_width,
+        legend_y + legend_height,
+    );
+    backend.fill_rect(bg_rect, bg_color)?;
+
+    for (i, entry) in entries.iter().enumerate() {
+        let y = legend_y + padding + (i as f32 * line_spacing) + sample_size / 2.0;
+
+        let line = Path::new()
+            .move_to(Point::new(legend_x + padding, y))
+            .line_to(Point::new(legend_x + padding + sample_size, y));
+        backend.draw_path(&line, &PathStyle::stroke(entry.color, 2.0))?;
+
+        backend.draw_text(
+            &entry.label,
+            Point::new(legend_x + padding + sample_size + 6.0, y + 4.0),
+            font_size,
+            label_color,
+        )?;
+    }
+
+    Ok(())
+}
 
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
@@ -169,7 +252,7 @@ pub fn render_title(title: &str, width: u32, backend: &mut dyn DrawBackend) -> R
     let font_size: f32 = 16.0;
     let title_color = Color::new(30, 30, 30);
     let x = width as f32 / 2.0;
-    let y = 15.0;
+    let y = 10.0;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
 
@@ -185,12 +268,12 @@ pub fn render_axis_labels(
 
     if let Some(label) = x_label {
         let x = plot_area.left + plot_area.width() / 2.0;
-        let y = plot_area.bottom + 35.0;
+        let y = plot_area.bottom + 50.0;
         backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
     }
 
     if let Some(label) = y_label {
-        let x = 15.0;
+        let x = 5.0;
         let y = plot_area.top + plot_area.height() / 2.0;
         backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
     }

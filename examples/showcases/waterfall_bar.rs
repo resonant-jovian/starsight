@@ -73,6 +73,7 @@ fn main() -> Result<()> {
             group: None,
             stack: None,
             base: Some(base),
+            label: None,
         });
     }
 

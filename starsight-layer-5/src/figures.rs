@@ -308,11 +308,33 @@ impl Figure {
         let category_labels = self.category_labels();
         // use_y_axis_labels: true = labels on Y-axis (horizontal bars), false = labels on X-axis (vertical bars)
         let use_y_axis_labels = self.has_horizontal_bars();
-        crate::renders::render_axes(&coord, backend, &category_labels, use_y_axis_labels)?;
 
         backend.set_clip(Some(plot_area))?;
+        crate::renders::render_grid_lines(&coord, backend)?;
         self.render_marks(&coord, backend)?;
         backend.set_clip(None)?;
+
+        crate::renders::render_axes(&coord, backend, &category_labels, use_y_axis_labels)?;
+
+        let legend_entries: Vec<crate::renders::LegendEntry> = self
+            .marks
+            .iter()
+            .filter_map(|mark| {
+                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label()) {
+                    if !label.is_empty() {
+                        return Some(crate::renders::LegendEntry {
+                            color,
+                            label: label.to_string(),
+                        });
+                    }
+                }
+                None
+            })
+            .collect();
+
+        if !legend_entries.is_empty() {
+            crate::renders::render_legend(&legend_entries, &plot_area, backend)?;
+        }
 
         Ok(())
     }

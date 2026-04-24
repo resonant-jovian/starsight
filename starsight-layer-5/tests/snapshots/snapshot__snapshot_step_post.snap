@@ -4,6 +4,17 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
+<path d="M60,560 L60,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M240,560 L240,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M420,560 L420,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M600,560 L600,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M780,560 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L780,560" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,425 L780,425" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,290 L780,290" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,155 L780,155" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,20 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L60,560 L96,560 L96,425 L132,425 L132,425 L168,425 L168,290 L204,290 L204,290 L240,290 L240,155 L276,155 L276,155 L312,155 L312,20 L348,20 L348,20 L384,20 L384,560 L420,560 L420,560 L456,560 L456,425 L492,425 L492,425 L528,425 L528,290 L564,290 L564,290 L600,290 L600,155 L636,155 L636,155 L672,155 L672,20 L708,20 L708,20 L744,20" fill="none" stroke="#0000ff" stroke-width="2"/>
 <path d="M60,560 L60,555" fill="none" stroke="#505050" stroke-width="1"/>
 <text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
 0
@@ -46,5 +57,4 @@ expression: svg
 </text>
 <path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
 <path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M60,560 L60,560 L96,560 L96,425 L132,425 L132,425 L168,425 L168,290 L204,290 L204,290 L240,290 L240,155 L276,155 L276,155 L312,155 L312,20 L348,20 L348,20 L384,20 L384,560 L420,560 L420,560 L456,560 L456,425 L492,425 L492,425 L528,425 L528,290 L564,290 L564,290 L600,290 L600,155 L636,155 L636,155 L672,155 L672,20 L708,20 L708,20 L744,20" fill="none" stroke="#0000ff" stroke-width="2"/>
 </svg>

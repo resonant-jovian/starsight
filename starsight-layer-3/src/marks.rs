@@ -73,6 +73,14 @@ pub trait Mark {
     }
     /// Bounding box of this mark's data, or `None` if it is empty.
     fn data_extent(&self) -> Option<DataExtent>;
+    /// Returns the color of this mark for legend display.
+    fn legend_color(&self) -> Option<Color> {
+        None
+    }
+    /// Returns a label for this mark in the legend.
+    fn legend_label(&self) -> Option<&str> {
+        None
+    }
 }
 
 // ── LineMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -88,6 +96,8 @@ pub struct LineMark {
     pub color: Color,
     /// Stroke width in pixels.
     pub width: f32,
+    /// Legend label.
+    pub label: Option<String>,
 }
 
 impl LineMark {
@@ -99,6 +109,7 @@ impl LineMark {
             y,
             color: Color::BLUE,
             width: 2.0,
+            label: None,
         }
     }
 
@@ -106,6 +117,13 @@ impl LineMark {
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
         self.color = c;
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
         self
     }
 
@@ -155,6 +173,14 @@ impl Mark for LineMark {
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
     }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.color)
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
 }
 
 // ── PointMark ────────────────────────────────────────────────────────────────────────────────────
@@ -170,6 +196,8 @@ pub struct PointMark {
     pub color: Color,
     /// Point radius in pixels.
     pub radius: f32,
+    /// Legend label.
+    pub label: Option<String>,
 }
 
 impl PointMark {
@@ -181,6 +209,7 @@ impl PointMark {
             y,
             color: Color::BLUE,
             radius: 4.0,
+            label: None,
         }
     }
 
@@ -195,6 +224,13 @@ impl PointMark {
     #[must_use]
     pub fn radius(mut self, r: f32) -> Self {
         self.radius = r;
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
         self
     }
 }
@@ -228,6 +264,14 @@ impl Mark for PointMark {
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
     }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.color)
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
 }
 
 // ── BarMark ──────────────────────────────────────────────────────────────────────────────────────
@@ -250,6 +294,8 @@ pub struct BarMark {
     pub stack: Option<String>,
     /// Base value for waterfall chart (defaults to 0)
     pub base: Option<f64>,
+    /// Legend label.
+    pub label: Option<String>,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[non_exhaustive]
@@ -271,6 +317,7 @@ impl BarMark {
             group: None,
             stack: None,
             base: None,
+            label: None,
         }
     }
 
@@ -311,6 +358,13 @@ impl BarMark {
     #[must_use]
     pub fn width(mut self, r: f32) -> Self {
         self.width = Some(r);
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
         self
     }
 }
@@ -537,6 +591,14 @@ impl Mark for BarMark {
             y_min,
             y_max,
         })
+    }
+
+    fn legend_color(&self) -> Option<Color> {
+        self.color
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
     }
 }
 
@@ -875,7 +937,7 @@ impl Mark for HistogramMark {
         let area = coord.plot_area;
         let n = bins.len();
         let band_width = area.width() / n as f32;
-        let bar_width = band_width * 0.8;
+        let bar_width = band_width;
 
         let y_max = bins.iter().map(|b| b.count as f64).fold(0.0f64, f64::max);
 

@@ -4,6 +4,26 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
+<path d="M60,560 L60,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M240,560 L240,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M420,560 L420,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M600,560 L600,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M780,560 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L780,560" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,380 L780,380" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,200 L780,200" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,20 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<rect fill="#4c72b0" height="33.103455" width="65.454544" x="60" y="526.89655"/>
+<rect fill="#4c72b0" height="62.06897" width="65.45454" x="125.45455" y="497.93103"/>
+<rect fill="#4c72b0" height="225.51724" width="65.45453" x="190.90909" y="334.48276"/>
+<rect fill="#4c72b0" height="436.55173" width="65.45453" x="256.36365" y="123.44827"/>
+<rect fill="#4c72b0" height="540" width="65.45453" x="321.81818" y="20"/>
+<rect fill="#4c72b0" height="440.68967" width="65.45453" x="387.27274" y="119.31033"/>
+<rect fill="#4c72b0" height="227.58621" width="65.45456" x="452.72726" y="332.4138"/>
+<rect fill="#4c72b0" height="74.48276" width="65.45459" x="518.18176" y="485.51724"/>
+<rect fill="#4c72b0" height="24.827576" width="65.45459" x="583.63635" y="535.1724"/>
+<rect fill="#4c72b0" height="2.0689697" width="65.45459" x="649.0909" y="557.931"/>
+<rect fill="#4c72b0" height="2.0689697" width="65.45459" x="714.5454" y="557.931"/>
 <path d="M60,560 L60,555" fill="none" stroke="#505050" stroke-width="1"/>
 <text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
 0
@@ -42,15 +62,4 @@ expression: svg
 </text>
 <path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
 <path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
-<rect fill="#4c72b0" height="33.103455" width="52.363632" x="66.545456" y="526.89655"/>
-<rect fill="#4c72b0" height="62.06897" width="52.363647" x="132" y="497.93103"/>
-<rect fill="#4c72b0" height="225.51724" width="52.363647" x="197.45453" y="334.48276"/>
-<rect fill="#4c72b0" height="436.55173" width="52.363647" x="262.9091" y="123.44827"/>
-<rect fill="#4c72b0" height="540" width="52.363647" x="328.36362" y="20"/>
-<rect fill="#4c72b0" height="440.68967" width="52.363647" x="393.81818" y="119.31033"/>
-<rect fill="#4c72b0" height="227.58621" width="52.363647" x="459.2727" y="332.4138"/>
-<rect fill="#4c72b0" height="74.48276" width="52.363647" x="524.72723" y="485.51724"/>
-<rect fill="#4c72b0" height="24.827576" width="52.363647" x="590.1818" y="535.1724"/>
-<rect fill="#4c72b0" height="2.0689697" width="52.363647" x="655.63635" y="557.931"/>
-<rect fill="#4c72b0" height="2.0689697" width="52.363647" x="721.0909" y="557.931"/>
 </svg>

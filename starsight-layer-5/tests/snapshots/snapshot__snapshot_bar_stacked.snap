@@ -4,10 +4,27 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="220" y="584">
+<path d="M60,560 L60,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M240,560 L240,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M420,560 L420,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M600,560 L600,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M780,560 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L780,560" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,380 L780,380" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,200 L780,200" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,20 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<rect fill="#0000ff" height="432" width="288" x="96" y="128"/>
+<rect fill="#0000ff" height="486" width="288" x="456" y="74"/>
+<rect fill="#ff0000" height="288" width="288" x="96" y="272"/>
+<rect fill="#ff0000" height="342" width="288" x="456" y="218"/>
+<rect fill="#0000ff" height="432" width="288" x="96" y="-592"/>
+<rect fill="#0000ff" height="486" width="288" x="456" y="-754"/>
+<rect fill="#ff0000" height="288" width="288" x="96" y="-448"/>
+<rect fill="#ff0000" height="342" width="288" x="456" y="-610"/>
+<text fill="#505050" font-family="sans-serif" font-size="12" x="225" y="584">
 2022
 </text>
-<text fill="#505050" font-family="sans-serif" font-size="12" x="580" y="584">
+<text fill="#505050" font-family="sans-serif" font-size="12" x="585" y="584">
 2023
 </text>
 <path d="M60,560 L65,560" fill="none" stroke="#505050" stroke-width="1"/>
@@ -28,12 +45,4 @@ expression: svg
 </text>
 <path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
 <path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
-<rect fill="#0000ff" height="432" width="288" x="96" y="128"/>
-<rect fill="#0000ff" height="486" width="288" x="456" y="74"/>
-<rect fill="#ff0000" height="288" width="288" x="96" y="272"/>
-<rect fill="#ff0000" height="342" width="288" x="456" y="218"/>
-<rect fill="#0000ff" height="432" width="288" x="96" y="-592"/>
-<rect fill="#0000ff" height="486" width="288" x="456" y="-754"/>
-<rect fill="#ff0000" height="288" width="288" x="96" y="-448"/>
-<rect fill="#ff0000" height="342" width="288" x="456" y="-610"/>
 </svg>

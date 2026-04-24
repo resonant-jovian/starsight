@@ -43,6 +43,8 @@ fn snapshot_line_basic() {
     let fig = Figure::new(800, 600).add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -67,6 +69,8 @@ fn snapshot_line_nan_gaps() {
     let fig = Figure::new(800, 600).add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -104,6 +108,8 @@ fn snapshot_scatter_basic() {
     let fig = Figure::new(800, 600).add(PointMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -132,6 +138,8 @@ fn snapshot_scatter_sizes() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── bar tests ────────────────────────────────────────────────────────────────────────────────────

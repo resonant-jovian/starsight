@@ -4,15 +4,25 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<text fill="#1e1e1e" font-family="sans-serif" font-size="16" x="400" y="15">
+<text fill="#1e1e1e" font-family="sans-serif" font-size="16" x="400" y="10">
 Damped Oscillation
 </text>
-<text fill="#3c3c3c" font-family="sans-serif" font-size="12" x="420" y="595">
+<text fill="#3c3c3c" font-family="sans-serif" font-size="12" x="420" y="610">
 Time (s)
 </text>
-<text fill="#3c3c3c" font-family="sans-serif" font-size="12" x="15" y="290">
+<text fill="#3c3c3c" font-family="sans-serif" font-size="12" x="5" y="290">
 Amplitude (m)
 </text>
+<path d="M60,560 L60,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M300,560 L300,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M540,560 L540,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M780,560 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,560 L780,560" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,425 L780,425" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,290 L780,290" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,155 L780,155" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,20 L780,20" fill="none" stroke="#dcdcdc" stroke-width="1"/>
+<path d="M60,20 L84,64.608765 L108,158.00085 L132,273.5613 L156,381.9923 L180,458.46146 L204,488.0192 L228,468.17566 L252,408.30063 L276,326.29053 L300,243.54655 L324,179.60594 L348,147.7228 L372,152.34767 L396,188.91827 L420,245.79048 L444,307.6519 L468,359.4734 L492,390.01825 L516,394.1248 L540,373.34283 L564,334.93024 L588,289.60223 L612,248.68135 L636,221.37573 L660,212.81403 L684,223.2268 L708,248.35861 L732,280.89587 L756,312.47876" fill="none" stroke="#0000ff" stroke-width="2"/>
 <path d="M60,560 L60,555" fill="none" stroke="#505050" stroke-width="1"/>
 <text fill="#505050" font-family="sans-serif" font-size="12" x="50" y="574">
 0
@@ -51,5 +61,4 @@ Amplitude (m)
 </text>
 <path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
 <path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M60,20 L84,64.608765 L108,158.00085 L132,273.5613 L156,381.9923 L180,458.46146 L204,488.0192 L228,468.17566 L252,408.30063 L276,326.29053 L300,243.54655 L324,179.60594 L348,147.7228 L372,152.34767 L396,188.91827 L420,245.79048 L444,307.6519 L468,359.4734 L492,390.01825 L516,394.1248 L540,373.34283 L564,334.93024 L588,289.60223 L612,248.68135 L636,221.37573 L660,212.81403 L684,223.2268 L708,248.35861 L732,280.89587 L756,312.47876" fill="none" stroke="#0000ff" stroke-width="2"/>
 </svg>

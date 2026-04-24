@@ -112,6 +112,7 @@ fn main() -> Result<()> {
             y: z_data,
             color: Color::from(c),
             width: 0.5,
+            label: None,
         });
     }
 
