@@ -116,26 +116,22 @@ impl Figure {
         // First: check if ANY marks have group or stack (need special rendering)
         let has_any_grouped = self.marks.iter().any(|m| {
             m.as_bar_info()
-                .map(|(group, _, _)| group.is_some())
-                .unwrap_or(false)
+                .is_some_and(|(group, _, _)| group.is_some())
         });
         let has_any_stacked = self.marks.iter().any(|m| {
             m.as_bar_info()
-                .map(|(_, stack, _)| stack.is_some())
-                .unwrap_or(false)
+                .is_some_and(|(_, stack, _)| stack.is_some())
         });
 
         if has_any_grouped {
             // For grouped bars: collect all unique groups and calculate total
             let mut groups: Vec<String> = Vec::new();
             for mark in &self.marks {
-                if let Some((group, _, _)) = mark.as_bar_info() {
-                    if let Some(g) = group {
-                        if !groups.contains(&g.to_string()) {
+                if let Some((group, _, _)) = mark.as_bar_info()
+                    && let Some(g) = group
+                        && !groups.contains(&g.to_string()) {
                             groups.push(g.to_string());
                         }
-                    }
-                }
             }
 
             // Total groups = count of ALL marks that have group set, not per-group count
@@ -144,8 +140,7 @@ impl Figure {
                 .iter()
                 .filter(|m| {
                     m.as_bar_info()
-                        .map(|(g, _, _)| g.is_some())
-                        .unwrap_or(false)
+                        .is_some_and(|(g, _, _)| g.is_some())
                 })
                 .count() as i32;
 
@@ -172,8 +167,7 @@ impl Figure {
     fn render_marks(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
         let has_any_stacked = self.marks.iter().any(|m| {
             m.as_bar_info()
-                .map(|(_, stack, _)| stack.is_some())
-                .unwrap_or(false)
+                .is_some_and(|(_, stack, _)| stack.is_some())
         });
 
         if has_any_stacked {
@@ -205,15 +199,15 @@ impl Figure {
     }
 
     /// Compute stacked baselines - returns map of label -> cumulative END position after EACH bar.
-    /// This is used by render_bar to know where each bar should start.
+    /// This is used by `render_bar` to know where each bar should start.
     fn compute_stacked_baselines(&self) -> std::collections::HashMap<String, f64> {
         let mut baselines = std::collections::HashMap::new();
 
         // Iterate marks in order - each stacked bar adds to the baseline
         for mark in &self.marks {
-            if let Some((_, stack, _)) = mark.as_bar_info() {
-                if stack.is_some() {
-                    if let Some((labels, values)) = mark.as_bar_data() {
+            if let Some((_, stack, _)) = mark.as_bar_info()
+                && stack.is_some()
+                    && let Some((labels, values)) = mark.as_bar_data() {
                         for (label, value) in labels.iter().zip(values.iter()) {
                             if !label.is_empty() && !value.is_nan() {
                                 // Get current baseline (where previous stack ended)
@@ -224,8 +218,6 @@ impl Figure {
                             }
                         }
                     }
-                }
-            }
         }
 
         baselines
@@ -234,11 +226,10 @@ impl Figure {
     /// Get category labels from bar marks (for category axis labels).
     fn category_labels(&self) -> Vec<String> {
         for mark in &self.marks {
-            if let Some((labels, _)) = mark.as_bar_data() {
-                if !labels.is_empty() {
+            if let Some((labels, _)) = mark.as_bar_data()
+                && !labels.is_empty() {
                     return labels.to_vec();
                 }
-            }
         }
         vec![]
     }
@@ -246,11 +237,10 @@ impl Figure {
     /// Check if we have horizontal bar marks (labels go on Y-axis).
     fn has_horizontal_bars(&self) -> bool {
         for mark in &self.marks {
-            if let Some((_, _, o)) = mark.as_bar_info() {
-                if matches!(o, Orientation::Horizontal) {
+            if let Some((_, _, o)) = mark.as_bar_info()
+                && matches!(o, Orientation::Horizontal) {
                     return true;
                 }
-            }
         }
         false
     }
@@ -320,14 +310,13 @@ impl Figure {
             .marks
             .iter()
             .filter_map(|mark| {
-                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label()) {
-                    if !label.is_empty() {
+                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
+                    && !label.is_empty() {
                         return Some(crate::renders::LegendEntry {
                             color,
                             label: label.to_string(),
                         });
                     }
-                }
                 None
             })
             .collect();

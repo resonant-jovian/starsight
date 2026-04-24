@@ -47,6 +47,7 @@ fn count_unique_f64(data: &[f64]) -> usize {
 /// - `x` has string labels → `Bar`  
 /// - only `y` provided → `Histogram`
 /// - otherwise → `Line`
+#[must_use] 
 pub fn infer_chart_kind(x: &[f64], y: &[f64]) -> ChartKind {
     if y.is_empty() {
         return ChartKind::default();
@@ -77,6 +78,7 @@ pub fn infer_chart_kind(x: &[f64], y: &[f64]) -> ChartKind {
 }
 
 /// Infer if x data is categorical (string-like).
+#[must_use] 
 pub fn is_categorical(x: &[f64]) -> bool {
     if x.is_empty() {
         return false;

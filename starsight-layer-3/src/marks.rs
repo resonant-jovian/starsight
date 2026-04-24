@@ -321,6 +321,7 @@ impl BarMark {
         }
     }
 
+    #[must_use] 
     pub fn horizontal(mut self) -> Self {
         self.orientation = Orientation::Horizontal;
         self
@@ -650,6 +651,13 @@ impl AreaMark {
         self.opacity = o;
         self
     }
+
+    /// Builder: set baseline for area fill (default is Zero, i.e., y=0).
+    #[must_use]
+    pub fn baseline(mut self, b: f64) -> Self {
+        self.baseline = AreaBaseline::Fixed(b);
+        self
+    }
 }
 impl Mark for AreaMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
@@ -857,7 +865,7 @@ impl Mark for StepMark {
                     commands.push(PathCommand::LineTo(curr));
                 }
                 StepPosition::Mid => {
-                    let mid_x = (prev.x + curr.x) / 2.0;
+                    let mid_x = f32::midpoint(prev.x, curr.x);
                     commands.push(PathCommand::LineTo(Point::new(mid_x, prev.y)));
                     commands.push(PathCommand::LineTo(Point::new(mid_x, curr.y)));
                     commands.push(PathCommand::LineTo(curr));

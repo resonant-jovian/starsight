@@ -1,7 +1,7 @@
 //! Statistical transforms: binning, density estimation, regression, aggregation.
 //!
 //! Each transform takes raw data and produces output data ready for a mark.
-//! Status: Implementation for 0.2.0 includes BinMethod, Bin, BinTransform.
+//! Status: Implementation for 0.2.0 includes `BinMethod`, Bin, `BinTransform`.
 
 #![allow(clippy::cast_precision_loss, clippy::cast_sign_loss)]
 

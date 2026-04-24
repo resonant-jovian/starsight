@@ -283,8 +283,19 @@ fn snapshot_area_basic() {
 #[test]
 fn snapshot_area_nan_gaps() {
     let x = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
-    let mut y = vec![0.0, 3.0, 1.0, 4.0, f64::NAN, 2.0, 5.0, 3.0];
+    let y = vec![0.0, 3.0, 1.0, 4.0, f64::NAN, 2.0, 5.0, 3.0];
     let fig = Figure::new(800, 600).add(AreaMark::new(x, y).opacity(0.5));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_area_with_baseline() {
+    let x: Vec<f64> = (0..20).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| (xi * 0.5).sin() * 10.0 + 15.0).collect();
+    let fig = Figure::new(800, 600).add(AreaMark::new(x, y).baseline(10.0).opacity(0.6));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
     let png = fig.render_png().unwrap();
