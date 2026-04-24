@@ -272,14 +272,6 @@ impl Figure {
             .merged_extent()
             .ok_or_else(|| StarsightError::Data("No data to render".into()))?;
 
-        // Margins: left=60, right=20, top=20, bottom=40.
-        let plot_area = Rect::new(
-            60.0,
-            20.0,
-            self.width as f32 - 20.0,
-            self.height as f32 - 40.0,
-        );
-
         let x_vals: Vec<f64> = vec![extent.x_min, extent.x_max];
         let y_vals: Vec<f64> = vec![extent.y_min, extent.y_max];
 
@@ -287,6 +279,76 @@ impl Figure {
             .ok_or_else(|| StarsightError::Scale("Cannot build X axis".into()))?;
         let y_axis = Axis::auto_from_data(&y_vals, 5)
             .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?;
+
+        let font_size: f32 = 12.0;
+        let label_offset: f32 = 14.0;
+        let tick_len: f32 = 5.0;
+        let axis_label_gap: f32 = 8.0;
+
+        let max_y_label_width = y_axis
+            .tick_labels
+            .iter()
+            .map(|l| {
+                backend
+                    .text_extent(l, font_size)
+                    .map(|(w, _)| w)
+                    .unwrap_or(0.0)
+            })
+            .fold(0.0f32, f32::max);
+
+        let max_x_label_height = x_axis
+            .tick_labels
+            .iter()
+            .map(|l| {
+                backend
+                    .text_extent(l, font_size)
+                    .map(|(_, h)| h)
+                    .unwrap_or(0.0)
+            })
+            .fold(0.0f32, f32::max);
+
+        let title_height = if let Some(title) = &self.title {
+            backend
+                .text_extent(title, 16.0)
+                .map(|(_, h)| h)
+                .unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
+        let x_label_height = if self.x_label.is_some() {
+            backend
+                .text_extent(self.x_label.as_ref().unwrap(), font_size)
+                .map(|(_, h)| h)
+                .unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
+        let y_label_width = if self.y_label.is_some() {
+            backend
+                .text_extent(self.y_label.as_ref().unwrap(), font_size)
+                .map(|(w, _)| w)
+                .unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
+        let left_margin = max_y_label_width + tick_len + axis_label_gap + y_label_width + 4.0;
+        let right_margin = 20.0;
+        let top_margin = if title_height > 0.0 {
+            title_height + label_offset + 10.0
+        } else {
+            20.0
+        };
+        let bottom_margin = max_x_label_height + tick_len + axis_label_gap + x_label_height + 4.0;
+
+        let plot_area = Rect::new(
+            left_margin,
+            top_margin,
+            self.width as f32 - right_margin,
+            self.height as f32 - bottom_margin,
+        );
 
         let coord = CartesianCoord {
             x_axis,
@@ -297,7 +359,7 @@ impl Figure {
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            crate::renders::render_title(title, self.width, backend, &self.theme)?;
+            crate::renders::render_title(title, self.width, backend, &self.theme, top_margin)?;
         }
 
         crate::renders::render_axis_labels(
@@ -309,7 +371,6 @@ impl Figure {
         )?;
 
         let category_labels = self.category_labels();
-        // use_y_axis_labels: true = labels on Y-axis (horizontal bars), false = labels on X-axis (vertical bars)
         let use_y_axis_labels = self.has_horizontal_bars();
 
         backend.set_clip(Some(plot_area))?;

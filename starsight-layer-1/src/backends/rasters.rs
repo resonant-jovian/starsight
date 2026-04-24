@@ -168,6 +168,60 @@ impl DrawBackend for SkiaBackend {
         Ok(())
     }
 
+    fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
+        let width = text.len() as f32 * font_size * 0.6;
+        let height = font_size;
+        Ok((width, height))
+    }
+
+    fn draw_rotated_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+        rotation: f32,
+    ) -> Result<()> {
+        if rotation.abs() < 0.1 {
+            return self.draw_text(text, position, font_size, color);
+        }
+
+        let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
+        let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
+        buffer.set_text(
+            text,
+            &cosmic_text::Attrs::new(),
+            cosmic_text::Shaping::Advanced,
+            None,
+        );
+        buffer.set_size(Some(self.pixmap.width() as f32), None);
+        buffer.shape_until_scroll(&mut self.font_system, true);
+
+        let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
+        let mut paint = Paint::default();
+
+        let angle_rad = rotation.to_radians();
+        let cos_a = angle_rad.cos();
+        let sin_a = angle_rad.sin();
+        let transform =
+            tiny_skia::Transform::from_row(cos_a, sin_a, -sin_a, cos_a, position.x, position.y);
+
+        buffer.draw(
+            &mut self.font_system,
+            &mut self.swash_cache,
+            text_color,
+            |x, y, w, h, c| {
+                paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
+                let px = x as f32;
+                let py = y as f32;
+                if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
+                    self.pixmap.fill_rect(rect, &paint, transform, None);
+                }
+            },
+        );
+        Ok(())
+    }
+
     fn set_clip(&mut self, rect: Option<Rect>) -> Result<()> {
         match rect {
             Some(r) => {

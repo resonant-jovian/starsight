@@ -1,48 +1,100 @@
 ---
 source: starsight-layer-5/tests/snapshot.rs
+assertion_line: 322
 expression: svg
 ---
-<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<path d="M60,560 L60,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M240,560 L240,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M420,560 L420,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M600,560 L600,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M780,560 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,560 L780,560" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,380 L780,380" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,200 L780,200" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,20 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<rect fill="#0000ff" height="432" width="288" x="96" y="128"/>
-<rect fill="#0000ff" height="486" width="288" x="456" y="74"/>
-<rect fill="#ff0000" height="288" width="288" x="96" y="272"/>
-<rect fill="#ff0000" height="342" width="288" x="456" y="218"/>
-<rect fill="#0000ff" height="432" width="288" x="96" y="-592"/>
-<rect fill="#0000ff" height="486" width="288" x="456" y="-754"/>
-<rect fill="#ff0000" height="288" width="288" x="96" y="-448"/>
-<rect fill="#ff0000" height="342" width="288" x="456" y="-610"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="225" y="584">
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1055" x="125" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="600" y="20">
+Energy Generation Mix by Year
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="1157.6" y="773">
+Year
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 111, 54)" x="111" y="54">
+Energy (TWh)
+</text>
+<path d="M125,759 L125,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300.83334,759 L300.83334,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M476.66666,759 L476.66666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M652.5,759 L652.5,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M828.3333,759 L828.3333,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1004.1667,759 L1004.1667,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1180,759 L1180,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M125,759 L1180,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M125,519.3333 L1180,519.3333" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M125,279.66666 L1180,279.66666" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M125,40 L1180,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#4caf50" height="431.40002" width="140.66669" x="142.58331" y="327.59998"/>
+<rect fill="#4caf50" height="467.34998" width="140.66669" x="318.41666" y="291.65002"/>
+<rect fill="#4caf50" height="503.3" width="140.66666" x="494.24997" y="255.70001"/>
+<rect fill="#4caf50" height="539.25" width="140.66663" x="670.0833" y="219.75"/>
+<rect fill="#4caf50" height="575.2" width="140.66663" x="845.9167" y="183.79999"/>
+<rect fill="#4caf50" height="623.13336" width="140.66669" x="1021.74994" y="135.86664"/>
+<rect fill="#ffc107" height="287.6" width="140.66669" x="142.58331" y="471.4"/>
+<rect fill="#ffc107" height="323.55" width="140.66669" x="318.41666" y="435.45"/>
+<rect fill="#ffc107" height="359.5" width="140.66666" x="494.24997" y="399.5"/>
+<rect fill="#ffc107" height="395.45" width="140.66663" x="670.0833" y="363.55"/>
+<rect fill="#ffc107" height="431.40002" width="140.66663" x="845.9167" y="327.59998"/>
+<rect fill="#ffc107" height="467.34998" width="140.66669" x="1021.74994" y="291.65002"/>
+<rect fill="#607d8b" height="191.73334" width="140.66669" x="142.58331" y="567.26666"/>
+<rect fill="#607d8b" height="179.75" width="140.66669" x="318.41666" y="579.25"/>
+<rect fill="#607d8b" height="167.76666" width="140.66666" x="494.24997" y="591.23334"/>
+<rect fill="#607d8b" height="143.79999" width="140.66663" x="670.0833" y="615.2"/>
+<rect fill="#607d8b" height="131.81665" width="140.66663" x="845.9167" y="627.18335"/>
+<rect fill="#607d8b" height="119.83331" width="140.66669" x="1021.74994" y="639.1667"/>
+<rect fill="#4caf50" height="431.39996" width="140.66669" x="142.58331" y="-583.1333"/>
+<rect fill="#4caf50" height="467.34998" width="140.66669" x="318.41666" y="-679"/>
+<rect fill="#4caf50" height="503.30005" width="140.66666" x="494.24997" y="-774.8667"/>
+<rect fill="#4caf50" height="539.25" width="140.66663" x="670.0833" y="-858.75"/>
+<rect fill="#4caf50" height="575.19995" width="140.66663" x="845.9167" y="-954.6167"/>
+<rect fill="#4caf50" height="623.1333" width="140.66669" x="1021.74994" y="-1074.45"/>
+<rect fill="#ffc107" height="287.5999" width="140.66669" x="142.58331" y="-439.33325"/>
+<rect fill="#ffc107" height="323.54993" width="140.66669" x="318.41666" y="-535.19995"/>
+<rect fill="#ffc107" height="359.5" width="140.66666" x="494.24997" y="-631.06665"/>
+<rect fill="#ffc107" height="395.44995" width="140.66663" x="670.0833" y="-714.94995"/>
+<rect fill="#ffc107" height="431.40002" width="140.66663" x="845.9167" y="-810.8168"/>
+<rect fill="#ffc107" height="467.34998" width="140.66669" x="1021.74994" y="-918.6666"/>
+<rect fill="#607d8b" height="191.73334" width="140.66669" x="142.58331" y="-343.46667"/>
+<rect fill="#607d8b" height="179.75" width="140.66669" x="318.41666" y="-391.40002"/>
+<rect fill="#607d8b" height="167.7666" width="140.66666" x="494.24997" y="-439.33325"/>
+<rect fill="#607d8b" height="143.80005" width="140.66663" x="670.0833" y="-463.30005"/>
+<rect fill="#607d8b" height="131.81653" width="140.66663" x="845.9167" y="-511.23328"/>
+<rect fill="#607d8b" height="119.833374" width="140.66669" x="1021.74994" y="-571.15"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="197.91666" y="783">
+2019
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="373.75" y="783">
+2020
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="549.5833" y="783">
+2021
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="725.4166" y="783">
 2022
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="585" y="584">
+<text fill="#666666" font-family="sans-serif" font-size="12" x="901.25" y="783">
 2023
 </text>
-<path d="M60,560 L65,560" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="554">
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1077.0833" y="783">
+2024
+</text>
+<path d="M125,759 L130,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="107" y="753">
 0
 </text>
-<path d="M60,380 L65,380" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="374">
-50
-</text>
-<path d="M60,200 L65,200" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="194">
+<path d="M125,519.3333 L130,519.3333" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="107" y="513.3333">
 100
 </text>
-<path d="M60,20 L65,20" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="14">
-150
+<path d="M125,279.66666 L130,279.66666" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="107" y="273.66666">
+200
 </text>
-<path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M125,40 L130,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="107" y="34">
+300
+</text>
+<path d="M125,759 L1180,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M125,40 L125,759" fill="none" stroke="#000000" stroke-width="1"/>
 </svg>

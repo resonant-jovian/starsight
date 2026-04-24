@@ -89,7 +89,7 @@ pub fn render_axes(
                 backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
                 backend.draw_text(
                     label,
-                    Point::new(area.left - 40.0, py - 6.0),
+                    Point::new(area.left - label_offset - 4.0, py - 6.0),
                     font_size,
                     tick_color,
                 )?;
@@ -97,7 +97,7 @@ pub fn render_axes(
         }
     } else {
         // === No category labels - regular numeric axes ===
-        // X-axis: ticks up (data side)
+        // X-axis: ticks down (below plot area), labels below ticks
         for (pos, label) in coord
             .x_axis
             .tick_positions
@@ -107,7 +107,7 @@ pub fn render_axes(
             let px = coord.map_x(*pos) as f32;
             let path = Path::new()
                 .move_to(Point::new(px, area.bottom))
-                .line_to(Point::new(px, area.bottom - tick_len));
+                .line_to(Point::new(px, area.bottom + tick_len));
             backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
             backend.draw_text(
                 label,
@@ -116,7 +116,7 @@ pub fn render_axes(
                 tick_color,
             )?;
         }
-        // Y-axis: ticks right (data side)
+        // Y-axis: ticks left (to the left of plot area), labels to the left of ticks
         for (pos, label) in coord
             .y_axis
             .tick_positions
@@ -126,11 +126,11 @@ pub fn render_axes(
             let py = coord.map_y(*pos) as f32;
             let path = Path::new()
                 .move_to(Point::new(area.left, py))
-                .line_to(Point::new(area.left + tick_len, py));
+                .line_to(Point::new(area.left - tick_len, py));
             backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
             backend.draw_text(
                 label,
-                Point::new(area.left - 40.0, py - 6.0),
+                Point::new(area.left - label_offset - 4.0, py - 6.0),
                 font_size,
                 tick_color,
             )?;
@@ -264,11 +264,12 @@ pub fn render_title(
     width: u32,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    top_margin: f32,
 ) -> Result<()> {
     let font_size: f32 = 16.0;
     let title_color = theme.title;
     let x = width as f32 / 2.0;
-    let y = 10.0;
+    let y = top_margin / 2.0;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
 
@@ -281,18 +282,21 @@ pub fn render_axis_labels(
     theme: &Theme,
 ) -> Result<()> {
     let font_size: f32 = 12.0;
+    let axis_label_gap: f32 = 8.0;
     let label_color = theme.tick_label;
 
     if let Some(label) = x_label {
-        let x = plot_area.left + plot_area.width() / 2.0;
-        let y = plot_area.bottom + 50.0;
+        let label_width = backend.text_extent(label, font_size).map(|(w, _)| w).unwrap_or(0.0);
+        let x = plot_area.right - axis_label_gap - label_width / 2.0;
+        let y = plot_area.bottom + axis_label_gap + font_size / 2.0;
         backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
     }
 
     if let Some(label) = y_label {
-        let x = 5.0;
-        let y = plot_area.top + plot_area.height() / 2.0;
-        backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
+        let label_height = backend.text_extent(label, font_size).map(|(_, h)| h).unwrap_or(0.0);
+        let x = plot_area.left - axis_label_gap - font_size / 2.0;
+        let y = plot_area.top + axis_label_gap + label_height / 2.0;
+        backend.draw_rotated_text(label, Point::new(x, y), font_size, label_color, -90.0)?;
     }
 
     Ok(())

@@ -116,6 +116,40 @@ impl DrawBackend for SvgBackend {
         Ok(())
     }
 
+fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
+        let width = text.len() as f32 * font_size * 0.6;
+        let height = font_size;
+        Ok((width, height))
+    }
+
+    fn draw_rotated_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+        rotation: f32,
+    ) -> Result<()> {
+        if rotation.abs() < 0.1 {
+            return self.draw_text(text, position, font_size, color);
+        }
+
+        let transform = format!(
+            "rotate({} {}, {})",
+            rotation, position.x, position.y
+        );
+
+        let t = SvgText::new(text)
+            .set("x", position.x)
+            .set("y", position.y)
+            .set("font-size", font_size)
+            .set("fill", color.to_css_hex())
+            .set("font-family", "sans-serif")
+            .set("transform", transform);
+        self.elements.push(Box::new(t));
+        Ok(())
+    }
+
     fn set_clip(&mut self, _rect: Option<Rect>) -> Result<()> {
         // TODO(0.2.0): emit a <clipPath id=...> element and reference it from drawn elements.
         Ok(())

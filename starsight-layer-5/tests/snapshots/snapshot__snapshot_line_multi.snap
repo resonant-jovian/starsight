@@ -1,56 +1,76 @@
 ---
 source: starsight-layer-5/tests/snapshot.rs
+assertion_line: 94
 expression: svg
 ---
-<svg height="600" viewBox="0 0 800 600" width="800" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="540" width="720" x="60" y="20"/>
-<path d="M60,560 L60,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,560 L300,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M540,560 L540,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M780,560 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,560 L780,560" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,425 L780,425" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,290 L780,290" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,155 L780,155" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M60,20 L780,20" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M84,290 L108,273.8 L132,249.5 L156,254.9 L180,236 L204,217.1 L228,192.8 L252,173.9 L276,155 L300,136.1 L324,144.2 L348,157.7 L372,141.5 L396,106.4 L420,74 L444,55.1 L468,65.9 L492,98.3 L516,130.7 L540,163.1 L564,146.9 L588,128 L612,109.1 L636,87.5 L660,63.2 L684,49.7 L708,60.5 L732,79.4" fill="none" stroke="#ff0000" stroke-width="2"/>
-<path d="M84,514.1 L108,497.9 L132,479 L156,489.8 L180,468.2 L204,454.7 L228,438.5 L252,430.4 L276,416.9 L300,406.1 L324,411.5 L348,422.3 L372,408.8 L396,384.5 L420,354.8 L444,344 L468,352.1 L492,373.7 L516,392.6 L540,414.2 L564,403.4 L588,387.2 L612,371 L636,352.1 L660,335.9 L684,327.8 L708,338.6 L732,357.5" fill="none" stroke="#0000ff" stroke-width="2"/>
-<path d="M60,560 L60,555" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="50" y="574">
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1026.2" x="153.8" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="600" y="20">
+Daily High and Low Temperatures (Spring Quarter)
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="1132.4" y="773">
+Day of Year
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 139.8, 54)" x="139.8" y="54">
+Temperature (°C)
+</text>
+<path d="M153.8,759 L153.8,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M410.34998,759 L410.34998,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M666.89996,759 L666.89996,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M923.44995,759 L923.44995,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1180,759 L1180,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,759 L1180,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,615.2 L1180,615.2" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,471.4 L1180,471.4" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,327.6 L1180,327.6" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,183.8 L1180,183.8" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M153.8,40 L1180,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M164.062,399.5 L174.324,382.244 L184.586,356.36 L194.848,362.112 L205.11,341.98 L215.372,321.848 L225.634,295.964 L235.896,275.832 L246.158,255.7 L256.41998,235.568 L266.682,244.196 L276.944,258.576 L287.206,241.32 L297.468,203.932 L307.72998,169.42 L317.992,149.288 L328.254,160.792 L338.516,195.304 L348.77798,229.816 L359.03998,264.328 L369.302,247.072 L379.564,226.94 L389.826,206.808 L400.08798,183.8 L410.34998,157.916 L420.612,143.536 L430.874,155.04 L441.136,175.172 L451.39798,198.18 L461.65997,238.444 L471.922,261.452 L482.184,275.832 L492.44598,301.716 L502.70798,336.228 L512.97,370.74 L523.232,390.872 L533.49396,416.756 L543.756,436.888 L554.018,457.02 L564.27997,477.152 L574.542,468.524 L584.80396,448.392 L595.066,428.26 L605.328,405.252 L615.58997,379.368 L625.852,353.484 L636.11395,327.6 L646.376,304.592 L656.638,284.46 L666.89996,264.328 L677.162,241.32 L687.42395,218.312 L697.686,198.18 L707.948,178.048 L718.20996,155.04 L728.472,132.032 L738.73395,111.9 L748.996,97.52 L759.258,103.272 L769.51996,126.28 L779.782,149.288 L790.04395,169.42 L800.30597,189.552 L810.568,212.56 L820.82996,235.568 L831.092,255.7 L841.35394,275.832 L851.61597,293.088 L861.878,304.592 L872.13995,313.22 L882.402,327.6 L892.66394,341.98 L902.92596,359.236 L913.188,379.368 L923.44995,399.5 L933.712,419.632 L943.97394,436.888 L954.23596,448.392 L964.498,457.02 L974.75995,465.648 L985.022,471.4 L995.28394,477.152 L1005.54596,474.276 L1015.808,465.648 L1026.07,457.02 L1036.3319,442.64 L1046.594,428.26 L1056.856,413.88" fill="none" stroke="#ff0000" stroke-width="2"/>
+<path d="M164.062,638.208 L174.324,620.952 L184.586,600.82 L194.848,612.324 L205.11,589.316 L215.372,574.936 L225.634,557.68 L235.896,549.052 L246.158,534.672 L256.41998,523.168 L266.682,528.92 L276.944,540.424 L287.206,526.044 L297.468,500.16 L307.72998,468.524 L317.992,457.02 L328.254,465.648 L338.516,488.656 L348.77798,508.788 L359.03998,531.796 L369.302,520.292 L379.564,503.036 L389.826,485.78 L400.08798,465.648 L410.34998,448.392 L420.612,439.764 L430.874,451.268 L441.136,471.4 L451.39798,488.656 L461.65997,505.912 L471.922,523.168 L482.184,534.672 L492.44598,551.928 L502.70798,563.432 L512.97,580.688 L523.232,600.82 L533.49396,620.952 L543.756,638.208 L554.018,629.58 L564.27997,620.952 L574.542,609.448 L584.80396,592.192 L595.066,574.936 L605.328,557.68 L615.58997,540.424 L625.852,523.168 L636.11395,505.912 L646.376,488.656 L656.638,471.4 L666.89996,457.02 L677.162,442.64 L687.42395,428.26 L697.686,413.88 L707.948,399.5 L718.20996,385.12 L728.472,370.74 L738.73395,356.36 L748.996,350.608 L759.258,356.36 L769.51996,370.74 L779.782,390.872 L790.04395,408.128 L800.30597,428.26 L810.568,448.392 L820.82996,465.648 L831.092,485.78 L841.35394,505.912 L851.61597,523.168 L861.878,540.424 L872.13995,557.68 L882.402,572.06 L892.66394,586.44 L902.92596,600.82 L913.188,609.448 L923.44995,615.2 L933.712,620.952 L943.97394,629.58 L954.23596,638.208 L964.498,643.96 L974.75995,649.712 L985.022,658.34 L995.28394,666.968 L1005.54596,672.72 L1015.808,678.472 L1026.07,687.1 L1036.3319,689.976 L1046.594,687.1 L1056.856,678.472 L1067.1179,672.72 L1077.38,666.968" fill="none" stroke="#0000ff" stroke-width="2"/>
+<path d="M153.8,759 L153.8,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="143.8" y="773">
 0
 </text>
-<path d="M300,560 L300,555" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="290" y="574">
+<path d="M410.34998,759 L410.34998,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="400.34998" y="773">
+25
+</text>
+<path d="M666.89996,759 L666.89996,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="656.89996" y="773">
+50
+</text>
+<path d="M923.44995,759 L923.44995,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="913.44995" y="773">
+75
+</text>
+<path d="M1180,759 L1180,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1170" y="773">
+100
+</text>
+<path d="M153.8,759 L148.8,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="753">
+0
+</text>
+<path d="M153.8,615.2 L148.8,615.2" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="609.2">
+5
+</text>
+<path d="M153.8,471.4 L148.8,471.4" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="465.4">
 10
 </text>
-<path d="M540,560 L540,555" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="530" y="574">
+<path d="M153.8,327.6 L148.8,327.6" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="321.6">
+15
+</text>
+<path d="M153.8,183.8 L148.8,183.8" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="177.8">
 20
 </text>
-<path d="M780,560 L780,555" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="770" y="574">
-30
+<path d="M153.8,40 L148.8,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="135.8" y="34">
+25
 </text>
-<path d="M60,560 L65,560" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="554">
-2.5
-</text>
-<path d="M60,425 L65,425" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="419">
-7.5
-</text>
-<path d="M60,290 L65,290" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="284">
-12.5
-</text>
-<path d="M60,155 L65,155" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="149">
-17.5
-</text>
-<path d="M60,20 L65,20" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="14">
-22.5
-</text>
-<path d="M60,560 L780,560" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M60,20 L60,560" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M153.8,759 L1180,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M153.8,40 L153.8,759" fill="none" stroke="#000000" stroke-width="1"/>
 </svg>
