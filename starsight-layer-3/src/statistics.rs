@@ -224,6 +224,54 @@ mod tests {
     }
 
     #[test]
+    fn bin_method_freedman_diaconis() {
+        let data: Vec<f64> = (0..100).map(|i| i as f64).collect();
+        let method = BinMethod::FreedmanDiaconis;
+        let count = method.bin_count(&data);
+        assert!(count > 0);
+    }
+
+    #[test]
+    fn bin_method_freedman_diaconis_equal_iqr() {
+        let data = vec![1.0, 1.0, 1.0, 1.0, 1.0];
+        let method = BinMethod::FreedmanDiaconis;
+        let count = method.bin_count(&data);
+        assert!(count > 0);
+    }
+
+    #[test]
+    fn bin_method_scott() {
+        let data: Vec<f64> = (0..100).map(|i| i as f64).collect();
+        let method = BinMethod::Scott;
+        let count = method.bin_count(&data);
+        assert!(count > 0);
+    }
+
+    #[test]
+    fn bin_method_scott_zero_std() {
+        let data = vec![5.0, 5.0, 5.0, 5.0, 5.0];
+        let method = BinMethod::Scott;
+        let count = method.bin_count(&data);
+        assert!(count > 0);
+    }
+
+    #[test]
+    fn bin_method_width_zero_range() {
+        let data = vec![5.0, 5.0, 5.0];
+        let method = BinMethod::Width(1.0);
+        let count = method.bin_count(&data);
+        assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn bin_method_width_negative() {
+        let data = vec![1.0, 2.0, 3.0];
+        let method = BinMethod::Width(-1.0);
+        let count = method.bin_count(&data);
+        assert_eq!(count, 1);
+    }
+
+    #[test]
     fn bin_values() {
         let bins = vec![
             Bin {
@@ -272,9 +320,9 @@ mod tests {
     }
 
     #[test]
-    fn percentile_quartiles() {
+    fn percentile_100() {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-        let _p25 = percentile(&data, 0.25);
-        let _p75 = percentile(&data, 0.75);
+        let p = percentile(&data, 1.0);
+        assert!((p - 5.0).abs() < 0.01);
     }
 }

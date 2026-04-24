@@ -771,6 +771,112 @@ mod tests {
     }
 
     #[test]
+    fn from_css_hex_short() {
+        let hex = "#abc";
+        let color = Color::from_css_hex(hex).unwrap();
+        assert_eq!(0xAA, color.r);
+    }
+
+    #[test]
+    fn from_css_hex_invalid() {
+        assert!(Color::from_css_hex("").is_none());
+        assert!(Color::from_css_hex("#gggggg").is_none());
+    }
+
+    #[test]
+    fn color_to_f32() {
+        let color = Color::new(128, 128, 128);
+        let (r, g, b) = color.to_f32();
+        assert!((r - 0.502).abs() < 0.01);
+    }
+
+    #[test]
+    fn color_from_f32() {
+        let color = Color::from_f32(0.5, 0.5, 0.5);
+        assert!(color.r >= 127 && color.r <= 129);
+    }
+
+    #[test]
+    fn color_from_f32_clamp() {
+        let color = Color::from_f32(1.5, -0.5, 0.5);
+        assert_eq!(color.r, 255);
+        assert_eq!(color.g, 0);
+    }
+
+    #[test]
+    fn color_to_tiny_skia() {
+        let color = Color::new(255, 0, 0);
+        let ts_color = color.to_tiny_skia();
+        assert_eq!(ts_color.red(), 1.0);
+    }
+
+    #[test]
+    fn color_with_alpha() {
+        let color = Color::new(255, 0, 0);
+        let alpha = color.with_alpha(128);
+        assert_eq!(alpha.r, 255);
+        assert_eq!(alpha.a, 128);
+    }
+
+    #[test]
+    fn color_to_css_hex() {
+        let color = Color::new(150, 52, 173);
+        assert_eq!(color.to_css_hex(), "#9634ad");
+    }
+
+    #[test]
+    fn contrast_ratio_same() {
+        let c = Color::new(128, 128, 128);
+        assert!((c.contrast_ratio(c) - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn color_lerp_mid() {
+        let (b, w) = (Color::BLACK, Color::WHITE);
+        let gray = b.lerp(w, 0.5);
+        assert!(gray.r >= 125 && gray.r <= 130);
+    }
+
+    #[test]
+    fn color_red() {
+        let c = Color::RED;
+        assert_eq!(c.r, 255);
+    }
+
+    #[test]
+    fn color_green() {
+        let c = Color::GREEN;
+        assert_eq!(c.g, 255);
+    }
+
+    #[test]
+    fn color_blue() {
+        let c = Color::BLUE;
+        assert_eq!(c.b, 255);
+    }
+
+    #[test]
+    fn color_display() {
+        let color = Color::new(150, 52, 173);
+        let s = format!("{}", color);
+        assert!(s.starts_with('#'));
+    }
+
+    #[test]
+    fn from_chromata_color() {
+        let c = chromata::Color { r: 255, g: 0, b: 0 };
+        let color = Color::from(c);
+        assert_eq!(color.r, 255);
+    }
+
+    #[test]
+    fn from_prismatica_color() {
+        let c = prismatica::Color { r: 255, g: 0, b: 0 };
+        let color = Color::from(c);
+        assert_eq!(color.r, 255);
+    }
+
+    #[test]
     fn black_luminance() {
         assert!(Color::BLACK.luminance() < f64::EPSILON);
     }

@@ -985,3 +985,91 @@ fn extent_from_xy(x: &[f64], y: &[f64]) -> Option<DataExtent> {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn line_mark_new() {
+        let mark = LineMark::new(vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]);
+        assert_eq!(mark.x.len(), 3);
+        assert_eq!(mark.y.len(), 3);
+    }
+
+    #[test]
+    fn line_mark_data_extent() {
+        let mark = LineMark::new(vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+        let e = extent.unwrap();
+        assert_eq!(e.x_min, 1.0);
+        assert_eq!(e.x_max, 3.0);
+    }
+
+    #[test]
+    fn line_mark_data_extent_empty() {
+        let mark = LineMark::new(vec![], vec![]);
+        let extent = mark.data_extent();
+        assert!(extent.is_none());
+    }
+
+    #[test]
+    fn line_mark_nan_gaps() {
+        let mark = LineMark::new(
+            vec![1.0, 2.0, f64::NAN, 4.0],
+            vec![1.0, 2.0, 3.0, 4.0],
+        );
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn point_mark_new() {
+        let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn point_mark_data_extent() {
+        let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn area_mark_new() {
+        let mark = AreaMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn area_mark_data_extent() {
+        let mark = AreaMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn step_mark_new() {
+        let mark = StepMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn histogram_mark_new() {
+        let mark = HistogramMark::new(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+        assert_eq!(mark.data.len(), 5);
+    }
+
+    #[test]
+    fn data_extent_new() {
+        let extent = DataExtent {
+            x_min: 0.0,
+            x_max: 10.0,
+            y_min: 0.0,
+            y_max: 10.0,
+        };
+        assert_eq!(extent.x_min, 0.0);
+    }
+}

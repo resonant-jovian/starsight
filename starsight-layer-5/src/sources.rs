@@ -99,6 +99,15 @@ mod tests {
     }
 
     #[test]
+    fn slice_source_single_column() {
+        let x: &[f64] = &[1.0, 2.0, 3.0];
+        let slices: &[&[f64]] = &[x];
+        let source = SliceSource::new(slices);
+        let cols = source.into_columns();
+        assert_eq!(cols.len(), 1);
+    }
+
+    #[test]
     fn vec_source_new() {
         let source = VecSource::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]]);
         let cols = source.into_columns();
