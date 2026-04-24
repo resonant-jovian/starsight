@@ -1016,10 +1016,7 @@ mod tests {
 
     #[test]
     fn line_mark_nan_gaps() {
-        let mark = LineMark::new(
-            vec![1.0, 2.0, f64::NAN, 4.0],
-            vec![1.0, 2.0, 3.0, 4.0],
-        );
+        let mark = LineMark::new(vec![1.0, 2.0, f64::NAN, 4.0], vec![1.0, 2.0, 3.0, 4.0]);
         let extent = mark.data_extent();
         assert!(extent.is_some());
     }
