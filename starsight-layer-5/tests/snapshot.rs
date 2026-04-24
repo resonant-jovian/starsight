@@ -11,7 +11,9 @@
 //! `blue_rect_on_white` test, neither of which depends on font rendering.
 
 use starsight_layer_1::primitives::Color;
-use starsight_layer_3::marks::{BarMark, LineMark, PointMark};
+use starsight_layer_3::marks::{
+    AreaMark, BarMark, HistogramMark, LineMark, PointMark, StepMark, StepPosition,
+};
 use starsight_layer_5::Figure;
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
@@ -202,8 +204,119 @@ fn snapshot_bar_stacked() {
     // Energy mix (GWh) stacked by source — exercises cumulative baseline
     // offsets so the second series begins where the first ends.
     let fig = Figure::new(800, 600)
-        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![120.0, 135.0]).stack("wind").color(Color::BLUE))
-        .add(BarMark::new(vec!["2022".into(), "2023".into()], vec![80.0, 95.0]).stack("solar").color(Color::RED));
+        .add(
+            BarMark::new(vec!["2022".into(), "2023".into()], vec![120.0, 135.0])
+                .stack("wind")
+                .color(Color::BLUE),
+        )
+        .add(
+            BarMark::new(vec!["2022".into(), "2023".into()], vec![80.0, 95.0])
+                .stack("solar")
+                .color(Color::RED),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+// ── step tests ─────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_step_pre() {
+    let x: Vec<f64> = (0..20).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| (xi * 0.5).floor() % 5.0).collect();
+    let fig = Figure::new(800, 600).add(StepMark::new(x, y).position(StepPosition::Pre));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_step_mid() {
+    let x: Vec<f64> = (0..20).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| (xi * 0.5).floor() % 5.0).collect();
+    let fig = Figure::new(800, 600).add(StepMark::new(x, y).position(StepPosition::Mid));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_step_post() {
+    let x: Vec<f64> = (0..20).map(|i| i as f64).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| (xi * 0.5).floor() % 5.0).collect();
+    let fig = Figure::new(800, 600).add(StepMark::new(x, y).position(StepPosition::Post));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+// ── area tests ─────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_area_basic() {
+    // Temperature over a year — area chart exercises closed polygon path.
+    let x: Vec<f64> = (0..365).map(|i| i as f64).collect();
+    let y: Vec<f64> = x
+        .iter()
+        .map(|&xi| 15.0 + 10.0 * (xi * 2.0 * std::f64::consts::PI / 365.0).sin())
+        .collect();
+    let fig = Figure::new(800, 600).add(AreaMark::new(x, y).opacity(0.5));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+#[test]
+fn snapshot_area_nan_gaps() {
+    let x = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
+    let mut y = vec![0.0, 3.0, 1.0, 4.0, f64::NAN, 2.0, 5.0, 3.0];
+    let fig = Figure::new(800, 600).add(AreaMark::new(x, y).opacity(0.5));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+// ── histogram tests ───────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_histogram_basic() {
+    let mut rng = 42u32;
+    let mut next_rand = || {
+        rng = rng.wrapping_mul(1_103_515_245).wrapping_add(12_345);
+        rng as f64 / u32::MAX as f64
+    };
+    let data: Vec<f64> = (0..1000)
+        .map(|_| {
+            let u1 = next_rand();
+            let u2 = next_rand();
+            let z = (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos();
+            50.0 + 15.0 * z
+        })
+        .collect();
+    let fig = Figure::new(800, 600).add(HistogramMark::new(data));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
+}
+
+// ── title and label tests ─────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_with_title_and_labels() {
+    let (x, y) = damped_cosine(30);
+    let fig = Figure::new(800, 600)
+        .title("Damped Oscillation")
+        .x_label("Time (s)")
+        .y_label("Amplitude (m)")
+        .add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
     let png = fig.render_png().unwrap();

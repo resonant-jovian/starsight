@@ -114,8 +114,16 @@ impl Figure {
         let mut ctx = BarRenderContext::default();
 
         // First: check if ANY marks have group or stack (need special rendering)
-        let has_any_grouped = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| g.is_some()).unwrap_or(false));
-        let has_any_stacked = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| s.is_some()).unwrap_or(false));
+        let has_any_grouped = self.marks.iter().any(|m| {
+            m.as_bar_info()
+                .map(|(group, _, _)| group.is_some())
+                .unwrap_or(false)
+        });
+        let has_any_stacked = self.marks.iter().any(|m| {
+            m.as_bar_info()
+                .map(|(_, stack, _)| stack.is_some())
+                .unwrap_or(false)
+        });
 
         if has_any_grouped {
             // For grouped bars: collect all unique groups and calculate total
@@ -131,13 +139,20 @@ impl Figure {
             }
 
             // Total groups = count of ALL marks that have group set, not per-group count
-            let total_groups = self.marks.iter()
-                .filter(|m| m.as_bar_info().map(|(g, _, _)| g.is_some()).unwrap_or(false))
+            let total_groups = self
+                .marks
+                .iter()
+                .filter(|m| {
+                    m.as_bar_info()
+                        .map(|(g, _, _)| g.is_some())
+                        .unwrap_or(false)
+                })
                 .count() as i32;
 
             // Assign index to each group
             for (idx, g) in groups.iter().enumerate() {
-                ctx.group_offsets.insert(g.clone(), (idx as i32, total_groups));
+                ctx.group_offsets
+                    .insert(g.clone(), (idx as i32, total_groups));
             }
         }
 
@@ -145,7 +160,7 @@ impl Figure {
             // For stacked bars: compute cumulative baselines per category
             // We need to iterate in order (first mark adds to baseline 0, second adds to that, etc.)
             // The issue is we can't access BarMark fields from dyn Mark
-            
+
             // For now: use simple approach - same width as non-stacked, will fix stacking in render_bar
             // ctx.first_pass = false
         }
@@ -155,8 +170,12 @@ impl Figure {
 
     /// Render marks, passing bar context for grouped/stacked bar rendering.
     fn render_marks(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let has_any_stacked = self.marks.iter().any(|m| m.as_bar_info().map(|(g, s, _)| s.is_some()).unwrap_or(false));
-        
+        let has_any_stacked = self.marks.iter().any(|m| {
+            m.as_bar_info()
+                .map(|(_, stack, _)| stack.is_some())
+                .unwrap_or(false)
+        });
+
         if has_any_stacked {
             // First pass: compute stacked baselines
             let mut ctx = BarRenderContext::default();
@@ -164,8 +183,8 @@ impl Figure {
             for mark in &self.marks {
                 mark.render_bar(coord, backend, &ctx)?;
             }
-            
-            // Second pass: render with accumulated baselines  
+
+            // Second pass: render with accumulated baselines
             let mut ctx = BarRenderContext::default();
             ctx.first_pass = false;
             ctx.stacked_baselines = self.compute_stacked_baselines();
@@ -184,12 +203,12 @@ impl Figure {
         }
         Ok(())
     }
-    
+
     /// Compute stacked baselines - returns map of label -> cumulative END position after EACH bar.
     /// This is used by render_bar to know where each bar should start.
     fn compute_stacked_baselines(&self) -> std::collections::HashMap<String, f64> {
         let mut baselines = std::collections::HashMap::new();
-        
+
         // Iterate marks in order - each stacked bar adds to the baseline
         for mark in &self.marks {
             if let Some((_, stack, _)) = mark.as_bar_info() {
@@ -208,7 +227,7 @@ impl Figure {
                 }
             }
         }
-        
+
         baselines
     }
 
@@ -274,6 +293,18 @@ impl Figure {
         };
 
         crate::renders::render_background(&plot_area, backend)?;
+
+        if let Some(title) = &self.title {
+            crate::renders::render_title(title, self.width, backend)?;
+        }
+
+        crate::renders::render_axis_labels(
+            self.x_label.as_deref(),
+            self.y_label.as_deref(),
+            &plot_area,
+            backend,
+        )?;
+
         let category_labels = self.category_labels();
         // use_y_axis_labels: true = labels on Y-axis (horizontal bars), false = labels on X-axis (vertical bars)
         let use_y_axis_labels = self.has_horizontal_bars();

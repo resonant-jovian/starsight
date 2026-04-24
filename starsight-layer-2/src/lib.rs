@@ -8,6 +8,13 @@
 //! - [`axes`]: bundle a scale with ticks and labels.
 //! - [`coords`]: convert data values to pixel positions.
 
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss,
+    clippy::many_single_char_names
+)]
+
 pub mod axes;
 pub mod coords;
 pub mod scales;

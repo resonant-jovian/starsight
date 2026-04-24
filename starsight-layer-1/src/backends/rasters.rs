@@ -146,10 +146,7 @@ impl DrawBackend for SkiaBackend {
             cosmic_text::Shaping::Advanced,
             None,
         );
-        buffer.set_size(
-            Some(self.pixmap.width() as f32),
-            None,
-        );
+        buffer.set_size(Some(self.pixmap.width() as f32), None);
         buffer.shape_until_scroll(&mut self.font_system, true);
 
         let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);

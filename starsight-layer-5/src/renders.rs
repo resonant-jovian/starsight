@@ -38,12 +38,7 @@ pub fn render_axes(
             let band_height = area.height() / n_categories as f32;
             for (i, label) in category_labels.iter().enumerate() {
                 let py = area.top + (i as f32 + 0.5) * band_height;
-                backend.draw_text(
-                    label,
-                    Point::new(10.0, py - 6.0),
-                    font_size,
-                    tick_color,
-                )?;
+                backend.draw_text(label, Point::new(10.0, py - 6.0), font_size, tick_color)?;
             }
             // X-axis: ticks to left (label side)
             for (pos, label) in coord
@@ -166,3 +161,39 @@ pub fn render_background(plot_area: &Rect, backend: &mut dyn DrawBackend) -> Res
 
 // ── render_legend ───────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub fn render_legend(legend: &Legend, backend: &mut dyn DrawBackend) -> Result<()>
+
+// ── render_title ───────────────────────────────────────────────────────────────────────────────
+
+/// Render chart title above the plot area.
+pub fn render_title(title: &str, width: u32, backend: &mut dyn DrawBackend) -> Result<()> {
+    let font_size: f32 = 16.0;
+    let title_color = Color::new(30, 30, 30);
+    let x = width as f32 / 2.0;
+    let y = 15.0;
+    backend.draw_text(title, Point::new(x, y), font_size, title_color)
+}
+
+/// Render axis labels.
+pub fn render_axis_labels(
+    x_label: Option<&str>,
+    y_label: Option<&str>,
+    plot_area: &Rect,
+    backend: &mut dyn DrawBackend,
+) -> Result<()> {
+    let font_size: f32 = 12.0;
+    let label_color = Color::new(60, 60, 60);
+
+    if let Some(label) = x_label {
+        let x = plot_area.left + plot_area.width() / 2.0;
+        let y = plot_area.bottom + 35.0;
+        backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
+    }
+
+    if let Some(label) = y_label {
+        let x = 15.0;
+        let y = plot_area.top + plot_area.height() / 2.0;
+        backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
+    }
+
+    Ok(())
+}

@@ -71,13 +71,15 @@ impl DrawBackend for SvgBackend {
                 PathCommand::CubicTo(c1, c2, p) => {
                     data = data.cubic_curve_to((c1.x, c1.y, c2.x, c2.y, p.x, p.y));
                 }
+                PathCommand::QuadTo(c, p) => {
+                    data = data.quadratic_curve_to((c.x, c.y, p.x, p.y));
+                }
                 PathCommand::Close => {
                     data = data.close();
                 }
-                PathCommand::QuadTo(_, _) => {}
             }
         }
-        let p = SvgPath::new()
+        let mut p = SvgPath::new()
             .set("d", data)
             .set("stroke", style.stroke_color.to_css_hex())
             .set("stroke-width", style.stroke_width)
@@ -87,6 +89,12 @@ impl DrawBackend for SvgBackend {
                     .fill_color
                     .map_or("none".to_string(), Color::to_css_hex),
             );
+        if style.opacity < 1.0 {
+            p = p
+                .set("opacity", style.opacity)
+                .set("fill-opacity", style.opacity)
+                .set("stroke-opacity", style.opacity);
+        }
         self.elements.push(Box::new(p));
         Ok(())
     }

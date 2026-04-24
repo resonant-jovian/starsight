@@ -38,8 +38,8 @@ fn build_waterfall_data() -> (Vec<String>, Vec<f64>, Vec<f64>, Vec<bool>, Vec<bo
 fn main() -> Result<()> {
     let (labels, values, bases, is_subtotal, is_total) = build_waterfall_data();
 
-    let green = Color::new(34, 139, 34);   // forest green for increases
-    let red = Color::new(220, 20, 60);    // crimson for decreases
+    let green = Color::new(34, 139, 34); // forest green for increases
+    let red = Color::new(220, 20, 60); // crimson for decreases
     let blue = Color::new(65, 105, 225); // royal blue for subtotals/totals
 
     let mut fig = Figure::new(1200, 700);
