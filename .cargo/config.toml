@@ -6,7 +6,7 @@
 #rr = "run --release"
 #recursive_example = "rr --example recursions"
 #space_example = ["run", "--release", "--", "\"command list\""]
-xtask = "run -- xtask/Cargo.toml --"
+xtask = "run -p xtask --"
 
 #[build]
 #jobs = 1                      # number of parallel jobs, defaults to # of CPUs

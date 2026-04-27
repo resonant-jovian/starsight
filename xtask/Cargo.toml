@@ -8,6 +8,8 @@ authors.workspace = true
 publish = false
 
 [dependencies]
+clap = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
 
 [features]
 
