@@ -23,6 +23,22 @@ path = "showcases/kruskal_szekeres_line.rs"
 name = "waterfall_bar"
 path = "showcases/waterfall_bar.rs"
 
+[[example]]
+name = "bar_chart"
+path = "showcases/bar_chart.rs"
+
+[[example]]
+name = "line_chart"
+path = "showcases/line_chart.rs"
+
+[[example]]
+name = "scatter"
+path = "showcases/scatter.rs"
+
+[[example]]
+name = "heatmap"
+path = "showcases/heatmap.rs"
+
 [lints]
 workspace = true
 
