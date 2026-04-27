@@ -35,6 +35,32 @@ pub fn render_axes(
 
     let n_categories = category_labels.len();
 
+    // Helper closures center labels on tick positions using measured widths,
+    // keeping the legacy Y offsets that produce reasonable output across the
+    // SVG (baseline-anchored) and Skia (top-left-anchored) backends.
+    let draw_x_label = |backend: &mut dyn DrawBackend, label: &str, px: f32| -> Result<()> {
+        let (tw, _) = backend
+            .text_extent(label, font_size)
+            .unwrap_or((0.0, font_size));
+        backend.draw_text(
+            label,
+            Point::new(px - tw / 2.0, area.bottom + label_offset),
+            font_size,
+            tick_color,
+        )
+    };
+    let draw_y_label = |backend: &mut dyn DrawBackend, label: &str, py: f32| -> Result<()> {
+        let (tw, _) = backend
+            .text_extent(label, font_size)
+            .unwrap_or((0.0, font_size));
+        backend.draw_text(
+            label,
+            Point::new(area.left - tick_len - 4.0 - tw, py - 6.0),
+            font_size,
+            tick_color,
+        )
+    };
+
     // === Category labels (bar charts) ===
     if n_categories > 0 {
         if use_y_axis_labels {
@@ -42,7 +68,7 @@ pub fn render_axes(
             let band_height = area.height() / n_categories as f32;
             for (i, label) in category_labels.iter().enumerate() {
                 let py = area.top + (i as f32 + 0.5) * band_height;
-                backend.draw_text(label, Point::new(10.0, py - 6.0), font_size, tick_color)?;
+                draw_y_label(backend, label, py)?;
             }
             // X-axis: ticks to left (label side)
             for (pos, label) in coord
@@ -56,12 +82,7 @@ pub fn render_axes(
                     .move_to(Point::new(px, area.bottom))
                     .line_to(Point::new(px, area.bottom + tick_len));
                 backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-                backend.draw_text(
-                    label,
-                    Point::new(px - 10.0, area.bottom + label_offset),
-                    font_size,
-                    tick_color,
-                )?;
+                draw_x_label(backend, label, px)?;
             }
             // NO Y-axis ticks - category labels are on Y positions
         } else {
@@ -69,12 +90,7 @@ pub fn render_axes(
             let band_width = area.width() / n_categories as f32;
             for (i, label) in category_labels.iter().enumerate() {
                 let px = area.left + (i as f32 + 0.5) * band_width;
-                backend.draw_text(
-                    label,
-                    Point::new(px - 15.0, area.bottom + label_offset + 10.0),
-                    font_size,
-                    tick_color,
-                )?;
+                draw_x_label(backend, label, px)?;
             }
             // NO X-axis ticks - category labels replace them
             // Y-axis: ticks right (data side)
@@ -89,12 +105,7 @@ pub fn render_axes(
                     .move_to(Point::new(area.left, py))
                     .line_to(Point::new(area.left + tick_len, py));
                 backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-                backend.draw_text(
-                    label,
-                    Point::new(area.left - label_offset - 4.0, py - 6.0),
-                    font_size,
-                    tick_color,
-                )?;
+                draw_y_label(backend, label, py)?;
             }
         }
     } else {
@@ -111,12 +122,7 @@ pub fn render_axes(
                 .move_to(Point::new(px, area.bottom))
                 .line_to(Point::new(px, area.bottom + tick_len));
             backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-            backend.draw_text(
-                label,
-                Point::new(px - 10.0, area.bottom + label_offset),
-                font_size,
-                tick_color,
-            )?;
+            draw_x_label(backend, label, px)?;
         }
         // Y-axis: ticks left (to the left of plot area), labels to the left of ticks
         for (pos, label) in coord
@@ -130,12 +136,7 @@ pub fn render_axes(
                 .move_to(Point::new(area.left, py))
                 .line_to(Point::new(area.left - tick_len, py));
             backend.draw_path(&path, &PathStyle::stroke(tick_color, 1.0))?;
-            backend.draw_text(
-                label,
-                Point::new(area.left - label_offset - 4.0, py - 6.0),
-                font_size,
-                tick_color,
-            )?;
+            draw_y_label(backend, label, py)?;
         }
     }
 
