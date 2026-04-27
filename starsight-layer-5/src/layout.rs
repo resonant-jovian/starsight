@@ -205,6 +205,8 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
 }
 
 /// Bottom-side reservation for x-axis tick labels (closest to plot, priority 0).
+/// Also reserves on the right so the rightmost label, which is centered on
+/// `plot.right`, doesn't overhang the canvas edge.
 pub struct XTickLabelsComponent<'a> {
     pub labels: &'a [String],
     pub tick_len: f32,
@@ -219,9 +221,13 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
         if self.labels.is_empty() {
             return vec![];
         }
+        let mut max_w: f32 = 0.0;
         let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((_, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+                if w > max_w {
+                    max_w = w;
+                }
                 if h > max_h {
                     max_h = h;
                 }
@@ -230,15 +236,24 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
         if max_h <= 0.0 {
             max_h = ctx.font_size;
         }
-        vec![Reservation {
-            side: Side::Bottom,
-            size: self.tick_len + self.gap + max_h,
-            priority: 0,
-        }]
+        vec![
+            Reservation {
+                side: Side::Bottom,
+                size: self.tick_len + self.gap + max_h,
+                priority: 0,
+            },
+            Reservation {
+                side: Side::Right,
+                size: max_w / 2.0 + 2.0,
+                priority: 0,
+            },
+        ]
     }
 }
 
 /// Left-side reservation for y-axis tick labels (closest to plot, priority 0).
+/// Also reserves on the top so the topmost label, which is centered on
+/// `plot.top`, doesn't overhang the canvas edge.
 pub struct YTickLabelsComponent<'a> {
     pub labels: &'a [String],
     pub tick_len: f32,
@@ -254,18 +269,32 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
             return vec![];
         }
         let mut max_w: f32 = 0.0;
+        let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((w, _)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
                 if w > max_w {
                     max_w = w;
                 }
+                if h > max_h {
+                    max_h = h;
+                }
             }
         }
-        vec![Reservation {
-            side: Side::Left,
-            size: self.tick_len + self.gap + max_w,
-            priority: 0,
-        }]
+        if max_h <= 0.0 {
+            max_h = ctx.font_size;
+        }
+        vec![
+            Reservation {
+                side: Side::Left,
+                size: self.tick_len + self.gap + max_w,
+                priority: 0,
+            },
+            Reservation {
+                side: Side::Top,
+                size: max_h / 2.0 + 2.0,
+                priority: 0,
+            },
+        ]
     }
 }
 

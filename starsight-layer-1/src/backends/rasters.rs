@@ -149,6 +149,13 @@ impl DrawBackend for SkiaBackend {
         buffer.set_size(Some(self.pixmap.width() as f32), None);
         buffer.shape_until_scroll(&mut self.font_system, true);
 
+        // Match SVG semantics: position.y is the baseline. cosmic-text's buffer
+        // origin is the line top, so shift up by the first run's baseline offset.
+        let baseline_offset = buffer
+            .layout_runs()
+            .next()
+            .map_or(font_size * 0.85, |run| run.line_y);
+
         let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
         let mut paint = Paint::default();
         buffer.draw(
@@ -158,7 +165,7 @@ impl DrawBackend for SkiaBackend {
             |x, y, w, h, c| {
                 paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
                 let px = x as f32 + position.x;
-                let py = y as f32 + position.y;
+                let py = y as f32 + position.y - baseline_offset;
                 if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
                     self.pixmap
                         .fill_rect(rect, &paint, tiny_skia::Transform::identity(), None);
@@ -200,11 +207,25 @@ impl DrawBackend for SkiaBackend {
         let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
         let mut paint = Paint::default();
 
+        // Same baseline shift as draw_text, but composed with the rotation.
+        // Pre-translate the buffer by (0, -baseline_offset) so the baseline sits
+        // at the rotation pivot, then rotate, then translate to position.
+        let baseline_offset = buffer
+            .layout_runs()
+            .next()
+            .map_or(font_size * 0.85, |run| run.line_y);
+
         let angle_rad = rotation.to_radians();
         let cos_a = angle_rad.cos();
         let sin_a = angle_rad.sin();
-        let transform =
-            tiny_skia::Transform::from_row(cos_a, sin_a, -sin_a, cos_a, position.x, position.y);
+        let transform = tiny_skia::Transform::from_row(
+            cos_a,
+            sin_a,
+            -sin_a,
+            cos_a,
+            position.x + sin_a * baseline_offset,
+            position.y - cos_a * baseline_offset,
+        );
 
         buffer.draw(
             &mut self.font_system,
