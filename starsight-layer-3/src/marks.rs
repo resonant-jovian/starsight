@@ -851,8 +851,10 @@ impl Mark for HeatmapMark {
         let n_rows = self.data.len();
         let n_cols = self.data[0].len();
 
-        let cell_width = coord.plot_area.width() / n_cols as f32;
-        let cell_height = coord.plot_area.height() / n_rows as f32;
+        let left = coord.plot_area.left;
+        let top = coord.plot_area.top;
+        let w = coord.plot_area.width();
+        let h = coord.plot_area.height();
 
         for (row_idx, row) in self.data.iter().enumerate() {
             for (col_idx, &value) in row.iter().enumerate() {
@@ -863,16 +865,13 @@ impl Mark for HeatmapMark {
                 let normalized = (value - data_min) / range;
                 let color = self.colormap.sample(normalized);
 
-                let x = coord.plot_area.left + (col_idx as f32 + 0.5) * cell_width;
-                let y = coord.plot_area.top + (row_idx as f32 + 0.5) * cell_height;
-
-                let rect = Rect::from_xywh(
-                    x - cell_width / 2.0,
-                    y - cell_height / 2.0,
-                    cell_width,
-                    cell_height,
-                );
-                backend.fill_rect(rect, color)?;
+                // Integer-snapped boundaries: cell N's right == cell N+1's left exactly,
+                // so adjacent cells share a pixel edge and anti-aliasing can't leak through.
+                let x0 = (left + w * (col_idx as f32 / n_cols as f32)).round();
+                let x1 = (left + w * ((col_idx + 1) as f32 / n_cols as f32)).round();
+                let y0 = (top + h * (row_idx as f32 / n_rows as f32)).round();
+                let y1 = (top + h * ((row_idx + 1) as f32 / n_rows as f32)).round();
+                backend.fill_rect(Rect::new(x0, y0, x1, y1), color)?;
             }
         }
 
