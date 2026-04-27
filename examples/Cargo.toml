@@ -67,6 +67,31 @@ path = "showcases/recipe.rs"
 name = "gallery"
 path = "showcases/gallery.rs"
 
+# Placeholder examples — backend or feature lands in 0.3.0+.
+[[example]]
+name = "terminal"
+path = "showcases/terminal.rs"
+
+[[example]]
+name = "interactive"
+path = "showcases/interactive.rs"
+
+[[example]]
+name = "surface3d"
+path = "showcases/surface3d.rs"
+
+[[example]]
+name = "streaming"
+path = "showcases/streaming.rs"
+
+[[example]]
+name = "polars_integration"
+path = "showcases/polars_integration.rs"
+
+[[example]]
+name = "faceting"
+path = "showcases/faceting.rs"
+
 [lints]
 workspace = true
 
