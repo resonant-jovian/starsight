@@ -10,6 +10,10 @@ fn main() -> Result<()> {
     let ys = xs.clone();
     Figure::new(800, 600)
         .title("[placeholder] 3D surface — demo lands in 0.3.0 (vello/wgpu backend)")
-        .add(LineMark::new(xs, ys).color(Color::from_hex(0x888888)).width(1.0))
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::from_hex(0x888888))
+                .width(1.0),
+        )
         .save("examples/planned/surface3d.png")
 }

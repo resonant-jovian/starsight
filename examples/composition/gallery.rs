@@ -15,7 +15,11 @@ fn main() -> Result<()> {
 
     let xs: Vec<f64> = (0..40).map(|i| f64::from(i) * 0.25).collect();
     let truth: Vec<f64> = xs.iter().map(|&x| 3.0 + 1.4 * x).collect();
-    let noisy: Vec<f64> = xs.iter().zip(&truth).map(|(_, &y)| y + 1.5 * noise()).collect();
+    let noisy: Vec<f64> = xs
+        .iter()
+        .zip(&truth)
+        .map(|(_, &y)| y + 1.5 * noise())
+        .collect();
 
     Figure::new(1100, 650)
         .title("Linear Fit Over Noisy Observations")

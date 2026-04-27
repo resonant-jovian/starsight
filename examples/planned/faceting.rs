@@ -10,6 +10,10 @@ fn main() -> Result<()> {
     let ys = xs.clone();
     Figure::new(800, 600)
         .title("[placeholder] faceting — demo lands in 0.3.0 (layer-4 grid layout)")
-        .add(LineMark::new(xs, ys).color(Color::from_hex(0x888888)).width(1.0))
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::from_hex(0x888888))
+                .width(1.0),
+        )
         .save("examples/planned/faceting.png")
 }

@@ -1,6 +1,6 @@
 # starsight examples
 
-Twenty-one runnable examples grouped by what they teach. Each `.rs` file lives
+Twenty runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 

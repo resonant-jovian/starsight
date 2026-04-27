@@ -131,7 +131,10 @@ impl Default for Theme {
 mod tests {
     use super::{Color, DEFAULT_DARK, DEFAULT_LIGHT, Theme};
 
-    fn build_theme(line_highlight: Option<chromata::Color>, comment: Option<chromata::Color>) -> chromata::Theme {
+    fn build_theme(
+        line_highlight: Option<chromata::Color>,
+        comment: Option<chromata::Color>,
+    ) -> chromata::Theme {
         let mut builder = chromata::ThemeBuilder::new(
             "Test",
             "tester",

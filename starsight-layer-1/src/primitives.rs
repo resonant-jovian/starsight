@@ -1074,12 +1074,18 @@ mod tests {
 
     #[test]
     fn vec2_add() {
-        assert_eq!(Vec2::new(1.0, 2.0) + Vec2::new(3.0, 4.0), Vec2::new(4.0, 6.0));
+        assert_eq!(
+            Vec2::new(1.0, 2.0) + Vec2::new(3.0, 4.0),
+            Vec2::new(4.0, 6.0)
+        );
     }
 
     #[test]
     fn vec2_sub() {
-        assert_eq!(Vec2::new(5.0, 7.0) - Vec2::new(3.0, 4.0), Vec2::new(2.0, 3.0));
+        assert_eq!(
+            Vec2::new(5.0, 7.0) - Vec2::new(3.0, 4.0),
+            Vec2::new(2.0, 3.0)
+        );
     }
 
     #[test]

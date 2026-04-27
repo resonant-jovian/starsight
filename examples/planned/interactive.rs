@@ -10,6 +10,10 @@ fn main() -> Result<()> {
     let ys = xs.clone();
     Figure::new(800, 600)
         .title("[placeholder] interactive — demo lands in 0.3.0 (winit + wgpu backend)")
-        .add(LineMark::new(xs, ys).color(Color::from_hex(0x888888)).width(1.0))
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::from_hex(0x888888))
+                .width(1.0),
+        )
         .save("examples/planned/interactive.png")
 }

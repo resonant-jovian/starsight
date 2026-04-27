@@ -1421,7 +1421,9 @@ mod tests {
 
     #[test]
     fn histogram_mark_builders() {
-        let m = HistogramMark::new(vec![1.0, 2.0]).color(Color::RED).method(BinMethod::default());
+        let m = HistogramMark::new(vec![1.0, 2.0])
+            .color(Color::RED)
+            .method(BinMethod::default());
         assert_eq!(m.color, Color::RED);
     }
 
@@ -1500,7 +1502,8 @@ mod tests {
 
     #[test]
     fn bar_mark_render_horizontal_simple() {
-        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).horizontal();
+        let mark =
+            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).horizontal();
         let coord = coord_for(0.0, 2.0, 0.0, 2.0);
         let mut backend = SvgBackend::new(100, 100);
         mark.render(&coord, &mut backend).unwrap();
@@ -1546,8 +1549,7 @@ mod tests {
 
     #[test]
     fn bar_mark_render_bar_vertical_stacked() {
-        let mark =
-            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).stack("s");
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).stack("s");
         let coord = coord_for(0.0, 2.0, 0.0, 4.0);
         let mut backend = SvgBackend::new(100, 100);
         let mut ctx = BarRenderContext::default();
@@ -1557,8 +1559,7 @@ mod tests {
 
     #[test]
     fn bar_mark_render_bar_vertical_with_base() {
-        let mark =
-            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).base(0.5);
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).base(0.5);
         let coord = coord_for(0.0, 2.0, 0.0, 4.0);
         let mut backend = SvgBackend::new(100, 100);
         let ctx = BarRenderContext::default();
@@ -1629,7 +1630,9 @@ mod tests {
 
     #[test]
     fn bar_mark_as_bar_info_and_data() {
-        let m = BarMark::new(vec!["a".into()], vec![1.0]).group("g").stack("s");
+        let m = BarMark::new(vec!["a".into()], vec![1.0])
+            .group("g")
+            .stack("s");
         let info = m.as_bar_info().unwrap();
         assert_eq!(info.0, Some("g"));
         assert_eq!(info.1, Some("s"));

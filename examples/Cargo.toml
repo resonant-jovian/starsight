@@ -8,9 +8,8 @@ publish = false
 
 [dev-dependencies]
 starsight.workspace = true
-starsight-layer-3.workspace = true
 chromata.workspace = true
-prismatica = { version = "1.0.0", features = ["matplotlib"] }
+prismatica = { workspace = true, features = ["matplotlib"] }
 
 # ── basics ──────────────────────────────────────────────────────────────────
 # Smallest possible programs that exercise one mark type at a time. Start here

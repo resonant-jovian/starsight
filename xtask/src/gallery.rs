@@ -43,7 +43,10 @@ pub fn run() -> Result<()> {
                     generated += 1;
                     println!("[OK]   {name}");
                 } else {
-                    failed.push(format!("{name} (ran but produced no PNG at {})", src.display()));
+                    failed.push(format!(
+                        "{name} (ran but produced no PNG at {})",
+                        src.display()
+                    ));
                     println!("[WARN] {name} ran but did not write {}", src.display());
                 }
             }
@@ -140,7 +143,11 @@ fn parse_kv(line: &str, key: &str) -> Option<String> {
         return None;
     }
     let value = rhs.trim().trim_matches('"');
-    if value.is_empty() { None } else { Some(value.to_string()) }
+    if value.is_empty() {
+        None
+    } else {
+        Some(value.to_string())
+    }
 }
 
 fn push_if_complete(
@@ -159,13 +166,7 @@ fn push_if_complete(
 fn run_example(workspace_root: &Path, name: &str) -> Result<()> {
     let manifest = workspace_root.join("examples/Cargo.toml");
     let status = Command::new("cargo")
-        .args([
-            "run",
-            "--release",
-            "--example",
-            name,
-            "--manifest-path",
-        ])
+        .args(["run", "--release", "--example", name, "--manifest-path"])
         .arg(&manifest)
         .current_dir(workspace_root)
         .status()
@@ -184,14 +185,11 @@ fn mirror_snapshots(src_dir: &Path, dst_dir: &Path) -> Result<usize> {
         return Ok(0);
     }
     let mut count = 0;
-    for entry in fs::read_dir(src_dir)
-        .with_context(|| format!("reading {}", src_dir.display()))?
-    {
+    for entry in fs::read_dir(src_dir).with_context(|| format!("reading {}", src_dir.display()))? {
         let entry = entry?;
         let file_name = entry.file_name();
-        let s = match file_name.to_str() {
-            Some(s) => s,
-            None => continue,
+        let Some(s) = file_name.to_str() else {
+            continue;
         };
         if !s.ends_with(".snap.png") {
             continue;
@@ -200,9 +198,8 @@ fn mirror_snapshots(src_dir: &Path, dst_dir: &Path) -> Result<usize> {
         let stem = s
             .strip_suffix(".snap.png")
             .and_then(|x| x.strip_prefix("snapshot__snapshot_"));
-        let stem = match stem {
-            Some(s) => s,
-            None => continue,
+        let Some(stem) = stem else {
+            continue;
         };
         let name = stem.strip_suffix("-2").unwrap_or(stem);
         let dst = dst_dir.join(format!("{name}.png"));

@@ -24,6 +24,10 @@ fn main() -> Result<()> {
         .title("Monthly Revenue — gruvbox dark hard (via chromata)")
         .x_label("Month")
         .y_label("Revenue (k USD)")
-        .add(LineMark::new(months, revenue).color(theme.accent).width(2.5))
+        .add(
+            LineMark::new(months, revenue)
+                .color(theme.accent)
+                .width(2.5),
+        )
         .save("examples/theming/custom_theme.png")
 }

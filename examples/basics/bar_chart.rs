@@ -7,7 +7,10 @@
 use starsight::prelude::*;
 
 fn main() -> Result<()> {
-    let quarters: Vec<String> = ["Q1", "Q2", "Q3", "Q4"].iter().map(|s| (*s).to_string()).collect();
+    let quarters: Vec<String> = ["Q1", "Q2", "Q3", "Q4"]
+        .iter()
+        .map(|s| (*s).to_string())
+        .collect();
 
     let widgets = vec![32.0, 41.0, 38.0, 47.0];
     let gizmos = vec![22.0, 28.0, 35.0, 42.0];

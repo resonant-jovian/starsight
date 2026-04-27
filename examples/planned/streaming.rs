@@ -10,6 +10,10 @@ fn main() -> Result<()> {
     let ys = xs.clone();
     Figure::new(800, 600)
         .title("[placeholder] streaming — demo lands in 0.3.0 (windowed data source)")
-        .add(LineMark::new(xs, ys).color(Color::from_hex(0x888888)).width(1.0))
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::from_hex(0x888888))
+                .width(1.0),
+        )
         .save("examples/planned/streaming.png")
 }

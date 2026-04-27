@@ -56,22 +56,32 @@ cargo test --workspace
 ## Test Fixtures
 
 - Snapshot tests in `starsight-layer-5/tests/snapshot.rs`
-- Reference PNGs in `docs/screenshots/`
+- Reference PNGs in `examples/<group>/`, alongside each `.rs` source (run `cargo xtask gallery` to refresh them all)
 - SVG backend used for deterministic CI renders
 
-## What Works Now (0.1.x)
+## What Works Now (0.2.x)
 
-- LineMark, PointMark, BarMark, AreaMark
-- SkiaBackend, SvgBackend
+- LineMark, PointMark, BarMark (vertical/horizontal/grouped), AreaMark (with baseline), HeatmapMark, HistogramMark (auto-binning), StepMark
+- BandScale for categorical x-axis
+- `infer_chart_kind` chart-type inference
+- `Color::cycle_next` (Tableau10 default palette)
+- Title and axis-label rendering
+- SkiaBackend, SvgBackend (with opacity)
 - Figure + plot! macro
 - Wilkinson Extended ticks (layer-2)
-- 9 snapshot tests in layer-5
+- Snapshot tests in layer-5
 
 ## Not Implemented (yet)
 
-- Polars/DataFrame integration
-- HeatmapMark, BoxPlotMark, ViolinMark, PieMark
-- Feature flags: `interactive`, `polars`, `wasm`
+- Layout: GridLayout, faceting, legends, colorbars (0.4.0)
+- LogScale, SymLogScale, DateTimeScale (0.5.0)
+- GPU + interactivity: wgpu, hover/zoom/pan (0.6.0)
+- Animation, GIF (0.7.0)
+- Terminal backends (0.8.0)
+- 3D: Surface3D, Scatter3D (0.9.0)
+- PDF (krilla), interactive HTML, WASM (0.10.0)
+- Polars / ndarray / Arrow input (0.11.0)
+- BoxMark, ViolinMark, KDE, PieMark (0.3.0)
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker

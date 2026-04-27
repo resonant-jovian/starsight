@@ -116,7 +116,7 @@ impl DrawBackend for SvgBackend {
         Ok(())
     }
 
-fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
+    fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
         let width = text.len() as f32 * font_size * 0.6;
         let height = font_size;
         Ok((width, height))
@@ -134,10 +134,7 @@ fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
             return self.draw_text(text, position, font_size, color);
         }
 
-        let transform = format!(
-            "rotate({} {}, {})",
-            rotation, position.x, position.y
-        );
+        let transform = format!("rotate({} {}, {})", rotation, position.x, position.y);
 
         let t = SvgText::new(text)
             .set("x", position.x)
@@ -211,7 +208,8 @@ mod tests {
                 PathCommand::Close,
             ],
         };
-        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 1.0)).unwrap();
+        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 1.0))
+            .unwrap();
         let svg = b.svg_string();
         assert!(svg.contains("<path"));
     }
@@ -233,7 +231,8 @@ mod tests {
     #[test]
     fn draw_text_emits_text_element() {
         let mut b = SvgBackend::new(100, 100);
-        b.draw_text("hello", Point::new(10.0, 50.0), 14.0, Color::BLACK).unwrap();
+        b.draw_text("hello", Point::new(10.0, 50.0), 14.0, Color::BLACK)
+            .unwrap();
         let svg = b.svg_string();
         assert!(svg.contains("hello"));
     }
@@ -241,7 +240,8 @@ mod tests {
     #[test]
     fn draw_rotated_text_zero_rotation_uses_fast_path() {
         let mut b = SvgBackend::new(100, 100);
-        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 0.0).unwrap();
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 0.0)
+            .unwrap();
         let svg = b.svg_string();
         assert!(!svg.contains("transform"));
         assert!(svg.contains("hi"));
@@ -250,7 +250,8 @@ mod tests {
     #[test]
     fn draw_rotated_text_emits_transform() {
         let mut b = SvgBackend::new(100, 100);
-        b.draw_rotated_text("rotated", Point::new(10.0, 50.0), 12.0, Color::BLACK, 45.0).unwrap();
+        b.draw_rotated_text("rotated", Point::new(10.0, 50.0), 12.0, Color::BLACK, 45.0)
+            .unwrap();
         let svg = b.svg_string();
         assert!(svg.contains("transform"));
     }
@@ -282,7 +283,8 @@ mod tests {
     #[test]
     fn save_svg_writes_file() {
         let mut b = SvgBackend::new(20, 20);
-        b.fill_rect(Rect::new(0.0, 0.0, 10.0, 10.0), Color::RED).unwrap();
+        b.fill_rect(Rect::new(0.0, 0.0, 10.0, 10.0), Color::RED)
+            .unwrap();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("out.svg");
         b.save_svg(&path).unwrap();

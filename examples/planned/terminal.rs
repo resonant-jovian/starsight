@@ -11,6 +11,10 @@ fn main() -> Result<()> {
     let ys = xs.clone();
     Figure::new(800, 600)
         .title("[placeholder] terminal — demo lands in 0.3.0 (ratatui backend)")
-        .add(LineMark::new(xs, ys).color(Color::from_hex(0x888888)).width(1.0))
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::from_hex(0x888888))
+                .width(1.0),
+        )
         .save("examples/planned/terminal.png")
 }

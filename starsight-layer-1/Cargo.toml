@@ -11,6 +11,11 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 publish = true
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "README.md",
+]
 
 [dependencies]
 thiserror.workspace = true

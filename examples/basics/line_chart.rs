@@ -16,6 +16,10 @@ fn main() -> Result<()> {
         .title("Monthly Revenue")
         .x_label("Month")
         .y_label("Revenue (k USD)")
-        .add(LineMark::new(months, revenue).color(Color::from_hex(0x2E7CB8)).width(2.5))
+        .add(
+            LineMark::new(months, revenue)
+                .color(Color::from_hex(0x2E7CB8))
+                .width(2.5),
+        )
         .save("examples/basics/line_chart.png")
 }

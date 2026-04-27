@@ -6,7 +6,6 @@
 //! Color indicates increase (green) or decrease (red), with subtotals and totals in blue.
 
 use starsight::prelude::*;
-use starsight_layer_3::marks::{BarMark, Orientation};
 
 // ── Waterfall data ────────────────────────────────────────────────────────────────────
 

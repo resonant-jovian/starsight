@@ -270,7 +270,9 @@ pub fn render_title(
 ) -> Result<()> {
     let font_size: f32 = 16.0;
     let title_color = theme.title;
-    let (tw, th) = backend.text_extent(title, font_size).unwrap_or((0.0, font_size));
+    let (tw, th) = backend
+        .text_extent(title, font_size)
+        .unwrap_or((0.0, font_size));
     let x = slot.rect.left + (slot.rect.width() - tw) / 2.0;
     let y = slot.rect.top + (slot.rect.height() + th) / 2.0;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
@@ -353,8 +355,13 @@ mod tests {
     #[test]
     fn render_legend_empty_returns_ok() {
         let mut backend = SvgBackend::new(100, 100);
-        render_legend(&[], &Rect::new(0.0, 0.0, 100.0, 100.0), &mut backend, &DEFAULT_LIGHT)
-            .unwrap();
+        render_legend(
+            &[],
+            &Rect::new(0.0, 0.0, 100.0, 100.0),
+            &mut backend,
+            &DEFAULT_LIGHT,
+        )
+        .unwrap();
     }
 
     #[test]
@@ -385,7 +392,12 @@ mod tests {
     #[test]
     fn render_background_fills_rect() {
         let mut backend = SvgBackend::new(50, 50);
-        render_background(&Rect::new(0.0, 0.0, 50.0, 50.0), &mut backend, &DEFAULT_LIGHT).unwrap();
+        render_background(
+            &Rect::new(0.0, 0.0, 50.0, 50.0),
+            &mut backend,
+            &DEFAULT_LIGHT,
+        )
+        .unwrap();
     }
 
     #[test]

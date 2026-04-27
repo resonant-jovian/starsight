@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - SvgBackend opacity support (fill-opacity, stroke-opacity attributes)
 - `AreaMark` baseline support (Zero or Fixed value)
 - Facade exports: `StepMark`, `HistogramMark`, `BarMark`, `BinMethod`, `BinTransform`
+- Facade re-exports: `AreaMark`, `AreaBaseline`, `Orientation`, `BarRenderContext`, `DataExtent`; new `starsight::inferences` and `starsight::renders` modules surfacing layer-5 chart-kind inference and chrome render helpers; `Orientation` and `ChartKind` added to `prelude`
 
 ### Changed
 

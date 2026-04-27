@@ -330,7 +330,8 @@ mod tests {
                 PathCommand::Close,
             ],
         };
-        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 2.0)).unwrap();
+        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 2.0))
+            .unwrap();
     }
 
     #[test]

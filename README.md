@@ -17,7 +17,7 @@
 [![Edition](https://img.shields.io/badge/Edition-2024-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://doc.rust-lang.org/edition-guide/)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=ci)](https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/coverage.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=coverage)](https://github.com/resonant-jovian/starsight/actions/workflows/coverage.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&logoColor=white&label=coverage)](https://app.codecov.io/gh/resonant-jovian/starsight)
 [![Gallery](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/gallery.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=gallery)](https://github.com/resonant-jovian/starsight/actions/workflows/gallery.yml)
 [![Release](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/release.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=release)](https://github.com/resonant-jovian/starsight/actions/workflows/release.yml)
 [![Snapshots](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/snapshots.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=snapshots)](https://github.com/resonant-jovian/starsight/actions/workflows/snapshots.yml)
@@ -36,7 +36,7 @@
 
 ```toml
 [dependencies]
-starsight = "0.1"
+starsight = "0.2"
 ```
 
 ```rust
@@ -133,7 +133,7 @@ fn main() -> starsight::Result<()> {
 }
 ```
 
-⏳ Planned in 0.2.0
+✓ Available in 0.2.0
 </details>
 
 <details>
@@ -152,7 +152,7 @@ fn main() -> starsight::Result<()> {
 }
 ```
 
-⏳ Planned in 0.2.0
+✓ Available in 0.1.0
 </details>
 
 <details>
@@ -176,20 +176,26 @@ fn main() -> starsight::Result<()> {
 }
 ```
 
-⏳ Planned in 0.3.0
+✓ Available in 0.2.0
 </details>
 
 ### What it actually renders today
 
-Frozen reference renders of the same data the layer-3 snapshot tests use. The full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end on the current code; the polished gallery wired up via `cargo xtask gallery` will land in 0.2.0.
+The full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end. Each card below is produced deterministically by `cargo xtask gallery` from the program in [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples) — click an image to jump to its source.
 
 <p align="center">
-  <img src="docs/screenshots/line_damped_cosine.png" width="280" alt="Damped cosine line chart with axes and tick labels"/>
-  <img src="docs/screenshots/line_two_series.png" width="280" alt="Two-series line chart (daily high/low temperatures) with colors"/>
-  <img src="docs/screenshots/scatter_anscombe.png" width="280" alt="Anscombe's quartet scatter plot"/>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/line_chart.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/line_chart.png" width="280" alt="Line chart with title and axis labels"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/scatter.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/scatter.png" width="280" alt="Two-series PointMark scatter with auto-legend"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/recipe.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/recipe.png" width="280" alt="Three-series composition with custom palette and DEFAULT_LIGHT theme"/>
+  </a>
 </p>
 
-> Note: snapshot tests in CI use the SVG backend (deterministic across operating systems and font setups). The PNGs above are committed reference renders from a Linux box; they update when someone re-renders them locally.
+> Note: snapshot tests in CI use the SVG backend (deterministic across operating systems and font setups).
 
 ---
 

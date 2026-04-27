@@ -166,7 +166,10 @@ impl<'a> LayoutBuilder<'a> {
                         self.ctx.height,
                     ),
                 };
-                slots.entry(*id).or_default().push(Slot { rect, side: *side });
+                slots
+                    .entry(*id)
+                    .or_default()
+                    .push(Slot { rect, side: *side });
                 outward += res.size;
             }
         }
@@ -396,9 +399,7 @@ mod tests {
     fn title_component_with_title_reserves_top() {
         let mut backend = SvgBackend::new(200, 200);
         let mut ctx = make_ctx(&mut backend);
-        let comp = TitleComponent {
-            title: Some("hi"),
-        };
+        let comp = TitleComponent { title: Some("hi") };
         let res = comp.reserve(&mut ctx);
         assert_eq!(res.len(), 1);
         assert_eq!(res[0].side, Side::Top);
@@ -575,7 +576,11 @@ mod tests {
         ) -> starsight_layer_1::errors::Result<()> {
             Ok(())
         }
-        fn text_extent(&mut self, _: &str, _: f32) -> starsight_layer_1::errors::Result<(f32, f32)> {
+        fn text_extent(
+            &mut self,
+            _: &str,
+            _: f32,
+        ) -> starsight_layer_1::errors::Result<(f32, f32)> {
             Ok((0.0, 0.0))
         }
         fn draw_rotated_text(

@@ -1,5 +1,7 @@
 # Starsight — Thursday + Friday Sprint
 
+> **Sprint completed.** Tasks referencing `docs/screenshots/` are obsolete — that folder was removed; reference PNGs now live in `examples/<group>/` (one per example, refreshed by `cargo xtask gallery`).
+
 > **Starting point**: 0.1.1 on crates.io. LineMark, PointMark, SkiaBackend, SvgBackend, Figure, Wilkinson ticks — all working. 7 snapshot tests passing. Next milestone: **0.2.0 — Core chart types part 1**.
 
 ---

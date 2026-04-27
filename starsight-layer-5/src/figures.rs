@@ -361,11 +361,7 @@ impl Figure {
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            let slot = layout
-                .slots
-                .get("title")
-                .and_then(|v| v.first())
-                .copied();
+            let slot = layout.slots.get("title").and_then(|v| v.first()).copied();
             if let Some(slot) = slot {
                 crate::renders::render_title(title, &slot, backend, &self.theme)?;
             }
@@ -546,9 +542,8 @@ mod tests {
 
     #[test]
     fn render_svg_with_horizontal_bars_uses_y_category_axis() {
-        let fig = Figure::new(400, 300).add(
-            BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).horizontal(),
-        );
+        let fig = Figure::new(400, 300)
+            .add(BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).horizontal());
         let svg = fig.render_svg().unwrap();
         assert!(svg.contains('a'));
     }

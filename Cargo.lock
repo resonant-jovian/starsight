@@ -266,7 +266,6 @@ dependencies = [
  "chromata",
  "prismatica",
  "starsight",
- "starsight-layer-3",
 ]
 
 [[package]]

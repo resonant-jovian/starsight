@@ -8,7 +8,9 @@ use starsight::prelude::*;
 
 fn series(name: &str) -> (Vec<f64>, Vec<f64>) {
     let years: Vec<f64> = (2014..=2024).map(f64::from).collect();
-    let mut state: u32 = name.bytes().fold(0x9E37_79B9u32, |s, b| s.wrapping_mul(1_664_525).wrapping_add(u32::from(b)));
+    let mut state: u32 = name.bytes().fold(0x9E37_79B9u32, |s, b| {
+        s.wrapping_mul(1_664_525).wrapping_add(u32::from(b))
+    });
     let mut next = || {
         state = state.wrapping_mul(1_103_515_245).wrapping_add(12_345);
         f64::from(state) / f64::from(u32::MAX) - 0.5
