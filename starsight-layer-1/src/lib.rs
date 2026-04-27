@@ -10,7 +10,9 @@
 //! - [`backends`]: `DrawBackend` trait + raster/vector/print/gpu/terminal implementations.
 
 pub mod backends;
+pub mod colormap;
 pub mod errors;
 pub mod paths;
 pub mod primitives;
 pub mod scenes;
+pub mod theme;

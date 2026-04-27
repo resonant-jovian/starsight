@@ -3,4 +3,7 @@
 //! `Mark` is the trait every visual element implements; the rest are concrete
 //! mark types ready to be added to a [`Figure`](crate::figures::Figure).
 
-pub use crate::components::marks::{DataExtent, LineMark, Mark, PointMark};
+pub use crate::components::marks::{
+    AreaBaseline, AreaMark, BarMark, BarRenderContext, DataExtent, HeatmapMark, HistogramMark,
+    LineMark, Mark, Orientation, PointMark, StepMark, StepPosition,
+};

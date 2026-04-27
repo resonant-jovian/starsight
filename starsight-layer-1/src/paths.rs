@@ -183,3 +183,71 @@ impl PathStyle {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Color, LineCap, LineJoin, Path, PathCommand, PathStyle, Point};
+
+    #[test]
+    fn path_default_is_empty() {
+        let p: Path = Path::default();
+        assert!(p.commands.is_empty());
+    }
+
+    #[test]
+    fn path_close_appends_command() {
+        let p = Path::new()
+            .move_to(Point::new(0.0, 0.0))
+            .line_to(Point::new(10.0, 10.0))
+            .close();
+        assert_eq!(p.commands.len(), 3);
+        assert_eq!(p.commands[2], PathCommand::Close);
+    }
+
+    #[test]
+    fn line_cap_to_tiny_skia_all_variants() {
+        assert_eq!(
+            LineCap::Butt.to_tiny_skia() as u8,
+            tiny_skia::LineCap::Butt as u8
+        );
+        assert_eq!(
+            LineCap::Round.to_tiny_skia() as u8,
+            tiny_skia::LineCap::Round as u8
+        );
+        assert_eq!(
+            LineCap::Square.to_tiny_skia() as u8,
+            tiny_skia::LineCap::Square as u8
+        );
+    }
+
+    #[test]
+    fn line_join_to_tiny_skia_all_variants() {
+        assert_eq!(
+            LineJoin::Miter.to_tiny_skia() as u8,
+            tiny_skia::LineJoin::Miter as u8
+        );
+        assert_eq!(
+            LineJoin::Round.to_tiny_skia() as u8,
+            tiny_skia::LineJoin::Round as u8
+        );
+        assert_eq!(
+            LineJoin::Bevel.to_tiny_skia() as u8,
+            tiny_skia::LineJoin::Bevel as u8
+        );
+    }
+
+    #[test]
+    fn path_style_fill_constructor() {
+        let s = PathStyle::fill(Color::RED);
+        assert_eq!(s.fill_color, Some(Color::RED));
+        assert_eq!(s.stroke_width, 0.0);
+    }
+
+    #[test]
+    fn path_style_stroke_constructor() {
+        let s = PathStyle::stroke(Color::BLUE, 3.0);
+        assert_eq!(s.stroke_color, Color::BLUE);
+        assert_eq!(s.stroke_width, 3.0);
+        assert_eq!(s.fill_color, None);
+    }
+}

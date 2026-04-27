@@ -11,15 +11,23 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 publish = true
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "README.md",
+]
 
 [dependencies]
 thiserror.workspace = true
 tiny-skia.workspace = true
 chromata.workspace = true
-prismatica.workspace = true
 cosmic-text.workspace = true
 insta.workspace = true
 svg.workspace = true
+prismatica = { workspace = true, features = ["d3"] }
+
+[dev-dependencies]
+tempfile = "3"
 
 [lints]
 workspace = true

@@ -49,6 +49,31 @@ pub trait DrawBackend {
         color: Color,
     ) -> Result<()>;
 
+    /// Measure text extent (width, height) at the given font size.
+    ///
+    /// Returns `(width, height)` in pixels.
+    ///
+    /// # Errors
+    /// Returns [`StarsightError::Render`](crate::errors::StarsightError::Render) if
+    /// font shaping fails.
+    fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)>;
+
+    /// Render rotated text at `position`.
+    ///
+    /// Rotation is in degrees clockwise. 0 = normal, 90 = rotated 90° clockwise.
+    ///
+    /// # Errors
+    /// Returns [`StarsightError::Render`](crate::errors::StarsightError::Render) if
+    /// font shaping or backend rendering fails.
+    fn draw_rotated_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+        rotation: f32,
+    ) -> Result<()>;
+
     /// Set the clip rectangle. `None` clears the clip.
     ///
     /// # Errors

@@ -1,0 +1,81 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1150.6001" x="36.2" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="480" y="26">
+Area Chart with Data Gaps
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="597.1" y="794">
+Time
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 18, 417.5)" x="18" y="417.5">
+Value
+</text>
+<path d="M36.2,759 L36.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M419.73337,759 L419.73337,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M803.2667,759 L803.2667,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1186.8,759 L1186.8,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,759 L1186.8,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,656.2857 L1186.8,656.2857" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,553.5714 L1186.8,553.5714" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,450.85715 L1186.8,450.85715" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,348.14285 L1186.8,348.14285" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,245.42857 L1186.8,245.42857" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,142.71428 L1186.8,142.71428" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,40 L1186.8,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M36.2,759 L74.55334,502.2143 L112.90668,348.14285 L151.26001,399.5 L189.61334,245.42857 L227.96669,91.35714 L266.32,245.42857 L304.67337,296.7857 L304.67337,759 L36.2,759 z" fill="#ff0000" fill-opacity="0.6" opacity="0.6" stroke="#000000" stroke-opacity="0.6" stroke-width="1"/>
+<path d="M419.73337,450.85715 L458.0867,296.7857 L496.44003,194.07143 L534.7934,348.14285 L573.1467,399.5 L611.50006,553.5714 L649.8534,604.9286 L688.2067,502.2143 L726.56006,450.85715 L764.9134,296.7857 L803.2667,245.42857 L803.2667,759 L419.73337,759 z" fill="#ff0000" fill-opacity="0.6" opacity="0.6" stroke="#000000" stroke-opacity="0.6" stroke-width="1"/>
+<path d="M956.68005,399.5 L995.0334,553.5714 L1033.3867,604.9286 L1071.7401,553.5714 L1110.0934,399.5 L1148.4468,348.14285 L1148.4468,759 L956.68005,759 z" fill="#ff0000" fill-opacity="0.6" opacity="0.6" stroke="#000000" stroke-opacity="0.6" stroke-width="1"/>
+<path d="M36.2,759 L36.2,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="32.600002" y="776">
+0
+</text>
+<path d="M419.73337,759 L419.73337,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="412.53336" y="776">
+10
+</text>
+<path d="M803.2667,759 L803.2667,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="796.0667" y="776">
+20
+</text>
+<path d="M1186.8,759 L1186.8,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1179.6001" y="776">
+30
+</text>
+<path d="M36.2,759 L31.2,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="763.8">
+0
+</text>
+<path d="M36.2,656.2857 L31.2,656.2857" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="661.0857">
+1
+</text>
+<path d="M36.2,553.5714 L31.2,553.5714" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="558.3714">
+2
+</text>
+<path d="M36.2,450.85715 L31.2,450.85715" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="455.65714">
+3
+</text>
+<path d="M36.2,348.14285 L31.2,348.14285" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="352.94284">
+4
+</text>
+<path d="M36.2,245.42857 L31.2,245.42857" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="250.22858">
+5
+</text>
+<path d="M36.2,142.71428 L31.2,142.71428" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="147.51428">
+6
+</text>
+<path d="M36.2,40 L31.2,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="44.8">
+7
+</text>
+<path d="M36.2,759 L1186.8,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M36.2,40 L36.2,759" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

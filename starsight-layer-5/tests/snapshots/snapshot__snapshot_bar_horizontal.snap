@@ -1,0 +1,104 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1082.2001" x="108.200005" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="513.6" y="26">
+Population by City
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="573.69995" y="794">
+Population (millions)
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 18, 413.9)" x="18" y="413.9">
+City
+</text>
+<path d="M108.200005,759 L108.200005,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M378.75003,759 L378.75003,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M649.30005,759 L649.30005,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M919.85004,759 L919.85004,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1190.4,759 L1190.4,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,759 L1190.4,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,699.0833 L1190.4,699.0833" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,639.1667 L1190.4,639.1667" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,579.25 L1190.4,579.25" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,519.3333 L1190.4,519.3333" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,459.41666 L1190.4,459.41666" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,399.5 L1190.4,399.5" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,339.58334 L1190.4,339.58334" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,279.66666 L1190.4,279.66666" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,219.75 L1190.4,219.75" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,159.83333 L1190.4,159.83333" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,99.916664 L1190.4,99.916664" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M108.200005,40 L1190.4,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#0000ff" height="47.933334" width="1001.0351" x="108.200005" y="45.99167"/>
+<rect fill="#0000ff" height="47.933342" width="892.81506" x="108.200005" y="105.90833"/>
+<rect fill="#0000ff" height="47.93332" width="757.54004" x="108.200005" y="165.82501"/>
+<rect fill="#0000ff" height="47.93335" width="595.2101" x="108.200005" y="225.74167"/>
+<rect fill="#0000ff" height="47.93335" width="568.155" x="108.200005" y="285.65833"/>
+<rect fill="#0000ff" height="47.93335" width="568.155" x="108.200005" y="345.575"/>
+<rect fill="#0000ff" height="47.93335" width="541.10004" x="108.200005" y="405.49167"/>
+<rect fill="#0000ff" height="47.93335" width="541.10004" x="108.200005" y="465.40833"/>
+<rect fill="#0000ff" height="47.93335" width="568.155" x="108.200005" y="525.325"/>
+<rect fill="#0000ff" height="47.93335" width="514.04504" x="108.200005" y="585.2417"/>
+<rect fill="#0000ff" height="47.93335" width="486.99" x="108.200005" y="645.1583"/>
+<rect fill="#0000ff" height="47.93335" width="432.88" x="108.200005" y="705.075"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="63.200005" y="74.75834">
+Tokyo
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="63.200005" y="134.675">
+Delhi
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="41.600002" y="194.59167">
+Shanghai
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.200005" y="254.50835">
+São Paulo
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20" y="314.425">
+Mexico City
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="63.200005" y="374.34167">
+Cairo
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="56.000004" y="434.25833">
+Mumbai
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="48.800003" y="494.175">
+Beijing
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="63.200005" y="554.0917">
+Dhaka
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="63.200005" y="614.00836">
+Osaka
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="41.600002" y="673.925">
+New York
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="48.800003" y="733.8417">
+Karachi
+</text>
+<path d="M108.200005,759 L108.200005,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="104.600006" y="776">
+0
+</text>
+<path d="M378.75003,759 L378.75003,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="375.15002" y="776">
+1
+</text>
+<path d="M649.30005,759 L649.30005,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="645.7001" y="776">
+2
+</text>
+<path d="M919.85004,759 L919.85004,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="916.25006" y="776">
+3
+</text>
+<path d="M1190.4,759 L1190.4,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1186.8" y="776">
+4
+</text>
+<path d="M108.200005,759 L1190.4,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M108.200005,40 L108.200005,759" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

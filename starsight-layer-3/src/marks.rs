@@ -10,12 +10,14 @@
 //! - 0.3.0+: `HeatmapMark`, `BoxMark`, `ViolinMark`, `PieMark`, `ContourMark`,
 //!   `RidgeMark`, `StepMark`, `ErrorBarMark`, `RugMark`.
 
+use crate::statistics::{Bin, BinMethod, BinTransform};
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
-use starsight_layer_1::primitives::{Color, Point};
+use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::CartesianCoord;
-
+use starsight_layer_2::scales::Scale;
+use std::collections::HashMap;
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.
@@ -30,6 +32,17 @@ pub struct DataExtent {
     pub y_max: f64,
 }
 
+/// Context for bar rendering that enables grouped/stacked modes.
+#[derive(Debug, Default)]
+pub struct BarRenderContext {
+    /// Cumulative baselines for stacked bars: category -> baseline value.
+    pub stacked_baselines: HashMap<String, f64>,
+    /// Group offsets: `group_name` -> (`group_index`, `total_groups`).
+    pub group_offsets: HashMap<String, (i32, i32)>,
+    /// Whether this is the first render pass (for computing baselines).
+    pub first_pass: bool,
+}
+
 // ── Mark ─────────────────────────────────────────────────────────────────────────────────────────
 
 /// Object-safe trait every visual mark implements.
@@ -41,11 +54,43 @@ pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
     ///
     /// # Errors
-    /// Forwards any error returned by the backend's drawing methods. Marks
-    /// themselves do not produce errors — they only propagate them.
+    /// Returns the backend's [`Result`] error if drawing any of the mark's
+    /// primitives fails (e.g. invalid clip rect, font shaping failure).
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
+    /// Render with bar context for grouped/stacked bar rendering.
+    ///
+    /// Default implementation forwards to [`render`](Self::render); bar marks
+    /// override this to handle group offsets and stacked baselines.
+    ///
+    /// # Errors
+    /// Returns the backend's [`Result`] error if drawing the bar fails.
+    #[allow(unused_variables)]
+    fn render_bar(
+        &self,
+        coord: &CartesianCoord,
+        backend: &mut dyn DrawBackend,
+        _context: &BarRenderContext,
+    ) -> Result<()> {
+        self.render(coord, backend)
+    }
+    /// Check if this is a bar mark with group/stack info.
+    fn as_bar_info(&self) -> Option<(Option<&str>, Option<&str>, Orientation)> {
+        None
+    }
+    /// Get bar data for stacking calculations. Returns (labels, values).
+    fn as_bar_data(&self) -> Option<(&[String], &[f64])> {
+        None
+    }
     /// Bounding box of this mark's data, or `None` if it is empty.
     fn data_extent(&self) -> Option<DataExtent>;
+    /// Returns the color of this mark for legend display.
+    fn legend_color(&self) -> Option<Color> {
+        None
+    }
+    /// Returns a label for this mark in the legend.
+    fn legend_label(&self) -> Option<&str> {
+        None
+    }
 }
 
 // ── LineMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -61,6 +106,8 @@ pub struct LineMark {
     pub color: Color,
     /// Stroke width in pixels.
     pub width: f32,
+    /// Legend label.
+    pub label: Option<String>,
 }
 
 impl LineMark {
@@ -72,6 +119,7 @@ impl LineMark {
             y,
             color: Color::BLUE,
             width: 2.0,
+            label: None,
         }
     }
 
@@ -79,6 +127,13 @@ impl LineMark {
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
         self.color = c;
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
         self
     }
 
@@ -128,6 +183,14 @@ impl Mark for LineMark {
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
     }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.color)
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
 }
 
 // ── PointMark ────────────────────────────────────────────────────────────────────────────────────
@@ -143,6 +206,8 @@ pub struct PointMark {
     pub color: Color,
     /// Point radius in pixels.
     pub radius: f32,
+    /// Legend label.
+    pub label: Option<String>,
 }
 
 impl PointMark {
@@ -154,6 +219,7 @@ impl PointMark {
             y,
             color: Color::BLUE,
             radius: 4.0,
+            label: None,
         }
     }
 
@@ -168,6 +234,13 @@ impl PointMark {
     #[must_use]
     pub fn radius(mut self, r: f32) -> Self {
         self.radius = r;
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
         self
     }
 }
@@ -201,16 +274,661 @@ impl Mark for PointMark {
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
     }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.color)
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
 }
 
 // ── BarMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.2.0): pub struct BarMark { categories: Vec<String>, values: Vec<f64>, color: Color, width: f32 }
+/// Bar chart for individual values
+#[derive(Debug, Clone)]
+pub struct BarMark {
+    /// X category labels.
+    pub x: Vec<String>,
+    /// Y data height
+    pub y: Vec<f64>,
+    /// Bar color
+    pub color: Option<Color>,
+    /// Define the width of each bar
+    pub width: Option<f32>,
+    /// Set bar origin axis
+    pub orientation: Orientation,
+    /// Group name for grouped bars (dodged within band)
+    pub group: Option<String>,
+    /// Stack name for stacked bars (accumulated baseline)
+    pub stack: Option<String>,
+    /// Base value for waterfall chart (defaults to 0)
+    pub base: Option<f64>,
+    /// Legend label.
+    pub label: Option<String>,
+}
+/// Bar/box mark orientation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
+pub enum Orientation {
+    /// Bars rise vertically along the y-axis (categories on x).
+    #[default]
+    Vertical,
+    /// Bars extend horizontally along the x-axis (categories on y).
+    Horizontal,
+}
+impl BarMark {
+    /// New bar chart from x and y data with default color and bar width.
+    #[must_use]
+    pub fn new(x: Vec<String>, y: Vec<f64>) -> Self {
+        Self {
+            x,
+            y,
+            color: Some(Color::BLUE),
+            width: Some(0.8),
+            orientation: Orientation::Vertical,
+            group: None,
+            stack: None,
+            base: None,
+            label: None,
+        }
+    }
+
+    /// Builder: switch the bars to a horizontal orientation.
+    #[must_use]
+    pub fn horizontal(mut self) -> Self {
+        self.orientation = Orientation::Horizontal;
+        self
+    }
+
+    /// Builder: set group name for grouped bars (bars are dodged within each band).
+    #[must_use]
+    pub fn group(mut self, name: impl Into<String>) -> Self {
+        self.group = Some(name.into());
+        self
+    }
+
+    /// Builder: set stack name for stacked bars (bars are accumulated).
+    #[must_use]
+    pub fn stack(mut self, name: impl Into<String>) -> Self {
+        self.stack = Some(name.into());
+        self
+    }
+
+    /// Builder: set base value for waterfall chart (where bar starts).
+    #[must_use]
+    pub fn base(mut self, b: f64) -> Self {
+        self.base = Some(b);
+        self
+    }
+
+    /// Builder: set bar color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = Some(c);
+        self
+    }
+
+    /// Builder: set bar width in pixels.
+    #[must_use]
+    pub fn width(mut self, r: f32) -> Self {
+        self.width = Some(r);
+        self
+    }
+
+    /// Builder: set legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+}
+impl Mark for BarMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let valid: Vec<(&str, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
+            .map(|(x, y)| (x.as_str(), *y))
+            .collect();
+
+        let n = valid.len();
+        if n == 0 {
+            return Ok(());
+        }
+
+        let area = coord.plot_area;
+        let fill = self.color.unwrap_or(Color::BLUE);
+        let width_fraction = self.width.unwrap_or(0.8);
+
+        match self.orientation {
+            Orientation::Vertical => {
+                let band_width = area.width() / n as f32;
+                let bar_width = band_width * width_fraction;
+
+                for (i, (_label, value)) in valid.iter().enumerate() {
+                    let x_center = area.left + (i as f32 + 0.5) * band_width;
+                    let x_left = x_center - bar_width / 2.0;
+                    let x_right = x_center + bar_width / 2.0;
+
+                    let y_top = area.bottom - coord.y_axis.scale.map(*value) as f32 * area.height();
+                    let y_bottom = area.bottom - coord.y_axis.scale.map(0.0) as f32 * area.height();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+            Orientation::Horizontal => {
+                let band_height = area.height() / n as f32;
+                let bar_height = band_height * width_fraction;
+
+                for (i, (_label, value)) in valid.iter().enumerate() {
+                    let y_center = area.top + (i as f32 + 0.5) * band_height;
+                    let y_top = y_center - bar_height / 2.0;
+                    let y_bottom = y_center + bar_height / 2.0;
+
+                    let x_left = area.left + coord.x_axis.scale.map(0.0) as f32 * area.width();
+                    let x_right = area.left + coord.x_axis.scale.map(*value) as f32 * area.width();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    // Bar rendering is symmetric between vertical and horizontal orientations;
+    // splitting helpers here would duplicate ~30 lines of parameter setup.
+    #[allow(clippy::too_many_lines)]
+    fn render_bar(
+        &self,
+        coord: &CartesianCoord,
+        backend: &mut dyn DrawBackend,
+        context: &BarRenderContext,
+    ) -> Result<()> {
+        let valid: Vec<(&str, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
+            .map(|(x, y)| (x.as_str(), *y))
+            .collect();
+
+        let n = valid.len();
+        if n == 0 {
+            return Ok(());
+        }
+
+        let area = coord.plot_area;
+        let fill = self.color.unwrap_or(Color::BLUE);
+        let width_fraction = self.width.unwrap_or(0.8);
+
+        match self.orientation {
+            Orientation::Vertical => {
+                let band_width = area.width() / n as f32;
+                let total_groups = context
+                    .group_offsets
+                    .values()
+                    .map(|(_, t)| *t)
+                    .max()
+                    .unwrap_or(1);
+                let group_gap = 0.15;
+                let bar_width = if total_groups > 1 {
+                    band_width * width_fraction * (1.0 - group_gap) / total_groups as f32
+                } else {
+                    band_width * width_fraction
+                };
+
+                for (i, (label, value)) in valid.iter().enumerate() {
+                    let base_x_center = area.left + (i as f32 + 0.5) * band_width;
+                    let x_offset = if let Some(group_name) = &self.group {
+                        if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
+                            let sub_band = band_width * (1.0 - group_gap) / total as f32;
+                            (idx as f32 - (total - 1) as f32 / 2.0) * sub_band
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        0.0
+                    };
+                    let x_center = base_x_center + x_offset;
+                    let x_left = x_center - bar_width / 2.0;
+                    let x_right = x_center + bar_width / 2.0;
+
+                    // For stacked or floating bars: y_bottom is baseline, y_top is baseline + value
+                    let (y_bottom_val, y_top_val) = if self.stack.is_some() {
+                        let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
+                        (baseline, baseline + value)
+                    } else if let Some(base) = self.base {
+                        (base, base + value)
+                    } else {
+                        (0.0, *value)
+                    };
+
+                    let y_top =
+                        area.bottom - coord.y_axis.scale.map(y_top_val) as f32 * area.height();
+                    let y_bottom =
+                        area.bottom - coord.y_axis.scale.map(y_bottom_val) as f32 * area.height();
+
+                    // Ensure valid rect
+                    let rect_top = y_top.min(y_bottom);
+                    let rect_bottom = y_top.max(y_bottom);
+
+                    let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+            Orientation::Horizontal => {
+                let band_height = area.height() / n as f32;
+                let total_groups = context
+                    .group_offsets
+                    .values()
+                    .map(|(_, t)| *t)
+                    .max()
+                    .unwrap_or(1);
+                let group_gap = 0.15;
+                let bar_height = if total_groups > 1 {
+                    band_height * width_fraction * (1.0 - group_gap) / total_groups as f32
+                } else {
+                    band_height * width_fraction
+                };
+
+                for (i, (label, value)) in valid.iter().enumerate() {
+                    let base_y_center = area.top + (i as f32 + 0.5) * band_height;
+                    let y_offset = if let Some(group_name) = &self.group {
+                        if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
+                            let sub_band = band_height * (1.0 - group_gap) / total as f32;
+                            (idx as f32 - (total - 1) as f32 / 2.0) * sub_band
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        0.0
+                    };
+                    let y_center = base_y_center + y_offset;
+                    let y_top = y_center - bar_height / 2.0;
+                    let y_bottom = y_center + bar_height / 2.0;
+
+                    // For stacked or floating horizontal bars: x_left is baseline, x_right is baseline + value
+                    let (x_left_val, x_right_val) = if self.stack.is_some() {
+                        let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
+                        (baseline, baseline + value)
+                    } else if let Some(base) = self.base {
+                        (base, base + value)
+                    } else {
+                        (0.0, *value)
+                    };
+                    let x_left =
+                        area.left + coord.x_axis.scale.map(x_left_val) as f32 * area.width();
+                    let x_right =
+                        area.left + coord.x_axis.scale.map(x_right_val) as f32 * area.width();
+
+                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+                    backend.fill_rect(rect, fill)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn as_bar_info(&self) -> Option<(Option<&str>, Option<&str>, Orientation)> {
+        Some((
+            self.group.as_deref(),
+            self.stack.as_deref(),
+            self.orientation,
+        ))
+    }
+
+    fn as_bar_data(&self) -> Option<(&[String], &[f64])> {
+        Some((&self.x, &self.y))
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        let valid_y: Vec<f64> = self.y.iter().copied().filter(|v| !v.is_nan()).collect();
+        if valid_y.is_empty() {
+            return None;
+        }
+        let v_min = valid_y
+            .iter()
+            .copied()
+            .fold(f64::INFINITY, f64::min)
+            .min(0.0);
+        let v_max = valid_y
+            .iter()
+            .copied()
+            .fold(f64::NEG_INFINITY, f64::max)
+            .max(0.0);
+        let n = self.x.len() as f64;
+        // Orientation determines which axis carries values vs categories. Reporting
+        // category count as x for horizontal bars caused Wilkinson tick selection
+        // to extend the value range way past actual data, so bars only filled ~70%
+        // of the plot area.
+        Some(match self.orientation {
+            Orientation::Vertical => DataExtent {
+                x_min: 0.0,
+                x_max: n,
+                y_min: v_min,
+                y_max: v_max,
+            },
+            Orientation::Horizontal => DataExtent {
+                x_min: v_min,
+                x_max: v_max,
+                y_min: 0.0,
+                y_max: n,
+            },
+        })
+    }
+
+    fn legend_color(&self) -> Option<Color> {
+        self.color
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
+}
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.2.0): pub struct AreaMark { x: Vec<f64>, y_low: Vec<f64>, y_high: Vec<f64>, fill: Color }
+/// Area chart for stacked values
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct AreaMark {
+    /// X data values.
+    x: Vec<f64>,
+    /// Y data values (must be the same length as `x`)
+    y: Vec<f64>,
+    baseline: AreaBaseline,
+    /// Area fill color
+    fill: Color,
+    /// Area opacity, 1 to 0
+    opacity: f32,
+}
+/// Where the area mark's lower edge sits.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[non_exhaustive]
+pub enum AreaBaseline {
+    /// Fill between the data and y = 0.
+    #[default]
+    Zero,
+    /// Fill between the data and a fixed y value.
+    Fixed(f64),
+}
+impl AreaMark {
+    /// New area chart from x and y data with default color and full opacity.
+    #[must_use]
+    pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+        Self {
+            x,
+            y,
+            baseline: AreaBaseline::Zero,
+            fill: Color::RED,
+            opacity: 1.,
+        }
+    }
+
+    /// Builder: set area color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.fill = c;
+        self
+    }
+
+    /// Builder: set area opacity 1 to 0.
+    #[must_use]
+    pub fn opacity(mut self, o: f32) -> Self {
+        self.opacity = o;
+        self
+    }
+
+    /// Builder: set baseline for area fill (default is Zero, i.e., y=0).
+    #[must_use]
+    pub fn baseline(mut self, b: f64) -> Self {
+        self.baseline = AreaBaseline::Fixed(b);
+        self
+    }
+}
+
+fn render_segment(
+    coord: &CartesianCoord,
+    backend: &mut dyn DrawBackend,
+    points: &[(f64, f64)],
+    baseline_y: f64,
+    fill: Color,
+    opacity: f32,
+) -> Result<()> {
+    let mut commands = Vec::new();
+
+    if let Some((first_x, first_y)) = points.first() {
+        commands.push(PathCommand::MoveTo(coord.data_to_pixel(*first_x, *first_y)));
+    }
+
+    for (x, y) in points.iter().skip(1) {
+        commands.push(PathCommand::LineTo(coord.data_to_pixel(*x, *y)));
+    }
+
+    if let Some((last_x, _)) = points.last() {
+        commands.push(PathCommand::LineTo(
+            coord.data_to_pixel(*last_x, baseline_y),
+        ));
+    }
+    if let Some((first_x, _)) = points.first() {
+        commands.push(PathCommand::LineTo(
+            coord.data_to_pixel(*first_x, baseline_y),
+        ));
+    }
+    commands.push(PathCommand::Close);
+
+    let path = Path { commands };
+    let style = PathStyle {
+        fill_color: Some(fill),
+        opacity,
+        ..PathStyle::default()
+    };
+    backend.draw_path(&path, &style)
+}
+
+impl Mark for AreaMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let baseline_y = match self.baseline {
+            AreaBaseline::Zero => 0.0,
+            AreaBaseline::Fixed(y) => y,
+        };
+
+        let n = self.x.len().min(self.y.len());
+        let mut segment_start: Option<usize> = None;
+        let mut segment_points: Vec<(f64, f64)> = Vec::new();
+
+        for i in 0..n {
+            let xi = self.x[i];
+            let yi = self.y[i];
+
+            if xi.is_nan() || yi.is_nan() {
+                if let Some(_start) = segment_start {
+                    if segment_points.len() >= 2 {
+                        render_segment(
+                            coord,
+                            backend,
+                            &segment_points,
+                            baseline_y,
+                            self.fill,
+                            self.opacity,
+                        )?;
+                    }
+                    segment_points.clear();
+                    segment_start = None;
+                }
+                continue;
+            }
+
+            if segment_start.is_none() {
+                segment_start = Some(i);
+            }
+            segment_points.push((xi, yi));
+        }
+
+        if segment_start.is_some() && segment_points.len() >= 2 {
+            render_segment(
+                coord,
+                backend,
+                &segment_points,
+                baseline_y,
+                self.fill,
+                self.opacity,
+            )?;
+        }
+
+        Ok(())
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        let baseline_y = match self.baseline {
+            AreaBaseline::Zero => 0.0,
+            AreaBaseline::Fixed(y) => y,
+        };
+        let y_min = self
+            .y
+            .iter()
+            .copied()
+            .fold(f64::INFINITY, f64::min)
+            .min(baseline_y);
+        let y_max = self
+            .y
+            .iter()
+            .copied()
+            .fold(f64::NEG_INFINITY, f64::max)
+            .max(baseline_y);
+        Some(DataExtent {
+            x_min: self.x.iter().copied().fold(f64::INFINITY, f64::min),
+            x_max: self.x.iter().copied().fold(f64::NEG_INFINITY, f64::max),
+            y_min,
+            y_max,
+        })
+    }
+}
 
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct HeatmapMark { data: Vec<Vec<f64>>, colormap: Colormap, ... }
+
+use starsight_layer_1::colormap::Colormap;
+
+/// Heatmap: a 2D grid of values mapped to colors via a colormap.
+#[derive(Debug, Clone)]
+pub struct HeatmapMark {
+    /// 2D grid of values (row = y, col = x).
+    pub data: Vec<Vec<f64>>,
+    /// Colormap for mapping values to colors.
+    pub colormap: Colormap,
+    /// Optional label for legend.
+    pub label: Option<String>,
+}
+
+impl HeatmapMark {
+    /// Create a new heatmap from a 2D grid of values.
+    #[must_use]
+    pub fn new(data: Vec<Vec<f64>>) -> Self {
+        Self {
+            data,
+            colormap: Colormap::default(),
+            label: None,
+        }
+    }
+
+    /// Set the colormap for mapping values to colors.
+    #[must_use]
+    pub fn colormap(mut self, colormap: Colormap) -> Self {
+        self.colormap = colormap;
+        self
+    }
+
+    /// Set the legend label.
+    #[must_use]
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    fn value_range(&self) -> (f64, f64) {
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+        for row in &self.data {
+            for &v in row {
+                if !v.is_nan() {
+                    min = min.min(v);
+                    max = max.max(v);
+                }
+            }
+        }
+        (min, max)
+    }
+}
+
+impl Mark for HeatmapMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        if self.data.is_empty() || self.data[0].is_empty() {
+            return Ok(());
+        }
+
+        let (data_min, data_max) = self.value_range();
+        let range = if (data_max - data_min).abs() < f64::EPSILON {
+            1.0
+        } else {
+            data_max - data_min
+        };
+
+        let n_rows = self.data.len();
+        let n_cols = self.data[0].len();
+
+        let left = coord.plot_area.left;
+        let top = coord.plot_area.top;
+        let w = coord.plot_area.width();
+        let h = coord.plot_area.height();
+
+        for (row_idx, row) in self.data.iter().enumerate() {
+            for (col_idx, &value) in row.iter().enumerate() {
+                if value.is_nan() {
+                    continue;
+                }
+
+                let normalized = (value - data_min) / range;
+                let color = self.colormap.sample(normalized);
+
+                // Integer-snapped boundaries: cell N's right == cell N+1's left exactly,
+                // so adjacent cells share a pixel edge and anti-aliasing can't leak through.
+                let x0 = (left + w * (col_idx as f32 / n_cols as f32)).round();
+                let x1 = (left + w * ((col_idx + 1) as f32 / n_cols as f32)).round();
+                let y0 = (top + h * (row_idx as f32 / n_rows as f32)).round();
+                let y1 = (top + h * ((row_idx + 1) as f32 / n_rows as f32)).round();
+                backend.fill_rect(Rect::new(x0, y0, x1, y1), color)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        if self.data.is_empty() || self.data[0].is_empty() {
+            return None;
+        }
+        let n_cols = self.data[0].len();
+        Some(DataExtent {
+            x_min: 0.0,
+            x_max: n_cols as f64,
+            y_min: 0.0,
+            y_max: self.data.len() as f64,
+        })
+    }
+
+    fn legend_color(&self) -> Option<Color> {
+        Some(self.colormap.sample(0.5))
+    }
+
+    fn legend_label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
+}
 
 // ── BoxMark ──────────────────────────────────────────────────────────────────────────────────────
 // TODO(0.3.0): pub struct BoxMark { groups: Vec<Vec<f64>>, color: Color, ... }
@@ -228,7 +946,233 @@ impl Mark for PointMark {
 // TODO(0.5.0): pub struct RidgeMark { densities: Vec<Vec<f64>>, offset: f64 }
 
 // ── StepMark ─────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.2.0): pub struct StepMark { x: Vec<f64>, y: Vec<f64>, where_: Step, color: Color }
+/// Step chart: constant between points with vertical/horizontal transitions.
+#[derive(Debug, Clone)]
+pub struct StepMark {
+    /// X data values.
+    pub x: Vec<f64>,
+    /// Y data values.
+    pub y: Vec<f64>,
+    /// Step position: when the vertical transition happens.
+    pub where_: StepPosition,
+    /// Line color.
+    pub color: Color,
+    /// Stroke width in pixels.
+    pub width: f32,
+}
+
+/// Where the vertical step transition happens relative to data points.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
+pub enum StepPosition {
+    #[default]
+    /// Vertical transition happens *before* the data point (`curveStepBefore`).
+    Pre,
+    /// Vertical transition at midpoint between points (`curveStep`).
+    Mid,
+    /// Vertical transition happens *after* the data point (`curveStepAfter`).
+    Post,
+}
+
+impl StepMark {
+    /// New step chart from x and y data with default color.
+    #[must_use]
+    pub fn new(x: Vec<f64>, y: Vec<f64>) -> Self {
+        Self {
+            x,
+            y,
+            where_: StepPosition::default(),
+            color: Color::BLUE,
+            width: 2.0,
+        }
+    }
+
+    /// Builder: set step position.
+    #[must_use]
+    pub fn position(mut self, p: StepPosition) -> Self {
+        self.where_ = p;
+        self
+    }
+
+    /// Builder: set line color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = c;
+        self
+    }
+
+    /// Builder: set stroke width in pixels.
+    #[must_use]
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = w;
+        self
+    }
+}
+
+impl Mark for StepMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let mut commands = Vec::new();
+        let mut need_move = true;
+
+        let n = self.x.len().min(self.y.len());
+        if n < 2 {
+            return Ok(());
+        }
+
+        // Collect valid points (skip NaN)
+        let valid: Vec<(f64, f64)> = (0..n)
+            .filter_map(|i| {
+                let x = self.x[i];
+                let y = self.y[i];
+                if x.is_nan() || y.is_nan() {
+                    None
+                } else {
+                    Some((x, y))
+                }
+            })
+            .collect();
+
+        if valid.len() < 2 {
+            return Ok(());
+        }
+
+        for i in 0..valid.len() {
+            let (x, y) = valid[i];
+            let curr = coord.data_to_pixel(x, y);
+
+            if need_move {
+                commands.push(PathCommand::MoveTo(curr));
+                need_move = false;
+                continue;
+            }
+
+            let (prev_x, prev_y) = valid[i - 1];
+            let prev = coord.data_to_pixel(prev_x, prev_y);
+
+            match self.where_ {
+                StepPosition::Pre => {
+                    commands.push(PathCommand::LineTo(Point::new(curr.x, prev.y)));
+                    commands.push(PathCommand::LineTo(curr));
+                }
+                StepPosition::Post => {
+                    commands.push(PathCommand::LineTo(Point::new(prev.x, curr.y)));
+                    commands.push(PathCommand::LineTo(curr));
+                }
+                StepPosition::Mid => {
+                    let mid_x = f32::midpoint(prev.x, curr.x);
+                    commands.push(PathCommand::LineTo(Point::new(mid_x, prev.y)));
+                    commands.push(PathCommand::LineTo(Point::new(mid_x, curr.y)));
+                    commands.push(PathCommand::LineTo(curr));
+                }
+            }
+        }
+
+        let path = Path { commands };
+        let style = PathStyle {
+            stroke_color: self.color,
+            stroke_width: self.width,
+            fill_color: None,
+            line_cap: LineCap::Round,
+            line_join: LineJoin::Round,
+            ..PathStyle::default()
+        };
+        backend.draw_path(&path, &style)
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        extent_from_xy(&self.x, &self.y)
+    }
+}
+
+// ── HistogramMark ───────────────────────────────────────────────────────────────────────
+
+/// Histogram: bar chart with bins computed from data.
+#[derive(Debug, Clone)]
+pub struct HistogramMark {
+    /// Raw data values.
+    pub data: Vec<f64>,
+    /// Binning method.
+    pub method: BinMethod,
+    /// Bar color.
+    pub color: Color,
+}
+
+impl HistogramMark {
+    /// New histogram from raw data.
+    #[must_use]
+    pub fn new(data: Vec<f64>) -> Self {
+        Self {
+            data,
+            method: BinMethod::default(),
+            color: Color::from_hex(0x4C_72B0),
+        }
+    }
+
+    /// Builder: set binning method.
+    #[must_use]
+    pub fn method(mut self, m: BinMethod) -> Self {
+        self.method = m;
+        self
+    }
+
+    /// Builder: set bar color.
+    #[must_use]
+    pub fn color(mut self, c: Color) -> Self {
+        self.color = c;
+        self
+    }
+}
+
+impl Mark for HistogramMark {
+    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let transform = BinTransform::new(self.method);
+        let bins: Vec<Bin> = transform.compute(&self.data);
+
+        let area = coord.plot_area;
+        let n = bins.len();
+        let band_width = area.width() / n as f32;
+        let bar_width = band_width;
+
+        let y_max = bins.iter().map(|b| b.count as f64).fold(0.0f64, f64::max);
+
+        for (i, bin) in bins.iter().enumerate() {
+            let x_center = area.left + (i as f32 + 0.5) * band_width;
+            let x_left = x_center - bar_width / 2.0;
+            let x_right = x_center + bar_width / 2.0;
+
+            let height_ratio = if y_max > 0.0 {
+                (bin.count as f64 / y_max) as f32
+            } else {
+                0.0
+            };
+            let bar_height = height_ratio * area.height();
+
+            let y_top = area.bottom - bar_height;
+            let y_bottom = area.bottom;
+
+            let rect = Rect::new(x_left, y_top, x_right, y_bottom);
+            backend.fill_rect(rect, self.color)?;
+        }
+
+        Ok(())
+    }
+
+    fn data_extent(&self) -> Option<DataExtent> {
+        let data: Vec<f64> = self.data.iter().copied().filter(|v| !v.is_nan()).collect();
+        if data.is_empty() {
+            return None;
+        }
+        let transform = BinTransform::new(self.method);
+        let bins = transform.compute(&data);
+        let count_max = bins.iter().map(|b| b.count).max().unwrap_or(0) as f64;
+        Some(DataExtent {
+            x_min: bins.first().map_or(0.0, |b| b.left),
+            x_max: bins.last().map_or(1.0, |b| b.right),
+            y_min: 0.0,
+            y_max: count_max,
+        })
+    }
+}
 
 // ── ErrorBarMark ─────────────────────────────────────────────────────────────────────────────────
 // TODO(0.3.0): pub struct ErrorBarMark { x: Vec<f64>, y: Vec<f64>, err: Vec<f64>, color: Color }
@@ -295,5 +1239,507 @@ fn extent_from_xy(x: &[f64], y: &[f64]) -> Option<DataExtent> {
         })
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use starsight_layer_1::backends::vectors::SvgBackend;
+    use starsight_layer_2::axes::Axis;
+    use starsight_layer_2::scales::LinearScale;
+
+    fn coord_for(x_min: f64, x_max: f64, y_min: f64, y_max: f64) -> CartesianCoord {
+        CartesianCoord {
+            x_axis: Axis {
+                scale: LinearScale {
+                    domain_min: x_min,
+                    domain_max: x_max,
+                },
+                label: None,
+                tick_positions: vec![],
+                tick_labels: vec![],
+            },
+            y_axis: Axis {
+                scale: LinearScale {
+                    domain_min: y_min,
+                    domain_max: y_max,
+                },
+                label: None,
+                tick_positions: vec![],
+                tick_labels: vec![],
+            },
+            plot_area: Rect::new(0.0, 0.0, 100.0, 100.0),
+        }
+    }
+
+    #[test]
+    fn line_mark_new() {
+        let mark = LineMark::new(vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]);
+        assert_eq!(mark.x.len(), 3);
+        assert_eq!(mark.y.len(), 3);
+    }
+
+    #[test]
+    fn line_mark_data_extent() {
+        let mark = LineMark::new(vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+        let e = extent.unwrap();
+        assert_eq!(e.x_min, 1.0);
+        assert_eq!(e.x_max, 3.0);
+    }
+
+    #[test]
+    fn line_mark_data_extent_empty() {
+        let mark = LineMark::new(vec![], vec![]);
+        let extent = mark.data_extent();
+        assert!(extent.is_none());
+    }
+
+    #[test]
+    fn line_mark_nan_gaps() {
+        let mark = LineMark::new(vec![1.0, 2.0, f64::NAN, 4.0], vec![1.0, 2.0, 3.0, 4.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn line_mark_builders() {
+        let m = LineMark::new(vec![0.0], vec![0.0])
+            .color(Color::RED)
+            .width(3.0)
+            .label("series");
+        assert_eq!(m.color, Color::RED);
+        assert_eq!(m.width, 3.0);
+        assert_eq!(m.label.as_deref(), Some("series"));
+        assert_eq!(m.legend_color(), Some(Color::RED));
+        assert_eq!(m.legend_label(), Some("series"));
+    }
+
+    #[test]
+    fn line_mark_render_all_nan_returns_ok() {
+        let mark = LineMark::new(vec![f64::NAN], vec![f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn line_mark_render_with_data() {
+        let mark = LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn point_mark_new() {
+        let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn point_mark_data_extent() {
+        let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn point_mark_builders() {
+        let m = PointMark::new(vec![0.0], vec![0.0])
+            .color(Color::GREEN)
+            .radius(8.0)
+            .label("dots");
+        assert_eq!(m.color, Color::GREEN);
+        assert_eq!(m.radius, 8.0);
+        assert_eq!(m.legend_color(), Some(Color::GREEN));
+        assert_eq!(m.legend_label(), Some("dots"));
+    }
+
+    #[test]
+    fn point_mark_render_all_nan_returns_ok() {
+        let mark = PointMark::new(vec![f64::NAN], vec![f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn point_mark_render_with_data() {
+        let mark = PointMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn area_mark_new() {
+        let mark = AreaMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn area_mark_data_extent() {
+        let mark = AreaMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        let extent = mark.data_extent();
+        assert!(extent.is_some());
+    }
+
+    #[test]
+    fn area_mark_builders() {
+        let m = AreaMark::new(vec![0.0], vec![0.0])
+            .color(Color::GREEN)
+            .opacity(0.5)
+            .baseline(10.0);
+        assert_eq!(m.fill, Color::GREEN);
+        assert_eq!(m.opacity, 0.5);
+        assert!(matches!(m.baseline, AreaBaseline::Fixed(_)));
+    }
+
+    #[test]
+    fn step_mark_new() {
+        let mark = StepMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
+        assert_eq!(mark.x.len(), 2);
+    }
+
+    #[test]
+    fn step_mark_builders() {
+        let m = StepMark::new(vec![0.0], vec![0.0])
+            .color(Color::RED)
+            .width(5.0)
+            .position(StepPosition::Mid);
+        assert_eq!(m.color, Color::RED);
+        assert_eq!(m.width, 5.0);
+        assert_eq!(m.where_, StepPosition::Mid);
+    }
+
+    #[test]
+    fn step_mark_render_short_returns_ok() {
+        let mark = StepMark::new(vec![1.0], vec![1.0]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn step_mark_render_all_nan_returns_ok() {
+        let mark = StepMark::new(vec![f64::NAN, f64::NAN], vec![f64::NAN, f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn histogram_mark_new() {
+        let mark = HistogramMark::new(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+        assert_eq!(mark.data.len(), 5);
+    }
+
+    #[test]
+    fn histogram_mark_builders() {
+        let m = HistogramMark::new(vec![1.0, 2.0])
+            .color(Color::RED)
+            .method(BinMethod::default());
+        assert_eq!(m.color, Color::RED);
+    }
+
+    #[test]
+    fn histogram_mark_render_empty_returns_ok() {
+        let mark = HistogramMark::new(vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn histogram_mark_render_with_data() {
+        let mark = HistogramMark::new((0..50).map(f64::from).collect());
+        let coord = coord_for(0.0, 50.0, 0.0, 10.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn histogram_mark_data_extent_empty_is_none() {
+        let mark = HistogramMark::new(vec![]);
+        assert!(mark.data_extent().is_none());
+    }
+
+    #[test]
+    fn histogram_mark_data_extent_only_nan_is_none() {
+        let mark = HistogramMark::new(vec![f64::NAN]);
+        assert!(mark.data_extent().is_none());
+    }
+
+    #[test]
+    fn data_extent_new() {
+        let extent = DataExtent {
+            x_min: 0.0,
+            x_max: 10.0,
+            y_min: 0.0,
+            y_max: 10.0,
+        };
+        assert_eq!(extent.x_min, 0.0);
+    }
+
+    // ── BarMark ────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn bar_mark_builders() {
+        let m = BarMark::new(vec!["a".to_string()], vec![1.0])
+            .color(Color::RED)
+            .width(0.5)
+            .group("g")
+            .stack("s")
+            .base(2.0)
+            .label("series");
+        assert_eq!(m.color, Some(Color::RED));
+        assert_eq!(m.width, Some(0.5));
+        assert_eq!(m.group.as_deref(), Some("g"));
+        assert_eq!(m.stack.as_deref(), Some("s"));
+        assert_eq!(m.base, Some(2.0));
+        assert_eq!(m.legend_label(), Some("series"));
+        assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_horizontal() {
+        let m = BarMark::new(vec!["a".to_string()], vec![1.0]).horizontal();
+        assert_eq!(m.orientation, Orientation::Horizontal);
+    }
+
+    #[test]
+    fn bar_mark_render_vertical_simple() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_horizontal_simple() {
+        let mark =
+            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).horizontal();
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_empty_returns_ok() {
+        let mark = BarMark::new(vec![], vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_empty_returns_ok() {
+        let mark = BarMark::new(vec![], vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_grouped() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).group("g");
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.group_offsets.insert("g".into(), (0, 2));
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_grouped_offset_missing() {
+        // Group set on the mark but the context has no entry for that group
+        // exercises the `else` branch where x_offset falls back to 0.0.
+        let mark = BarMark::new(vec!["a".to_string()], vec![1.0]).group("missing");
+        let coord = coord_for(0.0, 1.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_stacked() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).stack("s");
+        let coord = coord_for(0.0, 2.0, 0.0, 4.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.stacked_baselines.insert("a".into(), 1.0);
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_with_base() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).base(0.5);
+        let coord = coord_for(0.0, 2.0, 0.0, 4.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_grouped() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .group("g");
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.group_offsets.insert("g".into(), (0, 2));
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_grouped_offset_missing() {
+        let mark = BarMark::new(vec!["a".to_string()], vec![1.0])
+            .horizontal()
+            .group("missing");
+        let coord = coord_for(0.0, 2.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_stacked() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .stack("s");
+        let coord = coord_for(0.0, 4.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.stacked_baselines.insert("a".into(), 1.0);
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_with_base() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .base(0.5);
+        let coord = coord_for(0.0, 4.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_data_extent_horizontal() {
+        let m = BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).horizontal();
+        let e = m.data_extent().unwrap();
+        assert_eq!(e.x_min, 0.0);
+        assert_eq!(e.x_max, 2.0);
+        assert_eq!(e.y_min, 0.0);
+        assert_eq!(e.y_max, 2.0);
+    }
+
+    #[test]
+    fn bar_mark_data_extent_empty() {
+        let m = BarMark::new(vec![], vec![]);
+        assert!(m.data_extent().is_none());
+    }
+
+    #[test]
+    fn bar_mark_as_bar_info_and_data() {
+        let m = BarMark::new(vec!["a".into()], vec![1.0])
+            .group("g")
+            .stack("s");
+        let info = m.as_bar_info().unwrap();
+        assert_eq!(info.0, Some("g"));
+        assert_eq!(info.1, Some("s"));
+        let data = m.as_bar_data().unwrap();
+        assert_eq!(data.0.len(), 1);
+        assert_eq!(data.1.len(), 1);
+    }
+
+    // ── HeatmapMark ────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn heatmap_mark_builders() {
+        let m = HeatmapMark::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]])
+            .colormap(starsight_layer_1::colormap::PLASMA)
+            .label("h");
+        assert_eq!(m.label.as_deref(), Some("h"));
+        assert_eq!(m.legend_label(), Some("h"));
+    }
+
+    #[test]
+    fn heatmap_mark_render_empty_returns_ok() {
+        let mark = HeatmapMark::new(vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_inner_empty_row_returns_ok() {
+        let mark = HeatmapMark::new(vec![vec![]]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_constant_values() {
+        // All same value, so range collapses to zero (uses fallback `1.0`)
+        let mark = HeatmapMark::new(vec![vec![5.0, 5.0], vec![5.0, 5.0]]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_skips_nan() {
+        let mark = HeatmapMark::new(vec![vec![1.0, f64::NAN], vec![2.0, 3.0]]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_data_extent_empty() {
+        let m = HeatmapMark::new(vec![]);
+        assert!(m.data_extent().is_none());
+        let m2 = HeatmapMark::new(vec![vec![]]);
+        assert!(m2.data_extent().is_none());
+    }
+
+    #[test]
+    fn heatmap_mark_legend_color() {
+        let m = HeatmapMark::new(vec![vec![1.0]]);
+        assert!(m.legend_color().is_some());
+    }
+
+    // ── Mark trait default impls ──────────────────────────────────────────────────────────────
+
+    #[test]
+    fn mark_default_render_bar_falls_back_to_render() {
+        let mark = LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        // LineMark doesn't override render_bar, so default impl forwards to render
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn mark_default_legend_returns_none() {
+        let mark = StepMark::new(vec![0.0, 1.0], vec![0.0, 1.0]);
+        assert!(mark.legend_color().is_none());
+        assert!(mark.legend_label().is_none());
+    }
+
+    #[test]
+    fn mark_default_as_bar_info_is_none() {
+        let mark = LineMark::new(vec![0.0], vec![0.0]);
+        assert!(mark.as_bar_info().is_none());
+        assert!(mark.as_bar_data().is_none());
     }
 }

@@ -34,22 +34,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      # `cargo xtask gallery` is planned for 0.2.0; until then this is a stub
-      # that builds the workspace and uploads any pre-existing PNGs from the
-      # snapshot test directories so the README screenshots stay in sync.
-      - run: cargo build --workspace --locked
-      - name: Collect snapshot PNGs as gallery preview
-        run: |
-          mkdir -p gallery
-          find . -path '*/tests/snapshots/*.snap.png' -exec cp {} gallery/ \; || true
-          ls -la gallery/ || true
+      - run: cargo xtask gallery
       - name: Upload gallery
         uses: actions/upload-artifact@v4
         with:
           name: gallery
-          path: gallery/
+          path: target/gallery/
           if-no-files-found: warn
           retention-days: 14
-      # TODO(0.2.0): replace the snapshot-collection step above with the real
-      # gallery generator once it lands in `xtask/src/gallery.rs`:
-      # - run: cargo xtask gallery --output gallery/

@@ -1,0 +1,116 @@
+[package]
+name = "examples"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = false
+
+[dev-dependencies]
+starsight.workspace = true
+chromata.workspace = true
+prismatica = { workspace = true, features = ["matplotlib"] }
+
+# ── basics ──────────────────────────────────────────────────────────────────
+# Smallest possible programs that exercise one mark type at a time. Start here
+# if you've never used starsight before; everything else builds on these.
+
+[[example]]
+name = "quickstart"
+path = "basics/quickstart.rs"
+
+[[example]]
+name = "line_chart"
+path = "basics/line_chart.rs"
+
+[[example]]
+name = "scatter"
+path = "basics/scatter.rs"
+
+[[example]]
+name = "bar_chart"
+path = "basics/bar_chart.rs"
+
+[[example]]
+name = "heatmap"
+path = "basics/heatmap.rs"
+
+[[example]]
+name = "histogram"
+path = "basics/histogram.rs"
+
+# ── theming ─────────────────────────────────────────────────────────────────
+# Same data as the basics, recoloured: shows how to swap a Theme or a
+# colormap without changing the rest of the figure builder chain.
+
+[[example]]
+name = "custom_theme"
+path = "theming/custom_theme.rs"
+
+[[example]]
+name = "custom_colormap"
+path = "theming/custom_colormap.rs"
+
+# ── composition ─────────────────────────────────────────────────────────────
+# Multiple marks in the same Figure: layered overlays, polished references,
+# and per-bar customisation. The auto-derived legend lives here.
+
+[[example]]
+name = "statistical"
+path = "composition/statistical.rs"
+
+[[example]]
+name = "recipe"
+path = "composition/recipe.rs"
+
+[[example]]
+name = "gallery"
+path = "composition/gallery.rs"
+
+[[example]]
+name = "waterfall_bar"
+path = "composition/waterfall_bar.rs"
+
+# ── scientific ──────────────────────────────────────────────────────────────
+# Real numerical experiments: integrate an ODE, render a relativity diagram.
+# These exist to prove the library handles real data, not just toy series.
+
+[[example]]
+name = "lorenz_line"
+path = "scientific/lorenz_line.rs"
+
+[[example]]
+name = "kruskal_szekeres_line"
+path = "scientific/kruskal_szekeres_line.rs"
+
+# ── planned ─────────────────────────────────────────────────────────────────
+# Placeholders for backends and features that land in 0.3.0+. Each writes a
+# static PNG announcing the deferred feature so `cargo xtask gallery` always
+# emits a uniform output set.
+
+[[example]]
+name = "terminal"
+path = "planned/terminal.rs"
+
+[[example]]
+name = "interactive"
+path = "planned/interactive.rs"
+
+[[example]]
+name = "surface3d"
+path = "planned/surface3d.rs"
+
+[[example]]
+name = "streaming"
+path = "planned/streaming.rs"
+
+[[example]]
+name = "polars_integration"
+path = "planned/polars_integration.rs"
+
+[[example]]
+name = "faceting"
+path = "planned/faceting.rs"
+
+[lints]
+workspace = true

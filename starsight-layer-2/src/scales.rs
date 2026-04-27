@@ -47,3 +47,52 @@ impl Scale for LinearScale {
 
 // ── DateTimeScale ────────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub struct DateTimeScale { pub domain: (Timestamp, Timestamp) }
+
+// ── tests ────────────────────────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::Scale;
+
+    #[test]
+    fn linear_scale_map() {
+        let scale = super::LinearScale {
+            domain_min: 0.0,
+            domain_max: 10.0,
+        };
+        assert_eq!(scale.map(5.0), 0.5);
+        assert_eq!(scale.map(0.0), 0.0);
+        assert_eq!(scale.map(10.0), 1.0);
+    }
+
+    #[test]
+    fn linear_scale_inverse() {
+        let scale = super::LinearScale {
+            domain_min: 0.0,
+            domain_max: 10.0,
+        };
+        assert_eq!(scale.inverse(0.5), 5.0);
+        assert_eq!(scale.inverse(0.0), 0.0);
+        assert_eq!(scale.inverse(1.0), 10.0);
+    }
+
+    #[test]
+    fn linear_scale_inverse_clamped() {
+        let scale = super::LinearScale {
+            domain_min: 0.0,
+            domain_max: 10.0,
+        };
+        assert_eq!(scale.inverse(-0.5), -5.0);
+        assert_eq!(scale.inverse(1.5), 15.0);
+    }
+
+    #[test]
+    fn linear_scale_zero_domain_maps_to_midpoint() {
+        let scale = super::LinearScale {
+            domain_min: 5.0,
+            domain_max: 5.0,
+        };
+        assert_eq!(scale.map(5.0), 0.5);
+        assert_eq!(scale.map(0.0), 0.5);
+    }
+}

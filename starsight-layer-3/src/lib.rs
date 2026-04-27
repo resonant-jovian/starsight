@@ -4,7 +4,13 @@
 //! shapes that read data and draw it. Statistics are data transforms (binning,
 //! KDE, regression, ...). Aesthetics map data columns to visual properties.
 //! Position adjustments resolve overlapping marks (stack, dodge, jitter).
-//!
+
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+
 //! Modules:
 //! - [`marks`]: `Mark` trait + `LineMark`, `PointMark`, `BarMark`, ...
 //! - [`statistics`]: data transforms (stub).

@@ -1,0 +1,97 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1125.3999" x="57.800003" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="417.59998" y="26">
+Distribution of Simulated Measurements
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="602.5" y="794">
+Value
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 18, 431.9)" x="18" y="431.9">
+Frequency
+</text>
+<path d="M57.800003,759 L57.800003,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M218.57141,759 L218.57141,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M379.34283,759 L379.34283,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M540.11426,759 L540.11426,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M700.8857,759 L700.8857,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M861.6571,759 L861.6571,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1022.42847,759 L1022.42847,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1183.2,759 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M57.800003,759 L1183.2,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M57.800003,579.25 L1183.2,579.25" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M57.800003,399.5 L1183.2,399.5" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M57.800003,219.75 L1183.2,219.75" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M57.800003,40 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#4c72b0" height="2.6629639" width="80.38571" x="57.800007" y="756.33704"/>
+<rect fill="#4c72b0" height="25.963867" width="80.38571" x="138.1857" y="733.03613"/>
+<rect fill="#4c72b0" height="73.23151" width="80.3857" x="218.57143" y="685.7685"/>
+<rect fill="#4c72b0" height="185.74164" width="80.38568" x="298.95712" y="573.25836"/>
+<rect fill="#4c72b0" height="456.69815" width="80.38568" x="379.3428" y="302.30185"/>
+<rect fill="#4c72b0" height="626.46204" width="80.38571" x="459.72855" y="132.53796"/>
+<rect fill="#4c72b0" height="719" width="80.38574" x="540.1142" y="40"/>
+<rect fill="#4c72b0" height="609.81854" width="80.38574" x="620.4999" y="149.18146"/>
+<rect fill="#4c72b0" height="381.46945" width="80.38574" x="700.8856" y="377.53055"/>
+<rect fill="#4c72b0" height="174.42407" width="80.38574" x="781.2713" y="584.5759"/>
+<rect fill="#4c72b0" height="52.593506" width="80.38574" x="861.657" y="706.4065"/>
+<rect fill="#4c72b0" height="16.643494" width="80.38574" x="942.0427" y="742.3565"/>
+<rect fill="#4c72b0" height="3.3286743" width="80.38574" x="1022.42847" y="755.6713"/>
+<rect fill="#4c72b0" height="0.66571045" width="80.38574" x="1102.8142" y="758.3343"/>
+<path d="M57.800003,759 L57.800003,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="47.000004" y="776">
+-20
+</text>
+<path d="M218.57141,759 L218.57141,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="214.9714" y="776">
+0
+</text>
+<path d="M379.34283,759 L379.34283,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="372.14282" y="776">
+20
+</text>
+<path d="M540.11426,759 L540.11426,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="532.91425" y="776">
+40
+</text>
+<path d="M700.8857,759 L700.8857,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="693.68567" y="776">
+60
+</text>
+<path d="M861.6571,759 L861.6571,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="854.4571" y="776">
+80
+</text>
+<path d="M1022.42847,759 L1022.42847,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1011.6285" y="776">
+100
+</text>
+<path d="M1183.2,759 L1183.2,764" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1172.3999" y="776">
+120
+</text>
+<path d="M57.800003,759 L52.800003,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="41.600002" y="763.8">
+0
+</text>
+<path d="M57.800003,579.25 L52.800003,579.25" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.200003" y="584.05">
+300
+</text>
+<path d="M57.800003,399.5 L52.800003,399.5" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.200003" y="404.3">
+600
+</text>
+<path d="M57.800003,219.75 L52.800003,219.75" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.200003" y="224.55">
+900
+</text>
+<path d="M57.800003,40 L52.800003,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="20.000002" y="44.8">
+1200
+</text>
+<path d="M57.800003,759 L1183.2,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M57.800003,40 L57.800003,759" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

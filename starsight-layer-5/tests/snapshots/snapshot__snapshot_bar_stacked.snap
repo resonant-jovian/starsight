@@ -1,0 +1,99 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1129" x="50.6" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="460.8" y="26">
+Energy Generation Mix by Year
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="600.69995" y="794">
+Year
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 17.999998, 442.7)" x="17.999998" y="442.7">
+Energy (TWh)
+</text>
+<path d="M50.6,759 L50.6,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M238.76666,759 L238.76666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M426.93332,759 L426.93332,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M615.1,759 L615.1,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M803.26666,759 L803.26666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M991.43335,759 L991.43335,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1179.6,759 L1179.6,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,759 L1179.6,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,519.3333 L1179.6,519.3333" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,279.66666 L1179.6,279.66666" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,40 L1179.6,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#4caf50" height="431.40002" width="150.53336" x="69.416664" y="327.59998"/>
+<rect fill="#4caf50" height="467.34998" width="150.53333" x="257.58334" y="291.65002"/>
+<rect fill="#4caf50" height="503.3" width="150.53333" x="445.75" y="255.70001"/>
+<rect fill="#4caf50" height="539.25" width="150.53333" x="633.9167" y="219.75"/>
+<rect fill="#4caf50" height="575.2" width="150.53333" x="822.0833" y="183.79999"/>
+<rect fill="#4caf50" height="623.13336" width="150.53339" x="1010.25006" y="135.86664"/>
+<rect fill="#ffc107" height="287.6" width="150.53336" x="69.416664" y="471.4"/>
+<rect fill="#ffc107" height="323.55" width="150.53333" x="257.58334" y="435.45"/>
+<rect fill="#ffc107" height="359.5" width="150.53333" x="445.75" y="399.5"/>
+<rect fill="#ffc107" height="395.45" width="150.53333" x="633.9167" y="363.55"/>
+<rect fill="#ffc107" height="431.40002" width="150.53333" x="822.0833" y="327.59998"/>
+<rect fill="#ffc107" height="467.34998" width="150.53339" x="1010.25006" y="291.65002"/>
+<rect fill="#607d8b" height="191.73334" width="150.53336" x="69.416664" y="567.26666"/>
+<rect fill="#607d8b" height="179.75" width="150.53333" x="257.58334" y="579.25"/>
+<rect fill="#607d8b" height="167.76666" width="150.53333" x="445.75" y="591.23334"/>
+<rect fill="#607d8b" height="143.79999" width="150.53333" x="633.9167" y="615.2"/>
+<rect fill="#607d8b" height="131.81665" width="150.53333" x="822.0833" y="627.18335"/>
+<rect fill="#607d8b" height="119.83331" width="150.53339" x="1010.25006" y="639.1667"/>
+<rect fill="#4caf50" height="431.39996" width="150.53336" x="69.416664" y="-583.1333"/>
+<rect fill="#4caf50" height="467.34998" width="150.53333" x="257.58334" y="-679"/>
+<rect fill="#4caf50" height="503.30005" width="150.53333" x="445.75" y="-774.8667"/>
+<rect fill="#4caf50" height="539.25" width="150.53333" x="633.9167" y="-858.75"/>
+<rect fill="#4caf50" height="575.19995" width="150.53333" x="822.0833" y="-954.6167"/>
+<rect fill="#4caf50" height="623.1333" width="150.53339" x="1010.25006" y="-1074.45"/>
+<rect fill="#ffc107" height="287.5999" width="150.53336" x="69.416664" y="-439.33325"/>
+<rect fill="#ffc107" height="323.54993" width="150.53333" x="257.58334" y="-535.19995"/>
+<rect fill="#ffc107" height="359.5" width="150.53333" x="445.75" y="-631.06665"/>
+<rect fill="#ffc107" height="395.44995" width="150.53333" x="633.9167" y="-714.94995"/>
+<rect fill="#ffc107" height="431.40002" width="150.53333" x="822.0833" y="-810.8168"/>
+<rect fill="#ffc107" height="467.34998" width="150.53339" x="1010.25006" y="-918.6666"/>
+<rect fill="#607d8b" height="191.73334" width="150.53336" x="69.416664" y="-343.46667"/>
+<rect fill="#607d8b" height="179.75" width="150.53333" x="257.58334" y="-391.40002"/>
+<rect fill="#607d8b" height="167.7666" width="150.53333" x="445.75" y="-439.33325"/>
+<rect fill="#607d8b" height="143.80005" width="150.53333" x="633.9167" y="-463.30005"/>
+<rect fill="#607d8b" height="131.81653" width="150.53333" x="822.0833" y="-511.23328"/>
+<rect fill="#607d8b" height="119.833374" width="150.53339" x="1010.25006" y="-571.15"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="130.28334" y="776">
+2019
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="318.45" y="776">
+2020
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="506.61667" y="776">
+2021
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="694.7833" y="776">
+2022
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="882.94995" y="776">
+2023
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1071.1167" y="776">
+2024
+</text>
+<path d="M50.6,759 L55.6,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="34.399998" y="763.8">
+0
+</text>
+<path d="M50.6,519.3333 L55.6,519.3333" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="524.1333">
+100
+</text>
+<path d="M50.6,279.66666 L55.6,279.66666" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="284.46664">
+200
+</text>
+<path d="M50.6,40 L55.6,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="44.8">
+300
+</text>
+<path d="M50.6,759 L1179.6,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M50.6,40 L50.6,759" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

@@ -141,18 +141,20 @@ impl DrawBackend for SkiaBackend {
         let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
         let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
         buffer.set_text(
-            &mut self.font_system,
             text,
             &cosmic_text::Attrs::new(),
             cosmic_text::Shaping::Advanced,
             None,
         );
-        buffer.set_size(
-            &mut self.font_system,
-            Some(self.pixmap.width() as f32),
-            None,
-        );
+        buffer.set_size(Some(self.pixmap.width() as f32), None);
         buffer.shape_until_scroll(&mut self.font_system, true);
+
+        // Match SVG semantics: position.y is the baseline. cosmic-text's buffer
+        // origin is the line top, so shift up by the first run's baseline offset.
+        let baseline_offset = buffer
+            .layout_runs()
+            .next()
+            .map_or(font_size * 0.85, |run| run.line_y);
 
         let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
         let mut paint = Paint::default();
@@ -163,10 +165,78 @@ impl DrawBackend for SkiaBackend {
             |x, y, w, h, c| {
                 paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
                 let px = x as f32 + position.x;
-                let py = y as f32 + position.y;
+                let py = y as f32 + position.y - baseline_offset;
                 if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
                     self.pixmap
                         .fill_rect(rect, &paint, tiny_skia::Transform::identity(), None);
+                }
+            },
+        );
+        Ok(())
+    }
+
+    fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
+        let width = text.len() as f32 * font_size * 0.6;
+        let height = font_size;
+        Ok((width, height))
+    }
+
+    fn draw_rotated_text(
+        &mut self,
+        text: &str,
+        position: Point,
+        font_size: f32,
+        color: Color,
+        rotation: f32,
+    ) -> Result<()> {
+        if rotation.abs() < 0.1 {
+            return self.draw_text(text, position, font_size, color);
+        }
+
+        let metrics = cosmic_text::Metrics::new(font_size, font_size * 1.2);
+        let mut buffer = cosmic_text::Buffer::new(&mut self.font_system, metrics);
+        buffer.set_text(
+            text,
+            &cosmic_text::Attrs::new(),
+            cosmic_text::Shaping::Advanced,
+            None,
+        );
+        buffer.set_size(Some(self.pixmap.width() as f32), None);
+        buffer.shape_until_scroll(&mut self.font_system, true);
+
+        let text_color = cosmic_text::Color::rgba(color.r, color.g, color.b, 255);
+        let mut paint = Paint::default();
+
+        // Same baseline shift as draw_text, but composed with the rotation.
+        // Pre-translate the buffer by (0, -baseline_offset) so the baseline sits
+        // at the rotation pivot, then rotate, then translate to position.
+        let baseline_offset = buffer
+            .layout_runs()
+            .next()
+            .map_or(font_size * 0.85, |run| run.line_y);
+
+        let angle_rad = rotation.to_radians();
+        let cos_a = angle_rad.cos();
+        let sin_a = angle_rad.sin();
+        let transform = tiny_skia::Transform::from_row(
+            cos_a,
+            sin_a,
+            -sin_a,
+            cos_a,
+            position.x + sin_a * baseline_offset,
+            position.y - cos_a * baseline_offset,
+        );
+
+        buffer.draw(
+            &mut self.font_system,
+            &mut self.swash_cache,
+            text_color,
+            |x, y, w, h, c| {
+                paint.set_color_rgba8(c.r(), c.g(), c.b(), c.a());
+                let px = x as f32;
+                let py = y as f32;
+                if let Some(rect) = tiny_skia::Rect::from_xywh(px, py, w as f32, h as f32) {
+                    self.pixmap.fill_rect(rect, &paint, transform, None);
                 }
             },
         );
@@ -222,5 +292,129 @@ impl DrawBackend for SkiaBackend {
         self.pixmap
             .fill_rect(sk_rect, &paint, tiny_skia::Transform::identity(), None);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SkiaBackend;
+    use crate::backends::DrawBackend;
+    use crate::errors::StarsightError;
+    use crate::paths::{Path, PathCommand, PathStyle};
+    use crate::primitives::{Color, Point, Rect};
+
+    #[test]
+    fn new_zero_dimensions_errors() {
+        let result = SkiaBackend::new(0, 100);
+        assert!(matches!(result, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn dimensions_returns_pixmap_size() {
+        let b = SkiaBackend::new(120, 80).unwrap();
+        assert_eq!(b.dimensions(), (120, 80));
+    }
+
+    #[test]
+    fn draw_path_with_quad_and_cubic_curves() {
+        let mut b = SkiaBackend::new(200, 200).unwrap();
+        let path = Path {
+            commands: vec![
+                PathCommand::MoveTo(Point::new(10.0, 10.0)),
+                PathCommand::QuadTo(Point::new(50.0, 0.0), Point::new(100.0, 50.0)),
+                PathCommand::CubicTo(
+                    Point::new(120.0, 60.0),
+                    Point::new(150.0, 80.0),
+                    Point::new(180.0, 100.0),
+                ),
+                PathCommand::Close,
+            ],
+        };
+        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 2.0))
+            .unwrap();
+    }
+
+    #[test]
+    fn draw_path_empty_errors() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let path = Path::new();
+        let r = b.draw_path(&path, &PathStyle::default());
+        assert!(matches!(r, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn draw_path_with_fill_and_dash() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        let path = Path::new()
+            .move_to(Point::new(10.0, 10.0))
+            .line_to(Point::new(90.0, 90.0));
+        let mut style = PathStyle::stroke(Color::BLUE, 2.0);
+        style.fill_color = Some(Color::RED);
+        style.dash_pattern = Some((5.0, 3.0));
+        style.opacity = 0.5;
+        b.draw_path(&path, &style).unwrap();
+    }
+
+    #[test]
+    fn draw_rotated_text_zero_rotation_uses_fast_path() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 0.0)
+            .unwrap();
+    }
+
+    #[test]
+    fn draw_rotated_text_actual_rotation() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 45.0)
+            .unwrap();
+    }
+
+    #[test]
+    fn save_png_writes_file() {
+        let mut b = SkiaBackend::new(20, 20).unwrap();
+        b.fill(Color::WHITE);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.png");
+        b.save_png(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn save_svg_returns_export_error() {
+        let b = SkiaBackend::new(20, 20).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.svg");
+        let r = b.save_svg(&path);
+        assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+
+    #[test]
+    fn set_clip_with_rect_and_clear() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        b.set_clip(Some(Rect::new(0.0, 0.0, 25.0, 25.0))).unwrap();
+        b.set_clip(None).unwrap();
+    }
+
+    #[test]
+    fn fill_rect_invalid_returns_error() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let r = b.fill_rect(Rect::new(10.0, 10.0, 5.0, 5.0), Color::RED);
+        assert!(matches!(r, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn text_extent_proportional_to_length() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let (w1, _) = b.text_extent("a", 10.0).unwrap();
+        let (w5, _) = b.text_extent("aaaaa", 10.0).unwrap();
+        assert!(w5 > w1);
+    }
+
+    #[test]
+    fn png_bytes_is_valid_png_header() {
+        let mut b = SkiaBackend::new(10, 10).unwrap();
+        b.fill(Color::BLACK);
+        let bytes = b.png_bytes().unwrap();
+        assert_eq!(&bytes[..8], b"\x89PNG\r\n\x1a\n");
     }
 }

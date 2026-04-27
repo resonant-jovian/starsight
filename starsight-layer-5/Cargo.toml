@@ -11,6 +11,11 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 publish = true
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "README.md",
+]
 
 [dependencies]
 starsight-layer-1.workspace = true
@@ -22,9 +27,15 @@ starsight-layer-4.workspace = true
 # Snapshot tests for the full Figure → marks → backend pipeline live here
 # (moved from layer-3) so the cycle layer-3 → layer-5 → layer-3 disappears.
 insta = { workspace = true }
+tempfile = "3"
 
 [lints]
 workspace = true
+
+# Layer-4 (layouts/legends/colorbars/facets) is a stub in 0.2.0; the dep is
+# wired up so layer-5 can pick those types up when implementations land.
+[package.metadata.cargo-machete]
+ignored = ["starsight-layer-4"]
 
 [package.metadata.docs.rs]
 all-features = true

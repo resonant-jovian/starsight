@@ -1,0 +1,104 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="719" width="1132.6" x="50.6" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="484.8" y="26">
+Monthly Average Rainfall
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="598.89996" y="794">
+Month
+</text>
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 17.999998, 446.3)" x="17.999998" y="446.3">
+Rainfall (mm)
+</text>
+<path d="M50.6,759 L50.6,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M144.98334,759 L144.98334,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M239.36667,759 L239.36667,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M333.75,759 L333.75,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M428.13333,759 L428.13333,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M522.51666,759 L522.51666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M616.89996,759 L616.89996,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M711.2833,759 L711.2833,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M805.6666,759 L805.6666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M900.05,759 L900.05,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M994.4333,759 L994.4333,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1088.8167,759 L1088.8167,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1183.2,759 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,759 L1183.2,759" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,579.25 L1183.2,579.25" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,399.5 L1183.2,399.5" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,219.75 L1183.2,219.75" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,40 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#0000ff" height="407.43332" width="75.50667" x="60.03833" y="351.56668"/>
+<rect fill="#0000ff" height="311.56668" width="75.50665" x="154.42166" y="447.43332"/>
+<rect fill="#0000ff" height="443.38333" width="75.50665" x="248.805" y="315.61667"/>
+<rect fill="#0000ff" height="509.29166" width="75.50665" x="343.18835" y="249.70834"/>
+<rect fill="#0000ff" height="551.23334" width="75.50665" x="437.57166" y="207.76666"/>
+<rect fill="#0000ff" height="467.34998" width="75.506714" x="531.95496" y="291.65002"/>
+<rect fill="#0000ff" height="389.45834" width="75.506714" x="626.33826" y="369.54166"/>
+<rect fill="#0000ff" height="419.41666" width="75.506714" x="720.7216" y="339.58334"/>
+<rect fill="#0000ff" height="527.26666" width="75.506714" x="815.1049" y="231.73334"/>
+<rect fill="#0000ff" height="569.2084" width="75.506714" x="909.4883" y="189.79163"/>
+<rect fill="#0000ff" height="611.15" width="75.50665" x="1003.87164" y="147.84998"/>
+<rect fill="#0000ff" height="467.34998" width="75.50659" x="1098.255" y="291.65002"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="86.99166" y="776">
+Jan
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="181.37498" y="776">
+Feb
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="275.75833" y="776">
+Mar
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="370.1417" y="776">
+Apr
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="464.525" y="776">
+May
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="558.9083" y="776">
+Jun
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="653.2916" y="776">
+Jul
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="747.675" y="776">
+Aug
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="842.0583" y="776">
+Sep
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="936.44165" y="776">
+Oct
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1030.825" y="776">
+Nov
+</text>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="1125.2083" y="776">
+Dec
+</text>
+<path d="M50.6,759 L55.6,759" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="34.399998" y="763.8">
+0
+</text>
+<path d="M50.6,579.25 L55.6,579.25" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="584.05">
+30
+</text>
+<path d="M50.6,399.5 L55.6,399.5" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="404.3">
+60
+</text>
+<path d="M50.6,219.75 L55.6,219.75" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="224.55">
+90
+</text>
+<path d="M50.6,40 L55.6,40" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="44.8">
+120
+</text>
+<path d="M50.6,759 L1183.2,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M50.6,40 L50.6,759" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

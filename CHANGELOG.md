@@ -4,10 +4,37 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> [!NOTE]
-> No release has been published yet. Until `0.1.0` ships, every entry below describes the initial state of the codebase. `Changed` and `Removed` sections will start tracking diffs from `0.1.0` onward.
+## [0.2.0]
 
-## [Unreleased]
+### Added
+
+- `StepMark` with `StepPosition` enum (Pre/Mid/Post) for step charts
+- `HistogramMark` with automatic binning via `BinMethod` (Sturges, Freedman-Diaconis, Scott, Count, Width)
+- `BandScale` for categorical x-axis data in bar charts
+- `DataSource` trait with `SliceSource` and `VecSource` implementations
+- Chart type auto-inference via `infer_chart_kind()` - automatically chooses Line/Point/Bar/Histogram
+- `Color::cycle_next()` using prismatica's Tableau10 palette for default color cycle
+- Title rendering above plot area
+- Axis labels (x_label, y_label) rendering
+- SvgBackend opacity support (fill-opacity, stroke-opacity attributes)
+- `AreaMark` baseline support (Zero or Fixed value)
+- Facade exports: `StepMark`, `HistogramMark`, `BarMark`, `BinMethod`, `BinTransform`
+- Facade re-exports: `AreaMark`, `AreaBaseline`, `Orientation`, `BarRenderContext`, `DataExtent`; new `starsight::inferences` and `starsight::renders` modules surfacing layer-5 chart-kind inference and chrome render helpers; `Orientation` and `ChartKind` added to `prelude`
+
+### Changed
+
+- BandScale replaces manual band calculation for categorical data
+- AreaMark now properly closes path to baseline using coordinate system
+- SvgBackend draws quadratic curves (QuadTo)
+- Color.cycle_next() now uses prismatica::d3::TABLEAU10_PALETTE
+
+### Fixed
+
+- SvgBackend was ignoring PathStyle.opacity - now correctly applies opacity/fill-opacity/stroke-opacity
+- AreaMark baseline rendering (was using hardcoded pixel positions)
+- StepMark NaN gap handling
+
+## [0.1.1]
 
 ### Added
 

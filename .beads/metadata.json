@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "starsight",
+  "project_id": "d9a4a05d-4d11-4ccb-a722-7a97fbd39930"
+}
