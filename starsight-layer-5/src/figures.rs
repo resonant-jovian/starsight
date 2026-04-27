@@ -14,11 +14,15 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::backends::rasters::SkiaBackend;
 use starsight_layer_1::backends::vectors::SvgBackend;
 use starsight_layer_1::errors::{Result, StarsightError};
-use starsight_layer_1::primitives::Rect;
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_2::coords::CartesianCoord;
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
+
+use crate::layout::{
+    LayoutBuilder, LayoutCtx, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
+    YAxisTitleComponent, YTickLabelsComponent,
+};
 
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
 
@@ -280,75 +284,62 @@ impl Figure {
         let y_axis = Axis::auto_from_data(&y_vals, 5)
             .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?;
 
+        let category_labels = self.category_labels();
+        let use_y_axis_labels = self.has_horizontal_bars();
+
         let font_size: f32 = 12.0;
-        let label_offset: f32 = 14.0;
+        let title_font_size: f32 = 16.0;
         let tick_len: f32 = 5.0;
-        let axis_label_gap: f32 = 8.0;
+        let label_gap: f32 = 4.0;
 
-        let max_y_label_width = y_axis
-            .tick_labels
-            .iter()
-            .map(|l| {
-                backend
-                    .text_extent(l, font_size)
-                    .map(|(w, _)| w)
-                    .unwrap_or(0.0)
-            })
-            .fold(0.0f32, f32::max);
-
-        let max_x_label_height = x_axis
-            .tick_labels
-            .iter()
-            .map(|l| {
-                backend
-                    .text_extent(l, font_size)
-                    .map(|(_, h)| h)
-                    .unwrap_or(0.0)
-            })
-            .fold(0.0f32, f32::max);
-
-        let title_height = if let Some(title) = &self.title {
-            backend
-                .text_extent(title, 16.0)
-                .map(|(_, h)| h)
-                .unwrap_or(0.0)
+        // Tick-label space comes from category labels when this axis is the
+        // category axis, otherwise from the numeric tick labels. The wider of
+        // the two is what we need to reserve for either case.
+        let x_label_strings: Vec<String> = if !category_labels.is_empty() && !use_y_axis_labels {
+            category_labels.clone()
         } else {
-            0.0
+            x_axis.tick_labels.clone()
+        };
+        let y_label_strings: Vec<String> = if !category_labels.is_empty() && use_y_axis_labels {
+            category_labels.clone()
+        } else {
+            y_axis.tick_labels.clone()
         };
 
-        let x_label_height = if self.x_label.is_some() {
-            backend
-                .text_extent(self.x_label.as_ref().unwrap(), font_size)
-                .map(|(_, h)| h)
-                .unwrap_or(0.0)
-        } else {
-            0.0
+        let layout = {
+            let ctx = LayoutCtx {
+                width: self.width as f32,
+                height: self.height as f32,
+                backend,
+                font_size,
+                title_font_size,
+                padding: 4.0,
+            };
+            let mut builder = LayoutBuilder::new(ctx);
+            builder.add(&TitleComponent {
+                title: self.title.as_deref(),
+            });
+            builder.add(&XTickLabelsComponent {
+                labels: &x_label_strings,
+                tick_len,
+                gap: label_gap,
+            });
+            builder.add(&YTickLabelsComponent {
+                labels: &y_label_strings,
+                tick_len,
+                gap: label_gap,
+            });
+            builder.add(&XAxisTitleComponent {
+                label: self.x_label.as_deref(),
+                gap: label_gap,
+            });
+            builder.add(&YAxisTitleComponent {
+                label: self.y_label.as_deref(),
+                gap: label_gap,
+            });
+            builder.finish()
         };
-
-        let y_label_width = if self.y_label.is_some() {
-            backend
-                .text_extent(self.y_label.as_ref().unwrap(), font_size)
-                .map(|(w, _)| w)
-                .unwrap_or(0.0)
-        } else {
-            0.0
-        };
-
-        let left_margin = max_y_label_width + tick_len + axis_label_gap + y_label_width + 4.0;
-        let right_margin = 20.0;
-        let top_margin = if title_height > 0.0 {
-            title_height + label_offset + 10.0
-        } else {
-            20.0
-        };
-        let bottom_margin = max_x_label_height + tick_len + axis_label_gap + x_label_height + 4.0;
-
-        let plot_area = Rect::new(
-            left_margin,
-            top_margin,
-            self.width as f32 - right_margin,
-            self.height as f32 - bottom_margin,
-        );
+        let plot_area = layout.plot_rect;
 
         let coord = CartesianCoord {
             x_axis,
@@ -359,19 +350,35 @@ impl Figure {
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            crate::renders::render_title(title, self.width, backend, &self.theme, top_margin)?;
+            let slot = layout
+                .slots
+                .get("title")
+                .and_then(|v| v.first())
+                .copied();
+            if let Some(slot) = slot {
+                crate::renders::render_title(title, &slot, backend, &self.theme)?;
+            }
         }
 
+        let x_axis_title_slot = layout
+            .slots
+            .get("x_axis_title")
+            .and_then(|v| v.first())
+            .copied();
+        let y_axis_title_slot = layout
+            .slots
+            .get("y_axis_title")
+            .and_then(|v| v.first())
+            .copied();
         crate::renders::render_axis_labels(
             self.x_label.as_deref(),
             self.y_label.as_deref(),
+            x_axis_title_slot.as_ref(),
+            y_axis_title_slot.as_ref(),
             &plot_area,
             backend,
             &self.theme,
         )?;
-
-        let category_labels = self.category_labels();
-        let use_y_axis_labels = self.has_horizontal_bars();
 
         backend.set_clip(Some(plot_area))?;
         crate::renders::render_grid_lines(&coord, backend, &self.theme)?;

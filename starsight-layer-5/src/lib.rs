@@ -6,12 +6,14 @@
 //!
 //! Modules:
 //! - [`figures`]: the `Figure` builder.
+//! - [`layout`]: modular margin / slot composition for chrome.
 //! - [`renders`]: rendering helpers (axes, background, legend).
 //! - [`inferences`]: auto-pick a chart type from data shape (stub).
 //! - [`sources`]: data acceptance from slices, `DataFrames`, ndarray, Arrow (stub).
 
 pub mod figures;
 pub mod inferences;
+pub mod layout;
 pub mod renders;
 pub mod sources;
 

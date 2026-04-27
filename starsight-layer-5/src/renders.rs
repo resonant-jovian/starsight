@@ -13,6 +13,8 @@ use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::coords::CartesianCoord;
 
+use crate::layout::Slot;
+
 // ── render_axes ──────────────────────────────────────────────────────────────────────────────────
 
 /// Render tick marks and labels for both axes, plus category labels for bar charts.
@@ -258,45 +260,52 @@ pub fn render_legend(
 
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
-/// Render chart title above the plot area.
+/// Render the chart title centered inside its layout slot.
 pub fn render_title(
     title: &str,
-    width: u32,
+    slot: &Slot,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
-    top_margin: f32,
 ) -> Result<()> {
     let font_size: f32 = 16.0;
     let title_color = theme.title;
-    let x = width as f32 / 2.0;
-    let y = top_margin / 2.0;
+    let (tw, th) = backend.text_extent(title, font_size).unwrap_or((0.0, font_size));
+    let x = slot.rect.left + (slot.rect.width() - tw) / 2.0;
+    let y = slot.rect.top + (slot.rect.height() + th) / 2.0;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
 
-/// Render axis labels.
+/// Render axis-title labels centered along their respective axes, drawing into
+/// the slots reserved by the layout (below/beside the tick-label band).
 pub fn render_axis_labels(
     x_label: Option<&str>,
     y_label: Option<&str>,
+    x_slot: Option<&Slot>,
+    y_slot: Option<&Slot>,
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
 ) -> Result<()> {
     let font_size: f32 = 12.0;
-    let axis_label_gap: f32 = 8.0;
     let label_color = theme.tick_label;
 
-    if let Some(label) = x_label {
-        let label_width = backend.text_extent(label, font_size).map(|(w, _)| w).unwrap_or(0.0);
-        let x = plot_area.right - axis_label_gap - label_width / 2.0;
-        let y = plot_area.bottom + axis_label_gap + font_size / 2.0;
-        backend.draw_text(label, Point::new(x, y), font_size, label_color)?;
+    if let (Some(label), Some(slot)) = (x_label, x_slot) {
+        let (lw, lh) = backend
+            .text_extent(label, font_size)
+            .unwrap_or((0.0, font_size));
+        let cx = (plot_area.left + plot_area.right) / 2.0 - lw / 2.0;
+        let cy = slot.rect.top + (slot.rect.height() + lh) / 2.0;
+        backend.draw_text(label, Point::new(cx, cy), font_size, label_color)?;
     }
 
-    if let Some(label) = y_label {
-        let label_height = backend.text_extent(label, font_size).map(|(_, h)| h).unwrap_or(0.0);
-        let x = plot_area.left - axis_label_gap - font_size / 2.0;
-        let y = plot_area.top + axis_label_gap + label_height / 2.0;
-        backend.draw_rotated_text(label, Point::new(x, y), font_size, label_color, -90.0)?;
+    if let (Some(label), Some(slot)) = (y_label, y_slot) {
+        let (lw, lh) = backend
+            .text_extent(label, font_size)
+            .unwrap_or((0.0, font_size));
+        // Rotated -90°: post-rotation width is lh, post-rotation height is lw.
+        let cx = slot.rect.left + (slot.rect.width() + lh) / 2.0;
+        let cy = (plot_area.top + plot_area.bottom) / 2.0 + lw / 2.0;
+        backend.draw_rotated_text(label, Point::new(cx, cy), font_size, label_color, -90.0)?;
     }
 
     Ok(())
