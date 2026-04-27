@@ -195,11 +195,12 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
             .text_extent(t, ctx.title_font_size)
             .map(|(_, h)| h)
             .unwrap_or(ctx.title_font_size);
-        // Bit of breathing room above and below the glyph box.
+        // Priority 1 so the Y-tick-label top gutter (priority 0) sits flush
+        // against plot.top and the title goes above it.
         vec![Reservation {
             side: Side::Top,
             size: h + 12.0,
-            priority: 0,
+            priority: 1,
         }]
     }
 }

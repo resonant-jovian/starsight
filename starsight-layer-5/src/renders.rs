@@ -29,22 +29,22 @@ pub fn render_axes(
 ) -> Result<()> {
     let area = &coord.plot_area;
     let tick_len: f32 = 5.0;
-    let label_offset: f32 = 14.0;
     let tick_color = theme.axis;
     let font_size: f32 = 12.0;
 
     let n_categories = category_labels.len();
 
-    // Helper closures center labels on tick positions using measured widths,
-    // keeping the legacy Y offsets that produce reasonable output across the
-    // SVG (baseline-anchored) and Skia (top-left-anchored) backends.
+    // Both backends now treat draw_text's y as the SVG baseline. X labels are
+    // positioned so the glyph top sits ~2px below the tick (baseline =
+    // tick_end + ascent), and Y labels so the glyph is vertically centered on
+    // the tick (baseline = py + font_size * 0.4).
     let draw_x_label = |backend: &mut dyn DrawBackend, label: &str, px: f32| -> Result<()> {
         let (tw, _) = backend
             .text_extent(label, font_size)
             .unwrap_or((0.0, font_size));
         backend.draw_text(
             label,
-            Point::new(px - tw / 2.0, area.bottom + label_offset),
+            Point::new(px - tw / 2.0, area.bottom + tick_len + font_size),
             font_size,
             tick_color,
         )
@@ -55,7 +55,7 @@ pub fn render_axes(
             .unwrap_or((0.0, font_size));
         backend.draw_text(
             label,
-            Point::new(area.left - tick_len - 4.0 - tw, py - 6.0),
+            Point::new(area.left - tick_len - 4.0 - tw, py + font_size * 0.4),
             font_size,
             tick_color,
         )
