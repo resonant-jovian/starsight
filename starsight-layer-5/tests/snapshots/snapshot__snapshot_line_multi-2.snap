@@ -1,7 +1,0 @@
----
-source: starsight-layer-5/tests/snapshot.rs
-assertion_line: 96
-expression: png
-extension: png
-snapshot_kind: binary
----

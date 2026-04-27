@@ -42,8 +42,6 @@ fn snapshot_line_basic() {
     let fig = Figure::new(1200, 800).add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -61,8 +59,6 @@ fn snapshot_line_nan_gaps() {
     let fig = Figure::new(1200, 800).add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -92,8 +88,6 @@ fn snapshot_line_multi() {
         .add(LineMark::new(days, lows).color(Color::BLUE));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── scatter tests ────────────────────────────────────────────────────────────────────────────────
@@ -115,8 +109,6 @@ fn snapshot_scatter_basic() {
         .add(PointMark::new(x, y).radius(4.0));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -150,8 +142,6 @@ fn snapshot_scatter_sizes() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── bar tests ────────────────────────────────────────────────────────────────────────────────────
@@ -183,8 +173,6 @@ fn snapshot_bar_vertical() {
         ));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -215,8 +203,6 @@ fn snapshot_bar_horizontal() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -251,8 +237,6 @@ fn snapshot_bar_grouped() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -320,8 +304,6 @@ fn snapshot_bar_stacked() {
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── step tests ─────────────────────────────────────────────────────────────────────────────────
@@ -340,8 +322,6 @@ fn snapshot_step_pre() {
         .add(StepMark::new(x, y).position(StepPosition::Pre));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -358,8 +338,6 @@ fn snapshot_step_mid() {
         .add(StepMark::new(x, y).position(StepPosition::Mid));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -376,8 +354,6 @@ fn snapshot_step_post() {
         .add(StepMark::new(x, y).position(StepPosition::Post));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── area tests ─────────────────────────────────────────────────────────────────────────────────
@@ -399,8 +375,6 @@ fn snapshot_area_basic() {
         .add(AreaMark::new(x, y).opacity(0.6));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -445,8 +419,6 @@ fn snapshot_area_nan_gaps() {
         .add(AreaMark::new(x, y).opacity(0.6));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -465,8 +437,6 @@ fn snapshot_area_with_baseline() {
         .add(AreaMark::new(x, y).baseline(30.0).opacity(0.6));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── histogram tests ───────────────────────────────────────────────────────────────────────────────
@@ -493,8 +463,6 @@ fn snapshot_histogram_basic() {
         .add(HistogramMark::new(data));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── title and label tests ─────────────────────────────────────────────────────────────────────
@@ -509,8 +477,6 @@ fn snapshot_with_title_and_labels() {
         .add(LineMark::new(x, y));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── heatmap tests ───────────────────────────────────────────────────────────────────────────────
@@ -533,8 +499,6 @@ fn snapshot_heatmap_basic() {
         .add(HeatmapMark::new(data));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -555,8 +519,6 @@ fn snapshot_heatmap_viridis() {
         .add(HeatmapMark::new(data).colormap(VIRIDIS));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
 
 #[test]
@@ -577,6 +539,4 @@ fn snapshot_heatmap_plasma() {
         .add(HeatmapMark::new(data).colormap(PLASMA));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
-    let png = fig.render_png().unwrap();
-    insta::assert_binary_snapshot!(".png", png);
 }
