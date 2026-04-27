@@ -117,6 +117,8 @@ impl DrawBackend for SvgBackend {
     }
 
     fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
+        // SVG fallback estimate: text length is small (UI labels), f32 precision is sufficient.
+        #[allow(clippy::cast_precision_loss)]
         let width = text.len() as f32 * font_size * 0.6;
         let height = font_size;
         Ok((width, height))

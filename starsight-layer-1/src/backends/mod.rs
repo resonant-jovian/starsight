@@ -61,6 +61,10 @@ pub trait DrawBackend {
     /// Render rotated text at `position`.
     ///
     /// Rotation is in degrees clockwise. 0 = normal, 90 = rotated 90° clockwise.
+    ///
+    /// # Errors
+    /// Returns [`StarsightError::Render`](crate::errors::StarsightError::Render) if
+    /// font shaping or backend rendering fails.
     fn draw_rotated_text(
         &mut self,
         text: &str,

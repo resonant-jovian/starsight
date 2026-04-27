@@ -18,9 +18,13 @@ use std::collections::HashMap;
 /// Edge of the canvas a reservation lives on.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Side {
+    /// Top edge.
     Top,
+    /// Right edge.
     Right,
+    /// Bottom edge.
     Bottom,
+    /// Left edge.
     Left,
 }
 
@@ -89,6 +93,7 @@ pub struct Layout {
 }
 
 impl<'a> LayoutBuilder<'a> {
+    /// Create an empty builder bound to the given layout context.
     #[must_use]
     pub fn new(ctx: LayoutCtx<'a>) -> Self {
         Self {
@@ -120,8 +125,7 @@ impl<'a> LayoutBuilder<'a> {
         let total = |side: Side| -> f32 {
             by_side
                 .get(&side)
-                .map(|v| v.iter().map(|(_, r)| r.size).sum())
-                .unwrap_or(0.0)
+                .map_or(0.0, |v| v.iter().map(|(_, r)| r.size).sum())
         };
         let top_total = total(Side::Top);
         let bottom_total = total(Side::Bottom);
@@ -182,6 +186,7 @@ impl<'a> LayoutBuilder<'a> {
 
 /// Top-side reservation for the chart title.
 pub struct TitleComponent<'a> {
+    /// Title text, or `None` to skip the reservation.
     pub title: Option<&'a str>,
 }
 
@@ -196,8 +201,7 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
         let h = ctx
             .backend
             .text_extent(t, ctx.title_font_size)
-            .map(|(_, h)| h)
-            .unwrap_or(ctx.title_font_size);
+            .map_or(ctx.title_font_size, |(_, h)| h);
         // Priority 1 so the Y-tick-label top gutter (priority 0) sits flush
         // against plot.top and the title goes above it.
         vec![Reservation {
@@ -212,8 +216,11 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
 /// Also reserves on the right so the rightmost label, which is centered on
 /// `plot.right`, doesn't overhang the canvas edge.
 pub struct XTickLabelsComponent<'a> {
+    /// Tick labels in display order.
     pub labels: &'a [String],
+    /// Tick mark length in pixels.
     pub tick_len: f32,
+    /// Gap between tick marks and labels, in pixels.
     pub gap: f32,
 }
 
@@ -259,8 +266,11 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
 /// Also reserves on the top so the topmost label, which is centered on
 /// `plot.top`, doesn't overhang the canvas edge.
 pub struct YTickLabelsComponent<'a> {
+    /// Tick labels in display order.
     pub labels: &'a [String],
+    /// Tick mark length in pixels.
     pub tick_len: f32,
+    /// Gap between tick marks and labels, in pixels.
     pub gap: f32,
 }
 
@@ -304,7 +314,9 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
 
 /// Bottom-side reservation for the x-axis title (sits below tick labels, priority 1).
 pub struct XAxisTitleComponent<'a> {
+    /// Axis title text, or `None` to skip the reservation.
     pub label: Option<&'a str>,
+    /// Gap between tick labels and the title, in pixels.
     pub gap: f32,
 }
 
@@ -319,8 +331,7 @@ impl<'a> LayoutComponent for XAxisTitleComponent<'a> {
         let h = ctx
             .backend
             .text_extent(l, ctx.font_size)
-            .map(|(_, h)| h)
-            .unwrap_or(ctx.font_size);
+            .map_or(ctx.font_size, |(_, h)| h);
         vec![Reservation {
             side: Side::Bottom,
             size: self.gap + h,
@@ -331,7 +342,9 @@ impl<'a> LayoutComponent for XAxisTitleComponent<'a> {
 
 /// Left-side reservation for the y-axis title (sits left of tick labels, priority 1).
 pub struct YAxisTitleComponent<'a> {
+    /// Axis title text, or `None` to skip the reservation.
     pub label: Option<&'a str>,
+    /// Gap between tick labels and the title, in pixels.
     pub gap: f32,
 }
 
@@ -348,8 +361,7 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
         let h = ctx
             .backend
             .text_extent(l, ctx.font_size)
-            .map(|(_, h)| h)
-            .unwrap_or(ctx.font_size);
+            .map_or(ctx.font_size, |(_, h)| h);
         vec![Reservation {
             side: Side::Left,
             size: self.gap + h,

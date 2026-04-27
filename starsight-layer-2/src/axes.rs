@@ -37,7 +37,7 @@ impl Axis {
     /// Build a category axis covering exactly `[0, n]` for `n` labels, with
     /// tick positions at band edges so grid lines fall between categories.
     /// Tick labels are kept empty since renderers use the upstream category
-    /// label list directly; the contract "one tick_label per tick_position"
+    /// label list directly; the contract "one `tick_label` per `tick_position`"
     /// is preserved by aligning lengths.
     #[must_use]
     pub fn category(labels: &[String]) -> Self {

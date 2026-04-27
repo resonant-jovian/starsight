@@ -20,6 +20,9 @@ use crate::layout::Slot;
 /// Render tick marks and labels for both axes, plus category labels for bar charts.
 ///
 /// `use_y_axis_labels`: true = categories on Y-axis (left), false = categories on X-axis (bottom)
+///
+/// # Errors
+/// Returns the backend's error if any path or text draw call fails.
 pub fn render_axes(
     coord: &CartesianCoord,
     backend: &mut dyn DrawBackend,
@@ -157,6 +160,9 @@ pub fn render_axes(
 // ── render_grid_lines ────────────────────────────────────────────────────────────────────────────
 
 /// Render light grid lines for both axes.
+///
+/// # Errors
+/// Returns the backend's error if any line draw call fails.
 pub fn render_grid_lines(
     coord: &CartesianCoord,
     backend: &mut dyn DrawBackend,
@@ -203,11 +209,16 @@ pub fn render_background(
 
 /// A single entry in the legend.
 pub struct LegendEntry {
+    /// Sample color drawn next to the label.
     pub color: Color,
+    /// Display text for this legend row.
     pub label: String,
 }
 
 /// Render a legend with colored line/box samples and labels.
+///
+/// # Errors
+/// Returns the backend's error if any rect or text draw call fails.
 pub fn render_legend(
     entries: &[LegendEntry],
     plot_area: &Rect,
@@ -262,6 +273,9 @@ pub fn render_legend(
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
 /// Render the chart title centered inside its layout slot.
+///
+/// # Errors
+/// Returns the backend's error if text measurement or drawing fails.
 pub fn render_title(
     title: &str,
     slot: &Slot,
@@ -274,12 +288,15 @@ pub fn render_title(
         .text_extent(title, font_size)
         .unwrap_or((0.0, font_size));
     let x = slot.rect.left + (slot.rect.width() - tw) / 2.0;
-    let y = slot.rect.top + (slot.rect.height() + th) / 2.0;
+    let y = f32::midpoint(slot.rect.height(), th) + slot.rect.top;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
 
 /// Render axis-title labels centered along their respective axes, drawing into
 /// the slots reserved by the layout (below/beside the tick-label band).
+///
+/// # Errors
+/// Returns the backend's error if text measurement or drawing fails.
 pub fn render_axis_labels(
     x_label: Option<&str>,
     y_label: Option<&str>,
@@ -296,8 +313,8 @@ pub fn render_axis_labels(
         let (lw, lh) = backend
             .text_extent(label, font_size)
             .unwrap_or((0.0, font_size));
-        let cx = (plot_area.left + plot_area.right) / 2.0 - lw / 2.0;
-        let cy = slot.rect.top + (slot.rect.height() + lh) / 2.0;
+        let cx = f32::midpoint(plot_area.left, plot_area.right) - lw / 2.0;
+        let cy = f32::midpoint(slot.rect.height(), lh) + slot.rect.top;
         backend.draw_text(label, Point::new(cx, cy), font_size, label_color)?;
     }
 
@@ -306,8 +323,8 @@ pub fn render_axis_labels(
             .text_extent(label, font_size)
             .unwrap_or((0.0, font_size));
         // Rotated -90°: post-rotation width is lh, post-rotation height is lw.
-        let cx = slot.rect.left + (slot.rect.width() + lh) / 2.0;
-        let cy = (plot_area.top + plot_area.bottom) / 2.0 + lw / 2.0;
+        let cx = f32::midpoint(slot.rect.width(), lh) + slot.rect.left;
+        let cy = f32::midpoint(plot_area.top, plot_area.bottom) + lw / 2.0;
         backend.draw_rotated_text(label, Point::new(cx, cy), font_size, label_color, -90.0)?;
     }
 

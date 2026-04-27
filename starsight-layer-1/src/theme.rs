@@ -48,15 +48,13 @@ impl Theme {
         let grid = theme
             .line_highlight
             .or(theme.selection)
-            .map(Color::from)
-            .unwrap_or_else(|| foreground.lerp(background, 0.8));
+            .map_or_else(|| foreground.lerp(background, 0.8), Color::from);
 
         let axis = foreground.lerp(background, 0.7);
 
         let tick_label = theme
             .comment
-            .map(Color::from)
-            .unwrap_or_else(|| foreground.lerp(background, 0.6));
+            .map_or_else(|| foreground.lerp(background, 0.6), Color::from);
 
         let title = foreground;
 
@@ -100,24 +98,24 @@ impl From<&chromata::Theme> for Theme {
 /// Default light theme (white background, dark text).
 pub const DEFAULT_LIGHT: Theme = Theme {
     background: Color::WHITE,
-    foreground: Color::from_hex(0x333333),
-    grid: Color::from_hex(0xDDDDDD),
-    accent: Color::from_hex(0x2196F3),
-    axis: Color::from_hex(0x666666),
-    tick_label: Color::from_hex(0x555555),
-    title: Color::from_hex(0x222222),
+    foreground: Color::from_hex(0x33_3333),
+    grid: Color::from_hex(0xDD_DDDD),
+    accent: Color::from_hex(0x21_96F3),
+    axis: Color::from_hex(0x66_6666),
+    tick_label: Color::from_hex(0x55_5555),
+    title: Color::from_hex(0x22_2222),
     is_dark: false,
 };
 
 /// Default dark theme (dark background, light text).
 pub const DEFAULT_DARK: Theme = Theme {
-    background: Color::from_hex(0x1E1E1E),
-    foreground: Color::from_hex(0xE0E0E0),
-    grid: Color::from_hex(0x3A3A3A),
-    accent: Color::from_hex(0x64B5F6),
-    axis: Color::from_hex(0xAAAAAA),
-    tick_label: Color::from_hex(0xBBBBBB),
-    title: Color::from_hex(0xFFFFFF),
+    background: Color::from_hex(0x1E_1E1E),
+    foreground: Color::from_hex(0xE0_E0E0),
+    grid: Color::from_hex(0x3A_3A3A),
+    accent: Color::from_hex(0x64_B5F6),
+    axis: Color::from_hex(0xAA_AAAA),
+    tick_label: Color::from_hex(0xBB_BBBB),
+    title: Color::from_hex(0xFF_FFFF),
     is_dark: true,
 };
 

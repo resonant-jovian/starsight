@@ -27,6 +27,8 @@ impl Colormap {
     /// Values outside `[0, 1]` are clamped. Interpolation is linear in sRGB space.
     #[must_use]
     pub fn sample(&self, t: f64) -> Color {
+        // f32 precision is sufficient for color sampling (8-bit channel output).
+        #[allow(clippy::cast_possible_truncation)]
         let t = t.clamp(0.0, 1.0) as f32;
         Color::from(self.inner.eval(t))
     }
@@ -55,10 +57,10 @@ impl Colormap {
     #[must_use]
     pub fn kind(&self) -> ColormapKind {
         match self.inner.kind() {
-            prismatica::ColormapKind::Sequential => ColormapKind::Sequential,
             prismatica::ColormapKind::Diverging => ColormapKind::Diverging,
             prismatica::ColormapKind::Cyclic => ColormapKind::Cyclic,
             prismatica::ColormapKind::Qualitative => ColormapKind::Qualitative,
+            // Sequential, MultiSequential, and any future variants map to Sequential.
             _ => ColormapKind::Sequential,
         }
     }

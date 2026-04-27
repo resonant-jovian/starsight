@@ -110,7 +110,20 @@ starsight-layer-7        = { version = "0.2.0", path = "starsight-layer-7" }
 unsafe_code = "forbid"
 
 [workspace.lints.clippy]
-pedantic = "warn"
+pedantic = { level = "warn", priority = -1 }
+# Graphics code routinely converts integer pixel/index types to floats for
+# coordinate math; >23 bits of precision is well below the rendering
+# pipeline's resolution.
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+# Symmetric primitive-name pairs (xa/xb, py/px, draw_x_label/draw_y_label) are
+# intentional; clippy's similarity heuristic flags them too aggressively.
+similar_names = "allow"
+# Explicit named lifetimes are often clearer in trait impls with multiple refs.
+elidable_lifetime_names = "allow"
+# 100-line threshold is too tight for layout/render functions with symmetric branches.
+too_many_lines = "allow"
 
 [profile.release]
 lto = true

@@ -30,6 +30,7 @@ pub use starsight_layer_7 as export;
 pub mod aesthetics;
 pub mod axes;
 pub mod backends;
+/// Re-exports of the colormap types and built-in colormap constants.
 pub mod colormap;
 pub mod coords;
 pub mod exports;
@@ -45,6 +46,7 @@ pub mod renders;
 pub mod scales;
 pub mod sources;
 pub mod statistics;
+/// Re-exports of theming types and the default light/dark themes.
 pub mod theme;
 pub mod ticks;
 

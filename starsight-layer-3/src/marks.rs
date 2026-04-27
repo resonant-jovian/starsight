@@ -52,8 +52,18 @@ pub struct BarRenderContext {
 /// the figure can compute appropriate scales.
 pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
+    ///
+    /// # Errors
+    /// Returns the backend's [`Result`] error if drawing any of the mark's
+    /// primitives fails (e.g. invalid clip rect, font shaping failure).
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
     /// Render with bar context for grouped/stacked bar rendering.
+    ///
+    /// Default implementation forwards to [`render`](Self::render); bar marks
+    /// override this to handle group offsets and stacked baselines.
+    ///
+    /// # Errors
+    /// Returns the backend's [`Result`] error if drawing the bar fails.
     #[allow(unused_variables)]
     fn render_bar(
         &self,
@@ -297,11 +307,14 @@ pub struct BarMark {
     /// Legend label.
     pub label: Option<String>,
 }
+/// Bar/box mark orientation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[non_exhaustive]
 pub enum Orientation {
+    /// Bars rise vertically along the y-axis (categories on x).
     #[default]
     Vertical,
+    /// Bars extend horizontally along the x-axis (categories on y).
     Horizontal,
 }
 impl BarMark {
@@ -321,6 +334,7 @@ impl BarMark {
         }
     }
 
+    /// Builder: switch the bars to a horizontal orientation.
     #[must_use]
     pub fn horizontal(mut self) -> Self {
         self.orientation = Orientation::Horizontal;
@@ -426,6 +440,9 @@ impl Mark for BarMark {
         Ok(())
     }
 
+    // Bar rendering is symmetric between vertical and horizontal orientations;
+    // splitting helpers here would duplicate ~30 lines of parameter setup.
+    #[allow(clippy::too_many_lines)]
     fn render_bar(
         &self,
         coord: &CartesianCoord,
@@ -630,12 +647,15 @@ pub struct AreaMark {
     /// Area opacity, 1 to 0
     opacity: f32,
 }
+/// Where the area mark's lower edge sits.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 #[non_exhaustive]
 pub enum AreaBaseline {
+    /// Fill between the data and y = 0.
     #[default]
-    Zero, // fill between y and y=0
-    Fixed(f64), // fill between y and a fixed value
+    Zero,
+    /// Fill between the data and a fixed y value.
+    Fixed(f64),
 }
 impl AreaMark {
     /// New area chart from x and y data with default color and full opacity.
@@ -750,17 +770,15 @@ impl Mark for AreaMark {
             segment_points.push((xi, yi));
         }
 
-        if let Some(_) = segment_start {
-            if segment_points.len() >= 2 {
-                render_segment(
-                    coord,
-                    backend,
-                    &segment_points,
-                    baseline_y,
-                    self.fill,
-                    self.opacity,
-                )?;
-            }
+        if segment_start.is_some() && segment_points.len() >= 2 {
+            render_segment(
+                coord,
+                backend,
+                &segment_points,
+                baseline_y,
+                self.fill,
+                self.opacity,
+            )?;
         }
 
         Ok(())
@@ -1086,7 +1104,7 @@ impl HistogramMark {
         Self {
             data,
             method: BinMethod::default(),
-            color: Color::from_hex(0x00_4C_72B0),
+            color: Color::from_hex(0x4C_72B0),
         }
     }
 

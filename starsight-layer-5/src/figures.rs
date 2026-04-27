@@ -185,16 +185,20 @@ impl Figure {
 
         if has_any_stacked {
             // First pass: compute stacked baselines
-            let mut ctx = BarRenderContext::default();
-            ctx.first_pass = true;
+            let ctx = BarRenderContext {
+                first_pass: true,
+                ..BarRenderContext::default()
+            };
             for mark in &self.marks {
                 mark.render_bar(coord, backend, &ctx)?;
             }
 
             // Second pass: render with accumulated baselines
-            let mut ctx = BarRenderContext::default();
-            ctx.first_pass = false;
-            ctx.stacked_baselines = self.compute_stacked_baselines();
+            let ctx = BarRenderContext {
+                first_pass: false,
+                stacked_baselines: self.compute_stacked_baselines(),
+                ..BarRenderContext::default()
+            };
             for mark in &self.marks {
                 mark.render_bar(coord, backend, &ctx)?;
             }
@@ -424,13 +428,13 @@ impl Figure {
     }
     ///
     /// # Errors
-    /// - [`StarsightError::Render`](starsight_layer_1::errors::StarsightError::Render)
+    /// - [`starsight_layer_1::errors::StarsightError::Render`]
     ///   if the backend fails to allocate or draw.
-    /// - [`StarsightError::Data`](starsight_layer_1::errors::StarsightError::Data)
+    /// - [`starsight_layer_1::errors::StarsightError::Data`]
     ///   if no marks have any data.
-    /// - [`StarsightError::Scale`](starsight_layer_1::errors::StarsightError::Scale)
+    /// - [`starsight_layer_1::errors::StarsightError::Scale`]
     ///   if axes cannot be built from the data extent.
-    /// - [`StarsightError::Export`](starsight_layer_1::errors::StarsightError::Export)
+    /// - [`starsight_layer_1::errors::StarsightError::Export`]
     ///   if PNG encoding fails.
     pub fn render_png(&self) -> Result<Vec<u8>> {
         let mut backend = SkiaBackend::new(self.width, self.height)?;
@@ -446,11 +450,11 @@ impl Figure {
     /// which makes it the right format for snapshot tests in CI.
     ///
     /// # Errors
-    /// - [`StarsightError::Data`](starsight_layer_1::errors::StarsightError::Data)
+    /// - [`starsight_layer_1::errors::StarsightError::Data`]
     ///   if no marks have any data.
-    /// - [`StarsightError::Scale`](starsight_layer_1::errors::StarsightError::Scale)
+    /// - [`starsight_layer_1::errors::StarsightError::Scale`]
     ///   if axes cannot be built from the data extent.
-    /// - [`StarsightError::Render`](starsight_layer_1::errors::StarsightError::Render)
+    /// - [`starsight_layer_1::errors::StarsightError::Render`]
     ///   if the backend rejects a draw call.
     pub fn render_svg(&self) -> Result<String> {
         let mut backend = SvgBackend::new(self.width, self.height);
@@ -466,9 +470,9 @@ impl Figure {
     /// # Errors
     /// - Any error from [`render_png`](Self::render_png) or
     ///   [`render_svg`](Self::render_svg).
-    /// - [`StarsightError::Io`](starsight_layer_1::errors::StarsightError::Io)
+    /// - [`starsight_layer_1::errors::StarsightError::Io`]
     ///   if writing the file fails.
-    /// - [`StarsightError::Export`](starsight_layer_1::errors::StarsightError::Export)
+    /// - [`starsight_layer_1::errors::StarsightError::Export`]
     ///   if the extension is unsupported.
     pub fn save(&self, path: impl AsRef<std::path::Path>) -> Result<()> {
         let path = path.as_ref();

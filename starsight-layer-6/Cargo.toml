@@ -27,5 +27,17 @@ starsight-layer-5.workspace = true
 [lints]
 workspace = true
 
+# Layer-6 modules (hovers, pans, selections, streams, windows, zooms) are
+# stubs in 0.2.0; the lower-layer dependencies are wired up so concrete
+# implementations can land in subsequent releases without a Cargo.toml change.
+[package.metadata.cargo-machete]
+ignored = [
+  "starsight-layer-1",
+  "starsight-layer-2",
+  "starsight-layer-3",
+  "starsight-layer-4",
+  "starsight-layer-5",
+]
+
 [package.metadata.docs.rs]
 all-features = true

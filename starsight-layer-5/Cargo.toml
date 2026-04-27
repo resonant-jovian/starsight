@@ -32,5 +32,10 @@ tempfile = "3"
 [lints]
 workspace = true
 
+# Layer-4 (layouts/legends/colorbars/facets) is a stub in 0.2.0; the dep is
+# wired up so layer-5 can pick those types up when implementations land.
+[package.metadata.cargo-machete]
+ignored = ["starsight-layer-4"]
+
 [package.metadata.docs.rs]
 all-features = true
