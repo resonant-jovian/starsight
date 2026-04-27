@@ -858,7 +858,7 @@ mod tests {
     #[test]
     fn color_display() {
         let color = Color::new(150, 52, 173);
-        let s = format!("{}", color);
+        let s = format!("{color}");
         assert!(s.starts_with('#'));
     }
 
@@ -1198,7 +1198,7 @@ mod tests {
     #[test]
     fn rect_display() {
         let r = Rect::new(1.0, 2.0, 5.0, 6.0);
-        let s = format!("{}", r);
+        let s = format!("{r}");
         assert!(s.starts_with("Rect("));
     }
 
@@ -1276,7 +1276,7 @@ mod tests {
     #[test]
     fn transform_display() {
         let t = Transform::identity();
-        let s = format!("{}", t);
+        let s = format!("{t}");
         assert!(s.starts_with("Transform("));
     }
 }

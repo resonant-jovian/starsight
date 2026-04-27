@@ -1455,7 +1455,7 @@ mod tests {
 
     #[test]
     fn histogram_mark_render_with_data() {
-        let mark = HistogramMark::new((0..50).map(|i| f64::from(i)).collect());
+        let mark = HistogramMark::new((0..50).map(f64::from).collect());
         let coord = coord_for(0.0, 50.0, 0.0, 10.0);
         let mut backend = SvgBackend::new(100, 100);
         mark.render(&coord, &mut backend).unwrap();

@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn default_dark_constant() {
-        assert!(DEFAULT_DARK.is_dark);
+        const { assert!(DEFAULT_DARK.is_dark) };
         assert_ne!(DEFAULT_DARK.background, DEFAULT_LIGHT.background);
     }
 }

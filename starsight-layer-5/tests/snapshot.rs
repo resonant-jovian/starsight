@@ -53,9 +53,9 @@ fn snapshot_line_nan_gaps() {
         .iter()
         .map(|&xi| 20.0 + 5.0 * (xi * std::f64::consts::PI / 12.0).sin() + 2.0 * (xi * 0.3).cos())
         .collect();
-    for i in [24..32, 72..80, 120..128].iter() {
-        for j in i.clone() {
-            y[j as usize] = f64::NAN;
+    for range in &[24usize..32, 72..80, 120..128] {
+        for j in range.clone() {
+            y[j] = f64::NAN;
         }
     }
     let fig = Figure::new(1200, 800).add(LineMark::new(x, y));
@@ -328,7 +328,7 @@ fn snapshot_bar_stacked() {
 
 #[test]
 fn snapshot_step_pre() {
-    let x: Vec<f64> = (0..50).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..50).map(f64::from).collect();
     let y: Vec<f64> = x
         .iter()
         .map(|&xi| ((xi * 0.4).floor() % 6.0) * 5.0 + 10.0)
@@ -346,7 +346,7 @@ fn snapshot_step_pre() {
 
 #[test]
 fn snapshot_step_mid() {
-    let x: Vec<f64> = (0..50).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..50).map(f64::from).collect();
     let y: Vec<f64> = x
         .iter()
         .map(|&xi| ((xi * 0.4).floor() % 6.0) * 5.0 + 10.0)
@@ -364,7 +364,7 @@ fn snapshot_step_mid() {
 
 #[test]
 fn snapshot_step_post() {
-    let x: Vec<f64> = (0..50).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..50).map(f64::from).collect();
     let y: Vec<f64> = x
         .iter()
         .map(|&xi| ((xi * 0.4).floor() % 6.0) * 5.0 + 10.0)
@@ -384,7 +384,7 @@ fn snapshot_step_post() {
 
 #[test]
 fn snapshot_area_basic() {
-    let x: Vec<f64> = (0..365).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..365).map(f64::from).collect();
     let y: Vec<f64> = x
         .iter()
         .map(|&xi| {
@@ -405,7 +405,7 @@ fn snapshot_area_basic() {
 
 #[test]
 fn snapshot_area_nan_gaps() {
-    let x: Vec<f64> = (0..30).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..30).map(f64::from).collect();
     let y: Vec<f64> = vec![
         0.0,
         2.5,
@@ -451,7 +451,7 @@ fn snapshot_area_nan_gaps() {
 
 #[test]
 fn snapshot_area_with_baseline() {
-    let x: Vec<f64> = (0..100).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..100).map(f64::from).collect();
     // Range [0, 60] so the curve crosses baseline=30 each period — exercises both
     // above- and below-baseline rendering rather than the baseline acting as a floor.
     let y: Vec<f64> = x
@@ -476,7 +476,7 @@ fn snapshot_histogram_basic() {
     let mut rng = 42u32;
     let mut next_rand = || {
         rng = rng.wrapping_mul(1_103_515_245).wrapping_add(12_345);
-        rng as f64 / u32::MAX as f64
+        f64::from(rng) / f64::from(u32::MAX)
     };
     let data: Vec<f64> = (0..5000)
         .map(|_| {
@@ -521,8 +521,8 @@ fn snapshot_heatmap_basic() {
         .map(|i| {
             (0..40)
                 .map(|j| {
-                    let x = i as f64 - 20.0;
-                    let y = j as f64 - 20.0;
+                    let x = f64::from(i) - 20.0;
+                    let y = f64::from(j) - 20.0;
                     (x * x + y * y).sqrt()
                 })
                 .collect()
@@ -543,8 +543,8 @@ fn snapshot_heatmap_viridis() {
         .map(|i| {
             (0..50)
                 .map(|j| {
-                    let x = i as f64 - 25.0;
-                    let y = j as f64 - 25.0;
+                    let x = f64::from(i) - 25.0;
+                    let y = f64::from(j) - 25.0;
                     100.0 - (x * x + y * y).sqrt() + 20.0 * ((x * 0.1).sin() + (y * 0.1).cos())
                 })
                 .collect()
@@ -565,8 +565,8 @@ fn snapshot_heatmap_plasma() {
         .map(|i| {
             (0..50)
                 .map(|j| {
-                    let x = i as f64 - 25.0;
-                    let y = j as f64 - 25.0;
+                    let x = f64::from(i) - 25.0;
+                    let y = f64::from(j) - 25.0;
                     ((x * x + y * y) * 0.02).cos() * 50.0 + 50.0
                 })
                 .collect()

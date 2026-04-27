@@ -115,7 +115,7 @@ mod tests {
     #[test]
     fn infer_point_many_unique() {
         let x = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let y: Vec<f64> = (0..10).map(|i| i as f64 * 1.1).collect();
+        let y: Vec<f64> = (0..10).map(|i| f64::from(i) * 1.1).collect();
         let kind = infer_chart_kind(&x, &y);
         assert_eq!(kind, ChartKind::Point);
     }

@@ -1,8 +1,8 @@
 //! Kruskal–Szekeres diagram — starsight 0.1.0 showcase (fixed)
 //!
-//! Root cause of the original output: constant_r_curve pushed all four
-//! sign-quadrant sweeps into one Vec, so LineMark connected Region I
-//! points to Region III points with diagonal slashes. Fix: one LineMark
+//! Root cause of the original output: `constant_r_curve` pushed all four
+//! sign-quadrant sweeps into one Vec, so `LineMark` connected Region I
+//! points to Region III points with diagonal slashes. Fix: one `LineMark`
 //! per (su, sv) pair.
 
 use starsight::prelude::*;
@@ -35,7 +35,7 @@ fn kruskal(r: f64, t: f64, su: f64, sv: f64) -> Option<(f64, f64)> {
 // ── Curve builders ─────────────────────────────────────────────────────────────
 
 /// One continuous arc: fixed r, sweep t, single (su, sv) quadrant.
-/// NaN is inserted only at clip-boundary exits so LineMark draws a gap
+/// NaN is inserted only at clip-boundary exits so `LineMark` draws a gap
 /// instead of a line back across the diagram.
 fn r_arc(r: f64, su: f64, sv: f64, steps: usize) -> (Vec<f64>, Vec<f64>) {
     let mut xs = Vec::new();

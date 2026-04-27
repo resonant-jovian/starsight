@@ -1,7 +1,7 @@
 //! Gallery — starsight 0.2.0 showcase
 //!
-//! Layered composite: a LineMark on top of PointMark scatter, all in a
-//! single Figure. Multi-figure faceting (real grid layout) lands in 0.3.0
+//! Layered composite: a `LineMark` on top of `PointMark` scatter, all in a
+//! single `Figure`. Multi-figure faceting (real grid layout) lands in 0.3.0
 //! once layer-4 ships its grid composer.
 
 use starsight::prelude::*;
@@ -27,13 +27,13 @@ fn main() -> Result<()> {
         .y_label("y")
         .add(
             PointMark::new(xs.clone(), noisy)
-                .color(Color::from_hex(0x6B7280))
+                .color(Color::from_hex(0x6B_7280))
                 .radius(3.5)
                 .label("observations"),
         )
         .add(
             LineMark::new(xs, truth)
-                .color(Color::from_hex(0xD62728))
+                .color(Color::from_hex(0xD6_2728))
                 .width(2.5)
                 .label("model"),
         )

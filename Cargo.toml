@@ -124,6 +124,8 @@ similar_names = "allow"
 elidable_lifetime_names = "allow"
 # 100-line threshold is too tight for layout/render functions with symmetric branches.
 too_many_lines = "allow"
+# `assert_eq!` on deterministic float arithmetic is the standard test idiom.
+float_cmp = "allow"
 
 [profile.release]
 lto = true

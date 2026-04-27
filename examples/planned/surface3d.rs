@@ -12,7 +12,7 @@ fn main() -> Result<()> {
         .title("[placeholder] 3D surface — demo lands in 0.3.0 (vello/wgpu backend)")
         .add(
             LineMark::new(xs, ys)
-                .color(Color::from_hex(0x888888))
+                .color(Color::from_hex(0x88_8888))
                 .width(1.0),
         )
         .save("examples/planned/surface3d.png")

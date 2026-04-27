@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn bin_method_width() {
-        let data: Vec<f64> = (0..100).map(|i| i as f64).collect();
+        let data: Vec<f64> = (0..100).map(f64::from).collect();
         let method = BinMethod::Width(10.0);
         let count = method.bin_count(&data);
         assert_eq!(count, 10);
@@ -217,7 +217,7 @@ mod tests {
 
     #[test]
     fn bin_method_freedman_diaconis() {
-        let data: Vec<f64> = (0..100).map(|i| i as f64).collect();
+        let data: Vec<f64> = (0..100).map(f64::from).collect();
         let method = BinMethod::FreedmanDiaconis;
         let count = method.bin_count(&data);
         assert!(count > 0);
@@ -233,7 +233,7 @@ mod tests {
 
     #[test]
     fn bin_method_scott() {
-        let data: Vec<f64> = (0..100).map(|i| i as f64).collect();
+        let data: Vec<f64> = (0..100).map(f64::from).collect();
         let method = BinMethod::Scott;
         let count = method.bin_count(&data);
         assert!(count > 0);
@@ -265,7 +265,7 @@ mod tests {
 
     #[test]
     fn bin_values() {
-        let bins = vec![
+        let bins = [
             Bin {
                 left: 0.0,
                 right: 10.0,
@@ -283,7 +283,7 @@ mod tests {
 
     #[test]
     fn bin_transform_compute_even_distribution() {
-        let data: Vec<f64> = (0..20).map(|i| i as f64).collect();
+        let data: Vec<f64> = (0..20).map(f64::from).collect();
         let transform = BinTransform::new(BinMethod::Count(4));
         let bins = transform.compute(&data);
         assert_eq!(bins.len(), 4);
@@ -327,7 +327,7 @@ mod tests {
             BinMethod::Count(5),
             BinMethod::Width(1.0),
         ] {
-            assert_eq!(method.bin_count(&[]), 1, "{:?}", method);
+            assert_eq!(method.bin_count(&[]), 1, "{method:?}");
         }
     }
 }

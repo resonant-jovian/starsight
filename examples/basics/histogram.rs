@@ -1,6 +1,6 @@
 //! Histogram — starsight 0.2.0 showcase
 //!
-//! HistogramMark on 5000 deterministic Gaussian samples (Box–Muller against an
+//! `HistogramMark` on 5000 deterministic Gaussian samples (Box–Muller against an
 //! LCG seed, no `rand` dep). KDE overlay lands in 0.3.0.
 
 use starsight::prelude::*;
@@ -23,6 +23,6 @@ fn main() -> Result<()> {
         .title("Distribution of Synthetic Measurements")
         .x_label("Value")
         .y_label("Frequency")
-        .add(HistogramMark::new(samples).color(Color::from_hex(0x4F8AB8)))
+        .add(HistogramMark::new(samples).color(Color::from_hex(0x4F_8AB8)))
         .save("examples/basics/histogram.png")
 }

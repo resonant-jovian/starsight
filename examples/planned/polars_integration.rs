@@ -13,7 +13,7 @@ fn main() -> Result<()> {
         .title("[placeholder] Polars — demo lands in 0.3.0 (polars optional feature)")
         .add(
             LineMark::new(xs, ys)
-                .color(Color::from_hex(0x888888))
+                .color(Color::from_hex(0x88_8888))
                 .width(1.0),
         )
         .save("examples/planned/polars_integration.png")

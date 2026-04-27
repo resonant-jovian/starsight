@@ -1,6 +1,6 @@
 //! Heatmap — starsight 0.2.0 showcase
 //!
-//! 30×30 HeatmapMark of a synthetic 2D Gaussian-like field with the default
+//! 30×30 `HeatmapMark` of a synthetic 2D Gaussian-like field with the default
 //! colormap. Annotated colorbar / value annotations land in 0.3.0.
 
 use starsight::marks::HeatmapMark;

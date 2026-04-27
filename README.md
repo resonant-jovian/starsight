@@ -7,6 +7,7 @@
 [![Sponsor](https://img.shields.io/badge/Sponsor-resonant--jovian-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/resonant-jovian)
 [![Support on thanks.dev](https://img.shields.io/badge/thanks.dev-Support-green?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyMWMtNS41IDAtMTAtMy41LTEwLTkgMC00IDItNy41IDYtMTAgMS41IDIuNSAzIDQuNSA0IDQuNSAxLTEuNSAyLjUtMy41IDQtNC41IDQuNSAyLjUgNiA2IDYgMTAgMCA1LjUtNC41IDktMTAgOXoiLz48L3N2Zz4=)](https://thanks.dev/u/gh/resonant-jovian)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0008--1372--1727-a6ce39?style=for-the-badge&logo=orcid&logoColor=white)](https://orcid.org/0009-0008-1372-1727)
+[![Coverage](https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&logoColor=white&label=coverage)](https://app.codecov.io/gh/resonant-jovian/starsight)
 
 [![Crates.io](https://img.shields.io/crates/v/starsight?style=for-the-badge&logo=rust&logoColor=white&label=crates.io)](https://crates.io/crates/starsight)
 [![docs.rs](https://img.shields.io/docsrs/starsight?style=for-the-badge&logo=docsdotrs&logoColor=white&label=docs.rs)](https://docs.rs/starsight)
@@ -17,7 +18,6 @@
 [![Edition](https://img.shields.io/badge/Edition-2024-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://doc.rust-lang.org/edition-guide/)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=ci)](https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&logoColor=white&label=coverage)](https://app.codecov.io/gh/resonant-jovian/starsight)
 [![Gallery](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/gallery.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=gallery)](https://github.com/resonant-jovian/starsight/actions/workflows/gallery.yml)
 [![Release](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/release.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=release)](https://github.com/resonant-jovian/starsight/actions/workflows/release.yml)
 [![Snapshots](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/snapshots.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=snapshots)](https://github.com/resonant-jovian/starsight/actions/workflows/snapshots.yml)
@@ -290,7 +290,7 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 | SVG export | working | 0.1.0 | Resolution-independent vector; `Figure::render_svg()` and `.save("foo.svg")` work today |
 | `LineMark` / `PointMark` | working | 0.1.0 | Core 2D mark types |
 | `Figure` builder + `plot!` macro | working | 0.1.0 | High-level API and one-liner |
-| `BarMark` / `AreaMark` | wip     | 0.2.0 | Vertical/horizontal/stacked bars, area fills; grouped bars + HeatmapMark pending |
+| `BarMark` / `AreaMark` | working | 0.2.0 | Vertical/horizontal/stacked bars, area fills; grouped bars + HeatmapMark pending |
 | Statistical transforms (Bin, KDE, ...) | planned | 0.3.0 | Histograms, density, regression |
 | Layout + faceting + legends | planned | 0.4.0 | `GridLayout`, `FacetWrap`, `Colorbar` |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
@@ -338,13 +338,13 @@ Status legend: `working` = compiles + has snapshot tests; `wip` = code exists bu
 
 Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of Latin/Greek-named scientific Rust crates:
 
-| Crate | Status                 | What it does |
-|---|------------------------|---|
-| [`starsight`](https://github.com/resonant-jovian/starsight) | scaffolded, 300+ TODOs | Unified scientific visualization (this crate) |
-| [`chromata`](https://github.com/resonant-jovian/chromata) | working, published     | 1,104 editor / terminal color themes as compile-time constants |
-| [`prismatica`](https://github.com/resonant-jovian/prismatica) | working, published     | 260+ perceptually uniform colormaps as compile-time LUTs |
-| [`caustic`](https://github.com/resonant-jovian/caustic) | early stages           | 6D Vlasov–Poisson solver for plasma physics |
-| [`phasma`](https://github.com/resonant-jovian/phasma) | early stages           | Terminal UI for `caustic` |
+| Crate | Status             | What it does |
+|---|--------------------|---|
+| [`starsight`](https://github.com/resonant-jovian/starsight) | early stages       | Unified scientific visualization (this crate) |
+| [`chromata`](https://github.com/resonant-jovian/chromata) | working, published | 1,104 editor / terminal color themes as compile-time constants |
+| [`prismatica`](https://github.com/resonant-jovian/prismatica) | working, published | 260+ perceptually uniform colormaps as compile-time LUTs |
+| [`caustic`](https://github.com/resonant-jovian/caustic) | early stages       | 6D Vlasov–Poisson solver for plasma physics |
+| [`phasma`](https://github.com/resonant-jovian/phasma) | early stages       | Terminal UI for `caustic` |
 
 ---
 
@@ -354,7 +354,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 > Pin an exact version while the workspace evolves toward `1.0.0`. The high-level milestones are below; the full task-level roadmap with checkboxes lives in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md). See also: [CHANGELOG](CHANGELOG.md).
 
 - [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
-- [ ] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
+- [x] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
 - [ ] 0.3.0 Statistical charts — `BoxMark`, `ViolinMark`, `KDE`, `PieMark`
 - [ ] 0.4.0 Layout — `GridLayout`, faceting, legends, colorbars
 - [ ] 0.5.0 Scale infrastructure — `LogScale`, `SymLogScale`, `DateTimeScale`, `BandScale`

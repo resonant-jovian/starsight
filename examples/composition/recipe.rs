@@ -45,19 +45,19 @@ fn main() -> Result<()> {
         .y_label("Revenue (M USD)")
         .add(
             LineMark::new(yx.clone(), yn)
-                .color(Color::from_hex(0x1F77B4))
+                .color(Color::from_hex(0x1F_77B4))
                 .width(2.5)
                 .label("North"),
         )
         .add(
             LineMark::new(yx.clone(), ys)
-                .color(Color::from_hex(0xD62728))
+                .color(Color::from_hex(0xD6_2728))
                 .width(2.5)
                 .label("South"),
         )
         .add(
             LineMark::new(yx, yc)
-                .color(Color::from_hex(0x2CA02C))
+                .color(Color::from_hex(0x2C_A02C))
                 .width(2.5)
                 .label("Central"),
         )

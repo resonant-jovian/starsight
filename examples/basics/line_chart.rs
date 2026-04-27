@@ -1,6 +1,6 @@
 //! Line chart — starsight 0.2.0 showcase
 //!
-//! Single LineMark with a title and axis labels, the canonical "hello world"
+//! Single `LineMark` with a title and axis labels, the canonical "hello world"
 //! plot. Synthetic monthly revenue series with seasonal variation.
 
 use starsight::prelude::*;
@@ -18,7 +18,7 @@ fn main() -> Result<()> {
         .y_label("Revenue (k USD)")
         .add(
             LineMark::new(months, revenue)
-                .color(Color::from_hex(0x2E7CB8))
+                .color(Color::from_hex(0x2E_7CB8))
                 .width(2.5),
         )
         .save("examples/basics/line_chart.png")

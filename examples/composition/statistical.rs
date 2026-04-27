@@ -1,7 +1,7 @@
 //! Statistical — starsight 0.2.0 showcase
 //!
 //! Noisy daily measurements with a 7-day rolling mean overlay. Demonstrates
-//! layering two LineMarks on one Figure and the legend auto-derived from
+//! layering two `LineMark`s on one `Figure` and the legend auto-derived from
 //! `.label(...)`. KDE / density bands land in 0.3.0.
 
 use starsight::prelude::*;
@@ -25,7 +25,7 @@ fn main() -> Result<()> {
     };
 
     let n = 120;
-    let xs: Vec<f64> = (0..n).map(|i| f64::from(i)).collect();
+    let xs: Vec<f64> = (0..n).map(f64::from).collect();
     let raw: Vec<f64> = xs
         .iter()
         .map(|&x| 50.0 + 0.3 * x + 8.0 * (x * 0.15).sin() + 5.0 * next())
@@ -38,13 +38,13 @@ fn main() -> Result<()> {
         .y_label("Reading")
         .add(
             LineMark::new(xs.clone(), raw)
-                .color(Color::from_hex(0xCBD5E1))
+                .color(Color::from_hex(0xCB_D5E1))
                 .width(1.5)
                 .label("raw"),
         )
         .add(
             LineMark::new(xs, smoothed)
-                .color(Color::from_hex(0x2E7CB8))
+                .color(Color::from_hex(0x2E_7CB8))
                 .width(2.5)
                 .label("rolling mean (7d)"),
         )

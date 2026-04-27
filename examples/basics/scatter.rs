@@ -1,6 +1,6 @@
 //! Scatter plot — starsight 0.2.0 showcase
 //!
-//! Two color-coded clusters on a single PointMark per series. Demonstrates
+//! Two color-coded clusters on a single `PointMark` per series. Demonstrates
 //! `.label(name)` driving legend rendering and the `.radius(px)` builder.
 
 use starsight::prelude::*;
@@ -34,13 +34,13 @@ fn main() -> Result<()> {
         .y_label("Feature B")
         .add(
             PointMark::new(xa, ya)
-                .color(Color::from_hex(0x1F77B4))
+                .color(Color::from_hex(0x1F_77B4))
                 .radius(4.0)
                 .label("Group α"),
         )
         .add(
             PointMark::new(xb, yb)
-                .color(Color::from_hex(0xD62728))
+                .color(Color::from_hex(0xD6_2728))
                 .radius(4.0)
                 .label("Group β"),
         )

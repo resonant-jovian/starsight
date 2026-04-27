@@ -9,7 +9,15 @@ use starsight::prelude::*;
 
 // ── Waterfall data ────────────────────────────────────────────────────────────────────
 
-fn build_waterfall_data() -> (Vec<String>, Vec<f64>, Vec<f64>, Vec<bool>, Vec<bool>) {
+struct WaterfallData {
+    labels: Vec<String>,
+    values: Vec<f64>,
+    bases: Vec<f64>,
+    is_subtotal: Vec<bool>,
+    is_total: Vec<bool>,
+}
+
+fn build_waterfall_data() -> WaterfallData {
     let data = [
         ("Revenue", 4_200_000.0, 0.0, false, false),
         ("COGS", -1_800_000.0, 4_200_000.0, false, false),
@@ -23,19 +31,19 @@ fn build_waterfall_data() -> (Vec<String>, Vec<f64>, Vec<f64>, Vec<bool>, Vec<bo
         ("Net Income", 500_000.0, 0.0, false, true), // total
     ];
 
-    let labels: Vec<String> = data.iter().map(|r| r.0.to_string()).collect();
-    let values: Vec<f64> = data.iter().map(|r| r.1).collect();
-    let bases: Vec<f64> = data.iter().map(|r| r.2).collect();
-    let is_subtotal: Vec<bool> = data.iter().map(|r| r.3).collect();
-    let is_total: Vec<bool> = data.iter().map(|r| r.4).collect();
-
-    (labels, values, bases, is_subtotal, is_total)
+    WaterfallData {
+        labels: data.iter().map(|r| r.0.to_string()).collect(),
+        values: data.iter().map(|r| r.1).collect(),
+        bases: data.iter().map(|r| r.2).collect(),
+        is_subtotal: data.iter().map(|r| r.3).collect(),
+        is_total: data.iter().map(|r| r.4).collect(),
+    }
 }
 
 // ── main ────────────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    let (labels, values, bases, is_subtotal, is_total) = build_waterfall_data();
+    let data = build_waterfall_data();
 
     let green = Color::new(34, 139, 34); // forest green for increases
     let red = Color::new(220, 20, 60); // crimson for decreases
@@ -48,12 +56,12 @@ fn main() -> Result<()> {
         .y_label("Amount ($)");
 
     // Add each bar - we need separate marks because base varies per bar
-    for i in 0..labels.len() {
-        let label = &labels[i];
-        let value = values[i];
-        let base = bases[i];
-        let subtotal = is_subtotal[i];
-        let total = is_total[i];
+    for i in 0..data.labels.len() {
+        let label = &data.labels[i];
+        let value = data.values[i];
+        let base = data.bases[i];
+        let subtotal = data.is_subtotal[i];
+        let total = data.is_total[i];
 
         let color = if subtotal || total {
             blue
@@ -64,7 +72,7 @@ fn main() -> Result<()> {
         };
 
         fig = fig.add(BarMark {
-            x: vec![label.to_string()],
+            x: vec![label.clone()],
             y: vec![value],
             color: Some(color),
             width: Some(0.6),
