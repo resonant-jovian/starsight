@@ -55,6 +55,18 @@ path = "showcases/custom_colormap.rs"
 name = "quickstart"
 path = "showcases/quickstart.rs"
 
+[[example]]
+name = "statistical"
+path = "showcases/statistical.rs"
+
+[[example]]
+name = "recipe"
+path = "showcases/recipe.rs"
+
+[[example]]
+name = "gallery"
+path = "showcases/gallery.rs"
+
 [lints]
 workspace = true
 
