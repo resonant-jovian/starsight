@@ -452,9 +452,11 @@ fn snapshot_area_nan_gaps() {
 #[test]
 fn snapshot_area_with_baseline() {
     let x: Vec<f64> = (0..100).map(|i| i as f64).collect();
+    // Range [0, 60] so the curve crosses baseline=30 each period — exercises both
+    // above- and below-baseline rendering rather than the baseline acting as a floor.
     let y: Vec<f64> = x
         .iter()
-        .map(|&xi| (xi * 0.15).sin() * 20.0 + 50.0)
+        .map(|&xi| (xi * 0.15).sin() * 30.0 + 30.0)
         .collect();
     let fig = Figure::new(1200, 800)
         .title("Area Chart with Custom Baseline")
