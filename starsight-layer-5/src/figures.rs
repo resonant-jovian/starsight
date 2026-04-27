@@ -279,13 +279,24 @@ impl Figure {
         let x_vals: Vec<f64> = vec![extent.x_min, extent.x_max];
         let y_vals: Vec<f64> = vec![extent.y_min, extent.y_max];
 
-        let x_axis = Axis::auto_from_data(&x_vals, 5)
-            .ok_or_else(|| StarsightError::Scale("Cannot build X axis".into()))?;
-        let y_axis = Axis::auto_from_data(&y_vals, 5)
-            .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?;
-
         let category_labels = self.category_labels();
         let use_y_axis_labels = self.has_horizontal_bars();
+
+        // Bar charts get a category axis on the orientation-appropriate side so
+        // bars span the full plot area instead of being squeezed into a Wilkinson-
+        // extended numeric range. Numeric axes still use Wilkinson for "nice" ticks.
+        let x_axis = if !category_labels.is_empty() && !use_y_axis_labels {
+            Axis::category(&category_labels)
+        } else {
+            Axis::auto_from_data(&x_vals, 5)
+                .ok_or_else(|| StarsightError::Scale("Cannot build X axis".into()))?
+        };
+        let y_axis = if !category_labels.is_empty() && use_y_axis_labels {
+            Axis::category(&category_labels)
+        } else {
+            Axis::auto_from_data(&y_vals, 5)
+                .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?
+        };
 
         let font_size: f32 = 12.0;
         let title_font_size: f32 = 16.0;

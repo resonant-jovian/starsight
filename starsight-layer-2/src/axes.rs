@@ -33,4 +33,23 @@ impl Axis {
             tick_labels: labels,
         })
     }
+
+    /// Build a category axis covering exactly `[0, n]` for `n` labels, with
+    /// tick positions at band edges so grid lines fall between categories.
+    /// Tick labels are kept empty since renderers use the upstream category
+    /// label list directly; the contract "one tick_label per tick_position"
+    /// is preserved by aligning lengths.
+    #[must_use]
+    pub fn category(labels: &[String]) -> Self {
+        let n = labels.len();
+        Self {
+            scale: LinearScale {
+                domain_min: 0.0,
+                domain_max: n as f64,
+            },
+            label: None,
+            tick_positions: (0..=n).map(|i| i as f64).collect(),
+            tick_labels: vec![String::new(); n + 1],
+        }
+    }
 }

@@ -570,27 +570,39 @@ impl Mark for BarMark {
         Some((&self.x, &self.y))
     }
 
-    // No clue if this works
     fn data_extent(&self) -> Option<DataExtent> {
         let valid_y: Vec<f64> = self.y.iter().copied().filter(|v| !v.is_nan()).collect();
         if valid_y.is_empty() {
             return None;
         }
-        let y_min = valid_y
+        let v_min = valid_y
             .iter()
             .copied()
             .fold(f64::INFINITY, f64::min)
             .min(0.0);
-        let y_max = valid_y
+        let v_max = valid_y
             .iter()
             .copied()
             .fold(f64::NEG_INFINITY, f64::max)
             .max(0.0);
-        Some(DataExtent {
-            x_min: 0.0,
-            x_max: self.x.len() as f64,
-            y_min,
-            y_max,
+        let n = self.x.len() as f64;
+        // Orientation determines which axis carries values vs categories. Reporting
+        // category count as x for horizontal bars caused Wilkinson tick selection
+        // to extend the value range way past actual data, so bars only filled ~70%
+        // of the plot area.
+        Some(match self.orientation {
+            Orientation::Vertical => DataExtent {
+                x_min: 0.0,
+                x_max: n,
+                y_min: v_min,
+                y_max: v_max,
+            },
+            Orientation::Horizontal => DataExtent {
+                x_min: v_min,
+                x_max: v_max,
+                y_min: 0.0,
+                y_max: n,
+            },
         })
     }
 
