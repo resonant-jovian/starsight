@@ -39,6 +39,22 @@ path = "showcases/scatter.rs"
 name = "heatmap"
 path = "showcases/heatmap.rs"
 
+[[example]]
+name = "histogram"
+path = "showcases/histogram.rs"
+
+[[example]]
+name = "custom_theme"
+path = "showcases/custom_theme.rs"
+
+[[example]]
+name = "custom_colormap"
+path = "showcases/custom_colormap.rs"
+
+[[example]]
+name = "quickstart"
+path = "showcases/quickstart.rs"
+
 [lints]
 workspace = true
 
