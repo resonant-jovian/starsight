@@ -1049,10 +1049,6 @@ impl Mark for StepMark {
             }
         }
 
-        if commands.is_empty() {
-            return Ok(());
-        }
-
         let path = Path { commands };
         let style = PathStyle {
             stroke_color: self.color,
@@ -1113,10 +1109,6 @@ impl Mark for HistogramMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
         let transform = BinTransform::new(self.method);
         let bins: Vec<Bin> = transform.compute(&self.data);
-
-        if bins.is_empty() {
-            return Ok(());
-        }
 
         let area = coord.plot_area;
         let n = bins.len();
@@ -1235,6 +1227,33 @@ fn extent_from_xy(x: &[f64], y: &[f64]) -> Option<DataExtent> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use starsight_layer_1::backends::vectors::SvgBackend;
+    use starsight_layer_2::axes::Axis;
+    use starsight_layer_2::scales::LinearScale;
+
+    fn coord_for(x_min: f64, x_max: f64, y_min: f64, y_max: f64) -> CartesianCoord {
+        CartesianCoord {
+            x_axis: Axis {
+                scale: LinearScale {
+                    domain_min: x_min,
+                    domain_max: x_max,
+                },
+                label: None,
+                tick_positions: vec![],
+                tick_labels: vec![],
+            },
+            y_axis: Axis {
+                scale: LinearScale {
+                    domain_min: y_min,
+                    domain_max: y_max,
+                },
+                label: None,
+                tick_positions: vec![],
+                tick_labels: vec![],
+            },
+            plot_area: Rect::new(0.0, 0.0, 100.0, 100.0),
+        }
+    }
 
     #[test]
     fn line_mark_new() {
@@ -1268,6 +1287,35 @@ mod tests {
     }
 
     #[test]
+    fn line_mark_builders() {
+        let m = LineMark::new(vec![0.0], vec![0.0])
+            .color(Color::RED)
+            .width(3.0)
+            .label("series");
+        assert_eq!(m.color, Color::RED);
+        assert_eq!(m.width, 3.0);
+        assert_eq!(m.label.as_deref(), Some("series"));
+        assert_eq!(m.legend_color(), Some(Color::RED));
+        assert_eq!(m.legend_label(), Some("series"));
+    }
+
+    #[test]
+    fn line_mark_render_all_nan_returns_ok() {
+        let mark = LineMark::new(vec![f64::NAN], vec![f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn line_mark_render_with_data() {
+        let mark = LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
     fn point_mark_new() {
         let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
         assert_eq!(mark.x.len(), 2);
@@ -1278,6 +1326,34 @@ mod tests {
         let mark = PointMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
         let extent = mark.data_extent();
         assert!(extent.is_some());
+    }
+
+    #[test]
+    fn point_mark_builders() {
+        let m = PointMark::new(vec![0.0], vec![0.0])
+            .color(Color::GREEN)
+            .radius(8.0)
+            .label("dots");
+        assert_eq!(m.color, Color::GREEN);
+        assert_eq!(m.radius, 8.0);
+        assert_eq!(m.legend_color(), Some(Color::GREEN));
+        assert_eq!(m.legend_label(), Some("dots"));
+    }
+
+    #[test]
+    fn point_mark_render_all_nan_returns_ok() {
+        let mark = PointMark::new(vec![f64::NAN], vec![f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn point_mark_render_with_data() {
+        let mark = PointMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
     }
 
     #[test]
@@ -1294,15 +1370,87 @@ mod tests {
     }
 
     #[test]
+    fn area_mark_builders() {
+        let m = AreaMark::new(vec![0.0], vec![0.0])
+            .color(Color::GREEN)
+            .opacity(0.5)
+            .baseline(10.0);
+        assert_eq!(m.fill, Color::GREEN);
+        assert_eq!(m.opacity, 0.5);
+        assert!(matches!(m.baseline, AreaBaseline::Fixed(_)));
+    }
+
+    #[test]
     fn step_mark_new() {
         let mark = StepMark::new(vec![1.0, 2.0], vec![3.0, 4.0]);
         assert_eq!(mark.x.len(), 2);
     }
 
     #[test]
+    fn step_mark_builders() {
+        let m = StepMark::new(vec![0.0], vec![0.0])
+            .color(Color::RED)
+            .width(5.0)
+            .position(StepPosition::Mid);
+        assert_eq!(m.color, Color::RED);
+        assert_eq!(m.width, 5.0);
+        assert_eq!(m.where_, StepPosition::Mid);
+    }
+
+    #[test]
+    fn step_mark_render_short_returns_ok() {
+        let mark = StepMark::new(vec![1.0], vec![1.0]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn step_mark_render_all_nan_returns_ok() {
+        let mark = StepMark::new(vec![f64::NAN, f64::NAN], vec![f64::NAN, f64::NAN]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
     fn histogram_mark_new() {
         let mark = HistogramMark::new(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
         assert_eq!(mark.data.len(), 5);
+    }
+
+    #[test]
+    fn histogram_mark_builders() {
+        let m = HistogramMark::new(vec![1.0, 2.0]).color(Color::RED).method(BinMethod::default());
+        assert_eq!(m.color, Color::RED);
+    }
+
+    #[test]
+    fn histogram_mark_render_empty_returns_ok() {
+        let mark = HistogramMark::new(vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn histogram_mark_render_with_data() {
+        let mark = HistogramMark::new((0..50).map(|i| f64::from(i)).collect());
+        let coord = coord_for(0.0, 50.0, 0.0, 10.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn histogram_mark_data_extent_empty_is_none() {
+        let mark = HistogramMark::new(vec![]);
+        assert!(mark.data_extent().is_none());
+    }
+
+    #[test]
+    fn histogram_mark_data_extent_only_nan_is_none() {
+        let mark = HistogramMark::new(vec![f64::NAN]);
+        assert!(mark.data_extent().is_none());
     }
 
     #[test]
@@ -1314,5 +1462,263 @@ mod tests {
             y_max: 10.0,
         };
         assert_eq!(extent.x_min, 0.0);
+    }
+
+    // ── BarMark ────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn bar_mark_builders() {
+        let m = BarMark::new(vec!["a".to_string()], vec![1.0])
+            .color(Color::RED)
+            .width(0.5)
+            .group("g")
+            .stack("s")
+            .base(2.0)
+            .label("series");
+        assert_eq!(m.color, Some(Color::RED));
+        assert_eq!(m.width, Some(0.5));
+        assert_eq!(m.group.as_deref(), Some("g"));
+        assert_eq!(m.stack.as_deref(), Some("s"));
+        assert_eq!(m.base, Some(2.0));
+        assert_eq!(m.legend_label(), Some("series"));
+        assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_horizontal() {
+        let m = BarMark::new(vec!["a".to_string()], vec![1.0]).horizontal();
+        assert_eq!(m.orientation, Orientation::Horizontal);
+    }
+
+    #[test]
+    fn bar_mark_render_vertical_simple() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_horizontal_simple() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).horizontal();
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_empty_returns_ok() {
+        let mark = BarMark::new(vec![], vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_empty_returns_ok() {
+        let mark = BarMark::new(vec![], vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_grouped() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).group("g");
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.group_offsets.insert("g".into(), (0, 2));
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_grouped_offset_missing() {
+        // Group set on the mark but the context has no entry for that group
+        // exercises the `else` branch where x_offset falls back to 0.0.
+        let mark = BarMark::new(vec!["a".to_string()], vec![1.0]).group("missing");
+        let coord = coord_for(0.0, 1.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_stacked() {
+        let mark =
+            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).stack("s");
+        let coord = coord_for(0.0, 2.0, 0.0, 4.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.stacked_baselines.insert("a".into(), 1.0);
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_with_base() {
+        let mark =
+            BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0]).base(0.5);
+        let coord = coord_for(0.0, 2.0, 0.0, 4.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_grouped() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .group("g");
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.group_offsets.insert("g".into(), (0, 2));
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_grouped_offset_missing() {
+        let mark = BarMark::new(vec!["a".to_string()], vec![1.0])
+            .horizontal()
+            .group("missing");
+        let coord = coord_for(0.0, 2.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_stacked() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .stack("s");
+        let coord = coord_for(0.0, 4.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let mut ctx = BarRenderContext::default();
+        ctx.stacked_baselines.insert("a".into(), 1.0);
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_render_bar_horizontal_with_base() {
+        let mark = BarMark::new(vec!["a".to_string(), "b".to_string()], vec![1.0, 2.0])
+            .horizontal()
+            .base(0.5);
+        let coord = coord_for(0.0, 4.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn bar_mark_data_extent_horizontal() {
+        let m = BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).horizontal();
+        let e = m.data_extent().unwrap();
+        assert_eq!(e.x_min, 0.0);
+        assert_eq!(e.x_max, 2.0);
+        assert_eq!(e.y_min, 0.0);
+        assert_eq!(e.y_max, 2.0);
+    }
+
+    #[test]
+    fn bar_mark_data_extent_empty() {
+        let m = BarMark::new(vec![], vec![]);
+        assert!(m.data_extent().is_none());
+    }
+
+    #[test]
+    fn bar_mark_as_bar_info_and_data() {
+        let m = BarMark::new(vec!["a".into()], vec![1.0]).group("g").stack("s");
+        let info = m.as_bar_info().unwrap();
+        assert_eq!(info.0, Some("g"));
+        assert_eq!(info.1, Some("s"));
+        let data = m.as_bar_data().unwrap();
+        assert_eq!(data.0.len(), 1);
+        assert_eq!(data.1.len(), 1);
+    }
+
+    // ── HeatmapMark ────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn heatmap_mark_builders() {
+        let m = HeatmapMark::new(vec![vec![1.0, 2.0], vec![3.0, 4.0]])
+            .colormap(starsight_layer_1::colormap::PLASMA)
+            .label("h");
+        assert_eq!(m.label.as_deref(), Some("h"));
+        assert_eq!(m.legend_label(), Some("h"));
+    }
+
+    #[test]
+    fn heatmap_mark_render_empty_returns_ok() {
+        let mark = HeatmapMark::new(vec![]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_inner_empty_row_returns_ok() {
+        let mark = HeatmapMark::new(vec![vec![]]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_constant_values() {
+        // All same value, so range collapses to zero (uses fallback `1.0`)
+        let mark = HeatmapMark::new(vec![vec![5.0, 5.0], vec![5.0, 5.0]]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_render_skips_nan() {
+        let mark = HeatmapMark::new(vec![vec![1.0, f64::NAN], vec![2.0, 3.0]]);
+        let coord = coord_for(0.0, 2.0, 0.0, 2.0);
+        let mut backend = SvgBackend::new(100, 100);
+        mark.render(&coord, &mut backend).unwrap();
+    }
+
+    #[test]
+    fn heatmap_mark_data_extent_empty() {
+        let m = HeatmapMark::new(vec![]);
+        assert!(m.data_extent().is_none());
+        let m2 = HeatmapMark::new(vec![vec![]]);
+        assert!(m2.data_extent().is_none());
+    }
+
+    #[test]
+    fn heatmap_mark_legend_color() {
+        let m = HeatmapMark::new(vec![vec![1.0]]);
+        assert!(m.legend_color().is_some());
+    }
+
+    // ── Mark trait default impls ──────────────────────────────────────────────────────────────
+
+    #[test]
+    fn mark_default_render_bar_falls_back_to_render() {
+        let mark = LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]);
+        let coord = coord_for(0.0, 1.0, 0.0, 1.0);
+        let mut backend = SvgBackend::new(100, 100);
+        let ctx = BarRenderContext::default();
+        // LineMark doesn't override render_bar, so default impl forwards to render
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
+    }
+
+    #[test]
+    fn mark_default_legend_returns_none() {
+        let mark = StepMark::new(vec![0.0, 1.0], vec![0.0, 1.0]);
+        assert!(mark.legend_color().is_none());
+        assert!(mark.legend_label().is_none());
+    }
+
+    #[test]
+    fn mark_default_as_bar_info_is_none() {
+        let mark = LineMark::new(vec![0.0], vec![0.0]);
+        assert!(mark.as_bar_info().is_none());
+        assert!(mark.as_bar_data().is_none());
     }
 }

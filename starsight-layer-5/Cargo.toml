@@ -22,6 +22,7 @@ starsight-layer-4.workspace = true
 # Snapshot tests for the full Figure → marks → backend pipeline live here
 # (moved from layer-3) so the cycle layer-3 → layer-5 → layer-3 disappears.
 insta = { workspace = true }
+tempfile = "3"
 
 [lints]
 workspace = true

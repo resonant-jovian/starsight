@@ -43,11 +43,7 @@ impl BinMethod {
                 let h = 2.0 * iqr * (n as f64).powf(-1.0 / 3.0);
                 let range = data.iter().copied().fold(f64::NEG_INFINITY, f64::max)
                     - data.iter().copied().fold(f64::INFINITY, f64::min);
-                if h > 0.0 {
-                    (range / h).ceil() as usize
-                } else {
-                    Self::Sturges.bin_count(data)
-                }
+                (range / h).ceil() as usize
             }
             Self::Scott => {
                 let mean = data.iter().sum::<f64>() / n as f64;
@@ -59,11 +55,7 @@ impl BinMethod {
                 let h = 3.5 * std * (n as f64).powf(-1.0 / 3.0);
                 let range = data.iter().copied().fold(f64::NEG_INFINITY, f64::max)
                     - data.iter().copied().fold(f64::INFINITY, f64::min);
-                if h > 0.0 {
-                    (range / h).ceil() as usize
-                } else {
-                    Self::Sturges.bin_count(data)
-                }
+                (range / h).ceil() as usize
             }
             Self::Width(w) => {
                 let range = data.iter().copied().fold(f64::NEG_INFINITY, f64::max)
@@ -324,5 +316,18 @@ mod tests {
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
         let p = percentile(&data, 1.0);
         assert!((p - 5.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn bin_count_empty_returns_one() {
+        for method in [
+            BinMethod::Sturges,
+            BinMethod::FreedmanDiaconis,
+            BinMethod::Scott,
+            BinMethod::Count(5),
+            BinMethod::Width(1.0),
+        ] {
+            assert_eq!(method.bin_count(&[]), 1, "{:?}", method);
+        }
     }
 }

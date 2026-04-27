@@ -126,3 +126,89 @@ impl Default for Theme {
         DEFAULT_LIGHT
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Color, DEFAULT_DARK, DEFAULT_LIGHT, Theme};
+
+    fn build_theme(line_highlight: Option<chromata::Color>, comment: Option<chromata::Color>) -> chromata::Theme {
+        let mut builder = chromata::ThemeBuilder::new(
+            "Test",
+            "tester",
+            chromata::Color::new(0, 0, 0),
+            chromata::Color::new(255, 255, 255),
+        );
+        if let Some(c) = line_highlight {
+            builder = builder.line_highlight(c);
+        }
+        if let Some(c) = comment {
+            builder = builder.comment(c);
+        }
+        builder.build()
+    }
+
+    #[test]
+    fn from_chromata_with_optional_colors() {
+        let t = build_theme(
+            Some(chromata::Color::new(50, 50, 50)),
+            Some(chromata::Color::new(100, 100, 100)),
+        );
+        let theme = Theme::from_chromata(&t);
+        assert_eq!(theme.background, Color::new(0, 0, 0));
+        assert_eq!(theme.foreground, Color::new(255, 255, 255));
+        assert_eq!(theme.grid, Color::new(50, 50, 50));
+        assert_eq!(theme.tick_label, Color::new(100, 100, 100));
+        assert!(theme.is_dark);
+    }
+
+    #[test]
+    fn from_chromata_falls_back_when_optional_missing() {
+        let t = build_theme(None, None);
+        let theme = Theme::from_chromata(&t);
+        assert!(theme.grid.r > 0); // lerp fallback should produce non-zero
+        assert!(theme.tick_label.r > 0);
+    }
+
+    #[test]
+    fn from_chromata_value() {
+        let t = build_theme(None, None);
+        let theme: Theme = t.into();
+        assert_eq!(theme.background.r, 0);
+    }
+
+    #[test]
+    fn from_chromata_ref() {
+        let t = build_theme(None, None);
+        let theme: Theme = (&t).into();
+        assert_eq!(theme.background.r, 0);
+    }
+
+    #[test]
+    fn contrast_text_picks_background_on_high_contrast() {
+        // Light theme background is white; black has high contrast against it
+        let t = DEFAULT_LIGHT;
+        let chosen = t.contrast_text(Color::BLACK);
+        assert_eq!(chosen, t.background);
+    }
+
+    #[test]
+    fn contrast_text_picks_foreground_on_low_contrast() {
+        // Foreground when contrast is low against background
+        let t = DEFAULT_LIGHT;
+        let chosen = t.contrast_text(Color::new(250, 250, 250));
+        assert_eq!(chosen, t.foreground);
+    }
+
+    #[test]
+    fn default_is_light() {
+        let t = Theme::default();
+        assert!(!t.is_dark);
+        assert_eq!(t.background, DEFAULT_LIGHT.background);
+    }
+
+    #[test]
+    fn default_dark_constant() {
+        assert!(DEFAULT_DARK.is_dark);
+        assert_ne!(DEFAULT_DARK.background, DEFAULT_LIGHT.background);
+    }
+}

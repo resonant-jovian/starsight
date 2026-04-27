@@ -311,3 +311,163 @@ pub fn render_axis_labels(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        LegendEntry, render_axes, render_axis_labels, render_background, render_grid_lines,
+        render_legend, render_title,
+    };
+    use crate::layout::{Side, Slot};
+    use starsight_layer_1::backends::vectors::SvgBackend;
+    use starsight_layer_1::primitives::{Color, Rect};
+    use starsight_layer_1::theme::DEFAULT_LIGHT;
+    use starsight_layer_2::axes::Axis;
+    use starsight_layer_2::coords::CartesianCoord;
+    use starsight_layer_2::scales::LinearScale;
+
+    fn coord_with_ticks(plot: Rect) -> CartesianCoord {
+        CartesianCoord {
+            x_axis: Axis {
+                scale: LinearScale {
+                    domain_min: 0.0,
+                    domain_max: 1.0,
+                },
+                label: None,
+                tick_positions: vec![0.0, 0.5, 1.0],
+                tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
+            },
+            y_axis: Axis {
+                scale: LinearScale {
+                    domain_min: 0.0,
+                    domain_max: 1.0,
+                },
+                label: None,
+                tick_positions: vec![0.0, 0.5, 1.0],
+                tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
+            },
+            plot_area: plot,
+        }
+    }
+
+    #[test]
+    fn render_legend_empty_returns_ok() {
+        let mut backend = SvgBackend::new(100, 100);
+        render_legend(&[], &Rect::new(0.0, 0.0, 100.0, 100.0), &mut backend, &DEFAULT_LIGHT)
+            .unwrap();
+    }
+
+    #[test]
+    fn render_legend_with_entries() {
+        let mut backend = SvgBackend::new(400, 200);
+        let entries = vec![
+            LegendEntry {
+                color: Color::RED,
+                label: "first".into(),
+            },
+            LegendEntry {
+                color: Color::BLUE,
+                label: "second".into(),
+            },
+        ];
+        render_legend(
+            &entries,
+            &Rect::new(0.0, 0.0, 400.0, 200.0),
+            &mut backend,
+            &DEFAULT_LIGHT,
+        )
+        .unwrap();
+        let svg = backend.svg_string();
+        assert!(svg.contains("first"));
+        assert!(svg.contains("second"));
+    }
+
+    #[test]
+    fn render_background_fills_rect() {
+        let mut backend = SvgBackend::new(50, 50);
+        render_background(&Rect::new(0.0, 0.0, 50.0, 50.0), &mut backend, &DEFAULT_LIGHT).unwrap();
+    }
+
+    #[test]
+    fn render_title_centers_in_slot() {
+        let mut backend = SvgBackend::new(200, 50);
+        let slot = Slot {
+            rect: Rect::new(0.0, 0.0, 200.0, 30.0),
+            side: Side::Top,
+        };
+        render_title("Hello", &slot, &mut backend, &DEFAULT_LIGHT).unwrap();
+        assert!(backend.svg_string().contains("Hello"));
+    }
+
+    #[test]
+    fn render_axis_labels_writes_when_provided() {
+        let mut backend = SvgBackend::new(200, 200);
+        let plot = Rect::new(20.0, 20.0, 180.0, 180.0);
+        let x_slot = Slot {
+            rect: Rect::new(20.0, 180.0, 180.0, 200.0),
+            side: Side::Bottom,
+        };
+        let y_slot = Slot {
+            rect: Rect::new(0.0, 20.0, 20.0, 180.0),
+            side: Side::Left,
+        };
+        render_axis_labels(
+            Some("X"),
+            Some("Y"),
+            Some(&x_slot),
+            Some(&y_slot),
+            &plot,
+            &mut backend,
+            &DEFAULT_LIGHT,
+        )
+        .unwrap();
+        let svg = backend.svg_string();
+        assert!(svg.contains('X'));
+        assert!(svg.contains('Y'));
+    }
+
+    #[test]
+    fn render_axis_labels_skips_when_missing() {
+        let mut backend = SvgBackend::new(200, 200);
+        render_axis_labels(
+            None,
+            None,
+            None,
+            None,
+            &Rect::new(0.0, 0.0, 200.0, 200.0),
+            &mut backend,
+            &DEFAULT_LIGHT,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn render_grid_lines_runs_for_each_tick() {
+        let mut backend = SvgBackend::new(200, 200);
+        let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
+        render_grid_lines(&coord, &mut backend, &DEFAULT_LIGHT).unwrap();
+    }
+
+    #[test]
+    fn render_axes_numeric_branch() {
+        let mut backend = SvgBackend::new(200, 200);
+        let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
+        render_axes(&coord, &mut backend, &[], false, &DEFAULT_LIGHT).unwrap();
+    }
+
+    #[test]
+    fn render_axes_categories_on_x() {
+        let mut backend = SvgBackend::new(200, 200);
+        let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
+        let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        render_axes(&coord, &mut backend, &cats, false, &DEFAULT_LIGHT).unwrap();
+    }
+
+    #[test]
+    fn render_axes_categories_on_y() {
+        let mut backend = SvgBackend::new(200, 200);
+        let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
+        let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        render_axes(&coord, &mut backend, &cats, true, &DEFAULT_LIGHT).unwrap();
+    }
+}

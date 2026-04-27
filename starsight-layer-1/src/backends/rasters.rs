@@ -294,3 +294,126 @@ impl DrawBackend for SkiaBackend {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::SkiaBackend;
+    use crate::backends::DrawBackend;
+    use crate::errors::StarsightError;
+    use crate::paths::{Path, PathCommand, PathStyle};
+    use crate::primitives::{Color, Point, Rect};
+
+    #[test]
+    fn new_zero_dimensions_errors() {
+        let result = SkiaBackend::new(0, 100);
+        assert!(matches!(result, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn dimensions_returns_pixmap_size() {
+        let b = SkiaBackend::new(120, 80).unwrap();
+        assert_eq!(b.dimensions(), (120, 80));
+    }
+
+    #[test]
+    fn draw_path_with_quad_and_cubic_curves() {
+        let mut b = SkiaBackend::new(200, 200).unwrap();
+        let path = Path {
+            commands: vec![
+                PathCommand::MoveTo(Point::new(10.0, 10.0)),
+                PathCommand::QuadTo(Point::new(50.0, 0.0), Point::new(100.0, 50.0)),
+                PathCommand::CubicTo(
+                    Point::new(120.0, 60.0),
+                    Point::new(150.0, 80.0),
+                    Point::new(180.0, 100.0),
+                ),
+                PathCommand::Close,
+            ],
+        };
+        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 2.0)).unwrap();
+    }
+
+    #[test]
+    fn draw_path_empty_errors() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let path = Path::new();
+        let r = b.draw_path(&path, &PathStyle::default());
+        assert!(matches!(r, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn draw_path_with_fill_and_dash() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        let path = Path::new()
+            .move_to(Point::new(10.0, 10.0))
+            .line_to(Point::new(90.0, 90.0));
+        let mut style = PathStyle::stroke(Color::BLUE, 2.0);
+        style.fill_color = Some(Color::RED);
+        style.dash_pattern = Some((5.0, 3.0));
+        style.opacity = 0.5;
+        b.draw_path(&path, &style).unwrap();
+    }
+
+    #[test]
+    fn draw_rotated_text_zero_rotation_uses_fast_path() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 0.0)
+            .unwrap();
+    }
+
+    #[test]
+    fn draw_rotated_text_actual_rotation() {
+        let mut b = SkiaBackend::new(100, 100).unwrap();
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 45.0)
+            .unwrap();
+    }
+
+    #[test]
+    fn save_png_writes_file() {
+        let mut b = SkiaBackend::new(20, 20).unwrap();
+        b.fill(Color::WHITE);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.png");
+        b.save_png(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn save_svg_returns_export_error() {
+        let b = SkiaBackend::new(20, 20).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.svg");
+        let r = b.save_svg(&path);
+        assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+
+    #[test]
+    fn set_clip_with_rect_and_clear() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        b.set_clip(Some(Rect::new(0.0, 0.0, 25.0, 25.0))).unwrap();
+        b.set_clip(None).unwrap();
+    }
+
+    #[test]
+    fn fill_rect_invalid_returns_error() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let r = b.fill_rect(Rect::new(10.0, 10.0, 5.0, 5.0), Color::RED);
+        assert!(matches!(r, Err(StarsightError::Render(_))));
+    }
+
+    #[test]
+    fn text_extent_proportional_to_length() {
+        let mut b = SkiaBackend::new(50, 50).unwrap();
+        let (w1, _) = b.text_extent("a", 10.0).unwrap();
+        let (w5, _) = b.text_extent("aaaaa", 10.0).unwrap();
+        assert!(w5 > w1);
+    }
+
+    #[test]
+    fn png_bytes_is_valid_png_header() {
+        let mut b = SkiaBackend::new(10, 10).unwrap();
+        b.fill(Color::BLACK);
+        let bytes = b.png_bytes().unwrap();
+        assert_eq!(&bytes[..8], b"\x89PNG\r\n\x1a\n");
+    }
+}

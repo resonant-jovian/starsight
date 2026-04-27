@@ -263,6 +263,7 @@ dependencies = [
 name = "examples"
 version = "0.2.0"
 dependencies = [
+ "chromata",
  "prismatica",
  "starsight",
  "starsight-layer-3",
@@ -834,6 +835,7 @@ dependencies = [
  "insta",
  "prismatica",
  "svg",
+ "tempfile",
  "thiserror",
  "tiny-skia",
 ]
@@ -872,6 +874,7 @@ dependencies = [
  "starsight-layer-2",
  "starsight-layer-3",
  "starsight-layer-4",
+ "tempfile",
 ]
 
 [[package]]

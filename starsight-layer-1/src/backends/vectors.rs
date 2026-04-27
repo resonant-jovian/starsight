@@ -180,3 +180,112 @@ fn text_extent(&mut self, text: &str, font_size: f32) -> Result<(f32, f32)> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::SvgBackend;
+    use crate::backends::DrawBackend;
+    use crate::errors::StarsightError;
+    use crate::paths::{Path, PathCommand, PathStyle};
+    use crate::primitives::{Color, Point, Rect};
+
+    #[test]
+    fn dimensions_returns_size() {
+        let b = SvgBackend::new(300, 200);
+        assert_eq!(b.dimensions(), (300, 200));
+    }
+
+    #[test]
+    fn draw_path_with_all_command_kinds() {
+        let mut b = SvgBackend::new(200, 200);
+        let path = Path {
+            commands: vec![
+                PathCommand::MoveTo(Point::new(10.0, 10.0)),
+                PathCommand::LineTo(Point::new(20.0, 20.0)),
+                PathCommand::QuadTo(Point::new(30.0, 30.0), Point::new(40.0, 40.0)),
+                PathCommand::CubicTo(
+                    Point::new(50.0, 50.0),
+                    Point::new(60.0, 60.0),
+                    Point::new(70.0, 70.0),
+                ),
+                PathCommand::Close,
+            ],
+        };
+        b.draw_path(&path, &PathStyle::stroke(Color::BLACK, 1.0)).unwrap();
+        let svg = b.svg_string();
+        assert!(svg.contains("<path"));
+    }
+
+    #[test]
+    fn draw_path_with_opacity_emits_opacity_attrs() {
+        let mut b = SvgBackend::new(100, 100);
+        let path = Path::new()
+            .move_to(Point::new(0.0, 0.0))
+            .line_to(Point::new(10.0, 10.0));
+        let mut style = PathStyle::stroke(Color::BLUE, 1.0);
+        style.fill_color = Some(Color::RED);
+        style.opacity = 0.4;
+        b.draw_path(&path, &style).unwrap();
+        let svg = b.svg_string();
+        assert!(svg.contains("opacity"));
+    }
+
+    #[test]
+    fn draw_text_emits_text_element() {
+        let mut b = SvgBackend::new(100, 100);
+        b.draw_text("hello", Point::new(10.0, 50.0), 14.0, Color::BLACK).unwrap();
+        let svg = b.svg_string();
+        assert!(svg.contains("hello"));
+    }
+
+    #[test]
+    fn draw_rotated_text_zero_rotation_uses_fast_path() {
+        let mut b = SvgBackend::new(100, 100);
+        b.draw_rotated_text("hi", Point::new(10.0, 50.0), 12.0, Color::BLACK, 0.0).unwrap();
+        let svg = b.svg_string();
+        assert!(!svg.contains("transform"));
+        assert!(svg.contains("hi"));
+    }
+
+    #[test]
+    fn draw_rotated_text_emits_transform() {
+        let mut b = SvgBackend::new(100, 100);
+        b.draw_rotated_text("rotated", Point::new(10.0, 50.0), 12.0, Color::BLACK, 45.0).unwrap();
+        let svg = b.svg_string();
+        assert!(svg.contains("transform"));
+    }
+
+    #[test]
+    fn text_extent_proportional() {
+        let mut b = SvgBackend::new(100, 100);
+        let (w, h) = b.text_extent("test", 10.0).unwrap();
+        assert!(w > 0.0);
+        assert_eq!(h, 10.0);
+    }
+
+    #[test]
+    fn set_clip_is_no_op() {
+        let mut b = SvgBackend::new(100, 100);
+        b.set_clip(Some(Rect::new(0.0, 0.0, 50.0, 50.0))).unwrap();
+        b.set_clip(None).unwrap();
+    }
+
+    #[test]
+    fn save_png_returns_export_error() {
+        let b = SvgBackend::new(20, 20);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.png");
+        let r = b.save_png(&path);
+        assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+
+    #[test]
+    fn save_svg_writes_file() {
+        let mut b = SvgBackend::new(20, 20);
+        b.fill_rect(Rect::new(0.0, 0.0, 10.0, 10.0), Color::RED).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.svg");
+        b.save_svg(&path).unwrap();
+        assert!(path.exists());
+    }
+}

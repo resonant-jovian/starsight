@@ -750,7 +750,7 @@ impl std::fmt::Display for Transform {
 
 #[cfg(test)]
 mod tests {
-    use super::{Color, Point, Vec2};
+    use super::{Color, ColorAlpha, Point, Rect, Size, Transform, Vec2};
 
     #[test]
     fn from_hex_roundtrip() {
@@ -786,7 +786,7 @@ mod tests {
     #[test]
     fn color_to_f32() {
         let color = Color::new(128, 128, 128);
-        let (r, g, b) = color.to_f32();
+        let (r, _g, _b) = color.to_f32();
         assert!((r - 0.502).abs() < 0.01);
     }
 
@@ -923,5 +923,354 @@ mod tests {
     #[test]
     fn vec2_length() {
         assert!((Vec2::new(3.0, 4.0).length() - 5.0).abs() < f32::EPSILON);
+    }
+
+    // ── ColorAlpha ───────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn color_alpha_new() {
+        let c = ColorAlpha::new(10, 20, 30, 40);
+        assert_eq!(c.r, 10);
+        assert_eq!(c.g, 20);
+        assert_eq!(c.b, 30);
+        assert_eq!(c.a, 40);
+    }
+
+    #[test]
+    fn color_alpha_from_hex() {
+        let c = ColorAlpha::from_hex(0x80_FF_00_00);
+        assert_eq!(c.a, 0x80);
+        assert_eq!(c.r, 0xFF);
+        assert_eq!(c.g, 0x00);
+        assert_eq!(c.b, 0x00);
+    }
+
+    #[test]
+    fn color_alpha_constants() {
+        assert_eq!(ColorAlpha::BLACK.r, 0);
+        assert_eq!(ColorAlpha::BLACK.a, 255);
+        assert_eq!(ColorAlpha::WHITE.r, 255);
+        assert_eq!(ColorAlpha::WHITE.a, 255);
+        assert_eq!(ColorAlpha::RED.r, 255);
+        assert_eq!(ColorAlpha::RED.g, 0);
+        assert_eq!(ColorAlpha::GREEN.g, 255);
+        assert_eq!(ColorAlpha::BLUE.b, 255);
+    }
+
+    #[test]
+    fn color_alpha_to_f32() {
+        let c = ColorAlpha::new(255, 0, 0, 128);
+        let (r, g, b) = c.to_f32();
+        assert!((r - 1.0).abs() < f32::EPSILON);
+        assert!(g.abs() < f32::EPSILON);
+        assert!(b.abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn color_alpha_from_f32() {
+        let c = ColorAlpha::from_f32(1.0, 0.5, 0.0, 0.5);
+        assert_eq!(c.r, 255);
+        assert!(c.g >= 127 && c.g <= 129);
+        assert_eq!(c.b, 0);
+        assert!(c.a >= 127 && c.a <= 129);
+    }
+
+    #[test]
+    fn color_alpha_from_f32_clamp() {
+        let c = ColorAlpha::from_f32(2.0, -1.0, 0.5, 1.5);
+        assert_eq!(c.r, 255);
+        assert_eq!(c.g, 0);
+        assert_eq!(c.a, 255);
+    }
+
+    #[test]
+    fn color_alpha_to_tiny_skia() {
+        let c = ColorAlpha::new(255, 0, 0, 128);
+        let ts = c.to_tiny_skia();
+        assert_eq!(ts.red(), 1.0);
+    }
+
+    #[test]
+    fn color_alpha_without_alpha() {
+        let c = ColorAlpha::new(10, 20, 30, 128);
+        let plain = c.without_alpha();
+        assert_eq!(plain.r, 10);
+        assert_eq!(plain.g, 20);
+        assert_eq!(plain.b, 30);
+    }
+
+    // ── Point ────────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn point_constants() {
+        assert_eq!(Point::ZERO, Point::new(0.0, 0.0));
+        assert_eq!(Point::X, Point::new(1.0, 0.0));
+        assert_eq!(Point::Y, Point::new(0.0, 1.0));
+    }
+
+    #[test]
+    fn point_from_array() {
+        let p: Point = [3.0_f32, 4.0_f32].into();
+        assert_eq!(p, Point::new(3.0, 4.0));
+    }
+
+    #[test]
+    fn point_from_tuple() {
+        let p: Point = (3.0_f32, 4.0_f32).into();
+        assert_eq!(p, Point::new(3.0, 4.0));
+    }
+
+    #[test]
+    fn point_into_array() {
+        let arr: [f32; 2] = Point::new(3.0, 4.0).into();
+        assert_eq!(arr, [3.0, 4.0]);
+    }
+
+    #[test]
+    fn point_into_tuple() {
+        let tup: (f32, f32) = Point::new(3.0, 4.0).into();
+        assert_eq!(tup, (3.0, 4.0));
+    }
+
+    #[test]
+    fn point_from_tiny_skia() {
+        let ts = tiny_skia::Point::from_xy(3.0, 4.0);
+        let p: Point = ts.into();
+        assert_eq!(p, Point::new(3.0, 4.0));
+    }
+
+    #[test]
+    fn point_display() {
+        let s = format!("{}", Point::new(3.0, 4.0));
+        assert!(s.contains('3'));
+        assert!(s.contains('4'));
+    }
+
+    // ── Vec2 ─────────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn vec2_constants() {
+        assert_eq!(Vec2::ZERO, Vec2::new(0.0, 0.0));
+        assert_eq!(Vec2::X, Vec2::new(1.0, 0.0));
+        assert_eq!(Vec2::Y, Vec2::new(0.0, 1.0));
+    }
+
+    #[test]
+    fn vec2_normalize_unit() {
+        let v = Vec2::new(3.0, 4.0).normalize();
+        assert!((v.length() - 1.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn vec2_normalize_zero() {
+        assert_eq!(Vec2::ZERO.normalize(), Vec2::ZERO);
+    }
+
+    #[test]
+    fn vec2_display() {
+        let s = format!("{}", Vec2::new(3.0, 4.0));
+        assert!(s.contains('3'));
+    }
+
+    #[test]
+    fn vec2_add() {
+        assert_eq!(Vec2::new(1.0, 2.0) + Vec2::new(3.0, 4.0), Vec2::new(4.0, 6.0));
+    }
+
+    #[test]
+    fn vec2_sub() {
+        assert_eq!(Vec2::new(5.0, 7.0) - Vec2::new(3.0, 4.0), Vec2::new(2.0, 3.0));
+    }
+
+    #[test]
+    fn vec2_neg() {
+        assert_eq!(-Vec2::new(3.0, 4.0), Vec2::new(-3.0, -4.0));
+    }
+
+    #[test]
+    fn point_minus_vec2_is_point() {
+        let p = Point::new(10.0, 20.0);
+        let v = Vec2::new(3.0, 4.0);
+        let result: Point = p - v;
+        assert_eq!(result, Point::new(7.0, 16.0));
+    }
+
+    // ── Rect ─────────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn rect_new() {
+        let r = Rect::new(1.0, 2.0, 5.0, 6.0);
+        assert_eq!(r.left, 1.0);
+        assert_eq!(r.top, 2.0);
+        assert_eq!(r.right, 5.0);
+        assert_eq!(r.bottom, 6.0);
+    }
+
+    #[test]
+    fn rect_from_xywh() {
+        let r = Rect::from_xywh(1.0, 2.0, 4.0, 6.0);
+        assert_eq!(r.left, 1.0);
+        assert_eq!(r.top, 2.0);
+        assert_eq!(r.right, 5.0);
+        assert_eq!(r.bottom, 8.0);
+    }
+
+    #[test]
+    fn rect_from_center_size() {
+        let r = Rect::from_center_size(Point::new(10.0, 10.0), Size::new(4.0, 6.0));
+        assert_eq!(r.left, 8.0);
+        assert_eq!(r.top, 7.0);
+        assert_eq!(r.right, 12.0);
+        assert_eq!(r.bottom, 13.0);
+    }
+
+    #[test]
+    fn rect_dimensions() {
+        let r = Rect::new(1.0, 2.0, 5.0, 6.0);
+        assert_eq!(r.width(), 4.0);
+        assert_eq!(r.height(), 4.0);
+        assert_eq!(r.size(), Size::new(4.0, 4.0));
+        assert_eq!(r.center(), Point::new(3.0, 4.0));
+        assert_eq!(r.top_left(), Point::new(1.0, 2.0));
+        assert_eq!(r.bottom_right(), Point::new(5.0, 6.0));
+    }
+
+    #[test]
+    fn rect_contains() {
+        let r = Rect::new(0.0, 0.0, 10.0, 10.0);
+        assert!(r.contains(Point::new(5.0, 5.0)));
+        assert!(r.contains(Point::new(0.0, 0.0)));
+        assert!(r.contains(Point::new(10.0, 10.0)));
+        assert!(!r.contains(Point::new(-1.0, 5.0)));
+        assert!(!r.contains(Point::new(11.0, 5.0)));
+        assert!(!r.contains(Point::new(5.0, -1.0)));
+        assert!(!r.contains(Point::new(5.0, 11.0)));
+    }
+
+    #[test]
+    fn rect_intersection_overlap() {
+        let a = Rect::new(0.0, 0.0, 10.0, 10.0);
+        let b = Rect::new(5.0, 5.0, 15.0, 15.0);
+        let inter = a.intersection(&b).unwrap();
+        assert_eq!(inter, Rect::new(5.0, 5.0, 10.0, 10.0));
+    }
+
+    #[test]
+    fn rect_intersection_disjoint() {
+        let a = Rect::new(0.0, 0.0, 5.0, 5.0);
+        let b = Rect::new(10.0, 10.0, 20.0, 20.0);
+        assert!(a.intersection(&b).is_none());
+    }
+
+    #[test]
+    fn rect_pad() {
+        let r = Rect::new(5.0, 5.0, 10.0, 10.0).pad(2.0);
+        assert_eq!(r, Rect::new(3.0, 3.0, 12.0, 12.0));
+    }
+
+    #[test]
+    fn rect_to_tiny_skia() {
+        let r = Rect::new(1.0, 2.0, 5.0, 6.0);
+        let ts = r.to_tiny_skia().unwrap();
+        assert_eq!(ts.left(), 1.0);
+        assert_eq!(ts.right(), 5.0);
+    }
+
+    #[test]
+    fn rect_to_tiny_skia_invalid() {
+        let r = Rect::new(5.0, 5.0, 1.0, 1.0);
+        assert!(r.to_tiny_skia().is_none());
+    }
+
+    #[test]
+    fn rect_from_tiny_skia() {
+        let ts = tiny_skia::Rect::from_ltrb(1.0, 2.0, 5.0, 6.0).unwrap();
+        let r: Rect = ts.into();
+        assert_eq!(r, Rect::new(1.0, 2.0, 5.0, 6.0));
+    }
+
+    #[test]
+    fn rect_display() {
+        let r = Rect::new(1.0, 2.0, 5.0, 6.0);
+        let s = format!("{}", r);
+        assert!(s.starts_with("Rect("));
+    }
+
+    // ── Size ─────────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn size_new() {
+        let s = Size::new(10.0, 20.0);
+        assert_eq!(s.width, 10.0);
+        assert_eq!(s.height, 20.0);
+    }
+
+    #[test]
+    fn size_from_tiny_skia() {
+        let ts = tiny_skia::Size::from_wh(10.0, 20.0).unwrap();
+        let s: Size = ts.into();
+        assert_eq!(s, Size::new(10.0, 20.0));
+    }
+
+    #[test]
+    fn size_display() {
+        let s = format!("{}", Size::new(10.0, 20.0));
+        assert!(s.contains("10"));
+        assert!(s.contains("20"));
+    }
+
+    // ── Transform ────────────────────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn transform_identity() {
+        let t = Transform::identity();
+        assert_eq!(t.0.sx, 1.0);
+        assert_eq!(t.0.sy, 1.0);
+    }
+
+    #[test]
+    fn transform_translate() {
+        let t = Transform::translate(10.0, 20.0);
+        assert_eq!(t.0.tx, 10.0);
+        assert_eq!(t.0.ty, 20.0);
+    }
+
+    #[test]
+    fn transform_scale() {
+        let t = Transform::scale(2.0, 3.0);
+        assert_eq!(t.0.sx, 2.0);
+        assert_eq!(t.0.sy, 3.0);
+    }
+
+    #[test]
+    fn transform_rotate_degrees() {
+        let t = Transform::rotate_degrees(90.0);
+        // 90° rotation: cos→0, sin→1. sx and sy go near zero; kx/ky absolute go near 1.
+        assert!(t.0.sx.abs() < 1e-6);
+        assert!(t.0.sy.abs() < 1e-6);
+        assert!((t.0.kx.abs() - 1.0).abs() < 1e-6 || (t.0.ky.abs() - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn transform_then() {
+        let a = Transform::translate(10.0, 0.0);
+        let b = Transform::translate(0.0, 20.0);
+        let c = a.then(b);
+        assert_eq!(c.0.tx, 10.0);
+        assert_eq!(c.0.ty, 20.0);
+    }
+
+    #[test]
+    fn transform_pre_translate() {
+        let t = Transform::scale(2.0, 2.0).pre_translate(5.0, 5.0);
+        assert_eq!(t.0.tx, 10.0);
+        assert_eq!(t.0.ty, 10.0);
+    }
+
+    #[test]
+    fn transform_display() {
+        let t = Transform::identity();
+        let s = format!("{}", t);
+        assert!(s.starts_with("Transform("));
     }
 }

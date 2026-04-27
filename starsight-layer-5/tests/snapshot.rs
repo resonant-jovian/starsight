@@ -92,6 +92,8 @@ fn snapshot_line_multi() {
         .add(LineMark::new(days, lows).color(Color::BLUE));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+    let png = fig.render_png().unwrap();
+    insta::assert_binary_snapshot!(".png", png);
 }
 
 // ── scatter tests ────────────────────────────────────────────────────────────────────────────────

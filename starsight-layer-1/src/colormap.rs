@@ -130,3 +130,108 @@ pub const VIK: Colormap = Colormap::new(prismatica::crameri::VIK);
 
 /// Default colormap used when none is specified.
 pub const DEFAULT: Colormap = VIRIDIS;
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        BATLOW, BERLIN, Colormap, ColormapKind, DEFAULT, INFERNO, MAGMA, PLASMA, TURBO, VIK,
+        VIRIDIS,
+    };
+
+    #[test]
+    fn sample_clamps_below_zero() {
+        let c = VIRIDIS.sample(-1.0);
+        let c0 = VIRIDIS.sample(0.0);
+        assert_eq!(c, c0);
+    }
+
+    #[test]
+    fn sample_clamps_above_one() {
+        let c = VIRIDIS.sample(2.0);
+        let c1 = VIRIDIS.sample(1.0);
+        assert_eq!(c, c1);
+    }
+
+    #[test]
+    fn sample_index_endpoints() {
+        let first = VIRIDIS.sample_index(0, 10);
+        let last = VIRIDIS.sample_index(9, 10);
+        assert_ne!(first, last);
+    }
+
+    #[test]
+    fn colors_returns_n_entries() {
+        let palette = VIRIDIS.colors(8);
+        assert_eq!(palette.len(), 8);
+    }
+
+    #[test]
+    fn name_is_nonempty() {
+        assert!(!VIRIDIS.name().is_empty());
+    }
+
+    #[test]
+    fn kind_classification() {
+        assert_eq!(VIRIDIS.kind(), ColormapKind::Sequential);
+        assert_eq!(BERLIN.kind(), ColormapKind::Diverging);
+        assert_eq!(VIK.kind(), ColormapKind::Diverging);
+    }
+
+    #[test]
+    fn kind_multi_sequential_falls_back_to_sequential() {
+        // oleron is a MultiSequential colormap; the wrapper folds it into Sequential.
+        let m = Colormap::new(prismatica::crameri::OLERON);
+        assert_eq!(m.kind(), ColormapKind::Sequential);
+    }
+
+    #[test]
+    fn kind_cyclic() {
+        let m = Colormap::new(prismatica::d3::SINEBOW);
+        assert_eq!(m.kind(), ColormapKind::Cyclic);
+    }
+
+    #[test]
+    fn kind_qualitative() {
+        let m = Colormap::new(prismatica::d3::TABLEAU10);
+        assert_eq!(m.kind(), ColormapKind::Qualitative);
+    }
+
+    #[test]
+    fn reversed_returns_self_for_now() {
+        let c = VIRIDIS;
+        let r = c.reversed();
+        assert_eq!(c.sample(0.0), r.sample(0.0));
+    }
+
+    #[test]
+    fn from_prismatica_value() {
+        let c: Colormap = prismatica::matplotlib::VIRIDIS.into();
+        assert_eq!(c.name(), VIRIDIS.name());
+    }
+
+    #[test]
+    fn from_prismatica_ref() {
+        let inner = prismatica::matplotlib::VIRIDIS;
+        let c: Colormap = (&inner).into();
+        assert_eq!(c.name(), VIRIDIS.name());
+    }
+
+    #[test]
+    fn default_is_viridis() {
+        let d = Colormap::default();
+        assert_eq!(d.name(), VIRIDIS.name());
+    }
+
+    #[test]
+    fn default_const_is_viridis() {
+        assert_eq!(DEFAULT.name(), VIRIDIS.name());
+    }
+
+    #[test]
+    fn builtin_colormaps_load() {
+        for c in [VIRIDIS, PLASMA, INFERNO, MAGMA, TURBO, BATLOW, BERLIN, VIK] {
+            assert!(!c.name().is_empty());
+            let _ = c.sample(0.5);
+        }
+    }
+}

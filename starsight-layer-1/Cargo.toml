@@ -21,6 +21,9 @@ insta.workspace = true
 svg.workspace = true
 prismatica = { workspace = true, features = ["d3"] }
 
+[dev-dependencies]
+tempfile = "3"
+
 [lints]
 workspace = true
 

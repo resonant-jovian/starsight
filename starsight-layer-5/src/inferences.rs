@@ -151,4 +151,9 @@ mod tests {
         let unique = super::count_unique_f64(&data);
         assert_eq!(unique, 3);
     }
+
+    #[test]
+    fn count_unique_f64_empty_returns_zero() {
+        assert_eq!(super::count_unique_f64(&[]), 0);
+    }
 }

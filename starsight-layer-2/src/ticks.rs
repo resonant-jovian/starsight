@@ -39,10 +39,8 @@ pub fn wilkinson_extended(mut dmin: f64, mut dmax: f64, m: usize, only_loose: bo
 
     let mut j = 1.0;
     'outer: loop {
-        for &q in &Q {
-            let Some(sm) = simplicity_max(q, j) else {
-                continue;
-            };
+        for (i, &q) in Q.iter().enumerate() {
+            let sm = simplicity_max(i, j);
 
             if W[0] * sm + W[1] + W[2] + W[3] < best_score {
                 break 'outer;
@@ -81,9 +79,7 @@ pub fn wilkinson_extended(mut dmin: f64, mut dmax: f64, m: usize, only_loose: bo
                         let lmax = lmin + step * (k - 1.0);
                         let lstep = step;
 
-                        let Some(s) = simplicity(q, j, lmin, lmax, lstep) else {
-                            continue;
-                        };
+                        let s = simplicity(i, j, lmin, lmax, lstep);
                         let c = coverage(dmin, dmax, lmin, lmax);
                         let g = density(k, m as f64, dmin, dmax, lmin, lmax);
                         let l = 1.0; // legibility
@@ -126,24 +122,22 @@ fn linspace_step(from: f64, to: f64, step: f64) -> Vec<f64> {
     (0..n).map(|i| from + i as f64 * step).collect()
 }
 
-fn simplicity(q: f64, j: f64, lmin: f64, lmax: f64, lstep: f64) -> Option<f64> {
+fn simplicity(i: usize, j: f64, lmin: f64, lmax: f64, lstep: f64) -> f64 {
     let eps = f64::EPSILON;
     let n = Q.len();
-    let i = Q.iter().position(|&x| x == q)?;
     let v = if (lmin % lstep < eps || lstep - (lmin % lstep) < lstep) && lmin <= 0.0 && lmax >= 0.0
     {
         1.0
     } else {
         0.0
     };
-    Some(1. - (i as f64 - 1.) / (n as f64 - 1.) - j + v)
+    1. - (i as f64 - 1.) / (n as f64 - 1.) - j + v
 }
 
-fn simplicity_max(q: f64, j: f64) -> Option<f64> {
+fn simplicity_max(i: usize, j: f64) -> f64 {
     let n = Q.len();
-    let i = Q.iter().position(|&x| x == q)?;
     let v = 1.;
-    Some(1. - (i as f64 - 1.) / (n as f64 - 1.) - j + v)
+    1. - (i as f64 - 1.) / (n as f64 - 1.) - j + v
 }
 
 fn coverage(dmin: f64, dmax: f64, lmin: f64, lmax: f64) -> f64 {
@@ -204,6 +198,27 @@ mod tests {
     fn ticks_zero_width() {
         let ticks = wilkinson_extended(42.0, 42.0, 5, true);
         assert_eq!(ticks, vec![42.0]);
+    }
+
+    #[test]
+    fn ticks_swapped_input_is_normalized() {
+        let normal = wilkinson_extended(0.0, 100.0, 5, true);
+        let swapped = wilkinson_extended(100.0, 0.0, 5, true);
+        assert_eq!(normal, swapped);
+    }
+
+    #[test]
+    fn ticks_zero_count_returns_singleton() {
+        // Triggers the `n <= 1` branch in linspace via the zero-width fast path.
+        let ticks = wilkinson_extended(7.0, 7.0, 0, true);
+        assert_eq!(ticks, vec![7.0]);
+    }
+
+    #[test]
+    fn ticks_huge_range_uses_linspace() {
+        // Range exceeds f64::MAX.sqrt() so linspace fallback triggers.
+        let ticks = wilkinson_extended(-f64::MAX / 2.0, f64::MAX / 2.0, 5, true);
+        assert!(!ticks.is_empty());
     }
 }
 

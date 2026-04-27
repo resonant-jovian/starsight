@@ -496,3 +496,114 @@ impl Figure {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Figure;
+    use starsight_layer_1::errors::StarsightError;
+    use starsight_layer_1::primitives::Color;
+    use starsight_layer_1::theme::DEFAULT_DARK;
+    use starsight_layer_3::marks::{BarMark, LineMark};
+
+    #[test]
+    fn theme_builder_sets_theme() {
+        let fig = Figure::new(100, 100).theme(DEFAULT_DARK);
+        assert!(fig.theme.is_dark);
+    }
+
+    #[test]
+    fn marks_accessor_returns_added_marks() {
+        let fig = Figure::new(100, 100).add(LineMark::new(vec![0.0], vec![0.0]));
+        assert_eq!(fig.marks().len(), 1);
+    }
+
+    #[test]
+    fn from_arrays_creates_line_chart() {
+        let fig = Figure::from_arrays([0.0, 1.0, 2.0], [0.0, 1.0, 4.0]);
+        assert_eq!(fig.width, 800);
+        assert_eq!(fig.height, 600);
+        assert_eq!(fig.marks().len(), 1);
+    }
+
+    #[test]
+    fn render_png_with_no_marks_errors() {
+        let fig = Figure::new(100, 100);
+        let result = fig.render_png();
+        assert!(matches!(result, Err(StarsightError::Data(_))));
+    }
+
+    #[test]
+    fn render_svg_with_legend_entry() {
+        // Mark with a non-empty label triggers the legend code path
+        let fig = Figure::new(400, 300).add(
+            LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 4.0])
+                .label("series1")
+                .color(Color::RED),
+        );
+        let svg = fig.render_svg().unwrap();
+        assert!(svg.contains("series1"));
+    }
+
+    #[test]
+    fn render_svg_with_horizontal_bars_uses_y_category_axis() {
+        let fig = Figure::new(400, 300).add(
+            BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).horizontal(),
+        );
+        let svg = fig.render_svg().unwrap();
+        assert!(svg.contains('a'));
+    }
+
+    #[test]
+    fn render_svg_with_grouped_bars() {
+        let fig = Figure::new(400, 300)
+            .add(BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).group("g1"))
+            .add(BarMark::new(vec!["a".into(), "b".into()], vec![3.0, 4.0]).group("g2"));
+        let svg = fig.render_svg().unwrap();
+        assert!(!svg.is_empty());
+    }
+
+    #[test]
+    fn render_svg_with_stacked_bars() {
+        let fig = Figure::new(400, 300)
+            .add(BarMark::new(vec!["a".into(), "b".into()], vec![1.0, 2.0]).stack("s"))
+            .add(BarMark::new(vec!["a".into(), "b".into()], vec![3.0, 4.0]).stack("s"));
+        let svg = fig.render_svg().unwrap();
+        assert!(!svg.is_empty());
+    }
+
+    #[test]
+    fn save_to_svg_writes_file() {
+        let fig = Figure::new(100, 100).add(LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]));
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.svg");
+        fig.save(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn save_to_png_writes_file() {
+        let fig = Figure::new(100, 100).add(LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]));
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.png");
+        fig.save(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn save_to_no_extension_defaults_to_png() {
+        let fig = Figure::new(100, 100).add(LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]));
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out_noext");
+        fig.save(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn save_to_unsupported_extension_errors() {
+        let fig = Figure::new(100, 100).add(LineMark::new(vec![0.0, 1.0], vec![0.0, 1.0]));
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("out.bmp");
+        let r = fig.save(&path);
+        assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+}

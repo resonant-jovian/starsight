@@ -38,6 +38,16 @@ mod tests {
         assert_eq!(scale.inverse(-0.5), -5.0);
         assert_eq!(scale.inverse(1.5), 15.0);
     }
+
+    #[test]
+    fn linear_scale_zero_domain_maps_to_midpoint() {
+        let scale = super::LinearScale {
+            domain_min: 5.0,
+            domain_max: 5.0,
+        };
+        assert_eq!(scale.map(5.0), 0.5);
+        assert_eq!(scale.map(0.0), 0.5);
+    }
 }
 
 // ── Scale ────────────────────────────────────────────────────────────────────────────────────────

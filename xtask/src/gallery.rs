@@ -1,8 +1,11 @@
 //! Gallery command: run every example, aggregate outputs in `target/gallery/`.
 //!
 //! Layout:
-//! - `target/gallery/examples/<name>.png` — copies of `examples/showcases/<name>.png`,
+//! - `target/gallery/examples/<name>.png` — copies of `examples/<group>/<name>.png`,
 //!   produced by running each `[[example]]` registered in `examples/Cargo.toml`.
+//!   The PNG is assumed to live next to the `.rs` file; the source path comes
+//!   from the manifest's `path = "..."` field, so the gallery follows whichever
+//!   group sub-folder the example happens to live in.
 //! - `target/gallery/snapshots/<name>.png` — mirrors of
 //!   `starsight-layer-5/tests/snapshots/snapshot__snapshot_<name>-2.snap.png`,
 //!   renamed to drop the insta prefix. Snapshot regen is a separate step
@@ -16,7 +19,7 @@ use std::process::Command;
 
 pub fn run() -> Result<()> {
     let workspace_root = workspace_root()?;
-    let names = read_example_names(&workspace_root)?;
+    let examples = read_examples(&workspace_root)?;
 
     let gallery_examples = workspace_root.join("target/gallery/examples");
     let gallery_snapshots = workspace_root.join("target/gallery/snapshots");
@@ -27,10 +30,11 @@ pub fn run() -> Result<()> {
 
     let mut generated = 0usize;
     let mut failed: Vec<String> = Vec::new();
-    for name in &names {
+    for example in &examples {
+        let name = &example.name;
         match run_example(&workspace_root, name) {
             Ok(()) => {
-                let src = workspace_root.join(format!("examples/showcases/{name}.png"));
+                let src = workspace_root.join(example.png_path());
                 let dst = gallery_examples.join(format!("{name}.png"));
                 if src.exists() {
                     fs::copy(&src, &dst).with_context(|| {
@@ -77,38 +81,79 @@ fn workspace_root() -> Result<PathBuf> {
         .context("xtask manifest has no parent directory")
 }
 
-/// Parse `examples/Cargo.toml` for the `name` of each `[[example]]` table.
-fn read_example_names(workspace_root: &Path) -> Result<Vec<String>> {
-    let path = workspace_root.join("examples/Cargo.toml");
-    let text = fs::read_to_string(&path)
-        .with_context(|| format!("reading {}", path.display()))?;
+/// One `[[example]]` table from `examples/Cargo.toml`.
+struct ExampleEntry {
+    name: String,
+    /// Workspace-relative path to the `.rs` source, e.g. `examples/basics/quickstart.rs`.
+    rs_path: String,
+}
 
-    let mut names = Vec::new();
+impl ExampleEntry {
+    /// Sibling `.png` of the source file: same directory, `.png` extension.
+    fn png_path(&self) -> String {
+        match self.rs_path.strip_suffix(".rs") {
+            Some(stem) => format!("{stem}.png"),
+            None => format!("{}.png", self.rs_path),
+        }
+    }
+}
+
+/// Parse `examples/Cargo.toml` for every `[[example]]` table, capturing both
+/// `name` and `path` so the gallery can locate each generated PNG.
+fn read_examples(workspace_root: &Path) -> Result<Vec<ExampleEntry>> {
+    let manifest_path = workspace_root.join("examples/Cargo.toml");
+    let text = fs::read_to_string(&manifest_path)
+        .with_context(|| format!("reading {}", manifest_path.display()))?;
+
+    let mut entries = Vec::new();
     let mut in_example = false;
+    let mut current_name: Option<String> = None;
+    let mut current_path: Option<String> = None;
     for line in text.lines() {
         let trimmed = line.trim();
         if trimmed == "[[example]]" {
+            push_if_complete(&mut entries, &mut current_name, &mut current_path);
             in_example = true;
             continue;
         }
         if trimmed.starts_with('[') {
+            push_if_complete(&mut entries, &mut current_name, &mut current_path);
             in_example = false;
             continue;
         }
         if !in_example {
             continue;
         }
-        if let Some(rest) = trimmed.strip_prefix("name") {
-            let value = rest
-                .trim_start_matches([' ', '=', '\t'])
-                .trim()
-                .trim_matches('"');
-            if !value.is_empty() {
-                names.push(value.to_string());
-            }
+        if let Some(value) = parse_kv(trimmed, "name") {
+            current_name = Some(value);
+        } else if let Some(value) = parse_kv(trimmed, "path") {
+            current_path = Some(value);
         }
     }
-    Ok(names)
+    push_if_complete(&mut entries, &mut current_name, &mut current_path);
+    Ok(entries)
+}
+
+fn parse_kv(line: &str, key: &str) -> Option<String> {
+    let (lhs, rhs) = line.split_once('=')?;
+    if lhs.trim() != key {
+        return None;
+    }
+    let value = rhs.trim().trim_matches('"');
+    if value.is_empty() { None } else { Some(value.to_string()) }
+}
+
+fn push_if_complete(
+    entries: &mut Vec<ExampleEntry>,
+    name: &mut Option<String>,
+    path: &mut Option<String>,
+) {
+    if let (Some(name), Some(path)) = (name.take(), path.take()) {
+        entries.push(ExampleEntry {
+            name,
+            rs_path: format!("examples/{path}"),
+        });
+    }
 }
 
 fn run_example(workspace_root: &Path, name: &str) -> Result<()> {
