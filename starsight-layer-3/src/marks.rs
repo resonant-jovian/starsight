@@ -196,18 +196,25 @@ impl Mark for LineMark {
 // ── PointMark ────────────────────────────────────────────────────────────────────────────────────
 
 /// Scatter plot of individual points.
+///
+/// `colors` and `radii` are parallel to `x`/`y` and follow the same broadcast rule:
+/// `None` → default; `Some(vec)` of length 1 → broadcast; length matching the data
+/// → per-point. Length-mismatched vectors fall through to defaults rather than panic.
 #[derive(Debug, Clone)]
 pub struct PointMark {
     /// X data values.
     pub x: Vec<f64>,
     /// Y data values (must be the same length as `x`).
     pub y: Vec<f64>,
-    /// Point color.
-    pub color: Color,
-    /// Point radius in pixels.
-    pub radius: f32,
+    /// Per-point fill colors. See broadcast rule on the struct doc.
+    pub colors: Option<Vec<Color>>,
+    /// Per-point radii in pixels. See broadcast rule on the struct doc.
+    pub radii: Option<Vec<f32>>,
     /// Legend label.
     pub label: Option<String>,
+    /// Mark-wide alpha multiplier in `[0, 1]`. Applied uniformly to every point
+    /// at draw time via the path's opacity attribute. Default 1.0.
+    pub alpha: f32,
 }
 
 impl PointMark {
@@ -217,23 +224,48 @@ impl PointMark {
         Self {
             x,
             y,
-            color: Color::BLUE,
-            radius: 4.0,
+            colors: Some(vec![Color::BLUE]),
+            radii: Some(vec![4.0]),
             label: None,
+            alpha: 1.0,
         }
     }
 
-    /// Builder: set point color.
+    /// Builder: broadcast a single color to every point.
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
-        self.color = c;
+        self.colors = Some(vec![c]);
         self
     }
 
-    /// Builder: set point radius in pixels.
+    /// Builder: set per-point colors. Length 1 broadcasts; length matching data
+    /// gives per-point colors. Used by bubble scatters where each point's color
+    /// encodes a continuous variable through a colormap.
+    #[must_use]
+    pub fn colors(mut self, cs: Vec<Color>) -> Self {
+        self.colors = Some(cs);
+        self
+    }
+
+    /// Builder: broadcast a single radius (pixels) to every point.
     #[must_use]
     pub fn radius(mut self, r: f32) -> Self {
-        self.radius = r;
+        self.radii = Some(vec![r]);
+        self
+    }
+
+    /// Builder: set per-point radii (pixels). Length 1 broadcasts; length matching
+    /// data gives per-point sizes. Used by bubble scatters.
+    #[must_use]
+    pub fn radii(mut self, rs: Vec<f32>) -> Self {
+        self.radii = Some(rs);
+        self
+    }
+
+    /// Builder: set the mark-wide alpha multiplier (clamped to `[0, 1]`).
+    #[must_use]
+    pub fn alpha(mut self, a: f32) -> Self {
+        self.alpha = a.clamp(0.0, 1.0);
         self
     }
 
@@ -243,32 +275,82 @@ impl PointMark {
         self.label = Some(label.into());
         self
     }
+
+    /// Per-point color lookup. Same broadcast rule as `BarMark` — `None`/mismatched
+    /// fall back to BLUE; length 1 broadcasts; length matching data is per-point.
+    fn color_at(&self, i: usize) -> Color {
+        match self.colors.as_deref() {
+            None => Color::BLUE,
+            Some([c]) => *c,
+            Some(cs) if cs.len() == self.x.len() => cs[i],
+            Some(cs) => cs.first().copied().unwrap_or(Color::BLUE),
+        }
+    }
+
+    /// Per-point radius lookup. Default 4.0 px when unset/mismatched.
+    fn radius_at(&self, i: usize) -> f32 {
+        match self.radii.as_deref() {
+            None => 4.0,
+            Some([r]) => *r,
+            Some(rs) if rs.len() == self.x.len() => rs[i],
+            Some(rs) => rs.first().copied().unwrap_or(4.0),
+        }
+    }
 }
 
 impl Mark for PointMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let mut commands = Vec::new();
+        // Per-point colors/radii mean we can't share a single Path across all
+        // points the way the original implementation did. Group consecutive points
+        // by (color, radius) so each unique combination still maps to one draw_path
+        // call — common bubble-scatter cases (a few size buckets) emit at most a
+        // dozen draws, single-color/single-radius cases collapse back to one draw.
+        let mut current_key: Option<(Color, u32)> = None;
+        let mut commands: Vec<PathCommand> = Vec::new();
 
-        for (x, y) in self.x.iter().zip(&self.y) {
+        let flush = |backend: &mut dyn DrawBackend,
+                     commands: &mut Vec<PathCommand>,
+                     key: Option<(Color, u32)>,
+                     alpha: f32|
+         -> Result<()> {
+            if commands.is_empty() {
+                return Ok(());
+            }
+            if let Some((color, _)) = key {
+                let path = Path {
+                    commands: std::mem::take(commands),
+                };
+                let style = PathStyle {
+                    stroke_color: color,
+                    stroke_width: 0.0,
+                    fill_color: Some(color),
+                    opacity: alpha,
+                    ..PathStyle::default()
+                };
+                backend.draw_path(&path, &style)?;
+            }
+            Ok(())
+        };
+
+        for (i, (x, y)) in self.x.iter().zip(&self.y).enumerate() {
             if x.is_nan() || y.is_nan() {
                 continue;
             }
+            let color = self.color_at(i);
+            let radius = self.radius_at(i);
+            // Bucket by radius via its bit representation so f32 NaN is not a key
+            // (already filtered above) and equal radii hash equal.
+            let key = (color, radius.to_bits());
+            if current_key != Some(key) {
+                flush(backend, &mut commands, current_key, self.alpha)?;
+                current_key = Some(key);
+            }
             let center = coord.data_to_pixel(*x, *y);
-            push_circle(&mut commands, center, self.radius);
+            push_circle(&mut commands, center, radius);
         }
+        flush(backend, &mut commands, current_key, self.alpha)?;
 
-        if commands.is_empty() {
-            return Ok(());
-        }
-
-        let path = Path { commands };
-        let style = PathStyle {
-            stroke_color: self.color,
-            stroke_width: 0.0,
-            fill_color: Some(self.color),
-            ..PathStyle::default()
-        };
-        backend.draw_path(&path, &style)
+        Ok(())
     }
 
     fn data_extent(&self) -> Option<DataExtent> {
@@ -276,7 +358,12 @@ impl Mark for PointMark {
     }
 
     fn legend_color(&self) -> Option<Color> {
-        Some(self.color)
+        Some(
+            self.colors
+                .as_deref()
+                .and_then(|cs| cs.first().copied())
+                .unwrap_or(Color::BLUE),
+        )
     }
 
     fn legend_label(&self) -> Option<&str> {
@@ -285,27 +372,40 @@ impl Mark for PointMark {
 }
 
 // ── BarMark ──────────────────────────────────────────────────────────────────────────────────────
-/// Bar chart for individual values
+/// Bar chart for individual values.
+///
+/// `colors` and `bases` are parallel arrays to `y`. They follow the same broadcast
+/// rule everywhere they're used:
+///
+/// - `None` → use the default for every bar (blue / 0.0).
+/// - `Some(vec)` with `len == 1` → broadcast the single value across all bars.
+/// - `Some(vec)` with `len == y.len()` → per-bar value at index `i`.
+/// - Anything else → falls through to the default; render is robust, no panic.
 #[derive(Debug, Clone)]
 pub struct BarMark {
     /// X category labels.
     pub x: Vec<String>,
-    /// Y data height
+    /// Y data height (the value rendered as the bar's extent above its base).
     pub y: Vec<f64>,
-    /// Bar color
-    pub color: Option<Color>,
-    /// Define the width of each bar
+    /// Per-bar fill colors (see broadcast rules on the struct doc).
+    pub colors: Option<Vec<Color>>,
+    /// Define the width of each bar as a fraction of the band.
     pub width: Option<f32>,
-    /// Set bar origin axis
+    /// Set bar origin axis.
     pub orientation: Orientation,
-    /// Group name for grouped bars (dodged within band)
+    /// Group name for grouped bars (dodged within band).
     pub group: Option<String>,
-    /// Stack name for stacked bars (accumulated baseline)
+    /// Stack name for stacked bars (accumulated baseline).
     pub stack: Option<String>,
-    /// Base value for waterfall chart (defaults to 0)
-    pub base: Option<f64>,
+    /// Per-bar base values (see broadcast rules on the struct doc). When unset, all
+    /// bars start at 0; when set, each bar floats at its own base — used by waterfall
+    /// charts where bar `i` sits on the running total of bars `0..i`.
+    pub bases: Option<Vec<f64>>,
     /// Legend label.
     pub label: Option<String>,
+    /// Draw thin gray connector lines between consecutive bars at `bases[i] + y[i]`.
+    /// Only honored for `Orientation::Vertical`. Used by waterfall charts.
+    pub connectors: bool,
 }
 /// Bar/box mark orientation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -324,13 +424,14 @@ impl BarMark {
         Self {
             x,
             y,
-            color: Some(Color::BLUE),
+            colors: Some(vec![Color::BLUE]),
             width: Some(0.8),
             orientation: Orientation::Vertical,
             group: None,
             stack: None,
-            base: None,
+            bases: None,
             label: None,
+            connectors: false,
         }
     }
 
@@ -355,21 +456,38 @@ impl BarMark {
         self
     }
 
-    /// Builder: set base value for waterfall chart (where bar starts).
+    /// Builder: broadcast a single base value to every bar (where bars start).
     #[must_use]
     pub fn base(mut self, b: f64) -> Self {
-        self.base = Some(b);
+        self.bases = Some(vec![b]);
         self
     }
 
-    /// Builder: set bar color.
+    /// Builder: set per-bar base values (length should match `y` for per-bar bases;
+    /// length 1 broadcasts). Used by waterfall charts.
+    #[must_use]
+    pub fn bases(mut self, bs: Vec<f64>) -> Self {
+        self.bases = Some(bs);
+        self
+    }
+
+    /// Builder: broadcast a single color to every bar.
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
-        self.color = Some(c);
+        self.colors = Some(vec![c]);
         self
     }
 
-    /// Builder: set bar width in pixels.
+    /// Builder: set per-bar colors (length should match `y` for per-bar colors;
+    /// length 1 broadcasts). Used by waterfall charts and any other chart where
+    /// individual bars carry semantic color (e.g. above/below threshold).
+    #[must_use]
+    pub fn colors(mut self, cs: Vec<Color>) -> Self {
+        self.colors = Some(cs);
+        self
+    }
+
+    /// Builder: set bar width as a fraction of the band (0.0..1.0).
     #[must_use]
     pub fn width(mut self, r: f32) -> Self {
         self.width = Some(r);
@@ -382,15 +500,48 @@ impl BarMark {
         self.label = Some(label.into());
         self
     }
+
+    /// Builder: enable thin gray connector lines between consecutive bars (at
+    /// `bases[i] + y[i]`). Only honored for vertical orientation. Used by waterfalls.
+    #[must_use]
+    pub fn connectors(mut self, on: bool) -> Self {
+        self.connectors = on;
+        self
+    }
+
+    /// Per-bar color lookup: `colors[i]` if set and lengths align, else broadcast
+    /// the first element, else fall back to BLUE. Robust against length mismatches.
+    fn color_at(&self, i: usize) -> Color {
+        match self.colors.as_deref() {
+            None => Color::BLUE,
+            Some([c]) => *c,
+            Some(cs) if cs.len() == self.y.len() => cs[i],
+            // length mismatch (and not 1) — fall back rather than panic
+            Some(cs) => cs.first().copied().unwrap_or(Color::BLUE),
+        }
+    }
+
+    /// Per-bar base lookup with the same broadcast rules as colors. 0.0 default.
+    fn base_at(&self, i: usize) -> f64 {
+        match self.bases.as_deref() {
+            None => 0.0,
+            Some([b]) => *b,
+            Some(bs) if bs.len() == self.y.len() => bs[i],
+            Some(bs) => bs.first().copied().unwrap_or(0.0),
+        }
+    }
 }
 impl Mark for BarMark {
     fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let valid: Vec<(&str, f64)> = self
+        // Keep the original index alongside each valid bar so per-bar bases/colors
+        // line up with self.y even when some entries are filtered out as NaN/empty.
+        let valid: Vec<(usize, &str, f64)> = self
             .x
             .iter()
             .zip(&self.y)
-            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
-            .map(|(x, y)| (x.as_str(), *y))
+            .enumerate()
+            .filter(|(_, (x, y))| !x.is_empty() && !y.is_nan())
+            .map(|(i, (x, y))| (i, x.as_str(), *y))
             .collect();
 
         let n = valid.len();
@@ -399,7 +550,6 @@ impl Mark for BarMark {
         }
 
         let area = coord.plot_area;
-        let fill = self.color.unwrap_or(Color::BLUE);
         let width_fraction = self.width.unwrap_or(0.8);
 
         match self.orientation {
@@ -407,32 +557,42 @@ impl Mark for BarMark {
                 let band_width = area.width() / n as f32;
                 let bar_width = band_width * width_fraction;
 
-                for (i, (_label, value)) in valid.iter().enumerate() {
+                for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
                     let x_center = area.left + (i as f32 + 0.5) * band_width;
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
-                    let y_top = area.bottom - coord.y_axis.scale.map(*value) as f32 * area.height();
-                    let y_bottom = area.bottom - coord.y_axis.scale.map(0.0) as f32 * area.height();
+                    let base = self.base_at(*orig_i);
+                    let y_top = area.bottom
+                        - coord.y_axis.scale.map(base + *value) as f32 * area.height();
+                    let y_bottom =
+                        area.bottom - coord.y_axis.scale.map(base) as f32 * area.height();
+                    let rect_top = y_top.min(y_bottom);
+                    let rect_bottom = y_top.max(y_bottom);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
             }
             Orientation::Horizontal => {
                 let band_height = area.height() / n as f32;
                 let bar_height = band_height * width_fraction;
 
-                for (i, (_label, value)) in valid.iter().enumerate() {
+                for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
                     let y_center = area.top + (i as f32 + 0.5) * band_height;
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
-                    let x_left = area.left + coord.x_axis.scale.map(0.0) as f32 * area.width();
-                    let x_right = area.left + coord.x_axis.scale.map(*value) as f32 * area.width();
+                    let base = self.base_at(*orig_i);
+                    let x_left =
+                        area.left + coord.x_axis.scale.map(base) as f32 * area.width();
+                    let x_right = area.left
+                        + coord.x_axis.scale.map(base + *value) as f32 * area.width();
+                    let rect_left = x_left.min(x_right);
+                    let rect_right = x_left.max(x_right);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(rect_left, y_top, rect_right, y_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
             }
         }
@@ -449,12 +609,13 @@ impl Mark for BarMark {
         backend: &mut dyn DrawBackend,
         context: &BarRenderContext,
     ) -> Result<()> {
-        let valid: Vec<(&str, f64)> = self
+        let valid: Vec<(usize, &str, f64)> = self
             .x
             .iter()
             .zip(&self.y)
-            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
-            .map(|(x, y)| (x.as_str(), *y))
+            .enumerate()
+            .filter(|(_, (x, y))| !x.is_empty() && !y.is_nan())
+            .map(|(i, (x, y))| (i, x.as_str(), *y))
             .collect();
 
         let n = valid.len();
@@ -463,8 +624,15 @@ impl Mark for BarMark {
         }
 
         let area = coord.plot_area;
-        let fill = self.color.unwrap_or(Color::BLUE);
         let width_fraction = self.width.unwrap_or(0.8);
+
+        // Connector geometry: collected during the bar pass for vertical orientation
+        // when self.connectors is on. Each entry is (x_left, x_right, y_running_total_pixel).
+        let mut connector_geom: Vec<(f32, f32, f32)> = if self.connectors {
+            Vec::with_capacity(n)
+        } else {
+            Vec::new()
+        };
 
         match self.orientation {
             Orientation::Vertical => {
@@ -482,7 +650,7 @@ impl Mark for BarMark {
                     band_width * width_fraction
                 };
 
-                for (i, (label, value)) in valid.iter().enumerate() {
+                for (i, (orig_i, label, value)) in valid.iter().enumerate() {
                     let base_x_center = area.left + (i as f32 + 0.5) * band_width;
                     let x_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
@@ -498,14 +666,15 @@ impl Mark for BarMark {
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
-                    // For stacked or floating bars: y_bottom is baseline, y_top is baseline + value
+                    // Stacked > per-bar base > 0.0. Stacked bars float at the running
+                    // height for that category; per-bar bases let waterfalls sit at
+                    // their running totals.
                     let (y_bottom_val, y_top_val) = if self.stack.is_some() {
                         let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
                         (baseline, baseline + value)
-                    } else if let Some(base) = self.base {
-                        (base, base + value)
                     } else {
-                        (0.0, *value)
+                        let base = self.base_at(*orig_i);
+                        (base, base + value)
                     };
 
                     let y_top =
@@ -513,12 +682,40 @@ impl Mark for BarMark {
                     let y_bottom =
                         area.bottom - coord.y_axis.scale.map(y_bottom_val) as f32 * area.height();
 
-                    // Ensure valid rect
                     let rect_top = y_top.min(y_bottom);
                     let rect_bottom = y_top.max(y_bottom);
 
                     let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
+
+                    if self.connectors {
+                        // y_top is the pixel-y of (base + value), the running total —
+                        // exactly where the connector to the next bar should sit.
+                        connector_geom.push((x_left, x_right, y_top));
+                    }
+                }
+
+                // Connector pass: thin gray segments from bar i's right edge to bar
+                // i+1's left edge, both at bar i's running-total y. Vertical only.
+                if self.connectors && connector_geom.len() >= 2 {
+                    let connector_color = Color::new(0x88, 0x88, 0x88);
+                    let style = PathStyle {
+                        stroke_color: connector_color,
+                        stroke_width: 1.0,
+                        fill_color: None,
+                        ..PathStyle::default()
+                    };
+                    for pair in connector_geom.windows(2) {
+                        let (_, x_right_i, y_running) = pair[0];
+                        let (x_left_next, _, _) = pair[1];
+                        let path = Path {
+                            commands: vec![
+                                PathCommand::MoveTo(Point::new(x_right_i, y_running)),
+                                PathCommand::LineTo(Point::new(x_left_next, y_running)),
+                            ],
+                        };
+                        backend.draw_path(&path, &style)?;
+                    }
                 }
             }
             Orientation::Horizontal => {
@@ -536,7 +733,7 @@ impl Mark for BarMark {
                     band_height * width_fraction
                 };
 
-                for (i, (label, value)) in valid.iter().enumerate() {
+                for (i, (orig_i, label, value)) in valid.iter().enumerate() {
                     let base_y_center = area.top + (i as f32 + 0.5) * band_height;
                     let y_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
@@ -552,23 +749,25 @@ impl Mark for BarMark {
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
-                    // For stacked or floating horizontal bars: x_left is baseline, x_right is baseline + value
                     let (x_left_val, x_right_val) = if self.stack.is_some() {
                         let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
                         (baseline, baseline + value)
-                    } else if let Some(base) = self.base {
-                        (base, base + value)
                     } else {
-                        (0.0, *value)
+                        let base = self.base_at(*orig_i);
+                        (base, base + value)
                     };
                     let x_left =
                         area.left + coord.x_axis.scale.map(x_left_val) as f32 * area.width();
                     let x_right =
                         area.left + coord.x_axis.scale.map(x_right_val) as f32 * area.width();
+                    let rect_left = x_left.min(x_right);
+                    let rect_right = x_left.max(x_right);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(rect_left, y_top, rect_right, y_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
+                // Horizontal connectors are out of scope at 0.3.0 — would need a
+                // second pass keyed on x rather than y. Spec only calls for vertical.
             }
         }
 
@@ -624,7 +823,14 @@ impl Mark for BarMark {
     }
 
     fn legend_color(&self) -> Option<Color> {
-        self.color
+        // Broadcast first color (or BLUE fallback). We always return Some so that
+        // bar marks reliably render a legend swatch even when colors aren't set.
+        Some(
+            self.colors
+                .as_deref()
+                .and_then(|cs| cs.first().copied())
+                .unwrap_or(Color::BLUE),
+        )
     }
 
     fn legend_label(&self) -> Option<&str> {
@@ -814,6 +1020,23 @@ impl Mark for AreaMark {
 
 use starsight_layer_1::colormap::Colormap;
 
+/// How heatmap cell values map to the `[0, 1]` colormap input.
+///
+/// The default `Linear` is what most heatmaps want (`(v - vmin) / (vmax - vmin)`).
+/// `Log` applies `log10` to value and bounds with a small epsilon, useful when the
+/// data spans several decades — without it, the brightest cells saturate the
+/// colormap and dim cells collapse into the floor color.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[non_exhaustive]
+pub enum HeatmapColorScale {
+    /// Linear: `t = (v - vmin) / (vmax - vmin)`.
+    #[default]
+    Linear,
+    /// Log10: `t = (log10(v') - log10(vmin')) / (log10(vmax') - log10(vmin'))`,
+    /// where `v' = max(v, eps)` to keep `log10` finite. Negative cells clip to `eps`.
+    Log,
+}
+
 /// Heatmap: a 2D grid of values mapped to colors via a colormap.
 #[derive(Debug, Clone)]
 pub struct HeatmapMark {
@@ -821,6 +1044,8 @@ pub struct HeatmapMark {
     pub data: Vec<Vec<f64>>,
     /// Colormap for mapping values to colors.
     pub colormap: Colormap,
+    /// How values map to the `[0, 1]` colormap input. Default linear.
+    pub color_scale: HeatmapColorScale,
     /// Optional label for legend.
     pub label: Option<String>,
 }
@@ -832,6 +1057,7 @@ impl HeatmapMark {
         Self {
             data,
             colormap: Colormap::default(),
+            color_scale: HeatmapColorScale::Linear,
             label: None,
         }
     }
@@ -841,6 +1067,19 @@ impl HeatmapMark {
     pub fn colormap(mut self, colormap: Colormap) -> Self {
         self.colormap = colormap;
         self
+    }
+
+    /// Set the value-to-`[0, 1]` mapping mode (linear or log).
+    #[must_use]
+    pub fn color_scale(mut self, scale: HeatmapColorScale) -> Self {
+        self.color_scale = scale;
+        self
+    }
+
+    /// Convenience: switch to log-scale color mapping.
+    #[must_use]
+    pub fn log_scale(self) -> Self {
+        self.color_scale(HeatmapColorScale::Log)
     }
 
     /// Set the legend label.
@@ -878,6 +1117,24 @@ impl Mark for HeatmapMark {
             data_max - data_min
         };
 
+        // Log-scale prep: pre-compute the log10 bounds and a small epsilon to keep
+        // log10 finite when data hits zero or goes negative. eps scales with vmax so
+        // the floor is a few decades below the top regardless of the data's units.
+        let (log_min, log_range, log_eps) = match self.color_scale {
+            HeatmapColorScale::Log => {
+                let eps = (data_max.abs() * 1e-12).max(f64::MIN_POSITIVE);
+                let lmin = data_min.max(eps).log10();
+                let lmax = data_max.max(eps).log10();
+                let lrange = if (lmax - lmin).abs() < f64::EPSILON {
+                    1.0
+                } else {
+                    lmax - lmin
+                };
+                (lmin, lrange, eps)
+            }
+            HeatmapColorScale::Linear => (0.0, 1.0, 0.0),
+        };
+
         let n_rows = self.data.len();
         let n_cols = self.data[0].len();
 
@@ -892,7 +1149,12 @@ impl Mark for HeatmapMark {
                     continue;
                 }
 
-                let normalized = (value - data_min) / range;
+                let normalized = match self.color_scale {
+                    HeatmapColorScale::Linear => (value - data_min) / range,
+                    HeatmapColorScale::Log => {
+                        (value.max(log_eps).log10() - log_min) / log_range
+                    }
+                };
                 let color = self.colormap.sample(normalized);
 
                 // Integer-snapped boundaries: cell N's right == cell N+1's left exactly,
@@ -1352,10 +1614,23 @@ mod tests {
             .color(Color::GREEN)
             .radius(8.0)
             .label("dots");
-        assert_eq!(m.color, Color::GREEN);
-        assert_eq!(m.radius, 8.0);
+        assert_eq!(m.colors, Some(vec![Color::GREEN]));
+        assert_eq!(m.radii, Some(vec![8.0]));
         assert_eq!(m.legend_color(), Some(Color::GREEN));
         assert_eq!(m.legend_label(), Some("dots"));
+    }
+
+    #[test]
+    fn point_mark_per_point_colors_and_radii() {
+        let m = PointMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0])
+            .colors(vec![Color::RED, Color::GREEN, Color::BLUE])
+            .radii(vec![3.0, 5.0, 7.0])
+            .alpha(0.5);
+        assert_eq!(m.colors.as_ref().map(Vec::len), Some(3));
+        assert_eq!(m.radii.as_ref().map(Vec::len), Some(3));
+        assert!((m.alpha - 0.5).abs() < 1e-6);
+        // legend_color picks the first color
+        assert_eq!(m.legend_color(), Some(Color::RED));
     }
 
     #[test]
@@ -1495,13 +1770,44 @@ mod tests {
             .stack("s")
             .base(2.0)
             .label("series");
-        assert_eq!(m.color, Some(Color::RED));
+        assert_eq!(m.colors, Some(vec![Color::RED]));
         assert_eq!(m.width, Some(0.5));
         assert_eq!(m.group.as_deref(), Some("g"));
         assert_eq!(m.stack.as_deref(), Some("s"));
-        assert_eq!(m.base, Some(2.0));
+        assert_eq!(m.bases, Some(vec![2.0]));
+        assert!(!m.connectors);
         assert_eq!(m.legend_label(), Some("series"));
         assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_per_bar_bases_and_colors() {
+        let m = BarMark::new(
+            vec!["a".to_string(), "b".to_string(), "c".to_string()],
+            vec![1.0, -2.0, 3.0],
+        )
+        .bases(vec![0.0, 1.0, -1.0])
+        .colors(vec![Color::RED, Color::GREEN, Color::BLUE])
+        .connectors(true);
+        assert_eq!(m.bases.as_ref().map(Vec::len), Some(3));
+        assert_eq!(m.colors.as_ref().map(Vec::len), Some(3));
+        assert!(m.connectors);
+        // legend_color picks the first color
+        assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_with_connectors() {
+        let mark = BarMark::new(
+            vec!["a".to_string(), "b".to_string(), "c".to_string()],
+            vec![1.0, -0.5, 1.5],
+        )
+        .bases(vec![0.0, 1.0, 0.5])
+        .connectors(true);
+        let coord = coord_for(0.0, 3.0, -1.0, 3.0);
+        let mut backend = SvgBackend::new(120, 120);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
     }
 
     #[test]

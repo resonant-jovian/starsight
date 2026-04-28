@@ -1,90 +1,93 @@
-//! Waterfall chart — starsight 0.2.0 showcase
+//! Waterfall chart — starsight 0.3.0 showcase
 //!
 //! Waterfall charts show how a starting value changes through a series of
-//! positive and negative adjustments to reach a final value.
-//! Each bar "floats" at the running total, with the bar height showing the change.
-//! Color indicates increase (green) or decrease (red), with subtotals and totals in blue.
+//! positive and negative adjustments to reach a final value. Each bar floats
+//! at the running total, with bar height showing the change. Color encodes
+//! direction (green = increase, red = decrease, blue = subtotal/total). Thin
+//! gray connector lines link consecutive bars at the running-total level.
+//!
+//! Implements spec example #37 from `.spec/SHOWCASE_INPUTS.md`. The 0.3.0
+//! `BarMark` carries per-bar `bases` and `colors` plus the `connectors` flag,
+//! so the whole chart is a single mark.
 
 use starsight::prelude::*;
 
-// ── Waterfall data ────────────────────────────────────────────────────────────────────
+fn main() -> Result<()> {
+    let labels: Vec<String> = [
+        "Revenue",
+        "COGS",
+        "Gross Profit",
+        "OpEx",
+        "R&D",
+        "Marketing",
+        "EBITDA",
+        "D&A",
+        "Interest",
+        "Net Income",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect();
 
-struct WaterfallData {
-    labels: Vec<String>,
-    values: Vec<f64>,
-    bases: Vec<f64>,
-    is_subtotal: Vec<bool>,
-    is_total: Vec<bool>,
-}
-
-fn build_waterfall_data() -> WaterfallData {
-    let data = [
-        ("Revenue", 4_200_000.0, 0.0, false, false),
-        ("COGS", -1_800_000.0, 4_200_000.0, false, false),
-        ("Gross Profit", 2_400_000.0, 0.0, true, false), // subtotal
-        ("OpEx", -900_000.0, 2_400_000.0, false, false),
-        ("R&D", -500_000.0, 1_500_000.0, false, false),
-        ("Marketing", -300_000.0, 1_000_000.0, false, false),
-        ("EBITDA", 700_000.0, 0.0, true, false), // subtotal
-        ("D&A", -150_000.0, 700_000.0, false, false),
-        ("Interest", -50_000.0, 550_000.0, false, false),
-        ("Net Income", 500_000.0, 0.0, false, true), // total
+    let values = vec![
+        4_200_000.0,
+        -1_800_000.0,
+        2_400_000.0,
+        -900_000.0,
+        -500_000.0,
+        -300_000.0,
+        700_000.0,
+        -150_000.0,
+        -50_000.0,
+        500_000.0,
     ];
 
-    WaterfallData {
-        labels: data.iter().map(|r| r.0.to_string()).collect(),
-        values: data.iter().map(|r| r.1).collect(),
-        bases: data.iter().map(|r| r.2).collect(),
-        is_subtotal: data.iter().map(|r| r.3).collect(),
-        is_total: data.iter().map(|r| r.4).collect(),
-    }
-}
+    // bases[i] is the running total *before* row i is applied, so each bar's
+    // top edge lands at bases[i] + values[i] — the running total after row i.
+    // Subtotal/total rows reset to base 0 because they show the cumulative figure
+    // as a height from zero, not as an adjustment.
+    let bases = vec![
+        0.0,
+        4_200_000.0,
+        0.0,
+        2_400_000.0,
+        1_500_000.0,
+        1_000_000.0,
+        0.0,
+        700_000.0,
+        550_000.0,
+        0.0,
+    ];
 
-// ── main ────────────────────────────────────────────────────────────────────────────
+    let kind = [
+        "inc", "dec", "sub", "dec", "dec", "dec", "sub", "dec", "dec", "tot",
+    ];
 
-fn main() -> Result<()> {
-    let data = build_waterfall_data();
+    // Spec colors (.spec/SHOWCASE_INPUTS.md:175).
+    let green = Color::from_hex(0x2E_7D32);
+    let red = Color::from_hex(0xC6_2828);
+    let blue = Color::from_hex(0x15_65C0);
+    let colors: Vec<Color> = kind
+        .iter()
+        .map(|k| match *k {
+            "inc" => green,
+            "dec" => red,
+            _ => blue,
+        })
+        .collect();
 
-    let green = Color::new(34, 139, 34); // forest green for increases
-    let red = Color::new(220, 20, 60); // crimson for decreases
-    let blue = Color::new(65, 105, 225); // royal blue for subtotals/totals
-
-    let mut fig = Figure::new(1200, 700);
-    fig = fig
+    Figure::new(1200, 700)
         .title("Waterfall Chart — P&L Walk")
-        .x_label("")
-        .y_label("Amount ($)");
+        .y_label("Amount ($)")
+        .add(
+            BarMark::new(labels, values)
+                .bases(bases)
+                .colors(colors)
+                .width(0.6)
+                .connectors(true),
+        )
+        .save("examples/composition/waterfall_bar.png")?;
 
-    // Add each bar - we need separate marks because base varies per bar
-    for i in 0..data.labels.len() {
-        let label = &data.labels[i];
-        let value = data.values[i];
-        let base = data.bases[i];
-        let subtotal = data.is_subtotal[i];
-        let total = data.is_total[i];
-
-        let color = if subtotal || total {
-            blue
-        } else if value >= 0.0 {
-            green
-        } else {
-            red
-        };
-
-        fig = fig.add(BarMark {
-            x: vec![label.clone()],
-            y: vec![value],
-            color: Some(color),
-            width: Some(0.6),
-            orientation: Orientation::Vertical,
-            group: None,
-            stack: None,
-            base: Some(base),
-            label: None,
-        });
-    }
-
-    fig.save("examples/composition/waterfall_bar.png")?;
     println!("saved waterfall_bar.png");
     Ok(())
 }

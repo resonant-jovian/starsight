@@ -70,8 +70,8 @@ winit                    = "0.31.0-beta.2" # Cross-platform windowing         Ap
 egui                     = "0.34.1"        # Immediate-mode GUI               MIT OR Apache-2.0
 egui-plotter             = "0.6.0"         # Plotting widget for egui         MIT
 # WASM
-wasm-bindgen             = "0.2.118"       # Rust ↔ JS bindings               MIT OR Apache-2.0
-web-sys                  = "0.3.95"        # Web API bindings                 MIT OR Apache-2.0
+wasm-bindgen             = "0.2.120"       # Rust ↔ JS bindings               MIT OR Apache-2.0
+web-sys                  = "0.3.97"        # Web API bindings                 MIT OR Apache-2.0
 # Geospatial
 geo                      = "0.33.1"        # Geometric primitives             MIT OR Apache-2.0
 proj                     = "0.31.0"        # Coordinate transforms            MIT OR Apache-2.0

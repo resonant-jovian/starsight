@@ -9,7 +9,7 @@ publish = false
 [dev-dependencies]
 starsight.workspace = true
 chromata.workspace = true
-prismatica = { workspace = true, features = ["matplotlib"] }
+prismatica = { workspace = true, features = ["matplotlib", "colorbrewer"] }
 
 # ── basics ──────────────────────────────────────────────────────────────────
 # Smallest possible programs that exercise one mark type at a time. Start here
@@ -38,6 +38,14 @@ path = "basics/heatmap.rs"
 [[example]]
 name = "histogram"
 path = "basics/histogram.rs"
+
+[[example]]
+name = "bubble_scatter"
+path = "basics/bubble_scatter.rs"
+
+[[example]]
+name = "movie_heatmap"
+path = "basics/movie_heatmap.rs"
 
 # ── theming ─────────────────────────────────────────────────────────────────
 # Same data as the basics, recoloured: shows how to swap a Theme or a
@@ -82,6 +90,10 @@ path = "scientific/lorenz_line.rs"
 [[example]]
 name = "kruskal_szekeres_line"
 path = "scientific/kruskal_szekeres_line.rs"
+
+[[example]]
+name = "laser_plasma"
+path = "scientific/laser_plasma.rs"
 
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a

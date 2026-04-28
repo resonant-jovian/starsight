@@ -13,7 +13,8 @@
 use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, HeatmapMark, HistogramMark, LineMark, PointMark, StepMark, StepPosition,
+    AreaMark, BarMark, HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, PointMark,
+    StepMark, StepPosition,
 };
 use starsight_layer_5::Figure;
 
@@ -537,6 +538,140 @@ fn snapshot_heatmap_plasma() {
     let fig = Figure::new(800, 800)
         .title("Wave Interference Pattern (PLASMA)")
         .add(HeatmapMark::new(data).colormap(PLASMA));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── 0.3.0 additions: per-bar bases/colors + connectors, per-point colors/radii, log heatmap ─────
+
+#[test]
+fn snapshot_bar_waterfall() {
+    // Same 10-row P&L walk as examples/composition/waterfall_bar.rs — the snapshot
+    // doubles as a regression check on the example output.
+    let labels: Vec<String> = [
+        "Revenue",
+        "COGS",
+        "Gross Profit",
+        "OpEx",
+        "R&D",
+        "Marketing",
+        "EBITDA",
+        "D&A",
+        "Interest",
+        "Net Income",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect();
+    let values = vec![
+        4_200_000.0,
+        -1_800_000.0,
+        2_400_000.0,
+        -900_000.0,
+        -500_000.0,
+        -300_000.0,
+        700_000.0,
+        -150_000.0,
+        -50_000.0,
+        500_000.0,
+    ];
+    let bases = vec![
+        0.0,
+        4_200_000.0,
+        0.0,
+        2_400_000.0,
+        1_500_000.0,
+        1_000_000.0,
+        0.0,
+        700_000.0,
+        550_000.0,
+        0.0,
+    ];
+    let kind = [
+        "inc", "dec", "sub", "dec", "dec", "dec", "sub", "dec", "dec", "tot",
+    ];
+    let green = Color::from_hex(0x2E_7D32);
+    let red = Color::from_hex(0xC6_2828);
+    let blue = Color::from_hex(0x15_65C0);
+    let colors: Vec<Color> = kind
+        .iter()
+        .map(|k| match *k {
+            "inc" => green,
+            "dec" => red,
+            _ => blue,
+        })
+        .collect();
+
+    let fig = Figure::new(1200, 700)
+        .title("Waterfall Chart — P&L Walk")
+        .y_label("Amount ($)")
+        .add(
+            BarMark::new(labels, values)
+                .bases(bases)
+                .colors(colors)
+                .width(0.6)
+                .connectors(true),
+        );
+    let svg = fig.render_svg().unwrap();
+    // Connector pass must emit at least one stroked <line>/<path> between bars.
+    // We sanity-check this rather than rely on snapshot drift to catch a missed
+    // connector pass — the connectors are 1px thin and easy to lose visually.
+    assert!(
+        svg.contains("stroke=\"#888888\"") || svg.contains("rgb(136,136,136)"),
+        "expected gray connector strokes in waterfall SVG; got:\n{svg}"
+    );
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_point_per_point_color_size() {
+    // Six points: three at full BLUE/4px (broadcast via single .color/.radius) and
+    // three with explicit per-point colors/radii. Mark-wide alpha 0.5.
+    // Exercises both broadcast paths and per-point paths in one figure.
+    let xs_a = vec![0.0, 1.0, 2.0];
+    let ys_a = vec![1.0, 1.5, 2.0];
+    let xs_b = vec![3.0, 4.0, 5.0];
+    let ys_b = vec![2.5, 1.8, 1.2];
+    let fig = Figure::new(600, 400)
+        .title("Per-point colors and radii")
+        .x_label("x")
+        .y_label("y")
+        // Broadcast path (single-element vecs via .color / .radius convenience).
+        .add(
+            PointMark::new(xs_a, ys_a)
+                .color(Color::BLUE)
+                .radius(6.0)
+                .alpha(0.5),
+        )
+        // Per-point path.
+        .add(
+            PointMark::new(xs_b, ys_b)
+                .colors(vec![Color::RED, Color::GREEN, Color::from_hex(0xFF_8800)])
+                .radii(vec![4.0, 8.0, 12.0])
+                .alpha(0.5),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_heatmap_log() {
+    // Multi-decade dynamic range so the difference between linear and log mapping
+    // is unambiguous: the bottom-right cell is 1e6× the top-left cell.
+    let data: Vec<Vec<f64>> = (0..8)
+        .map(|j| {
+            (0..8)
+                .map(|i| 10f64.powi(i + j))
+                .collect::<Vec<f64>>()
+        })
+        .collect();
+    let fig = Figure::new(600, 600)
+        .title("Log-scale heatmap (multi-decade)")
+        .add(
+            HeatmapMark::new(data)
+                .colormap(VIRIDIS)
+                .color_scale(HeatmapColorScale::Log),
+        );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }

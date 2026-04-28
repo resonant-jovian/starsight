@@ -1,6 +1,6 @@
 # starsight examples
 
-Twenty runnable examples grouped by what they teach. Each `.rs` file lives
+Twenty-three runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -30,6 +30,8 @@ you've never used starsight before, read these in order.
 | [`bar_chart`](basics/bar_chart.rs) — [PNG](basics/bar_chart.png) | Grouped `BarMark`s — quarters × product lines |
 | [`heatmap`](basics/heatmap.rs) — [PNG](basics/heatmap.png) | A 30×30 `HeatmapMark` of a synthetic 2D field |
 | [`histogram`](basics/histogram.rs) — [PNG](basics/histogram.png) | `HistogramMark` over 5 000 deterministic Gaussian samples |
+| [`bubble_scatter`](basics/bubble_scatter.rs) — [PNG](basics/bubble_scatter.png) | Per-point continuous color (RdPu colormap) and per-point radius on `PointMark`, alpha 0.5 — wine-shaped synthetic data (spec #3) |
+| [`movie_heatmap`](basics/movie_heatmap.rs) — [PNG](basics/movie_heatmap.png) | `HeatmapMark` with `log_scale()` — synthetic Rotten Tomatoes × IMDB cross-tab, log lift on the dim secondary lobe (spec #16) |
 
 ### [`theming/`](theming) — recolour without touching the data
 
@@ -51,7 +53,7 @@ auto-derived legend lives here.
 | [`statistical`](composition/statistical.rs) — [PNG](composition/statistical.png) | Noisy daily readings + a 7-day rolling-mean overlay |
 | [`recipe`](composition/recipe.rs) — [PNG](composition/recipe.png) | The reference for "what a good starsight chart looks like" — three series, custom palette, `DEFAULT_LIGHT` theme, full chrome |
 | [`gallery`](composition/gallery.rs) — [PNG](composition/gallery.png) | A `LineMark` model fit over `PointMark` observations |
-| [`waterfall_bar`](composition/waterfall_bar.rs) — [PNG](composition/waterfall_bar.png) | A P&L-walk waterfall built from per-bar `base` offsets |
+| [`waterfall_bar`](composition/waterfall_bar.rs) — [PNG](composition/waterfall_bar.png) | A P&L-walk waterfall — single `BarMark` with per-bar `bases` + `colors` and `connectors(true)` linking running totals (spec #37) |
 
 ### [`scientific/`](scientific) — real numerical experiments
 
@@ -62,6 +64,7 @@ Both run their own ODE/transform integration before plotting.
 |---|---|
 | [`lorenz_line`](scientific/lorenz_line.rs) — [PNG](scientific/lorenz_line.png) | Lorenz attractor (RK4, 80 000 steps) projected onto the x–z plane, accent from `prismatica::matplotlib::INFERNO` |
 | [`kruskal_szekeres_line`](scientific/kruskal_szekeres_line.rs) — [PNG](scientific/kruskal_szekeres_line.png) | Kruskal–Szekeres extension of Schwarzschild — constant-r hyperbolas, constant-t rays, horizons, singularities |
+| [`laser_plasma`](scientific/laser_plasma.rs) — [PNG](scientific/laser_plasma.png) | Stimulated Raman scattering — electron phase-space density on a 200×200 grid, log-scale viridis (spec #7, single-panel; multi-panel deferred to 0.4.0) |
 
 ### [`planned/`](planned) — placeholders for 0.3.0+ features
 
