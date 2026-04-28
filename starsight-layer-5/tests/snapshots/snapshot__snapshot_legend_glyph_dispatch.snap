@@ -3,23 +3,23 @@ source: starsight-layer-5/tests/snapshot.rs
 expression: svg
 ---
 <svg height="400" viewBox="0 0 600 400" width="600" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="331" width="555.80005" x="34.6" y="44"/>
+<rect fill="#ffffff" height="331" shape-rendering="crispEdges" width="555.80005" x="34.6" y="44"/>
 <text fill="#222222" font-family="sans-serif" font-size="16" x="218.4" y="28">
 Mixed-mark legend
 </text>
-<path d="M34.6,375 L34.6,44" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M219.86668,375 L219.86668,44" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M405.13336,375 L405.13336,44" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M590.4,375 L590.4,44" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M34.6,375 L590.4,375" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M34.6,264.66666 L590.4,264.66666" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M34.6,154.33333 L590.4,154.33333" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M34.6,44 L590.4,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M34.6,375 L34.6,44" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M219.86668,375 L219.86668,44" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M405.13336,375 L405.13336,44" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M590.4,375 L590.4,44" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M34.6,375 L590.4,375" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M34.6,264.66666 L590.4,264.66666" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M34.6,154.33333 L590.4,154.33333" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M34.6,44 L590.4,44" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M34.6,375 L219.86668,154.33333 L405.13336,264.66666 L590.4,44" fill="none" stroke="#0000ff" stroke-width="2"/>
 <path d="M132.23334,330.86667 C132.23334,333.62808,129.99477,335.86667,127.23334,335.86667 C124.47192,335.86667,122.23334,333.62808,122.23334,330.86667 C122.23334,328.10526,124.47192,325.86667,127.23334,325.86667 C129.99477,325.86667,132.23334,328.10526,132.23334,330.86667 z M317.50003,110.2 C317.50003,112.96142,315.26144,115.2,312.50003,115.2 C309.73862,115.2,307.50003,112.96142,307.50003,110.2 C307.50003,107.438576,309.73862,105.2,312.50003,105.2 C315.26144,105.2,317.50003,107.438576,317.50003,110.2 z M502.7667,198.46666 C502.7667,201.22809,500.5281,203.46666,497.7667,203.46666 C495.00528,203.46666,492.7667,201.22809,492.7667,198.46666 C492.7667,195.70523,495.00528,193.46666,497.7667,193.46666 C500.5281,193.46666,502.7667,195.70523,502.7667,198.46666 z" fill="#ff0000" stroke="#ff0000" stroke-width="0"/>
-<rect fill="#33aa33" height="88.26666" width="148.21335" x="53.126663" y="286.73334"/>
-<rect fill="#33aa33" height="176.53334" width="148.21333" x="238.39336" y="198.46666"/>
-<rect fill="#33aa33" height="132.40001" width="148.21332" x="423.66003" y="242.59999"/>
+<rect fill="#33aa33" height="88.26666" shape-rendering="crispEdges" width="148.21335" x="53.126663" y="286.73334"/>
+<rect fill="#33aa33" height="176.53334" shape-rendering="crispEdges" width="148.21333" x="238.39336" y="198.46666"/>
+<rect fill="#33aa33" height="132.40001" shape-rendering="crispEdges" width="148.21332" x="423.66003" y="242.59999"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="123.63334" y="392">
 a
 </text>
@@ -29,27 +29,27 @@ b
 <text fill="#666666" font-family="sans-serif" font-size="12" x="494.1667" y="392">
 c
 </text>
-<path d="M34.6,375 L39.6,375" fill="none" stroke="#666666" stroke-width="1"/>
+<path d="M34.6,375 L39.6,375" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="18.399998" y="379.8">
 0
 </text>
-<path d="M34.6,264.66666 L39.6,264.66666" fill="none" stroke="#666666" stroke-width="1"/>
+<path d="M34.6,264.66666 L39.6,264.66666" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="3.999998" y="269.46664">
 0.5
 </text>
-<path d="M34.6,154.33333 L39.6,154.33333" fill="none" stroke="#666666" stroke-width="1"/>
+<path d="M34.6,154.33333 L39.6,154.33333" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="18.399998" y="159.13333">
 1
 </text>
-<path d="M34.6,44 L39.6,44" fill="none" stroke="#666666" stroke-width="1"/>
+<path d="M34.6,44 L39.6,44" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="3.999998" y="48.8">
 1.5
 </text>
-<path d="M34.6,375 L590.4,375" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M34.6,44 L34.6,375" fill="none" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="76" width="79" x="501.40002" y="54"/>
-<path d="M501.40002,54 L580.4,54 L580.4,130 L501.40002,130 z" fill="none" stroke="#666666" stroke-width="1"/>
-<path d="M509.40002,68 L521.4,68" fill="none" stroke="#0000ff" stroke-width="2"/>
+<path d="M34.6,375 L590.4,375" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M34.6,44 L34.6,375" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79" x="501.40002" y="54"/>
+<path d="M501.40002,54 L580.4,54 L580.4,130 L501.40002,130 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M509.40002,68 L521.4,68" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
 <text fill="#555555" font-family="sans-serif" font-size="12" x="527.4" y="72">
 trend
 </text>
@@ -57,7 +57,7 @@ trend
 <text fill="#555555" font-family="sans-serif" font-size="12" x="527.4" y="92">
 samples
 </text>
-<rect fill="#33aa33" height="12" width="12" x="509.40002" y="102"/>
+<rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="509.40002" y="102"/>
 <text fill="#555555" font-family="sans-serif" font-size="12" x="527.4" y="112">
 counts
 </text>

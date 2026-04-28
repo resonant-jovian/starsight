@@ -75,6 +75,55 @@ impl Path {
         self.commands.push(PathCommand::Close);
         self
     }
+
+    /// Returns `true` when every segment in this path is axis-aligned: only
+    /// `MoveTo`, `Close`, or `LineTo` where each `LineTo` shares either an
+    /// x- or y-coordinate with the previous anchor. Any `QuadTo` / `CubicTo`
+    /// is an immediate `false`.
+    ///
+    /// Backends use this to drop antialiasing on grid lines, tick marks,
+    /// axis edges, and box outlines so 1-px hairlines stay crisp instead
+    /// of fuzzing across two pixel rows. Curves and diagonals always keep
+    /// AA because the smoothing genuinely helps there.
+    #[must_use]
+    pub fn is_axis_aligned(&self) -> bool {
+        const EPS: f32 = 1.0e-4;
+        let mut prev: Option<Point> = None;
+        let mut subpath_start: Option<Point> = None;
+        for cmd in &self.commands {
+            match *cmd {
+                PathCommand::MoveTo(p) => {
+                    prev = Some(p);
+                    subpath_start = Some(p);
+                }
+                PathCommand::LineTo(p) => {
+                    let Some(prev_p) = prev else {
+                        return false;
+                    };
+                    let dx = (p.x - prev_p.x).abs();
+                    let dy = (p.y - prev_p.y).abs();
+                    if dx > EPS && dy > EPS {
+                        return false;
+                    }
+                    prev = Some(p);
+                }
+                PathCommand::Close => {
+                    // The implicit segment from prev → subpath_start must
+                    // also be axis-aligned for the closed path to qualify.
+                    if let (Some(prev_p), Some(start)) = (prev, subpath_start) {
+                        let dx = (start.x - prev_p.x).abs();
+                        let dy = (start.y - prev_p.y).abs();
+                        if dx > EPS && dy > EPS {
+                            return false;
+                        }
+                        prev = Some(start);
+                    }
+                }
+                PathCommand::QuadTo(_, _) | PathCommand::CubicTo(_, _, _) => return false,
+            }
+        }
+        true
+    }
 }
 
 // ── LineCap ──────────────────────────────────────────────────────────────────────────────────────
@@ -202,6 +251,72 @@ mod tests {
             .close();
         assert_eq!(p.commands.len(), 3);
         assert_eq!(p.commands[2], PathCommand::Close);
+    }
+
+    #[test]
+    fn axis_aligned_empty_path_is_aligned() {
+        // Vacuously true — no commands → no diagonal segments.
+        assert!(Path::new().is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_horizontal_run() {
+        let p = Path::new()
+            .move_to(Point::new(0.0, 5.0))
+            .line_to(Point::new(20.0, 5.0))
+            .line_to(Point::new(40.0, 5.0));
+        assert!(p.is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_vertical_run() {
+        let p = Path::new()
+            .move_to(Point::new(5.0, 0.0))
+            .line_to(Point::new(5.0, 30.0));
+        assert!(p.is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_orthogonal_box_with_close() {
+        let p = Path::new()
+            .move_to(Point::new(10.0, 10.0))
+            .line_to(Point::new(20.0, 10.0))
+            .line_to(Point::new(20.0, 20.0))
+            .line_to(Point::new(10.0, 20.0))
+            .close();
+        assert!(p.is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_diagonal_segment_is_rejected() {
+        let p = Path::new()
+            .move_to(Point::new(0.0, 0.0))
+            .line_to(Point::new(10.0, 10.0));
+        assert!(!p.is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_cubic_present_is_rejected() {
+        let mut p = Path::new().move_to(Point::new(0.0, 0.0));
+        p.commands.push(PathCommand::CubicTo(
+            Point::new(0.0, 5.0),
+            Point::new(5.0, 10.0),
+            Point::new(10.0, 10.0),
+        ));
+        assert!(!p.is_axis_aligned());
+    }
+
+    #[test]
+    fn axis_aligned_close_with_diagonal_back_to_start_is_rejected() {
+        // Triangle: two orthogonal sides, but Close would close diagonally
+        // back to the starting point — that hidden diagonal disqualifies
+        // the path even though every explicit LineTo is axis-aligned.
+        let p = Path::new()
+            .move_to(Point::new(0.0, 0.0))
+            .line_to(Point::new(10.0, 0.0))
+            .line_to(Point::new(10.0, 10.0))
+            .close();
+        assert!(!p.is_axis_aligned());
     }
 
     #[test]

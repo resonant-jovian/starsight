@@ -95,6 +95,13 @@ impl DrawBackend for SvgBackend {
                 .set("fill-opacity", style.opacity)
                 .set("stroke-opacity", style.opacity);
         }
+        // Crisp 1-px hairlines for axis-aligned grid / tick / axis paths
+        // — SVG renderers honour shape-rendering="crispEdges" by snapping
+        // strokes to the pixel grid (yrp.6). Curves and diagonals keep
+        // the default browser shape-rendering setting.
+        if path.is_axis_aligned() {
+            p = p.set("shape-rendering", "crispEdges");
+        }
         self.elements.push(Box::new(p));
         Ok(())
     }
@@ -174,7 +181,9 @@ impl DrawBackend for SvgBackend {
             .set("y", rect.top)
             .set("width", rect.width())
             .set("height", rect.height())
-            .set("fill", color.to_css_hex());
+            .set("fill", color.to_css_hex())
+            // Rectangles are axis-aligned by construction (yrp.6).
+            .set("shape-rendering", "crispEdges");
         self.elements.push(Box::new(r));
         Ok(())
     }

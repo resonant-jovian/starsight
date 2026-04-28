@@ -3,7 +3,7 @@ source: starsight-layer-5/tests/snapshot.rs
 expression: svg
 ---
 <svg height="500" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="431" width="437.8" x="41.800003" y="44"/>
+<rect fill="#ffffff" height="431" shape-rendering="crispEdges" width="437.8" x="41.800003" y="44"/>
 <text fill="#222222" font-family="sans-serif" font-size="16" x="168.4" y="28">
 Vote distribution
 </text>

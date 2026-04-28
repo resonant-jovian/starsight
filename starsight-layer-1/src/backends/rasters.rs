@@ -89,6 +89,12 @@ impl DrawBackend for SkiaBackend {
             .ok_or_else(|| StarsightError::Render("Empty path".into()))?;
 
         let mut paint = Paint::default();
+        // Crisp axis-aligned hairlines: drop AA on grid / tick / axis edges
+        // / box outlines so 1-px strokes don't fuzz across two pixel rows.
+        // Curves and diagonals keep the default AA on (yrp.6).
+        if path.is_axis_aligned() {
+            paint.anti_alias = false;
+        }
 
         // Fill first if requested.
         if let Some(fill) = style.fill_color {
@@ -287,7 +293,14 @@ impl DrawBackend for SkiaBackend {
         let sk_rect = rect
             .to_tiny_skia()
             .ok_or_else(|| StarsightError::Render("Invalid rect".into()))?;
-        let mut paint = Paint::default();
+        // Rectangles are axis-aligned by construction — drop AA so plot
+        // backgrounds, bar bodies, legend swatches, and box-plot bodies
+        // render with crisp edges (yrp.6).
+        let paint = Paint {
+            anti_alias: false,
+            ..Default::default()
+        };
+        let mut paint = paint;
         paint.set_color_rgba8(color.r, color.g, color.b, 255);
         self.pixmap
             .fill_rect(sk_rect, &paint, tiny_skia::Transform::identity(), None);
