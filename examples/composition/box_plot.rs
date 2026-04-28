@@ -1,41 +1,57 @@
 //! Box-and-whisker plot — starsight 0.3.0 showcase.
 //!
-//! Compares response distributions across four treatment cohorts. Each box
-//! shows the interquartile range; the white line marks the median; whiskers
-//! extend to the most extreme non-outlier samples; black dots flag points
-//! beyond 1.5×IQR. The custom palette runs the four bands through a
-//! perceptually-graded blue-to-red ramp so the cohort ordering reads at a
-//! glance even before the axis labels are processed.
+//! Compares response distributions across four cohorts in a synthetic
+//! dose-response trial. Each cohort has *genuinely different* characteristics
+//! so the box plot's distinguishing features (whisker reach, IQR width,
+//! outliers in different directions) actually show up:
+//!
+//! - **placebo** — tight unimodal distribution, no outliers
+//! - **low dose** — wider IQR, one high outlier (a non-responder
+//!   over-corrected upward)
+//! - **med dose** — moderate spread, two low outliers (under-responders)
+//! - **high dose** — narrowest IQR (drug worked), one extreme high outlier
+//!   (idiosyncratic reaction)
+//!
+//! The custom palette runs the cohort sequence through a perceptually
+//! uniform blue → green → orange → pink ramp.
 
 use starsight::prelude::*;
 
 fn main() -> Result<()> {
-    // Synthetic but plausible response measurements: each cohort gets a
-    // tight unimodal sample plus a couple of long-tail outliers so the
-    // boxplot exercises every visual element it produces.
+    // Deterministic data; values chosen so each cohort's box-and-whisker
+    // exercises a different visual element (whisker length, outlier side,
+    // box width). No RNG so the snapshot stays byte-stable.
     let groups = vec![
         BoxPlotGroup::new(
             "placebo",
+            // Tight, near-symmetric: IQR ≈ 4, no Tukey outliers.
             vec![
-                42.0, 44.0, 45.0, 46.0, 47.0, 47.5, 48.0, 48.5, 49.0, 50.0, 51.0, 52.0, 80.0,
+                44.0, 45.5, 46.5, 47.0, 47.5, 48.0, 48.0, 48.5, 49.0, 49.5, 50.0, 50.5, 51.0, 52.0,
+                53.5,
             ],
         ),
         BoxPlotGroup::new(
             "low dose",
+            // Wider IQR + one high outlier. The 78.0 sits well past
+            // q3 + 1.5·IQR.
             vec![
-                48.0, 50.0, 51.0, 52.0, 53.0, 53.5, 54.0, 54.5, 55.0, 56.0, 57.0, 58.0, 22.0,
+                48.0, 49.5, 51.0, 52.0, 53.0, 53.5, 54.0, 54.5, 55.5, 56.5, 58.0, 59.5, 61.0, 78.0,
             ],
         ),
         BoxPlotGroup::new(
             "med dose",
+            // Moderate spread + two low outliers (under-responders) and a
+            // slightly negative-skewed body.
             vec![
-                55.0, 57.0, 58.0, 59.0, 60.0, 60.5, 61.0, 61.5, 62.0, 63.0, 64.0, 65.0,
+                28.0, 32.0, 55.0, 56.5, 58.0, 59.0, 60.0, 60.5, 61.0, 62.0, 63.0, 64.5, 66.0,
             ],
         ),
         BoxPlotGroup::new(
             "high dose",
+            // Narrowest IQR (drug worked uniformly) plus one extreme high
+            // outlier representing an idiosyncratic over-response.
             vec![
-                62.0, 64.0, 65.0, 66.0, 67.0, 67.5, 68.0, 68.5, 69.0, 70.0, 71.0, 72.0, 95.0, 30.0,
+                65.0, 66.0, 66.5, 67.0, 67.0, 67.5, 68.0, 68.0, 68.5, 69.0, 69.5, 70.0, 92.0,
             ],
         ),
     ];

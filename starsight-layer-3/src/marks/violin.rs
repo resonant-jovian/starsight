@@ -501,7 +501,9 @@ impl ViolinMark {
         backend.draw_path(&path, &style)?;
 
         // Inner box / median overlays.
-        let inner_half = half_width_px * 0.18;
+        // 0.12 of the violin half-width keeps the inner box readable without
+        // crowding narrow violins (yrp.4).
+        let inner_half = half_width_px * 0.12;
         if self.show_box {
             self.render_inner_box(coord, backend, group, center_x, inner_half)?;
         } else if self.show_median {
