@@ -987,6 +987,45 @@ fn snapshot_candlestick_custom_colors() {
     insta::assert_snapshot!(svg);
 }
 
+#[cfg(feature = "polars")]
+#[test]
+fn snapshot_polars_line() {
+    use polars::prelude::*;
+    use starsight_layer_5::sources::plot_dataframe;
+
+    let df = df!(
+        "x" => &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        "y" => &[0.0, 1.0, 0.5, 2.0, 1.5, 2.5],
+    )
+    .unwrap();
+    let fig = plot_dataframe(&df, "x", "y", None)
+        .title("Numeric x → LineMark")
+        .x_label("x")
+        .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[cfg(feature = "polars")]
+#[test]
+fn snapshot_polars_grouped_scatter() {
+    use polars::prelude::*;
+    use starsight_layer_5::sources::plot_dataframe;
+
+    let df = df!(
+        "x" => &[0.0, 1.0, 2.0, 0.5, 1.5, 2.5, 0.2, 1.2, 2.2],
+        "y" => &[0.0, 1.0, 0.5, 1.0, 0.0, 1.5, 0.7, 1.4, 0.9],
+        "group" => &["A", "A", "A", "B", "B", "B", "C", "C", "C"],
+    )
+    .unwrap();
+    let fig = plot_dataframe(&df, "x", "y", Some("group"))
+        .title("color = 'group' → 3 PointMarks")
+        .x_label("x")
+        .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
 #[test]
 fn snapshot_legend_glyph_dispatch() {
     // Three labelled marks of different shapes — exercises the LegendGlyph

@@ -6,10 +6,14 @@ license.workspace = true
 authors.workspace = true
 publish = false
 
-[dev-dependencies]
+[dependencies]
 starsight.workspace = true
 chromata.workspace = true
 prismatica = { workspace = true, features = ["matplotlib", "colorbrewer"] }
+polars = { workspace = true, optional = true }
+
+[features]
+polars = ["dep:polars", "starsight/polars"]
 
 # ── basics ──────────────────────────────────────────────────────────────────
 # Smallest possible programs that exercise one mark type at a time. Start here
@@ -137,12 +141,17 @@ name = "streaming"
 path = "planned/streaming.rs"
 
 [[example]]
-name = "polars_integration"
-path = "planned/polars_integration.rs"
-
-[[example]]
 name = "faceting"
 path = "planned/faceting.rs"
+
+# ── data integration ─────────────────────────────────────────────────────────
+# Polars / ndarray / Arrow data acceptance. Polars lands in 0.3.0; the others
+# follow per the roadmap. Feature-gated so the default cargo build is light.
+
+[[example]]
+name = "polars_integration"
+path = "data/polars_integration.rs"
+required-features = ["starsight/polars"]
 
 [lints]
 workspace = true
