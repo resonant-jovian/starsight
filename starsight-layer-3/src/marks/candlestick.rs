@@ -215,9 +215,30 @@ impl Mark for CandlestickMark {
                 y_max = row.high;
             }
         }
+        // Inset the reported x range by half a band so the leftmost and
+        // rightmost candle bodies sit fully inside the plot rect rather
+        // than half-spilling onto the y-axis (yrp.5). Half-band is half
+        // the median timestamp spacing for n ≥ 2; degenerate single-row
+        // case widens by ±0.5 around the lone timestamp.
+        let half_band = if self.data.len() < 2 {
+            0.5
+        } else {
+            let mut spacings: Vec<f64> = self
+                .data
+                .windows(2)
+                .map(|w| (w[1].timestamp - w[0].timestamp).abs())
+                .filter(|s| *s > 0.0)
+                .collect();
+            if spacings.is_empty() {
+                0.5
+            } else {
+                spacings.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                spacings[spacings.len() / 2] * 0.5
+            }
+        };
         Some(DataExtent {
-            x_min,
-            x_max,
+            x_min: x_min - half_band,
+            x_max: x_max + half_band,
             y_min,
             y_max,
         })
@@ -271,12 +292,29 @@ mod tests {
 
     #[test]
     fn data_extent_covers_low_high_per_row() {
+        // x range insets by half a band on each side so the leftmost and
+        // rightmost candles fit inside the plot rect (yrp.5). Sample uses
+        // unit spacing → half_band = 0.5.
         let mark = CandlestickMark::new(sample());
         let extent = mark.data_extent().expect("non-empty extent");
-        assert_eq!(extent.x_min, 0.0);
-        assert_eq!(extent.x_max, 2.0);
+        assert!((extent.x_min - (-0.5)).abs() < 1e-9);
+        assert!((extent.x_max - 2.5).abs() < 1e-9);
         assert_eq!(extent.y_min, 90.0);
         assert_eq!(extent.y_max, 115.0);
+    }
+
+    #[test]
+    fn data_extent_single_row_widens_by_half() {
+        let mark = CandlestickMark::new(vec![Ohlc {
+            timestamp: 10.0,
+            open: 1.0,
+            high: 2.0,
+            low: 0.5,
+            close: 1.5,
+        }]);
+        let extent = mark.data_extent().expect("non-empty extent");
+        assert!((extent.x_min - 9.5).abs() < 1e-9);
+        assert!((extent.x_max - 10.5).abs() < 1e-9);
     }
 
     #[test]
