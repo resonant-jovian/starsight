@@ -1,5 +1,6 @@
 //! Re-exports of layer-3 statistical transforms.
-//!
-//! Status: stub. Concrete re-exports land alongside the layer-3 implementations.
 
-pub use crate::components::statistics::{Bin, BinMethod, BinTransform};
+pub use crate::components::statistics::{
+    Bandwidth, Bin, BinMethod, BinTransform, BoxPlotStats, Kde, Kernel, percentile,
+    scott_bandwidth, silverman_bandwidth, std_dev,
+};
