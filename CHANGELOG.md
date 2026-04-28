@@ -20,6 +20,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `examples/basics/movie_heatmap.rs` (spec #16) — Rotten Tomatoes × IMDB cross-tab with log-scale viridis
   - `examples/scientific/laser_plasma.rs` (spec #7, single-panel) — stimulated Raman scattering electron phase space, log-scale viridis
 - New snapshot tests: `snapshot_bar_waterfall`, `snapshot_point_per_point_color_size`, `snapshot_heatmap_log`
+- `BoxPlotMark` + `BoxPlotGroup` — box-and-whisker chart with median line, whiskers, caps, and 1.5×IQR Tukey outliers. `palette` / `color` / `half_width` / `show_outliers` / `label` builders.
+- `ViolinMark` + `ViolinGroup` + `ViolinScale { Area, Count, Width }` — kernel-density violins with optional inner box overlay, configurable bandwidth (Silverman / Scott / Manual), `cut` extension, and split-mode for paired comparisons.
+- `PieMark` + `PieLabelMode` — solid pie or donut (`inner_radius` builder) with arc-bezier slice geometry, configurable start angle, label modes (`Percent` / `Value` / `None`), and a 6-color default palette.
+- `CandlestickMark` + `Ohlc` — financial OHLC bars with up/down body color dispatch, vertical wicks, configurable `body_width` and `wick_width`.
+- `BoxPlotStats::compute(&[f64])` — five-number summary with 1.5×IQR fences and outlier classification.
+- `Kde { bandwidth, kernel }` — 1-D Gaussian kernel density estimator with `Bandwidth::{Silverman, Scott, Manual(f64)}` strategies. `evaluate_at` / `evaluate_grid` entry points.
+- Bandwidth helpers: `silverman_bandwidth`, `scott_bandwidth`, `std_dev`. Promoted `percentile()` to `pub` and re-exported through the facade.
+- `LegendGlyph { Line, Point, Bar, Area }` (`#[non_exhaustive]`) carried by `LegendEntry` — the legend now draws the right shape per mark (filled disk for `PointMark`, fill-rect for `BarMark`/`HistogramMark`/`HeatmapMark`, translucent area + top stroke for `AreaMark`, line stroke for `LineMark`/`StepMark`/fallback). `Mark::legend_glyph()` is the trait hook with `LegendGlyph::Line` as the default.
+- `LayoutFonts { label, title }` shared between layout-pass reservations and render-time text drawing, removing the duplicated `12.0` / `16.0` literals between `figures.rs` and `renders.rs`.
+- Polars data integration behind the `polars` feature flag (pulled forward from 0.11.0): `FrameSource` + `extract_f64` / `extract_f64_with_nulls` / `extract_strings` helpers + `From<LazyFrame> for FrameSource`. The `plot!` macro grows a DataFrame arm: `plot!(df, x = "col", y = "col", color = "col"?)` dispatches `LineMark` / `BarMark` / `PointMark` per column types and partitions by color column.
+- New gallery binaries: `examples/composition/{box_plot,violin,pie,donut}.rs`, `examples/scientific/candlestick.rs`, and `examples/data/polars_integration.rs` (replaces the earlier placeholder).
+- Snapshot tests for every new mark + the legend-glyph regression: `snapshot_boxplot_basic` / `_with_outliers` / `_palette`, `snapshot_violin_basic` / `_no_box` / `_split` / `_palette`, `snapshot_pie_basic`, `snapshot_donut_basic`, `snapshot_candlestick_basic` / `_custom_colors`, `snapshot_legend_glyph_dispatch`, and `snapshot_polars_line` / `_grouped_scatter` (gated on the `polars` feature).
 
 ### Changed
 
@@ -31,10 +43,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `PointMark::render` now batches consecutive points by `(color, radius)` so per-point styling needs only one `draw_path` call per unique combination.
 - `examples/composition/waterfall_bar.rs` rewritten as a single `BarMark` with per-bar `bases`/`colors` and `connectors(true)`.
 - `examples/Cargo.toml`: prismatica dependency now enables the `colorbrewer` feature (RdPu used by `bubble_scatter`).
+- **Breaking:** `Mark` trait gains a `legend_glyph()` method (default `LegendGlyph::Line`). External impls that don't override pick up the default.
+- **Breaking:** `LegendEntry` gains a `glyph: LegendGlyph` field — struct-literal callers must add it.
+- **Breaking:** `LayoutCtx` replaces `font_size: f32` and `title_font_size: f32` with `fonts: LayoutFonts`. Callers building a `LayoutCtx` directly migrate via `LayoutFonts { label: 12.0, title: 16.0 }` or `LayoutFonts::default()`.
+- `render_axes` / `render_legend` / `render_title` / `render_axis_labels` now take a trailing `&LayoutFonts` argument and read sizes from there instead of redefining literals.
+- `TitleComponent` breathing room bumped from `h + 12` to `h + 16` so chart titles on square heatmap canvases sit a touch further from the canvas top. All affected snapshots regenerated.
+- `xtask gallery` does one upfront `cargo build --release --examples` and then exec's each binary directly, removing the per-example cargo overhead (~2s × 23 examples).
+- Workspace `polars` dep moves from a bare version string to `{ default-features = false, features = ["lazy"] }` so layer-5 can inherit it cleanly while keeping the lazy-frame entry point.
 
 ### Fixed
 
 - `BarMark` waterfall layout (`starsight-7h9`) — multiple `BarMark` instances each with `x.len() == 1` collapsed onto a single x-position because `Figure::category_labels()` only reads the first mark's labels. The fix is structural: per-bar `bases`/`colors` let one `BarMark` carry the entire waterfall, so the category axis spans all 10 labels naturally.
+- `Axis::category(&[])` edge case (`starsight-262`) — debug builds now panic with a clear message; release builds keep the previous best-effort behaviour. Documented the band-edge tick-position invariant and the bar-mark scale-bypass behaviour (`starsight-o8p`).
+- Square heatmap title spacing (`starsight-hko`) — `TitleComponent` reserves an extra 4px so the title doesn't graze the canvas top.
+- Layout font-size duplication (`starsight-h4l`) — title / tick / axis-title font sizes are now sourced from a single `LayoutFonts` instance, eliminating drift between layout and render passes.
+- Legend glyph dispatch (`starsight-f4t`) — `PointMark` legends show a filled dot, bar / area entries get the right swatch shape; line marks remain on a horizontal stroke.
+- Gallery build performance (`starsight-qv7`) — `cargo xtask gallery` now builds examples once and exec's each binary, removing the cargo overhead per invocation.
 
 ## [0.2.0]
 

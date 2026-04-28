@@ -58,6 +58,10 @@ The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×6
 | `plt.plot(x, y)` | `plot!(x, y)` | No global state |
 | `plt.scatter(x, y, c=c)` | `PointMark::new(x, y).color_by(&c)` | Builder pattern |
 | `plt.bar(labels, vals)` | `BarMark::new(categories, values)` | Grammar of graphics |
+| `plt.boxplot([a, b])` | `BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])` | Per-group `BoxPlotGroup` carries its label |
+| `sns.violinplot(data=df, x=…, y=…)` | `ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)` | Bandwidth strategy is a builder, not magic |
+| `plt.pie(values, labels=…)` | `PieMark::new(values, labels).show_percent()` | Add `.inner_radius(0.5)` for a donut |
+| `mpl_finance.candlestick_ohlc` | `CandlestickMark::new(vec![Ohlc { … }, …])` | Inline `Ohlc` rows; no helper crate |
 | `plt.savefig("out.png")` | `.save("out.png")?` | Returns `Result` |
 | `plt.show()` | `.show()?` | Feature `interactive` |
 | `sns.heatmap(data)` | `HeatmapMark::new(data)` | prismatica colormaps |
@@ -291,7 +295,12 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 | `LineMark` / `PointMark` | working | 0.1.0 | Core 2D mark types |
 | `Figure` builder + `plot!` macro | working | 0.1.0 | High-level API and one-liner |
 | `BarMark` / `AreaMark` | working | 0.2.0 | Vertical/horizontal/stacked bars, area fills; grouped bars + HeatmapMark pending |
-| Statistical transforms (Bin, KDE, ...) | planned | 0.3.0 | Histograms, density, regression |
+| `BoxPlotMark` / `ViolinMark` | working | 0.3.0 | Statistical distributions with five-number summary, KDE-driven density, split-mode violins |
+| `PieMark` (+ donut variant) | working | 0.3.0 | Cubic-bezier arc geometry, percent / value slice labels |
+| `CandlestickMark` | working | 0.3.0 | OHLC bars with up/down body color dispatch |
+| Polars `DataFrame` integration | working | 0.3.0 | `plot!(df, x="col", y="col", color="col")` (feature `polars`) |
+| `LegendGlyph` dispatch | working | 0.3.0 | Per-mark legend swatch shape (line / point / bar / area) |
+| Statistical transforms (Bin, KDE, ...) | working | 0.3.0 | `BoxPlotStats`, `Kde`, bandwidth helpers; histograms shipped in 0.2.0 |
 | Layout + faceting + legends | planned | 0.4.0 | `GridLayout`, `FacetWrap`, `Colorbar` |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
 | Interactivity (hover/zoom/pan) | planned | 0.6.0 | winit event loop |
@@ -355,7 +364,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 
 - [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
 - [x] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
-- [ ] 0.3.0 Statistical charts — `BoxMark`, `ViolinMark`, `KDE`, `PieMark`
+- [x] 0.3.0 Statistical charts + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, Polars `DataFrame` integration (pulled forward from 0.11.0)
 - [ ] 0.4.0 Layout — `GridLayout`, faceting, legends, colorbars
 - [ ] 0.5.0 Scale infrastructure — `LogScale`, `SymLogScale`, `DateTimeScale`, `BandScale`
 - [ ] 0.6.0 GPU + interactivity — wgpu native, hover / zoom / pan, winit event loop
@@ -363,7 +372,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 - [ ] 0.8.0 Terminal backend — Kitty / Sixel / iTerm2 / half-block / Braille
 - [ ] 0.9.0 3D — `Surface3D`, `Scatter3D`, isosurface
 - [ ] 0.10.0 Export + WASM — PDF (krilla), interactive HTML, WebGPU
-- [ ] 0.11.0 Data acceptance — Polars / ndarray / Arrow
+- [ ] 0.11.0 Data acceptance — ndarray / Arrow (Polars landed early in 0.3.0)
 - [ ] 0.12.0 Documentation, examples, gallery
 - [ ] 1.0.0 Stable release
 

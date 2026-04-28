@@ -59,16 +59,21 @@ cargo test --workspace
 - Reference PNGs in `examples/<group>/`, alongside each `.rs` source (run `cargo xtask gallery` to refresh them all)
 - SVG backend used for deterministic CI renders
 
-## What Works Now (0.2.x)
+## What Works Now (0.3.x)
 
-- LineMark, PointMark, BarMark (vertical/horizontal/grouped), AreaMark (with baseline), HeatmapMark, HistogramMark (auto-binning), StepMark
-- BandScale for categorical x-axis
-- `infer_chart_kind` chart-type inference
-- `Color::cycle_next` (Tableau10 default palette)
-- Title and axis-label rendering
+- LineMark, PointMark (per-point colors/radii/alpha), BarMark (vertical/horizontal/grouped/per-bar bases+colors+connectors), AreaMark (with baseline), HeatmapMark (Linear + Log color scale), HistogramMark (auto-binning), StepMark
+- BoxPlotMark + BoxPlotGroup (five-number summary, whiskers, outliers, palette)
+- ViolinMark + ViolinGroup + ViolinScale (KDE-driven density, optional inner box overlay, split mode, Area/Count/Width normalization)
+- PieMark + PieLabelMode (solid pie / donut via inner_radius, percent / value label modes, 6-color default palette)
+- CandlestickMark + Ohlc (financial OHLC bars with up/down body color dispatch)
+- Polars data integration (`polars` feature) — FrameSource + extract helpers + `plot!(df, x="col", y="col", color="col")`
+- BandScale for categorical x-axis; `infer_chart_kind` chart-type inference
+- `Color::cycle_next` (Tableau10 default palette); LegendGlyph dispatch (line / point / bar / area glyphs)
+- Title and axis-label rendering; LayoutFonts shared between layout and render passes
 - SkiaBackend, SvgBackend (with opacity)
-- Figure + plot! macro
+- Figure + plot! macro (DataFrame arm gated on the `polars` feature)
 - Wilkinson Extended ticks (layer-2)
+- Stat infrastructure: BoxPlotStats, Kde (Gaussian + Silverman/Scott/Manual bandwidth), percentile, std_dev
 - Snapshot tests in layer-5
 
 ## Not Implemented (yet)
@@ -80,8 +85,7 @@ cargo test --workspace
 - Terminal backends (0.8.0)
 - 3D: Surface3D, Scatter3D (0.9.0)
 - PDF (krilla), interactive HTML, WASM (0.10.0)
-- Polars / ndarray / Arrow input (0.11.0)
-- BoxMark, ViolinMark, KDE, PieMark (0.3.0)
+- ndarray / Arrow input (0.11.0; Polars landed early in 0.3.0)
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
