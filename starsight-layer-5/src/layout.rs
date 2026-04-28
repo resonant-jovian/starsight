@@ -50,6 +50,28 @@ pub struct Slot {
     pub side: Side,
 }
 
+/// Bundle of font sizes used in both layout reservations and render-time text
+/// drawing. Layout components and render helpers take the same instance so the
+/// space reserved for text matches the size at which the text is later drawn —
+/// fixing the drift between `reserve` and `render` that hid behind two
+/// independently-edited literals (`starsight-h4l`).
+#[derive(Clone, Copy, Debug)]
+pub struct LayoutFonts {
+    /// Tick labels, axis titles, and legend labels.
+    pub label: f32,
+    /// Chart title.
+    pub title: f32,
+}
+
+impl Default for LayoutFonts {
+    fn default() -> Self {
+        Self {
+            label: 12.0,
+            title: 16.0,
+        }
+    }
+}
+
 /// Context handed to each component when it computes its reservations.
 ///
 /// Carries `&mut DrawBackend` because `text_extent` takes `&mut self` to allow
@@ -61,10 +83,8 @@ pub struct LayoutCtx<'a> {
     pub height: f32,
     /// Backend used for measuring text.
     pub backend: &'a mut dyn DrawBackend,
-    /// Default text font size for tick/axis labels.
-    pub font_size: f32,
-    /// Title font size.
-    pub title_font_size: f32,
+    /// Font sizes shared with the render pass.
+    pub fonts: LayoutFonts,
     /// Outer canvas padding around all reservations.
     pub padding: f32,
 }
@@ -200,13 +220,15 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
         };
         let h = ctx
             .backend
-            .text_extent(t, ctx.title_font_size)
-            .map_or(ctx.title_font_size, |(_, h)| h);
+            .text_extent(t, ctx.fonts.title)
+            .map_or(ctx.fonts.title, |(_, h)| h);
         // Priority 1 so the Y-tick-label top gutter (priority 0) sits flush
-        // against plot.top and the title goes above it.
+        // against plot.top and the title goes above it. The 16-px breathing
+        // room above the cap-height keeps short canvases (square heatmaps)
+        // from feeling cramped while staying invisible on tall canvases.
         vec![Reservation {
             side: Side::Top,
-            size: h + 12.0,
+            size: h + 16.0,
             priority: 1,
         }]
     }
@@ -235,7 +257,7 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
         let mut max_w: f32 = 0.0;
         let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.fonts.label) {
                 if w > max_w {
                     max_w = w;
                 }
@@ -245,7 +267,7 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
             }
         }
         if max_h <= 0.0 {
-            max_h = ctx.font_size;
+            max_h = ctx.fonts.label;
         }
         vec![
             Reservation {
@@ -285,7 +307,7 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
         let mut max_w: f32 = 0.0;
         let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.fonts.label) {
                 if w > max_w {
                     max_w = w;
                 }
@@ -295,7 +317,7 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
             }
         }
         if max_h <= 0.0 {
-            max_h = ctx.font_size;
+            max_h = ctx.fonts.label;
         }
         vec![
             Reservation {
@@ -330,8 +352,8 @@ impl<'a> LayoutComponent for XAxisTitleComponent<'a> {
         };
         let h = ctx
             .backend
-            .text_extent(l, ctx.font_size)
-            .map_or(ctx.font_size, |(_, h)| h);
+            .text_extent(l, ctx.fonts.label)
+            .map_or(ctx.fonts.label, |(_, h)| h);
         vec![Reservation {
             side: Side::Bottom,
             size: self.gap + h,
@@ -360,8 +382,8 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
         // to the *height* of the unrotated glyph box (becomes width after rotation).
         let h = ctx
             .backend
-            .text_extent(l, ctx.font_size)
-            .map_or(ctx.font_size, |(_, h)| h);
+            .text_extent(l, ctx.fonts.label)
+            .map_or(ctx.fonts.label, |(_, h)| h);
         vec![Reservation {
             side: Side::Left,
             size: self.gap + h,
@@ -373,7 +395,7 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
 #[cfg(test)]
 mod tests {
     use super::{
-        LayoutBuilder, LayoutComponent, LayoutCtx, Reservation, Side, TitleComponent,
+        LayoutBuilder, LayoutComponent, LayoutCtx, LayoutFonts, Reservation, Side, TitleComponent,
         XAxisTitleComponent, XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
     };
     use starsight_layer_1::backends::vectors::SvgBackend;
@@ -383,8 +405,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         }
     }
@@ -636,8 +657,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend: &mut backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         };
         let labels = vec!["a".to_string()];
@@ -659,8 +679,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend: &mut backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         };
         let labels = vec!["a".to_string()];

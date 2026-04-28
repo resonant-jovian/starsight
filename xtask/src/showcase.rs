@@ -20,8 +20,7 @@ pub fn run() -> Result<()> {
         fs::remove_dir_all(&out_dir)
             .with_context(|| format!("removing existing {}", out_dir.display()))?;
     }
-    fs::create_dir_all(&out_dir)
-        .with_context(|| format!("creating {}", out_dir.display()))?;
+    fs::create_dir_all(&out_dir).with_context(|| format!("creating {}", out_dir.display()))?;
 
     let mut pngs = Vec::new();
     collect_pngs(&src_dir, &src_dir, &mut pngs)?;
@@ -33,11 +32,7 @@ pub fn run() -> Result<()> {
         // Relative target so showcase/ stays valid if the repo is moved.
         let target = PathBuf::from("..").join("examples").join(rel);
         symlink(&target, &link_path).with_context(|| {
-            format!(
-                "symlinking {} -> {}",
-                link_path.display(),
-                target.display()
-            )
+            format!("symlinking {} -> {}", link_path.display(), target.display())
         })?;
     }
 
@@ -55,12 +50,10 @@ fn collect_pngs(root: &Path, dir: &Path, out: &mut Vec<String>) -> Result<()> {
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             collect_pngs(root, &path, out)?;
-        } else if file_type.is_file()
-            && path.extension().and_then(|e| e.to_str()) == Some("png")
-        {
-            let rel = path.strip_prefix(root).with_context(|| {
-                format!("{} is not under {}", path.display(), root.display())
-            })?;
+        } else if file_type.is_file() && path.extension().and_then(|e| e.to_str()) == Some("png") {
+            let rel = path
+                .strip_prefix(root)
+                .with_context(|| format!("{} is not under {}", path.display(), root.display()))?;
             let rel_str = rel
                 .components()
                 .filter_map(|c| c.as_os_str().to_str())

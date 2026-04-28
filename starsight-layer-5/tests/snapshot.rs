@@ -659,11 +659,7 @@ fn snapshot_heatmap_log() {
     // Multi-decade dynamic range so the difference between linear and log mapping
     // is unambiguous: the bottom-right cell is 1e6× the top-left cell.
     let data: Vec<Vec<f64>> = (0..8)
-        .map(|j| {
-            (0..8)
-                .map(|i| 10f64.powi(i + j))
-                .collect::<Vec<f64>>()
-        })
+        .map(|j| (0..8).map(|i| 10f64.powi(i + j)).collect::<Vec<f64>>())
         .collect();
     let fig = Figure::new(600, 600)
         .title("Log-scale heatmap (multi-decade)")

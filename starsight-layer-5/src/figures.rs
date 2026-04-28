@@ -302,8 +302,7 @@ impl Figure {
                 .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?
         };
 
-        let font_size: f32 = 12.0;
-        let title_font_size: f32 = 16.0;
+        let fonts = crate::layout::LayoutFonts::default();
         let tick_len: f32 = 5.0;
         let label_gap: f32 = 4.0;
 
@@ -326,8 +325,7 @@ impl Figure {
                 width: self.width as f32,
                 height: self.height as f32,
                 backend,
-                font_size,
-                title_font_size,
+                fonts,
                 padding: 4.0,
             };
             let mut builder = LayoutBuilder::new(ctx);
@@ -367,7 +365,7 @@ impl Figure {
         if let Some(title) = &self.title {
             let slot = layout.slots.get("title").and_then(|v| v.first()).copied();
             if let Some(slot) = slot {
-                crate::renders::render_title(title, &slot, backend, &self.theme)?;
+                crate::renders::render_title(title, &slot, backend, &self.theme, &fonts)?;
             }
         }
 
@@ -389,6 +387,7 @@ impl Figure {
             &plot_area,
             backend,
             &self.theme,
+            &fonts,
         )?;
 
         backend.set_clip(Some(plot_area))?;
@@ -402,6 +401,7 @@ impl Figure {
             &category_labels,
             use_y_axis_labels,
             &self.theme,
+            &fonts,
         )?;
 
         let legend_entries: Vec<crate::renders::LegendEntry> = self
@@ -421,7 +421,13 @@ impl Figure {
             .collect();
 
         if !legend_entries.is_empty() {
-            crate::renders::render_legend(&legend_entries, &plot_area, backend, &self.theme)?;
+            crate::renders::render_legend(
+                &legend_entries,
+                &plot_area,
+                backend,
+                &self.theme,
+                &fonts,
+            )?;
         }
 
         Ok(())

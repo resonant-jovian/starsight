@@ -13,7 +13,7 @@ use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::coords::CartesianCoord;
 
-use crate::layout::Slot;
+use crate::layout::{LayoutFonts, Slot};
 
 // ── render_axes ──────────────────────────────────────────────────────────────────────────────────
 
@@ -29,11 +29,12 @@ pub fn render_axes(
     category_labels: &[String],
     use_y_axis_labels: bool,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
     let area = &coord.plot_area;
     let tick_len: f32 = 5.0;
     let tick_color = theme.axis;
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
 
     let n_categories = category_labels.len();
 
@@ -224,12 +225,13 @@ pub fn render_legend(
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
     if entries.is_empty() {
         return Ok(());
     }
 
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
     let label_color = theme.tick_label;
     let sample_size: f32 = 12.0;
     let padding: f32 = 8.0;
@@ -281,8 +283,9 @@ pub fn render_title(
     slot: &Slot,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
-    let font_size: f32 = 16.0;
+    let font_size = fonts.title;
     let title_color = theme.title;
     let (tw, th) = backend
         .text_extent(title, font_size)
@@ -297,6 +300,7 @@ pub fn render_title(
 ///
 /// # Errors
 /// Returns the backend's error if text measurement or drawing fails.
+#[allow(clippy::too_many_arguments)]
 pub fn render_axis_labels(
     x_label: Option<&str>,
     y_label: Option<&str>,
@@ -305,8 +309,9 @@ pub fn render_axis_labels(
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
     let label_color = theme.tick_label;
 
     if let (Some(label), Some(slot)) = (x_label, x_slot) {
@@ -337,7 +342,7 @@ mod tests {
         LegendEntry, render_axes, render_axis_labels, render_background, render_grid_lines,
         render_legend, render_title,
     };
-    use crate::layout::{Side, Slot};
+    use crate::layout::{LayoutFonts, Side, Slot};
     use starsight_layer_1::backends::vectors::SvgBackend;
     use starsight_layer_1::primitives::{Color, Rect};
     use starsight_layer_1::theme::DEFAULT_LIGHT;
@@ -377,6 +382,7 @@ mod tests {
             &Rect::new(0.0, 0.0, 100.0, 100.0),
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
     }
@@ -399,6 +405,7 @@ mod tests {
             &Rect::new(0.0, 0.0, 400.0, 200.0),
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
         let svg = backend.svg_string();
@@ -424,7 +431,14 @@ mod tests {
             rect: Rect::new(0.0, 0.0, 200.0, 30.0),
             side: Side::Top,
         };
-        render_title("Hello", &slot, &mut backend, &DEFAULT_LIGHT).unwrap();
+        render_title(
+            "Hello",
+            &slot,
+            &mut backend,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
         assert!(backend.svg_string().contains("Hello"));
     }
 
@@ -448,6 +462,7 @@ mod tests {
             &plot,
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
         let svg = backend.svg_string();
@@ -466,6 +481,7 @@ mod tests {
             &Rect::new(0.0, 0.0, 200.0, 200.0),
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
     }
@@ -481,7 +497,15 @@ mod tests {
     fn render_axes_numeric_branch() {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
-        render_axes(&coord, &mut backend, &[], false, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &[],
+            false,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -489,7 +513,15 @@ mod tests {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
         let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-        render_axes(&coord, &mut backend, &cats, false, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &cats,
+            false,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -497,6 +529,14 @@ mod tests {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
         let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-        render_axes(&coord, &mut backend, &cats, true, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &cats,
+            true,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 }

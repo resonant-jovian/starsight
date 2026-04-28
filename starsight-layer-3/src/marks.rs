@@ -563,8 +563,8 @@ impl Mark for BarMark {
                     let x_right = x_center + bar_width / 2.0;
 
                     let base = self.base_at(*orig_i);
-                    let y_top = area.bottom
-                        - coord.y_axis.scale.map(base + *value) as f32 * area.height();
+                    let y_top =
+                        area.bottom - coord.y_axis.scale.map(base + *value) as f32 * area.height();
                     let y_bottom =
                         area.bottom - coord.y_axis.scale.map(base) as f32 * area.height();
                     let rect_top = y_top.min(y_bottom);
@@ -584,10 +584,9 @@ impl Mark for BarMark {
                     let y_bottom = y_center + bar_height / 2.0;
 
                     let base = self.base_at(*orig_i);
-                    let x_left =
-                        area.left + coord.x_axis.scale.map(base) as f32 * area.width();
-                    let x_right = area.left
-                        + coord.x_axis.scale.map(base + *value) as f32 * area.width();
+                    let x_left = area.left + coord.x_axis.scale.map(base) as f32 * area.width();
+                    let x_right =
+                        area.left + coord.x_axis.scale.map(base + *value) as f32 * area.width();
                     let rect_left = x_left.min(x_right);
                     let rect_right = x_left.max(x_right);
 
@@ -1151,9 +1150,7 @@ impl Mark for HeatmapMark {
 
                 let normalized = match self.color_scale {
                     HeatmapColorScale::Linear => (value - data_min) / range,
-                    HeatmapColorScale::Log => {
-                        (value.max(log_eps).log10() - log_min) / log_range
-                    }
+                    HeatmapColorScale::Log => (value.max(log_eps).log10() - log_min) / log_range,
                 };
                 let color = self.colormap.sample(normalized);
 

@@ -3,46 +3,46 @@ source: starsight-layer-5/tests/snapshot.rs
 expression: svg
 ---
 <svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="719" width="1132.6" x="50.6" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="484.8" y="26">
+<rect fill="#ffffff" height="715" width="1132.6" x="50.6" y="44"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="484.8" y="28">
 Monthly Average Rainfall
 </text>
 <text fill="#555555" font-family="sans-serif" font-size="12" x="598.89996" y="794">
 Month
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 17.999998, 446.3)" x="17.999998" y="446.3">
+<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 17.999998, 448.3)" x="17.999998" y="448.3">
 Rainfall (mm)
 </text>
-<path d="M50.6,759 L50.6,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M144.98334,759 L144.98334,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M239.36667,759 L239.36667,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M333.75,759 L333.75,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M428.13333,759 L428.13333,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M522.51666,759 L522.51666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M616.89996,759 L616.89996,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M711.2833,759 L711.2833,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M805.6666,759 L805.6666,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M900.05,759 L900.05,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M994.4333,759 L994.4333,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M1088.8167,759 L1088.8167,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M1183.2,759 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,759 L50.6,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M144.98334,759 L144.98334,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M239.36667,759 L239.36667,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M333.75,759 L333.75,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M428.13333,759 L428.13333,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M522.51666,759 L522.51666,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M616.89996,759 L616.89996,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M711.2833,759 L711.2833,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M805.6666,759 L805.6666,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M900.05,759 L900.05,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M994.4333,759 L994.4333,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1088.8167,759 L1088.8167,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M1183.2,759 L1183.2,44" fill="none" stroke="#dddddd" stroke-width="1"/>
 <path d="M50.6,759 L1183.2,759" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M50.6,579.25 L1183.2,579.25" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M50.6,399.5 L1183.2,399.5" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M50.6,219.75 L1183.2,219.75" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M50.6,40 L1183.2,40" fill="none" stroke="#dddddd" stroke-width="1"/>
-<rect fill="#0000ff" height="407.43332" width="75.50667" x="60.03833" y="351.56668"/>
-<rect fill="#0000ff" height="311.56668" width="75.50665" x="154.42166" y="447.43332"/>
-<rect fill="#0000ff" height="443.38333" width="75.50665" x="248.805" y="315.61667"/>
-<rect fill="#0000ff" height="509.29166" width="75.50665" x="343.18835" y="249.70834"/>
-<rect fill="#0000ff" height="551.23334" width="75.50665" x="437.57166" y="207.76666"/>
-<rect fill="#0000ff" height="467.34998" width="75.506714" x="531.95496" y="291.65002"/>
-<rect fill="#0000ff" height="389.45834" width="75.506714" x="626.33826" y="369.54166"/>
-<rect fill="#0000ff" height="419.41666" width="75.506714" x="720.7216" y="339.58334"/>
-<rect fill="#0000ff" height="527.26666" width="75.506714" x="815.1049" y="231.73334"/>
-<rect fill="#0000ff" height="569.2084" width="75.506714" x="909.4883" y="189.79163"/>
-<rect fill="#0000ff" height="611.15" width="75.50665" x="1003.87164" y="147.84998"/>
-<rect fill="#0000ff" height="467.34998" width="75.50659" x="1098.255" y="291.65002"/>
+<path d="M50.6,580.25 L1183.2,580.25" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,401.5 L1183.2,401.5" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,222.75 L1183.2,222.75" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M50.6,44 L1183.2,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#0000ff" height="405.16666" width="75.50667" x="60.03833" y="353.83334"/>
+<rect fill="#0000ff" height="309.83334" width="75.50665" x="154.42166" y="449.16666"/>
+<rect fill="#0000ff" height="440.9167" width="75.50665" x="248.805" y="318.0833"/>
+<rect fill="#0000ff" height="506.4583" width="75.50665" x="343.18835" y="252.54169"/>
+<rect fill="#0000ff" height="548.1666" width="75.50665" x="437.57166" y="210.83337"/>
+<rect fill="#0000ff" height="464.74997" width="75.506714" x="531.95496" y="294.25003"/>
+<rect fill="#0000ff" height="387.2917" width="75.506714" x="626.33826" y="371.7083"/>
+<rect fill="#0000ff" height="417.0833" width="75.506714" x="720.7216" y="341.9167"/>
+<rect fill="#0000ff" height="524.3334" width="75.506714" x="815.1049" y="234.66663"/>
+<rect fill="#0000ff" height="566.0417" width="75.506714" x="909.4883" y="192.95831"/>
+<rect fill="#0000ff" height="607.75" width="75.50665" x="1003.87164" y="151.25"/>
+<rect fill="#0000ff" height="464.74997" width="75.50659" x="1098.255" y="294.25003"/>
 <text fill="#666666" font-family="sans-serif" font-size="12" x="86.99166" y="776">
 Jan
 </text>
@@ -83,22 +83,22 @@ Dec
 <text fill="#666666" font-family="sans-serif" font-size="12" x="34.399998" y="763.8">
 0
 </text>
-<path d="M50.6,579.25 L55.6,579.25" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="584.05">
+<path d="M50.6,580.25 L55.6,580.25" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="585.05">
 30
 </text>
-<path d="M50.6,399.5 L55.6,399.5" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="404.3">
+<path d="M50.6,401.5 L55.6,401.5" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="406.3">
 60
 </text>
-<path d="M50.6,219.75 L55.6,219.75" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="224.55">
+<path d="M50.6,222.75 L55.6,222.75" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="27.199997" y="227.55">
 90
 </text>
-<path d="M50.6,40 L55.6,40" fill="none" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="44.8">
+<path d="M50.6,44 L55.6,44" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="19.999998" y="48.8">
 120
 </text>
 <path d="M50.6,759 L1183.2,759" fill="none" stroke="#000000" stroke-width="1"/>
-<path d="M50.6,40 L50.6,759" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M50.6,44 L50.6,759" fill="none" stroke="#000000" stroke-width="1"/>
 </svg>
