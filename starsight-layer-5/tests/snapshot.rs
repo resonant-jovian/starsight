@@ -13,8 +13,9 @@
 use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, HeatmapColorScale, HeatmapMark, HistogramMark,
-    LineMark, PieMark, PointMark, StepMark, StepPosition, ViolinGroup, ViolinMark,
+    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, HeatmapColorScale, HeatmapMark,
+    HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark, StepPosition, ViolinGroup,
+    ViolinMark,
 };
 use starsight_layer_3::statistics::Bandwidth;
 use starsight_layer_5::Figure;
@@ -880,6 +881,107 @@ fn snapshot_donut_basic() {
         )
         .inner_radius(0.5)
         .show_values(),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_candlestick_basic() {
+    // Six-day OHLC sequence: starts mostly up, dips, recovers. Visual
+    // baseline: green/red bodies in default theme, vertical wicks at body
+    // top/bottom.
+    let data = vec![
+        Ohlc {
+            timestamp: 0.0,
+            open: 100.0,
+            high: 110.0,
+            low: 95.0,
+            close: 105.0,
+        },
+        Ohlc {
+            timestamp: 1.0,
+            open: 105.0,
+            high: 115.0,
+            low: 100.0,
+            close: 112.0,
+        },
+        Ohlc {
+            timestamp: 2.0,
+            open: 112.0,
+            high: 118.0,
+            low: 102.0,
+            close: 104.0,
+        },
+        Ohlc {
+            timestamp: 3.0,
+            open: 104.0,
+            high: 109.0,
+            low: 95.0,
+            close: 97.0,
+        },
+        Ohlc {
+            timestamp: 4.0,
+            open: 97.0,
+            high: 105.0,
+            low: 92.0,
+            close: 102.0,
+        },
+        Ohlc {
+            timestamp: 5.0,
+            open: 102.0,
+            high: 113.0,
+            low: 100.0,
+            close: 111.0,
+        },
+    ];
+    let fig = Figure::new(700, 400)
+        .title("Six-day OHLC")
+        .x_label("session")
+        .y_label("price")
+        .add(CandlestickMark::new(data));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_candlestick_custom_colors() {
+    // Same data with cyan up / orange down — exercises the up_color /
+    // down_color builders.
+    let data = vec![
+        Ohlc {
+            timestamp: 0.0,
+            open: 50.0,
+            high: 55.0,
+            low: 48.0,
+            close: 53.0,
+        },
+        Ohlc {
+            timestamp: 1.0,
+            open: 53.0,
+            high: 56.0,
+            low: 50.0,
+            close: 51.0,
+        },
+        Ohlc {
+            timestamp: 2.0,
+            open: 51.0,
+            high: 57.0,
+            low: 50.0,
+            close: 56.0,
+        },
+        Ohlc {
+            timestamp: 3.0,
+            open: 56.0,
+            high: 60.0,
+            low: 55.0,
+            close: 58.0,
+        },
+    ];
+    let fig = Figure::new(500, 400).title("Cyan/orange OHLC").add(
+        CandlestickMark::new(data)
+            .up_color(Color::from_hex(0x0000_BCD4))
+            .down_color(Color::from_hex(0x00FF_5722)),
     );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);

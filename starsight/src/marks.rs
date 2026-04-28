@@ -4,7 +4,7 @@
 //! mark types ready to be added to a [`Figure`](crate::figures::Figure).
 
 pub use crate::components::marks::{
-    AreaBaseline, AreaMark, BarMark, BarRenderContext, BoxPlotGroup, BoxPlotMark, DataExtent,
-    HeatmapMark, HistogramMark, LegendGlyph, LineMark, Mark, Orientation, PieMark, PointMark,
-    StepMark, StepPosition, ViolinGroup, ViolinMark, ViolinScale,
+    AreaBaseline, AreaMark, BarMark, BarRenderContext, BoxPlotGroup, BoxPlotMark, CandlestickMark,
+    DataExtent, HeatmapMark, HistogramMark, LegendGlyph, LineMark, Mark, Ohlc, Orientation,
+    PieMark, PointMark, StepMark, StepPosition, ViolinGroup, ViolinMark, ViolinScale,
 };
