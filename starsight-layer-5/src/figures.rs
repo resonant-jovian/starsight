@@ -414,6 +414,7 @@ impl Figure {
                     return Some(crate::renders::LegendEntry {
                         color,
                         label: label.to_string(),
+                        glyph: mark.legend_glyph(),
                     });
                 }
                 None

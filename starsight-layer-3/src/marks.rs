@@ -43,6 +43,29 @@ pub struct BarRenderContext {
     pub first_pass: bool,
 }
 
+// ── LegendGlyph ──────────────────────────────────────────────────────────────────────────────────
+
+/// Visual sample drawn next to a legend entry's label.
+///
+/// Each [`Mark`] reports the glyph that best represents its appearance via
+/// [`Mark::legend_glyph`]. The legend renderer dispatches per variant so
+/// [`PointMark`] entries show a filled disk rather than a horizontal line,
+/// [`BarMark`] / [`HistogramMark`] entries show a filled rectangle, and
+/// [`AreaMark`] entries show a translucent fill — matching what the mark
+/// actually draws on the chart.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum LegendGlyph {
+    /// Horizontal stroke. Default for line-shaped marks ([`LineMark`], [`StepMark`]).
+    Line,
+    /// Filled disk. Used by [`PointMark`].
+    Point,
+    /// Filled rectangle. Used by [`BarMark`] and [`HistogramMark`].
+    Bar,
+    /// Filled rectangle with a top stroke. Used by [`AreaMark`].
+    Area,
+}
+
 // ── Mark ─────────────────────────────────────────────────────────────────────────────────────────
 
 /// Object-safe trait every visual mark implements.
@@ -90,6 +113,13 @@ pub trait Mark {
     /// Returns a label for this mark in the legend.
     fn legend_label(&self) -> Option<&str> {
         None
+    }
+    /// Returns the glyph the legend should draw for this mark. The default of
+    /// [`LegendGlyph::Line`] suits stroked-line marks; concrete marks override
+    /// to surface a more honest sample (e.g. [`PointMark`] returns
+    /// [`LegendGlyph::Point`], so a scatter legend shows a dot, not a dash).
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Line
     }
 }
 
@@ -368,6 +398,10 @@ impl Mark for PointMark {
 
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
+    }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Point
     }
 }
 
@@ -835,6 +869,10 @@ impl Mark for BarMark {
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
     }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
+    }
 }
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -1013,6 +1051,10 @@ impl Mark for AreaMark {
             y_max,
         })
     }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Area
+    }
 }
 
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────
@@ -1186,6 +1228,10 @@ impl Mark for HeatmapMark {
 
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
+    }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
     }
 }
 
@@ -1430,6 +1476,10 @@ impl Mark for HistogramMark {
             y_min: 0.0,
             y_max: count_max,
         })
+    }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
     }
 }
 

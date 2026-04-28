@@ -5,5 +5,5 @@
 
 pub use crate::components::marks::{
     AreaBaseline, AreaMark, BarMark, BarRenderContext, DataExtent, HeatmapMark, HistogramMark,
-    LineMark, Mark, Orientation, PointMark, StepMark, StepPosition,
+    LegendGlyph, LineMark, Mark, Orientation, PointMark, StepMark, StepPosition,
 };

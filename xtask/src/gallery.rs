@@ -28,6 +28,13 @@ pub fn run() -> Result<()> {
     fs::create_dir_all(&gallery_snapshots)
         .with_context(|| format!("creating {}", gallery_snapshots.display()))?;
 
+    // Build all examples in a single cargo invocation so cargo's job server
+    // parallelizes compilation and we pay the metadata + dep-graph check cost
+    // once instead of per-example. After this returns, each example exists as a
+    // standalone binary at `target/release/examples/<name>` and can be exec'd
+    // directly — no cargo overhead per invocation. Fix for `starsight-qv7`.
+    build_examples(&workspace_root)?;
+
     let mut generated = 0usize;
     let mut failed: Vec<String> = Vec::new();
     for example in &examples {
@@ -163,16 +170,33 @@ fn push_if_complete(
     }
 }
 
-fn run_example(workspace_root: &Path, name: &str) -> Result<()> {
+/// Compile every `[[example]]` registered in `examples/Cargo.toml` once.
+/// Cargo's job server parallelizes the work; the resulting binaries live at
+/// `target/release/examples/<name>` and are then exec'd directly by
+/// [`run_example`].
+fn build_examples(workspace_root: &Path) -> Result<()> {
     let manifest = workspace_root.join("examples/Cargo.toml");
+    println!("Building examples (release) ...");
     let status = Command::new("cargo")
-        .args(["run", "--release", "--example", name, "--manifest-path"])
+        .args(["build", "--release", "--examples", "--manifest-path"])
         .arg(&manifest)
         .current_dir(workspace_root)
         .status()
-        .with_context(|| format!("spawning cargo run --example {name}"))?;
+        .context("spawning cargo build --examples")?;
     if !status.success() {
-        anyhow::bail!("cargo run --example {name} exited with {status}");
+        anyhow::bail!("cargo build --examples exited with {status}");
+    }
+    Ok(())
+}
+
+fn run_example(workspace_root: &Path, name: &str) -> Result<()> {
+    let bin = workspace_root.join("target/release/examples").join(name);
+    let status = Command::new(&bin)
+        .current_dir(workspace_root)
+        .status()
+        .with_context(|| format!("spawning {}", bin.display()))?;
+    if !status.success() {
+        anyhow::bail!("{} exited with {status}", bin.display());
     }
     Ok(())
 }

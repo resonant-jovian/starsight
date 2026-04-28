@@ -671,3 +671,34 @@ fn snapshot_heatmap_log() {
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }
+
+#[test]
+fn snapshot_legend_glyph_dispatch() {
+    // Three labelled marks of different shapes — exercises the LegendGlyph
+    // dispatch fix for `starsight-f4t`. Visually: the legend should show a
+    // line for "trend", a dot for "samples", and a filled rectangle for
+    // "counts" — not three identical horizontal lines.
+    let fig = Figure::new(600, 400)
+        .title("Mixed-mark legend")
+        .add(
+            LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 1.0, 0.5, 1.5])
+                .color(Color::BLUE)
+                .label("trend"),
+        )
+        .add(
+            PointMark::new(vec![0.5, 1.5, 2.5], vec![0.2, 1.2, 0.8])
+                .color(Color::RED)
+                .radius(5.0)
+                .label("samples"),
+        )
+        .add(
+            BarMark::new(
+                vec!["a".into(), "b".into(), "c".into()],
+                vec![0.4, 0.8, 0.6],
+            )
+            .color(Color::from_hex(0x0033_AA33))
+            .label("counts"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}

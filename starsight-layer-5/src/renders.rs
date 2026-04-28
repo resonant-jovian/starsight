@@ -8,10 +8,11 @@
 
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
-use starsight_layer_1::paths::{Path, PathStyle};
+use starsight_layer_1::paths::{Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_3::marks::LegendGlyph;
 
 use crate::layout::{LayoutFonts, Slot};
 
@@ -214,6 +215,10 @@ pub struct LegendEntry {
     pub color: Color,
     /// Display text for this legend row.
     pub label: String,
+    /// Sample shape drawn next to the label. Honest legend glyphs let scatter
+    /// plots show a dot (not a dash) and bar charts show a swatch (not a
+    /// hairline). Fix for `starsight-f4t`.
+    pub glyph: LegendGlyph,
 }
 
 /// Render a legend with colored line/box samples and labels.
@@ -255,11 +260,43 @@ pub fn render_legend(
 
     for (i, entry) in entries.iter().enumerate() {
         let y = legend_y + padding + (i as f32 * line_spacing) + sample_size / 2.0;
+        let sample_left = legend_x + padding;
+        let sample_right = sample_left + sample_size;
 
-        let line = Path::new()
-            .move_to(Point::new(legend_x + padding, y))
-            .line_to(Point::new(legend_x + padding + sample_size, y));
-        backend.draw_path(&line, &PathStyle::stroke(entry.color, 2.0))?;
+        match entry.glyph {
+            LegendGlyph::Point => {
+                // Filled disk centered on the sample slot, radius matching
+                // PointMark's default visual weight in legends.
+                let radius = sample_size / 2.5;
+                let cx = f32::midpoint(sample_left, sample_right);
+                draw_filled_disk(backend, Point::new(cx, y), radius, entry.color)?;
+            }
+            LegendGlyph::Bar => {
+                let half = sample_size / 2.0;
+                let rect = Rect::new(sample_left, y - half, sample_right, y + half);
+                backend.fill_rect(rect, entry.color)?;
+            }
+            LegendGlyph::Area => {
+                // Translucent fill + top stroke conveys the "area under a line"
+                // shape — readable even at the small legend swatch size.
+                let half = sample_size / 2.0;
+                let rect = Rect::new(sample_left, y - half, sample_right, y + half);
+                let fill = entry.color.with_alpha(140).without_alpha();
+                backend.fill_rect(rect, fill)?;
+                let top = Path::new()
+                    .move_to(Point::new(sample_left, y - half))
+                    .line_to(Point::new(sample_right, y - half));
+                backend.draw_path(&top, &PathStyle::stroke(entry.color, 1.5))?;
+            }
+            // LegendGlyph::Line and any future variant fall back to a
+            // horizontal stroke — the safe, readable default for unknown shapes.
+            LegendGlyph::Line | _ => {
+                let line = Path::new()
+                    .move_to(Point::new(sample_left, y))
+                    .line_to(Point::new(sample_right, y));
+                backend.draw_path(&line, &PathStyle::stroke(entry.color, 2.0))?;
+            }
+        }
 
         backend.draw_text(
             &entry.label,
@@ -270,6 +307,44 @@ pub fn render_legend(
     }
 
     Ok(())
+}
+
+/// Approximate a filled circle with four cubic Béziers (the standard
+/// `0.5522847498` Kappa constant). The legend-internal helper avoids pulling in
+/// any additional renderer dependencies for what is a one-off use today.
+fn draw_filled_disk(
+    backend: &mut dyn DrawBackend,
+    center: Point,
+    radius: f32,
+    color: Color,
+) -> Result<()> {
+    // Kappa for cubic-Bézier circle approximation: 4·(√2 − 1)/3 ≈ 0.552_284_8.
+    let k = 0.552_284_8 * radius;
+    let cx = center.x;
+    let cy = center.y;
+    let mut path = Path::new().move_to(Point::new(cx + radius, cy));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + radius, cy + k),
+        Point::new(cx + k, cy + radius),
+        Point::new(cx, cy + radius),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - k, cy + radius),
+        Point::new(cx - radius, cy + k),
+        Point::new(cx - radius, cy),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - radius, cy - k),
+        Point::new(cx - k, cy - radius),
+        Point::new(cx, cy - radius),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + k, cy - radius),
+        Point::new(cx + radius, cy - k),
+        Point::new(cx + radius, cy),
+    ));
+    let style = PathStyle::fill(color);
+    backend.draw_path(&path, &style)
 }
 
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
@@ -349,6 +424,7 @@ mod tests {
     use starsight_layer_2::axes::Axis;
     use starsight_layer_2::coords::CartesianCoord;
     use starsight_layer_2::scales::LinearScale;
+    use starsight_layer_3::marks::LegendGlyph;
 
     fn coord_with_ticks(plot: Rect) -> CartesianCoord {
         CartesianCoord {
@@ -394,10 +470,12 @@ mod tests {
             LegendEntry {
                 color: Color::RED,
                 label: "first".into(),
+                glyph: LegendGlyph::Line,
             },
             LegendEntry {
                 color: Color::BLUE,
                 label: "second".into(),
+                glyph: LegendGlyph::Point,
             },
         ];
         render_legend(
