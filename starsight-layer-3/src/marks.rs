@@ -26,7 +26,9 @@ use std::collections::HashMap;
 // up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
 // caring that the implementation lives in a sibling file.
 pub mod box_plot;
+pub mod violin;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
+pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.

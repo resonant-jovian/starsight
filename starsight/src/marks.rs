@@ -6,5 +6,5 @@
 pub use crate::components::marks::{
     AreaBaseline, AreaMark, BarMark, BarRenderContext, BoxPlotGroup, BoxPlotMark, DataExtent,
     HeatmapMark, HistogramMark, LegendGlyph, LineMark, Mark, Orientation, PointMark, StepMark,
-    StepPosition,
+    StepPosition, ViolinGroup, ViolinMark, ViolinScale,
 };

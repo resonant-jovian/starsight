@@ -11,7 +11,7 @@ pub use crate::common::Figure;
 pub use crate::common::inferences::ChartKind;
 pub use crate::components::marks::{
     BarMark, BoxPlotGroup, BoxPlotMark, HistogramMark, LineMark, Mark, Orientation, PointMark,
-    StepMark,
+    StepMark, ViolinGroup, ViolinMark, ViolinScale,
 };
 pub use crate::plot;
 pub use crate::theme::{DEFAULT_DARK, DEFAULT_LIGHT, Theme};

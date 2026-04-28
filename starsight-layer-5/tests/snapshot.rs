@@ -14,8 +14,9 @@ use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
     AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, HeatmapColorScale, HeatmapMark, HistogramMark,
-    LineMark, PointMark, StepMark, StepPosition,
+    LineMark, PointMark, StepMark, StepPosition, ViolinGroup, ViolinMark,
 };
+use starsight_layer_3::statistics::Bandwidth;
 use starsight_layer_5::Figure;
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
@@ -733,6 +734,114 @@ fn snapshot_boxplot_palette() {
                 .palette(palette)
                 .show_outliers(false),
         );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_basic() {
+    // Three groups with deterministic, slightly skewed samples. Visual
+    // baseline: three violin shapes side by side, each with an inner mini
+    // boxplot showing Q1/Q3 in black + median in white.
+    let groups = vec![
+        ViolinGroup::new(
+            "control",
+            vec![
+                1.0, 1.5, 2.0, 2.2, 2.5, 2.7, 3.0, 3.2, 3.5, 3.8, 4.0, 4.2, 4.5, 5.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "low dose",
+            vec![
+                2.0, 2.5, 3.0, 3.2, 3.5, 3.7, 4.0, 4.2, 4.5, 4.8, 5.0, 5.2, 5.5, 6.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "high dose",
+            vec![
+                3.0, 3.5, 4.0, 4.2, 4.5, 4.7, 5.0, 5.2, 5.5, 5.8, 6.0, 6.2, 6.5, 7.0,
+            ],
+        ),
+    ];
+    let fig = Figure::new(700, 400)
+        .title("Dose-response densities")
+        .x_label("cohort")
+        .y_label("response")
+        .add(ViolinMark::new(groups).bandwidth(Bandwidth::Manual(0.4)));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_no_box() {
+    // Same data as basic, with the inner box overlay disabled. Just the
+    // density envelope and a horizontal median line.
+    let groups = vec![
+        ViolinGroup::new("A", vec![1.0, 2.0, 2.5, 3.0, 3.0, 3.5, 4.0, 5.0, 5.5, 6.0]),
+        ViolinGroup::new("B", vec![2.0, 3.0, 3.5, 4.0, 4.0, 4.5, 5.0, 6.0, 6.5, 7.0]),
+    ];
+    let fig = Figure::new(500, 400).title("Density only").add(
+        ViolinMark::new(groups)
+            .bandwidth(Bandwidth::Manual(0.5))
+            .show_box(false),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_split() {
+    // Paired before/after comparison: group "before" on the left half of
+    // the band, "after" on the right. Each side shows just a half-violin
+    // with a partial median line meeting at the centre.
+    let groups = vec![
+        ViolinGroup::new(
+            "before",
+            vec![
+                10.0, 12.0, 13.0, 14.0, 15.0, 15.5, 16.0, 16.5, 17.0, 18.0, 19.0, 20.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "after",
+            vec![
+                14.0, 16.0, 17.0, 18.0, 19.0, 19.5, 20.0, 20.5, 21.0, 22.0, 23.0, 24.0,
+            ],
+        ),
+    ];
+    let fig = Figure::new(400, 400).title("Pre/post split violin").add(
+        ViolinMark::new(groups)
+            .bandwidth(Bandwidth::Manual(0.8))
+            .split(true)
+            .palette(vec![
+                Color::from_hex(0x0033_77BB),
+                Color::from_hex(0x00CC_3366),
+            ]),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_palette() {
+    // Four groups with a custom palette so the chart reads as four colored
+    // shapes. Default Silverman bandwidth — exercises the auto-pick path.
+    let groups = vec![
+        ViolinGroup::new("Q1", (10..=18).map(f64::from).collect()),
+        ViolinGroup::new("Q2", (14..=22).map(f64::from).collect()),
+        ViolinGroup::new("Q3", (18..=26).map(f64::from).collect()),
+        ViolinGroup::new("Q4", (22..=30).map(f64::from).collect()),
+    ];
+    let palette = vec![
+        Color::from_hex(0x0033_77BB),
+        Color::from_hex(0x0033_AA66),
+        Color::from_hex(0x00CC_8800),
+        Color::from_hex(0x00CC_3366),
+    ];
+    let fig = Figure::new(800, 400)
+        .title("Quarterly throughput densities")
+        .x_label("quarter")
+        .y_label("requests / s")
+        .add(ViolinMark::new(groups).palette(palette));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }
