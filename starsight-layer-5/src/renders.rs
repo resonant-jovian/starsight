@@ -257,6 +257,15 @@ pub fn render_legend(
         legend_y + legend_height,
     );
     backend.fill_rect(bg_rect, bg_color)?;
+    // 1-px border so the legend box has a visible edge against bright plot
+    // backgrounds (yrp.1). Drawn after the fill so it sits on top.
+    let border = Path::new()
+        .move_to(Point::new(bg_rect.left, bg_rect.top))
+        .line_to(Point::new(bg_rect.right, bg_rect.top))
+        .line_to(Point::new(bg_rect.right, bg_rect.bottom))
+        .line_to(Point::new(bg_rect.left, bg_rect.bottom))
+        .close();
+    backend.draw_path(&border, &PathStyle::stroke(theme.axis, 1.0))?;
 
     for (i, entry) in entries.iter().enumerate() {
         let y = legend_y + padding + (i as f32 * line_spacing) + sample_size / 2.0;

@@ -48,6 +48,7 @@ c
 <path d="M34.6,375 L590.4,375" fill="none" stroke="#000000" stroke-width="1"/>
 <path d="M34.6,44 L34.6,375" fill="none" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="76" width="79" x="501.40002" y="54"/>
+<path d="M501.40002,54 L580.4,54 L580.4,130 L501.40002,130 z" fill="none" stroke="#666666" stroke-width="1"/>
 <path d="M509.40002,68 L521.4,68" fill="none" stroke="#0000ff" stroke-width="2"/>
 <text fill="#555555" font-family="sans-serif" font-size="12" x="527.4" y="72">
 trend
