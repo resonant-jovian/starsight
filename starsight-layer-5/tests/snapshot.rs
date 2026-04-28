@@ -13,8 +13,8 @@
 use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, PointMark,
-    StepMark, StepPosition,
+    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, HeatmapColorScale, HeatmapMark, HistogramMark,
+    LineMark, PointMark, StepMark, StepPosition,
 };
 use starsight_layer_5::Figure;
 
@@ -667,6 +667,71 @@ fn snapshot_heatmap_log() {
             HeatmapMark::new(data)
                 .colormap(VIRIDIS)
                 .color_scale(HeatmapColorScale::Log),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_basic() {
+    // Two side-by-side groups with a clean unimodal sample each. The visual
+    // baseline: two boxes with a median line, whiskers + caps, no outliers.
+    let groups = vec![
+        BoxPlotGroup::new("control", vec![1.0, 2.0, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0]),
+        BoxPlotGroup::new(
+            "treatment",
+            vec![3.0, 4.0, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0],
+        ),
+    ];
+    let fig = Figure::new(600, 400)
+        .title("Treatment effect — box plot")
+        .x_label("group")
+        .y_label("response")
+        .add(BoxPlotMark::new(groups));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_with_outliers() {
+    // A high outlier (20.0) and a low outlier (-5.0) — the visual baseline
+    // should show two black dots beyond each whisker.
+    let groups = vec![BoxPlotGroup::new(
+        "samples",
+        vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 20.0, -5.0],
+    )];
+    let fig = Figure::new(400, 400)
+        .title("Single group, two outliers")
+        .add(BoxPlotMark::new(groups));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_palette() {
+    // Four groups with a custom palette so each box reads as a distinct
+    // category. Outliers are turned off — useful when the visual focus is
+    // on quartile spread, not extreme values.
+    let groups = vec![
+        BoxPlotGroup::new("Q1", vec![10.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0]),
+        BoxPlotGroup::new("Q2", vec![14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0]),
+        BoxPlotGroup::new("Q3", vec![18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0]),
+        BoxPlotGroup::new("Q4", vec![22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0]),
+    ];
+    let palette = vec![
+        Color::from_hex(0x0033_77BB),
+        Color::from_hex(0x0033_AA66),
+        Color::from_hex(0x00CC_8800),
+        Color::from_hex(0x00CC_3366),
+    ];
+    let fig = Figure::new(800, 400)
+        .title("Quarterly throughput")
+        .x_label("quarter")
+        .y_label("requests / s")
+        .add(
+            BoxPlotMark::new(groups)
+                .palette(palette)
+                .show_outliers(false),
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);

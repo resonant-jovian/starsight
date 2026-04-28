@@ -79,6 +79,10 @@ path = "composition/gallery.rs"
 name = "waterfall_bar"
 path = "composition/waterfall_bar.rs"
 
+[[example]]
+name = "box_plot"
+path = "composition/box_plot.rs"
+
 # ── scientific ──────────────────────────────────────────────────────────────
 # Real numerical experiments: integrate an ODE, render a relativity diagram.
 # These exist to prove the library handles real data, not just toy series.

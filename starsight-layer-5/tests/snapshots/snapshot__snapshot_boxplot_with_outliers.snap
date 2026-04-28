@@ -1,0 +1,55 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="400" viewBox="0 0 400 400" width="400" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="331" width="341.4" x="27.400002" y="44"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="75.2" y="28">
+Single group, two outliers
+</text>
+<path d="M27.400002,375 L27.400002,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M368.8,375 L368.8,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,375 L368.8,375" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,308.8 L368.8,308.8" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,242.6 L368.8,242.6" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,176.4 L368.8,176.4" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,110.2 L368.8,110.2" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M27.400002,44 L368.8,44" fill="none" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#0000ff" height="66.20001" width="238.97998" x="78.61001" y="209.5"/>
+<path d="M78.61001,209.5 L317.59,209.5 L317.59,275.7 L78.61001,275.7 z" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M78.61001,242.59999 L317.59,242.59999" fill="none" stroke="#ffffff" stroke-width="2"/>
+<path d="M198.1,209.5 L198.1,189.64" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M138.35501,189.64 L257.845,189.64" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M198.1,275.7 L198.1,375" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M138.35501,375 L257.845,375" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M201.1,44 C201.1,45.656853,199.75687,47,198.1,47 C196.44315,47,195.1,45.656853,195.1,44 C195.1,42.343147,196.44315,41,198.1,41 C199.75687,41,201.1,42.343147,201.1,44" fill="#000000" stroke="#000000" stroke-width="0"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="172.90001" y="392">
+samples
+</text>
+<path d="M27.400002,375 L32.4,375" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="4.000001" y="379.8">
+-5
+</text>
+<path d="M27.400002,308.8 L32.4,308.8" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="11.200001" y="313.59998">
+0
+</text>
+<path d="M27.400002,242.6 L32.4,242.6" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="11.200001" y="247.40001">
+5
+</text>
+<path d="M27.400002,176.4 L32.4,176.4" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="4.000001" y="181.2">
+10
+</text>
+<path d="M27.400002,110.2 L32.4,110.2" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="4.000001" y="115">
+15
+</text>
+<path d="M27.400002,44 L32.4,44" fill="none" stroke="#666666" stroke-width="1"/>
+<text fill="#666666" font-family="sans-serif" font-size="12" x="4.000001" y="48.8">
+20
+</text>
+<path d="M27.400002,375 L368.8,375" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M27.400002,44 L27.400002,375" fill="none" stroke="#000000" stroke-width="1"/>
+</svg>

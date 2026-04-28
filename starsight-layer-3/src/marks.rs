@@ -18,6 +18,15 @@ use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::CartesianCoord;
 use starsight_layer_2::scales::Scale;
 use std::collections::HashMap;
+
+// ── Submodule marks (0.3.0+) ─────────────────────────────────────────────────────────────────────
+//
+// Statistical marks added in 0.3.0 live in their own submodule files to keep
+// this top-level file readable. Each submodule re-exports its public type(s)
+// up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
+// caring that the implementation lives in a sibling file.
+pub mod box_plot;
+pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.
