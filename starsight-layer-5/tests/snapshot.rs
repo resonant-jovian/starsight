@@ -14,7 +14,7 @@ use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
 use starsight_layer_1::primitives::Color;
 use starsight_layer_3::marks::{
     AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, HeatmapColorScale, HeatmapMark, HistogramMark,
-    LineMark, PointMark, StepMark, StepPosition, ViolinGroup, ViolinMark,
+    LineMark, PieMark, PointMark, StepMark, StepPosition, ViolinGroup, ViolinMark,
 };
 use starsight_layer_3::statistics::Bandwidth;
 use starsight_layer_5::Figure;
@@ -842,6 +842,45 @@ fn snapshot_violin_palette() {
         .x_label("quarter")
         .y_label("requests / s")
         .add(ViolinMark::new(groups).palette(palette));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_pie_basic() {
+    // Five-slice pie with the default palette and percentage labels at each
+    // midpoint. Visual baseline: clean wedges at the conventional top start
+    // angle, white slice borders, percentages readable in black.
+    let fig = Figure::new(500, 500).title("Energy mix").add(
+        PieMark::new(
+            vec![32.0, 24.0, 18.0, 14.0, 12.0],
+            vec![
+                "Solar".into(),
+                "Wind".into(),
+                "Hydro".into(),
+                "Nuclear".into(),
+                "Other".into(),
+            ],
+        )
+        .show_percent(),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_donut_basic() {
+    // Three-slice donut with a thick ring (inner_radius=0.5) and value
+    // labels. Visual baseline: a donut with a hollow center, three filled
+    // wedges, and the raw counts at each midpoint.
+    let fig = Figure::new(500, 500).title("Vote distribution").add(
+        PieMark::new(
+            vec![1240.0, 980.0, 540.0],
+            vec!["Yes".into(), "No".into(), "Abstain".into()],
+        )
+        .inner_radius(0.5)
+        .show_values(),
+    );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }

@@ -87,6 +87,14 @@ path = "composition/box_plot.rs"
 name = "violin"
 path = "composition/violin.rs"
 
+[[example]]
+name = "pie"
+path = "composition/pie.rs"
+
+[[example]]
+name = "donut"
+path = "composition/donut.rs"
+
 # ── scientific ──────────────────────────────────────────────────────────────
 # Real numerical experiments: integrate an ODE, render a relativity diagram.
 # These exist to prove the library handles real data, not just toy series.

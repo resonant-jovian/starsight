@@ -26,8 +26,10 @@ use std::collections::HashMap;
 // up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
 // caring that the implementation lives in a sibling file.
 pub mod box_plot;
+pub mod pie;
 pub mod violin;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
+pub use pie::PieMark;
 pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
