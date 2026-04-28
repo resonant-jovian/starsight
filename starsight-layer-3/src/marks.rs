@@ -136,6 +136,14 @@ pub trait Mark {
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Line
     }
+    /// Whether the figure should draw numeric x/y axes around this mark. Most
+    /// marks live on a Cartesian axis and want them; angular / decorative
+    /// marks like [`PieMark`] override to `false` so the figure suppresses
+    /// the axis chrome. The figure honours this only when *every* mark on it
+    /// returns `false`; mixed charts keep the axes for the others.
+    fn wants_axes(&self) -> bool {
+        true
+    }
 }
 
 // ── LineMark ─────────────────────────────────────────────────────────────────────────────────────

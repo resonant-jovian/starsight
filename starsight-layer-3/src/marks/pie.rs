@@ -170,10 +170,11 @@ impl Mark for PieMark {
             } else {
                 build_pie_slice(cx, cy, outer_r, start_angle, end_angle)
             };
+            let slice_color = self.slice_color(i);
             let style = PathStyle {
                 stroke_color: Color::WHITE,
                 stroke_width: 1.0,
-                fill_color: Some(self.slice_color(i)),
+                fill_color: Some(slice_color),
                 ..PathStyle::default()
             };
             backend.draw_path(&path, &style)?;
@@ -196,11 +197,23 @@ impl Mark for PieMark {
                 let (tw, _) = backend
                     .text_extent(&text, font_size)
                     .unwrap_or((0.0, font_size));
+                // Auto-pick label color for contrast against the slice fill
+                // (yrp.3). The user-facing `.label_color(c)` builder still
+                // wins when explicitly set away from the BLACK default.
+                let resolved_label_color = if self.label_color == Color::BLACK {
+                    if luminance(slice_color) < 0.5 {
+                        Color::WHITE
+                    } else {
+                        Color::BLACK
+                    }
+                } else {
+                    self.label_color
+                };
                 backend.draw_text(
                     &text,
                     Point::new(lx - tw * 0.5, ly + font_size * 0.4),
                     font_size,
-                    self.label_color,
+                    resolved_label_color,
                 )?;
             }
             start_angle = end_angle;
@@ -236,6 +249,22 @@ impl Mark for PieMark {
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Bar
     }
+
+    fn wants_axes(&self) -> bool {
+        // Pie / donut charts are angular — numeric x/y axes around them
+        // are visual noise. The figure suppresses axes + grid when every
+        // mark on it returns `false` here (yrp.2).
+        false
+    }
+}
+
+/// Rec. 601 luminance for a sRGB color, in `[0.0, 1.0]`. Used to pick a
+/// readable label color against an arbitrary slice fill.
+fn luminance(c: Color) -> f32 {
+    let r = f32::from(c.r) / 255.0;
+    let g = f32::from(c.g) / 255.0;
+    let b = f32::from(c.b) / 255.0;
+    0.299 * r + 0.587 * g + 0.114 * b
 }
 
 // ── arc geometry ─────────────────────────────────────────────────────────────────────────────────

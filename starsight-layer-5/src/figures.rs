@@ -390,19 +390,28 @@ impl Figure {
             &fonts,
         )?;
 
+        // Marks like PieMark are angular and want no Cartesian axis chrome.
+        // Skip render_grid_lines + render_axes only when *every* mark on the
+        // figure agrees — mixed charts keep the axes for the others (yrp.2).
+        let suppress_axes = !self.marks.is_empty() && self.marks.iter().all(|m| !m.wants_axes());
+
         backend.set_clip(Some(plot_area))?;
-        crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        if !suppress_axes {
+            crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        }
         self.render_marks(&coord, backend)?;
         backend.set_clip(None)?;
 
-        crate::renders::render_axes(
-            &coord,
-            backend,
-            &category_labels,
-            use_y_axis_labels,
-            &self.theme,
-            &fonts,
-        )?;
+        if !suppress_axes {
+            crate::renders::render_axes(
+                &coord,
+                backend,
+                &category_labels,
+                use_y_axis_labels,
+                &self.theme,
+                &fonts,
+            )?;
+        }
 
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
