@@ -12,12 +12,24 @@
 
 use crate::statistics::{Bin, BinMethod, BinTransform};
 use starsight_layer_1::backends::DrawBackend;
-use starsight_layer_1::errors::Result;
+use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, Coord};
 use starsight_layer_2::scales::Scale;
 use std::collections::HashMap;
+
+/// Downcast a `&dyn Coord` to the concrete `CartesianCoord` required by every
+/// 0.2.x-era cartesian mark. New polar marks (`ArcMark`, `RadarMark`, etc.)
+/// bypass this and downcast to their own coord type instead.
+pub(crate) fn require_cartesian(coord: &dyn Coord) -> Result<&CartesianCoord> {
+    coord
+        .as_any()
+        .downcast_ref::<CartesianCoord>()
+        .ok_or_else(|| {
+            StarsightError::Config("this mark requires a Cartesian coordinate system".to_string())
+        })
+}
 
 // ── Submodule marks (0.3.0+) ─────────────────────────────────────────────────────────────────────
 //
@@ -91,10 +103,14 @@ pub enum LegendGlyph {
 pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
     ///
+    /// `coord` is `&dyn Coord` so the same trait can dispatch to cartesian and
+    /// polar marks. Cartesian marks use [`require_cartesian`] to downcast at
+    /// the top of their impl; polar marks downcast to their own coord type.
+    ///
     /// # Errors
-    /// Returns the backend's [`Result`] error if drawing any of the mark's
-    /// primitives fails (e.g. invalid clip rect, font shaping failure).
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
+    /// Returns [`StarsightError`] if the coord type is unsupported by this mark
+    /// or if the backend errors on a draw call.
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()>;
     /// Render with bar context for grouped/stacked bar rendering.
     ///
     /// Default implementation forwards to [`render`](Self::render); bar marks
@@ -105,7 +121,7 @@ pub trait Mark {
     #[allow(unused_variables)]
     fn render_bar(
         &self,
-        coord: &CartesianCoord,
+        coord: &dyn Coord,
         backend: &mut dyn DrawBackend,
         _context: &BarRenderContext,
     ) -> Result<()> {
@@ -199,7 +215,8 @@ impl LineMark {
 }
 
 impl Mark for LineMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let mut commands = Vec::new();
         let mut need_move = true;
 
@@ -352,7 +369,8 @@ impl PointMark {
 }
 
 impl Mark for PointMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         // Per-point colors/radii mean we can't share a single Path across all
         // points the way the original implementation did. Group consecutive points
         // by (color, radius) so each unique combination still maps to one draw_path
@@ -589,7 +607,8 @@ impl BarMark {
     }
 }
 impl Mark for BarMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         // Keep the original index alongside each valid bar so per-bar bases/colors
         // line up with self.y even when some entries are filtered out as NaN/empty.
         let valid: Vec<(usize, &str, f64)> = self
@@ -661,10 +680,11 @@ impl Mark for BarMark {
     #[allow(clippy::too_many_lines)]
     fn render_bar(
         &self,
-        coord: &CartesianCoord,
+        coord: &dyn Coord,
         backend: &mut dyn DrawBackend,
         context: &BarRenderContext,
     ) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let valid: Vec<(usize, &str, f64)> = self
             .x
             .iter()
@@ -998,7 +1018,8 @@ fn render_segment(
 }
 
 impl Mark for AreaMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let baseline_y = match self.baseline {
             AreaBaseline::Zero => 0.0,
             AreaBaseline::Fixed(y) => y,
@@ -1169,7 +1190,8 @@ impl HeatmapMark {
 }
 
 impl Mark for HeatmapMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         if self.data.is_empty() || self.data[0].is_empty() {
             return Ok(());
         }
@@ -1338,7 +1360,8 @@ impl StepMark {
 }
 
 impl Mark for StepMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let mut commands = Vec::new();
         let mut need_move = true;
 
@@ -1452,7 +1475,8 @@ impl HistogramMark {
 }
 
 impl Mark for HistogramMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let transform = BinTransform::new(self.method);
         let bins: Vec<Bin> = transform.compute(&self.data);
 

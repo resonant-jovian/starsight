@@ -18,7 +18,7 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{Path, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, Coord};
 use starsight_layer_2::scales::Scale;
 
 use crate::marks::{DataExtent, LegendGlyph, Mark};
@@ -150,7 +150,8 @@ impl CandlestickMark {
 }
 
 impl Mark for CandlestickMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = crate::marks::require_cartesian(coord)?;
         if self.data.is_empty() {
             return Ok(());
         }

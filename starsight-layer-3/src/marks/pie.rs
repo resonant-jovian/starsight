@@ -19,7 +19,7 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point};
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::Coord;
 
 use crate::marks::{DataExtent, LegendGlyph, Mark};
 
@@ -145,7 +145,8 @@ impl PieMark {
 }
 
 impl Mark for PieMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = crate::marks::require_cartesian(coord)?;
         let total: f64 = self.values.iter().filter(|&&v| v > 0.0).sum();
         if total <= 0.0 || self.values.is_empty() {
             return Ok(());

@@ -1,14 +1,34 @@
 //! Coordinate systems: convert data values to pixel positions.
 //!
-//! [`CartesianCoord`] bundles an x-axis, a y-axis, and the plot-area rectangle.
-//! `data_to_pixel` maps a `(data_x, data_y)` pair to screen coordinates,
-//! inverting the y-axis (data y up → pixel y down).
+//! The [`Coord`] trait abstracts over the concrete coordinate systems that a
+//! mark may render against — currently [`CartesianCoord`], with `PolarCoord`
+//! arriving in 0.3.0. Marks accept `&dyn Coord` and downcast to the concrete
+//! variant they support via [`Coord::as_any`]; cross-coord rendering is opt-in,
+//! not implicit.
 
 #![allow(clippy::cast_possible_truncation)]
 
 use crate::axes::Axis;
 use crate::scales::Scale;
 use starsight_layer_1::primitives::{Point, Rect};
+use std::any::Any;
+
+// ── Coord ────────────────────────────────────────────────────────────────────────────────────────
+
+/// Coordinate system contract every mark renders against.
+///
+/// Object-safe so marks can be stored as `Box<dyn Mark>` and dispatched via
+/// `&dyn Coord`. The trait exposes the common surface shared by every coord
+/// system (plot rect + data→pixel mapping); coord-specific accessors like
+/// `CartesianCoord::x_axis` are reached via [`Coord::as_any`] downcasting.
+pub trait Coord: Any {
+    /// The pixel-space rectangle this coord maps data into.
+    fn plot_area(&self) -> Rect;
+    /// Map a data-space `(x, y)` pair to a pixel-space [`Point`].
+    fn data_to_pixel(&self, x: f64, y: f64) -> Point;
+    /// Erased self-reference used to downcast to a concrete coord type.
+    fn as_any(&self) -> &dyn Any;
+}
 
 // ── CartesianCoord ───────────────────────────────────────────────────────────────────────────────
 
@@ -45,5 +65,17 @@ impl CartesianCoord {
     }
 }
 
+impl Coord for CartesianCoord {
+    fn plot_area(&self) -> Rect {
+        self.plot_area
+    }
+    fn data_to_pixel(&self, x: f64, y: f64) -> Point {
+        Self::data_to_pixel(self, x, y)
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 // ── PolarCoord ───────────────────────────────────────────────────────────────────────────────────
-// TODO(0.4.0): pub struct PolarCoord { pub center: Point, pub radius: f32, pub theta_axis: Axis, pub r_axis: Axis }
+// TODO(A.2): pub struct PolarCoord { pub center: Point, pub radius: f32, pub theta_axis: Axis, pub r_axis: Axis }
