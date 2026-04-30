@@ -30,7 +30,7 @@ cargo test --workspace
 - **starsight** (facade): re-exports layers 1-7
 - **starsight-layer-1**: primitives, backends (SkiaBackend, SvgBackend), errors
 - **starsight-layer-2**: scales, coords, axes, ticks
-- **starsight-layer-3**: marks (LineMark, PointMark, BarMark, AreaMark)
+- **starsight-layer-3**: marks + stats (LineMark, PointMark, BarMark, AreaMark, StepMark, HistogramMark, HeatmapMark, BoxPlotMark, ViolinMark, PieMark, CandlestickMark; Kde, BoxPlotStats, Bandwidth helpers)
 - **starsight-layer-4**: layout (grid, legend)
 - **starsight-layer-5**: Figure, plot! macro
 - **starsight-layer-6**: interactivity (winit)

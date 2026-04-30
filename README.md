@@ -36,7 +36,7 @@
 
 ```toml
 [dependencies]
-starsight = "0.2"
+starsight = "0.3"
 ```
 
 ```rust
@@ -187,15 +187,57 @@ fn main() -> starsight::Result<()> {
 
 The full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end. Each card below is produced deterministically by `cargo xtask gallery` from the program in [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples) — click an image to jump to its source.
 
+#### Basics
 <p align="center">
   <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/line_chart.rs">
-    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/line_chart.png" width="280" alt="Line chart with title and axis labels"/>
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/line_chart.png" width="280" alt="LineMark with title and axis labels"/>
   </a>
   <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/scatter.rs">
-    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/scatter.png" width="280" alt="Two-series PointMark scatter with auto-legend"/>
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/scatter.png" width="280" alt="PointMark scatter with grouped color and auto-legend"/>
   </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/recipe.rs">
-    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/recipe.png" width="280" alt="Three-series composition with custom palette and DEFAULT_LIGHT theme"/>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/bar_chart.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/bar_chart.png" width="280" alt="BarMark categorical bar chart"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/histogram.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/histogram.png" width="280" alt="HistogramMark with automatic Freedman–Diaconis binning"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/bubble_scatter.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/bubble_scatter.png" width="280" alt="PointMark bubble scatter with per-point colors and radii"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/heatmap.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/basics/heatmap.png" width="280" alt="HeatmapMark with prismatica colormap"/>
+  </a>
+</p>
+
+#### Composition
+<p align="center">
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/box_plot.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/box_plot.png" width="280" alt="BoxPlotMark with five-number summary and Tukey outliers"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/violin.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/violin.png" width="280" alt="ViolinMark with KDE-driven density envelopes"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/pie.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/pie.png" width="280" alt="PieMark with percent slice labels"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/donut.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/donut.png" width="280" alt="PieMark in donut mode (inner_radius set)"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/waterfall_bar.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/composition/waterfall_bar.png" width="280" alt="BarMark waterfall with per-bar bases, colors, and connectors"/>
+  </a>
+</p>
+
+#### Scientific & Data
+<p align="center">
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/candlestick.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/scientific/candlestick.png" width="280" alt="CandlestickMark OHLC bars with up/down body color dispatch"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/laser_plasma.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/scientific/laser_plasma.png" width="280" alt="Stimulated Raman scattering electron phase space, log-scale viridis"/>
+  </a>
+  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/data/polars_integration.rs">
+    <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/data/polars_integration.png" width="280" alt="plot!(df, x, y, color) macro with Polars LazyFrame"/>
   </a>
 </p>
 

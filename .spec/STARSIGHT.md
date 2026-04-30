@@ -76,9 +76,9 @@ plot!(x, y)
 | Pre-0.1.0 | 28 | 0 | 28 |
 | **0.1.0** | **43** | **38** | **81** |
 | 0.2.0 | 9 | 23 | 32 |
-| 0.3.0 | 0 | 40 | 40 |
+| 0.3.0 | 40 | 0 | 40 |
 | 0.4.0+ | 0 | 117 | 117 |
-| **Total** | **80** | **218** | **298** |
+| **Total** | **120** | **178** | **298** |
 
 ---
 
@@ -2119,7 +2119,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
 ### Layer 3: BoxPlotMark
 
-- [ ] Create `BoxPlotMark` with five-number summary computation:
+- [x] Create `BoxPlotMark` with five-number summary computation:
 
     ```rust
     #[derive(Debug, Clone)]
@@ -2151,7 +2151,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Render box plot elements:
+- [x] Render box plot elements:
 
     ```rust
     fn render_box(&self, stats: &BoxPlotStats, x_center: f32, half_width: f32,
@@ -2184,7 +2184,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         Ok(())
     }
     ```
-- [ ] Write snapshot test: basic box plot:
+- [x] Write snapshot test: basic box plot:
 
     ```rust
     #[test]
@@ -2197,7 +2197,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: grouped box plot:
+- [x] Write snapshot test: grouped box plot:
 
     ```rust
     #[test]
@@ -2209,7 +2209,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: box plot with outliers:
+- [x] Write snapshot test: box plot with outliers:
 
     ```rust
     #[test]
@@ -2222,7 +2222,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
 ### Layer 3: ViolinMark
 
-- [ ] Create `ViolinMark` in `starsight-layer-3/src/marks/violin.rs`. Depends on KDE stat transform.
+- [x] Create `ViolinMark` in `starsight-layer-3/src/marks/violin.rs`. Depends on KDE stat transform.
 
     ```rust
     #[derive(Debug, Clone)]
@@ -2242,7 +2242,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Implement violin rendering:
+- [x] Implement violin rendering:
 
     ```rust
     fn render_violin(&self, group: &ViolinGroup, x_center: f32, max_width: f32,
@@ -2284,7 +2284,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Implement split violins: when two groups share a category, render left/right halves from different groups
+- [x] Implement split violins: when two groups share a category, render left/right halves from different groups
 
     ```rust
     // When split=true, render group A density on left, group B on right:
@@ -2295,7 +2295,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     // Right half: x_center + dx for right_density
     }
     ```
-- [ ] Write snapshot test: basic violin plot:
+- [x] Write snapshot test: basic violin plot:
 
     ```rust
     #[test]
@@ -2305,7 +2305,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: grouped violins
+- [x] Write snapshot test: grouped violins
 
     ```rust
     #[test]
@@ -2318,7 +2318,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: split violin
+- [x] Write snapshot test: split violin
 
     ```rust
     #[test]
@@ -2329,7 +2329,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: violin with box overlay disabled
+- [x] Write snapshot test: violin with box overlay disabled
 
     ```rust
     #[test]
@@ -2343,7 +2343,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
 ### Layer 3: PieMark and DonutMark
 
-- [ ] Implement PieMark with arc geometry:
+- [x] Implement PieMark with arc geometry:
 
     ```rust
     impl Mark for PieMark {
@@ -2391,7 +2391,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         }
     }
     ```
-- [ ] Write snapshot test: basic pie chart:
+- [x] Write snapshot test: basic pie chart:
 
     ```rust
     #[test]
@@ -2402,7 +2402,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: donut chart:
+- [x] Write snapshot test: donut chart:
 
     ```rust
     #[test]
@@ -2428,7 +2428,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
 ### Layer 3: CandlestickMark
 
-- [ ] Create `CandlestickMark` in `starsight-layer-3/src/marks/candlestick.rs`:
+- [x] Create `CandlestickMark` in `starsight-layer-3/src/marks/candlestick.rs`:
 
     ```rust
     #[derive(Debug, Clone)]
@@ -2450,7 +2450,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Render candlestick elements:
+- [x] Render candlestick elements:
 
     ```rust
     fn render_candle(&self, ohlc: &OHLC, x_px: f32, half_w: f32,
@@ -2474,7 +2474,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Write snapshot test: basic candlestick chart:
+- [x] Write snapshot test: basic candlestick chart:
 
     ```rust
     #[test]
@@ -2488,7 +2488,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: candlestick with custom colors
+- [x] Write snapshot test: candlestick with custom colors
 
     ```rust
     #[test]
@@ -2502,7 +2502,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
 
 ### Layer 5: Polars integration
 
-- [ ] Create data acceptance layer in `starsight-layer-5/src/data/polars.rs` (behind `polars` feature flag):
+- [x] Create data acceptance layer in `starsight-layer-5/src/data/polars.rs` (behind `polars` feature flag):
 
     ```rust
     use polars::prelude::*;
@@ -2523,7 +2523,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Integrate DataFrame path with `plot!` macro
+- [x] Integrate DataFrame path with `plot!` macro
 
     ```rust
     // In plot! macro, DataFrame arm:
@@ -2535,7 +2535,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     fig
     }};
     ```
-- [ ] Auto-detect column types: numeric columns → LineMark, categorical x → BarMark
+- [x] Auto-detect column types: numeric columns → LineMark, categorical x → BarMark
 
     ```rust
     fn detect_mark(df: &DataFrame, x_col: &str, y_col: &str) -> Box<dyn Mark> {
@@ -2554,7 +2554,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     }
     ```
-- [ ] Support `color = "column"` for automatic grouping
+- [x] Support `color = "column"` for automatic grouping
 
     ```rust
     // When color = "col_name" is specified:
@@ -2568,14 +2568,14 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Accept eager `DataFrame` directly
+- [x] Accept eager `DataFrame` directly
 
     ```rust
     impl From<&DataFrame> for DataSource {
     fn from(df: &DataFrame) -> Self { DataSource::Polars(df.clone()) }
     }
     ```
-- [ ] Accept `LazyFrame`: call `.collect()` before extraction, log warning about materialization
+- [x] Accept `LazyFrame`: call `.collect()` before extraction, log warning about materialization
 
     ```rust
     impl From<LazyFrame> for DataSource {
@@ -2586,7 +2586,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Convert Polars null values to f64 NaN for mark rendering pipeline compatibility
+- [x] Convert Polars null values to f64 NaN for mark rendering pipeline compatibility
 
     ```rust
     fn extract_f64_with_nulls(df: &DataFrame, col: &str) -> Result<Vec<f64>> {
@@ -2596,7 +2596,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
     }
     ```
 
-- [ ] Write snapshot test: line chart from DataFrame:
+- [x] Write snapshot test: line chart from DataFrame:
 
     ```rust
     #[test]
@@ -2607,7 +2607,7 @@ Exit criteria: statistical chart types (box, violin, pie, candlestick) render co
         insta::assert_binary_snapshot!(".png", fig.render_png().unwrap());
     }
     ```
-- [ ] Write snapshot test: scatter with color grouping:
+- [x] Write snapshot test: scatter with color grouping:
 
     ```rust
     #[test]

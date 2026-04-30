@@ -22,3 +22,5 @@ keywords:
   - rust
   - tiny-skia
   - wgpu
+version: 0.3.0
+date-released: '2026-04-30'
