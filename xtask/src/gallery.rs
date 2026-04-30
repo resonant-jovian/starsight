@@ -177,8 +177,17 @@ fn push_if_complete(
 fn build_examples(workspace_root: &Path) -> Result<()> {
     let manifest = workspace_root.join("examples/Cargo.toml");
     println!("Building examples (release) ...");
+    // --all-features so feature-gated examples (e.g. polars_integration with
+    // required-features = ["starsight/polars"]) actually build, otherwise they
+    // are silently skipped and the run loop fails on the missing binary.
     let status = Command::new("cargo")
-        .args(["build", "--release", "--examples", "--manifest-path"])
+        .args([
+            "build",
+            "--release",
+            "--examples",
+            "--all-features",
+            "--manifest-path",
+        ])
         .arg(&manifest)
         .current_dir(workspace_root)
         .status()
