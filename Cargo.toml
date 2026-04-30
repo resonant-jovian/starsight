@@ -63,7 +63,7 @@ printpdf                 = "0.9.1"         # PDF builder                      MI
 # Terminal
 crossterm                = "0.29.0"        # Cross-platform terminal          MIT
 ratatui                  = "0.30.0"        # Terminal UI framework            MIT
-ratatui-image            = "10.0.6"        # Inline images in ratatui         MIT
+ratatui-image            = "10.0.7"        # Inline images in ratatui         MIT
 viuer                    = "0.11.0"        # Terminal image viewer            MIT
 # GUI
 winit                    = "0.31.0-beta.2" # Cross-platform windowing         Apache-2.0
