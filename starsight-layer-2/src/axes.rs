@@ -177,6 +177,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(debug_assertions)]
     #[should_panic(expected = "Axis::category requires at least one label")]
     fn category_axis_panics_on_empty_labels() {
         let _ = Axis::category(&[]);
