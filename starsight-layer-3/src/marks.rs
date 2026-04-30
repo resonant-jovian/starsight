@@ -16,7 +16,6 @@ use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::{CartesianCoord, Coord};
-use starsight_layer_2::scales::Scale;
 use std::collections::HashMap;
 
 /// Downcast a `&dyn Coord` to the concrete `CartesianCoord` required by every
@@ -1608,19 +1607,19 @@ mod tests {
     fn coord_for(x_min: f64, x_max: f64, y_min: f64, y_max: f64) -> CartesianCoord {
         CartesianCoord {
             x_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: x_min,
                     domain_max: x_max,
-                },
+                }),
                 label: None,
                 tick_positions: vec![],
                 tick_labels: vec![],
             },
             y_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: y_min,
                     domain_max: y_max,
-                },
+                }),
                 label: None,
                 tick_positions: vec![],
                 tick_labels: vec![],

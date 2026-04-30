@@ -9,7 +9,6 @@
 #![allow(clippy::cast_possible_truncation)]
 
 use crate::axes::Axis;
-use crate::scales::Scale;
 use starsight_layer_1::primitives::{Point, Rect};
 use std::any::Any;
 
@@ -176,19 +175,19 @@ mod tests {
 
     fn unit_polar() -> PolarCoord {
         let theta = Axis {
-            scale: LinearScale {
+            scale: Box::new(LinearScale {
                 domain_min: 0.0,
                 domain_max: 1.0,
-            },
+            }),
             label: None,
             tick_positions: vec![],
             tick_labels: vec![],
         };
         let r = Axis {
-            scale: LinearScale {
+            scale: Box::new(LinearScale {
                 domain_min: 0.0,
                 domain_max: 1.0,
-            },
+            }),
             label: None,
             tick_positions: vec![],
             tick_labels: vec![],

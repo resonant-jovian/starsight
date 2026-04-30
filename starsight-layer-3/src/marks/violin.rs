@@ -23,7 +23,6 @@ use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{Path, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_2::coords::{CartesianCoord, Coord};
-use starsight_layer_2::scales::Scale;
 
 use crate::marks::{DataExtent, LegendGlyph, Mark, Orientation};
 use crate::statistics::{Bandwidth, BoxPlotStats, Kde, Kernel};
