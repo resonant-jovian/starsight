@@ -81,6 +81,7 @@ serde                    = "1.0.228"       # Serialization framework          MI
 clap                     = "4.6.1"         # CLI argument parser              MIT OR Apache-2.0
 insta                    = "1.47.2"        # Snapshot testing                 Apache-2.0
 proptest                 = "1.11.0"        # Property-based testing           MIT OR Apache-2.0
+walkdir                  = "2.5.0"         # Recursive directory walking      MIT OR Unlicense
 # Logging & error handling
 log                      = "0.4.29"        # Logging facade                   MIT OR Apache-2.0
 tracing                  = "0.1.44"        # Structured logging               MIT

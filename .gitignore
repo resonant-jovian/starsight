@@ -37,3 +37,7 @@ tarpaulin-report.*
 
 # Generated showcase folder (symlinks to example PNGs, built by `cargo xtask showcase`)
 showcase/
+/.svg-preview/
+
+# Brainstorming spec scratch (per workflow preference: never commit)
+/docs/superpowers/specs/
