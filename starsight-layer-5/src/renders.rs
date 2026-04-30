@@ -438,19 +438,19 @@ mod tests {
     fn coord_with_ticks(plot: Rect) -> CartesianCoord {
         CartesianCoord {
             x_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: 0.0,
                     domain_max: 1.0,
-                },
+                }),
                 label: None,
                 tick_positions: vec![0.0, 0.5, 1.0],
                 tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
             },
             y_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: 0.0,
                     domain_max: 1.0,
-                },
+                }),
                 label: None,
                 tick_positions: vec![0.0, 0.5, 1.0],
                 tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
