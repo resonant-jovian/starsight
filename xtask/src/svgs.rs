@@ -21,8 +21,7 @@ const GITIGNORE_LINE: &str = "/.svg-preview/";
 pub fn run() -> Result<()> {
     let preview = Path::new(PREVIEW_DIR);
     if preview.exists() {
-        fs::remove_dir_all(preview)
-            .with_context(|| format!("clearing {}", preview.display()))?;
+        fs::remove_dir_all(preview).with_context(|| format!("clearing {}", preview.display()))?;
     }
 
     let mut accepted = 0_usize;
@@ -87,9 +86,7 @@ pub fn run() -> Result<()> {
     for (path, reason) in &malformed {
         eprintln!("skipping malformed: {}: {reason}", path.display());
     }
-    println!(
-        "Exported {accepted} SVG snapshots ({pending} pending) → {PREVIEW_DIR}/"
-    );
+    println!("Exported {accepted} SVG snapshots ({pending} pending) → {PREVIEW_DIR}/");
 
     Ok(())
 }
@@ -126,8 +123,7 @@ mod tests {
 
     #[test]
     fn strips_standard_insta_header() {
-        let input =
-            "---\nsource: x.rs\nexpression: svg\n---\n<svg height=\"10\"/>\n";
+        let input = "---\nsource: x.rs\nexpression: svg\n---\n<svg height=\"10\"/>\n";
         let body = strip_frontmatter(input).expect("valid header");
         assert!(body.starts_with("<svg"));
     }
