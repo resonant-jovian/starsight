@@ -20,46 +20,46 @@ Energy (TWh)
 <path d="M801.93335,755 L801.93335,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M988.76666,755 L988.76666,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M1175.6,755 L1175.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M54.6,755 L1175.6,755" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M54.6,519.3333 L1175.6,519.3333" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M54.6,283.66666 L1175.6,283.66666" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M54.6,48 L1175.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<rect fill="#4caf50" height="424.2" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="330.8"/>
-<rect fill="#4caf50" height="459.55" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="295.45"/>
-<rect fill="#4caf50" height="494.9" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="260.1"/>
-<rect fill="#4caf50" height="530.25" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="224.75"/>
-<rect fill="#4caf50" height="565.60004" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="189.39996"/>
-<rect fill="#4caf50" height="612.73334" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="142.26666"/>
-<rect fill="#ffc107" height="282.80002" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="472.19998"/>
-<rect fill="#ffc107" height="318.15" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="436.85"/>
-<rect fill="#ffc107" height="353.5" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="401.5"/>
-<rect fill="#ffc107" height="388.85" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="366.15"/>
-<rect fill="#ffc107" height="424.2" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="330.8"/>
-<rect fill="#ffc107" height="459.55" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="295.45"/>
-<rect fill="#607d8b" height="188.53333" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="566.4667"/>
-<rect fill="#607d8b" height="176.75" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="578.25"/>
-<rect fill="#607d8b" height="164.96667" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="590.0333"/>
-<rect fill="#607d8b" height="141.40002" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="613.6"/>
-<rect fill="#607d8b" height="129.6167" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="625.3833"/>
-<rect fill="#607d8b" height="117.83331" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="637.1667"/>
-<rect fill="#4caf50" height="424.20007" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-564.7334"/>
-<rect fill="#4caf50" height="459.55" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-659"/>
-<rect fill="#4caf50" height="494.9001" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-753.2667"/>
-<rect fill="#4caf50" height="530.25" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-835.75"/>
-<rect fill="#4caf50" height="565.6" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-930.0167"/>
-<rect fill="#4caf50" height="612.7334" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-1047.85"/>
-<rect fill="#ffc107" height="282.79993" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-423.33325"/>
-<rect fill="#ffc107" height="318.14996" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-517.6"/>
-<rect fill="#ffc107" height="353.49994" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-611.8666"/>
-<rect fill="#ffc107" height="388.84998" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-694.35"/>
-<rect fill="#ffc107" height="424.19995" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-788.6167"/>
-<rect fill="#ffc107" height="459.55005" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-894.6666"/>
-<rect fill="#607d8b" height="188.53333" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-329.06665"/>
-<rect fill="#607d8b" height="176.75006" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-376.20007"/>
-<rect fill="#607d8b" height="164.96661" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-423.33325"/>
-<rect fill="#607d8b" height="141.40002" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-446.90002"/>
-<rect fill="#607d8b" height="129.61658" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-494.03333"/>
-<rect fill="#607d8b" height="117.833496" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-552.9501"/>
+<path d="M54.6,722.86365 L1175.6,722.86365" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M54.6,508.62122 L1175.6,508.62122" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M54.6,294.37878 L1175.6,294.37878" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M54.6,80.13636 L1175.6,80.13636" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#4caf50" height="385.63635" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="337.2273"/>
+<rect fill="#4caf50" height="417.77274" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="305.0909"/>
+<rect fill="#4caf50" height="449.90912" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="272.95453"/>
+<rect fill="#4caf50" height="482.04547" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="240.81818"/>
+<rect fill="#4caf50" height="514.1818" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="208.68182"/>
+<rect fill="#4caf50" height="557.0303" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="165.83337"/>
+<rect fill="#ffc107" height="257.0909" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="465.77274"/>
+<rect fill="#ffc107" height="289.2273" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="433.63635"/>
+<rect fill="#ffc107" height="321.36365" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="401.5"/>
+<rect fill="#ffc107" height="353.50003" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="369.36362"/>
+<rect fill="#ffc107" height="385.63635" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="337.2273"/>
+<rect fill="#ffc107" height="417.77274" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="305.0909"/>
+<rect fill="#607d8b" height="171.39392" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="551.4697"/>
+<rect fill="#607d8b" height="160.68182" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="562.1818"/>
+<rect fill="#607d8b" height="149.96973" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="572.8939"/>
+<rect fill="#607d8b" height="128.54547" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="594.3182"/>
+<rect fill="#607d8b" height="117.833374" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="605.0303"/>
+<rect fill="#607d8b" height="107.121216" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="615.74243"/>
+<rect fill="#4caf50" height="385.6363" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-476.89392"/>
+<rect fill="#4caf50" height="417.77277" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-562.59094"/>
+<rect fill="#4caf50" height="449.90906" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-648.28784"/>
+<rect fill="#4caf50" height="482.04547" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-723.2727"/>
+<rect fill="#4caf50" height="514.1819" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-808.9697"/>
+<rect fill="#4caf50" height="557.03015" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-916.0908"/>
+<rect fill="#ffc107" height="257.09076" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-348.3484"/>
+<rect fill="#ffc107" height="289.22723" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-434.0454"/>
+<rect fill="#ffc107" height="321.36365" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-519.74243"/>
+<rect fill="#ffc107" height="353.50006" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-594.7273"/>
+<rect fill="#ffc107" height="385.63635" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-680.4242"/>
+<rect fill="#ffc107" height="417.7727" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-776.8334"/>
+<rect fill="#607d8b" height="171.39392" shape-rendering="crispEdges" width="149.46667" x="73.28333" y="-262.65155"/>
+<rect fill="#607d8b" height="160.68182" shape-rendering="crispEdges" width="149.46667" x="260.11667" y="-305.5"/>
+<rect fill="#607d8b" height="149.9696" shape-rendering="crispEdges" width="149.46667" x="446.94995" y="-348.3484"/>
+<rect fill="#607d8b" height="128.54547" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-369.7727"/>
+<rect fill="#607d8b" height="117.833374" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-412.62122"/>
+<rect fill="#607d8b" height="107.121216" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-466.1819"/>
 <text fill="#444444" font-family="sans-serif" font-size="12" x="133.61667" y="772">
 2019
 </text>
@@ -78,20 +78,20 @@ Energy (TWh)
 <text fill="#444444" font-family="sans-serif" font-size="12" x="1067.7832" y="772">
 2024
 </text>
-<path d="M54.6,755 L59.6,755" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="759.8">
+<path d="M54.6,722.86365 L59.6,722.86365" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="727.66364">
 0
 </text>
-<path d="M54.6,519.3333 L59.6,519.3333" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="524.1333">
+<path d="M54.6,508.62122 L59.6,508.62122" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="513.4212">
 100
 </text>
-<path d="M54.6,283.66666 L59.6,283.66666" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="288.46664">
+<path d="M54.6,294.37878 L59.6,294.37878" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="299.17877">
 200
 </text>
-<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="52.8">
+<path d="M54.6,80.13636 L59.6,80.13636" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="84.93636">
 300
 </text>
 <path d="M54.6,755 L1175.6,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

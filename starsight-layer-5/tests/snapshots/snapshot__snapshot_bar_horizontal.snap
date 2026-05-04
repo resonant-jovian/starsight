@@ -13,11 +13,11 @@ Population (millions)
 <text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 415.9)" x="22" y="415.9">
 City
 </text>
-<path d="M112.200005,755 L112.200005,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M380.75003,755 L380.75003,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M161.02728,755 L161.02728,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M405.16367,755 L405.16367,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M649.30005,755 L649.30005,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M917.85004,755 L917.85004,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M1186.4,755 L1186.4,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M893.4364,755 L893.4364,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M1137.5728,755 L1137.5728,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M112.200005,755 L1186.4,755" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M112.200005,696.0833 L1186.4,696.0833" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M112.200005,637.1667 L1186.4,637.1667" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -31,18 +31,18 @@ City
 <path d="M112.200005,165.83333 L1186.4,165.83333" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M112.200005,106.916664 L1186.4,106.916664" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M112.200005,48 L1186.4,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="993.6351" x="112.200005" y="53.89167"/>
-<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="886.215" x="112.200005" y="112.808334"/>
-<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="751.94006" x="112.200005" y="171.725"/>
-<rect fill="#0000ff" height="47.133347" shape-rendering="crispEdges" width="590.81006" x="112.200005" y="230.64168"/>
-<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="563.955" x="112.200005" y="289.55832"/>
-<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="563.955" x="112.200005" y="348.475"/>
-<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="537.10004" x="112.200005" y="407.39166"/>
-<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="537.10004" x="112.200005" y="466.30832"/>
-<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="563.955" x="112.200005" y="525.22504"/>
-<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="510.245" x="112.200005" y="584.1417"/>
-<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="483.39" x="112.200005" y="643.05835"/>
-<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="429.68" x="112.200005" y="701.97504"/>
+<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="903.3046" x="161.02728" y="53.89167"/>
+<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="805.6501" x="161.02728" y="112.808334"/>
+<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="683.58185" x="161.02728" y="171.725"/>
+<rect fill="#0000ff" height="47.133347" shape-rendering="crispEdges" width="537.10004" x="161.02728" y="230.64168"/>
+<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="512.6864" x="161.02728" y="289.55832"/>
+<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="512.6864" x="161.02728" y="348.475"/>
+<rect fill="#0000ff" height="47.13336" shape-rendering="crispEdges" width="488.27277" x="161.02728" y="407.39166"/>
+<rect fill="#0000ff" height="47.13333" shape-rendering="crispEdges" width="488.27277" x="161.02728" y="466.30832"/>
+<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="512.6864" x="161.02728" y="525.22504"/>
+<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="463.85913" x="161.02728" y="584.1417"/>
+<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="439.4455" x="161.02728" y="643.05835"/>
+<rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="390.61823" x="161.02728" y="701.97504"/>
 <text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="82.25834">
 Tokyo
 </text>
@@ -79,24 +79,24 @@ New York
 <text fill="#444444" font-family="sans-serif" font-size="12" x="52" y="730.3417">
 Karachi
 </text>
-<path d="M112.200005,755 L112.200005,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="108.600006" y="772">
+<path d="M161.02728,755 L161.02728,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="157.42728" y="772">
 0
 </text>
-<path d="M380.75003,755 L380.75003,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="377.15002" y="772">
+<path d="M405.16367,755 L405.16367,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="401.56366" y="772">
 1
 </text>
 <path d="M649.30005,755 L649.30005,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
 <text fill="#444444" font-family="sans-serif" font-size="12" x="645.7001" y="772">
 2
 </text>
-<path d="M917.85004,755 L917.85004,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="914.25006" y="772">
+<path d="M893.4364,755 L893.4364,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="889.8364" y="772">
 3
 </text>
-<path d="M1186.4,755 L1186.4,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="1182.8" y="772">
+<path d="M1137.5728,755 L1137.5728,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1133.9728" y="772">
 4
 </text>
 <path d="M112.200005,755 L1186.4,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

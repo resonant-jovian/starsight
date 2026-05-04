@@ -5,8 +5,8 @@
 
 pub use crate::components::marks::{
     ArcMark, AreaBaseline, AreaMark, AxisDir, BarMark, BarRenderContext, BoxPlotGroup, BoxPlotMark,
-    CandlestickMark, ContourMark, ContourMode, DataExtent, ErrorBarMark, ErrorBarOrientation,
-    HeatmapMark, HistogramMark, LegendGlyph, LineMark, Mark, Ohlc, Orientation, PieMark, PointMark,
-    PolarBarMark, PolarRectMark, RadarMark, RugMark, StepMark, StepPosition, ViolinGroup,
-    ViolinMark, ViolinScale,
+    CandlestickMark, ColormapLegend, ContourMark, ContourMode, DataExtent, ErrorBarMark,
+    ErrorBarOrientation, HeatmapMark, HistogramMark, LegendGlyph, LineMark, Mark, Ohlc,
+    Orientation, PieMark, PointMark, PolarBarMark, PolarRectMark, RadarMark, RugMark, StepMark,
+    StepPosition, ViolinGroup, ViolinMark, ViolinScale,
 };

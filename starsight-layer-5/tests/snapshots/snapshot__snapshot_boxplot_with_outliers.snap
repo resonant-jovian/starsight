@@ -9,45 +9,45 @@ Single group, two outliers
 </text>
 <path d="M31.400002,371 L31.400002,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M364.8,371 L364.8,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,371 L364.8,371" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,306.4 L364.8,306.4" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,241.8 L364.8,241.8" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,177.2 L364.8,177.2" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,112.6 L364.8,112.6" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M31.400002,48 L364.8,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<rect fill="#0000ff" height="64.600006" shape-rendering="crispEdges" width="233.38" x="81.41001" y="209.5"/>
-<path d="M81.41001,209.5 L314.79,209.5 L314.79,274.1 L81.41001,274.1 z" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<path d="M81.41001,241.8 L314.79,241.8" fill="none" shape-rendering="crispEdges" stroke="#ffffff" stroke-width="2"/>
-<path d="M198.1,209.5 L198.1,190.12" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<path d="M139.755,190.12 L256.445,190.12" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<path d="M198.1,274.1 L198.1,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<path d="M139.755,371 L256.445,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<path d="M201.1,48 C201.1,49.656853,199.75687,51,198.1,51 C196.44315,51,195.1,49.656853,195.1,48 C195.1,46.343147,196.44315,45,198.1,45 C199.75687,45,201.1,46.343147,201.1,48" fill="#000000" stroke="#000000" stroke-width="0"/>
+<path d="M31.400002,356.31818 L364.8,356.31818" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M31.400002,297.5909 L364.8,297.5909" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M31.400002,238.86363 L364.8,238.86363" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M31.400002,180.13637 L364.8,180.13637" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M31.400002,121.40909 L364.8,121.40909" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M31.400002,62.68182 L364.8,62.68182" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#0000ff" height="58.727264" shape-rendering="crispEdges" width="233.38" x="81.41001" y="209.5"/>
+<path d="M81.41001,209.5 L314.79,209.5 L314.79,268.22726 L81.41001,268.22726 z" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M81.41001,238.86363 L314.79,238.86363" fill="none" shape-rendering="crispEdges" stroke="#ffffff" stroke-width="2"/>
+<path d="M198.1,209.5 L198.1,191.88182" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M139.755,191.88182 L256.445,191.88182" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M198.1,268.22726 L198.1,356.31818" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M139.755,356.31818 L256.445,356.31818" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M201.1,62.681824 C201.1,64.33868,199.75687,65.68182,198.1,65.68182 C196.44315,65.68182,195.1,64.33868,195.1,62.681824 C195.1,61.02497,196.44315,59.681824,198.1,59.681824 C199.75687,59.681824,201.1,61.02497,201.1,62.681824" fill="#000000" stroke="#000000" stroke-width="0"/>
 <text fill="#444444" font-family="sans-serif" font-size="12" x="172.90001" y="388">
 samples
 </text>
-<path d="M31.400002,371 L36.4,371" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="375.8">
+<path d="M31.400002,356.31818 L36.4,356.31818" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="361.11816">
 -5
 </text>
-<path d="M31.400002,306.4 L36.4,306.4" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="14" y="311.19998">
+<path d="M31.400002,297.5909 L36.4,297.5909" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="14" y="302.3909">
 0
 </text>
-<path d="M31.400002,241.8 L36.4,241.8" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="14" y="246.6">
+<path d="M31.400002,238.86363 L36.4,238.86363" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="14" y="243.66364">
 5
 </text>
-<path d="M31.400002,177.2 L36.4,177.2" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="182">
+<path d="M31.400002,180.13637 L36.4,180.13637" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="184.93637">
 10
 </text>
-<path d="M31.400002,112.6 L36.4,112.6" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="117.4">
+<path d="M31.400002,121.40909 L36.4,121.40909" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="126.20909">
 15
 </text>
-<path d="M31.400002,48 L36.4,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="52.8">
+<path d="M31.400002,62.68182 L36.4,62.68182" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="7" y="67.48182">
 20
 </text>
 <path d="M31.400002,371 L364.8,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
