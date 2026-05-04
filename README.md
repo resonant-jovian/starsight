@@ -347,7 +347,10 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 | `ContourMark` + marching-squares stat | working | 0.3.0 | Isolines + per-level colormap; filled bands API-stable, polygon-tracing follow-up |
 | `ArcMark` (Nightingale / Gauge / Sunburst) | working | 0.3.0 | Polar-data-mapped wedges with `r_inner` / `theta_half_widths` / `start_offset` |
 | `MultiPanelFigure` (basic grid) | working | 0.3.0 | `Vec<Figure>` on a `(rows, cols)` grid with padding; independent per-panel axes |
-| Faceting + shared axes + colorbars | planned | 0.4.0 | `FacetWrap`, shared axis dispatch across `MultiPanelFigure` panels, `Colorbar` |
+| `PolarBarMark` / `PolarRectMark` | working | 0.3.0 | Stacked annular wind-rose bars and annular-tile spiral heatmaps |
+| `ErrorBarMark` / `RugMark` | working | 0.3.0 | Whiskers (symmetric or asymmetric) and 1-D axis-margin ticks |
+| Auto-attached `Colorbar` | working | 0.3.0 | Default-on for `HeatmapMark` / `ContourMark`; opt-out via `Figure::colorbar(false)` |
+| Faceting + shared axes | planned | 0.4.0 | `FacetWrap`, shared axis dispatch across `MultiPanelFigure` panels |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
 | Interactivity (hover/zoom/pan) | planned | 0.6.0 | winit event loop |
 | Animation + GIF export | planned | 0.7.0 | Frame recording |
@@ -410,7 +413,7 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 
 - [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
 - [x] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
-- [x] 0.3.0 Statistical charts + Polar + Contour + Grid + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, **`PolarCoord` + `ArcMark` (Nightingale / Gauge / Sunburst)**, **`ContourMark` + marching-squares stat**, **`MultiPanelFigure` (basic grid)**, Polars `DataFrame` integration (pulled forward from 0.11.0)
+- [x] 0.3.0 Statistical charts + Polar + Contour + Grid + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, **`PolarCoord` + `ArcMark` (Nightingale / Gauge / Sunburst)**, **`PolarBarMark` (wind rose)**, **`PolarRectMark` (polar calendar)**, **`RadarMark` (spider chart)**, **`ContourMark` + marching-squares stat**, **`ErrorBarMark` + `RugMark`**, **auto-attached `Colorbar`**, **`MultiPanelFigure` (basic grid)**, Polars `DataFrame` integration (pulled forward from 0.11.0)
 - [ ] 0.4.0 Layout — `FacetWrap`, shared axes across panels, `Colorbar`, polar-aware legend placement, contour filled bands
 - [ ] 0.5.0 Scale infrastructure — `SymLogScale`, `DateTimeScale`, `BandScale` (`LogScale`/`SqrtScale`/`CategoricalScale` shipped in 0.3.0)
 - [ ] 0.6.0 GPU + interactivity — wgpu native, hover / zoom / pan, winit event loop

@@ -4,10 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] 
+## [0.3.0] - 2026-05-04
 
 ### Added
 
+- `PolarBarMark` — stacked annular bars (`r_base` for layered wind-rose stacks, optional uniform / per-bar angular widths). Backs `examples/scientific/wind_rose.rs` (#33).
+- `PolarRectMark` — annular tile mark for spiral heatmaps and polar calendars. Backs `examples/scientific/polar_calendar.rs` (#8). Both polar marks share `build_arc_wedge` from `arc.rs` (promoted to `pub(crate)`) and the new `crate::marks::palette::POLAR_DEFAULT` Tableau-10 cycle.
+- `ErrorBarMark` — vertical/horizontal whiskers attached to `(x, y)` points with optional perpendicular caps. Symmetric `ErrorBarMark::new(xs, ys, errors)` plus the asymmetric `.errors_pair(Vec<(low, high)>)` builder. Backs `examples/scientific/error_bars.rs`.
+- `RugMark` + `AxisDir { X, Y }` — short perpendicular ticks along a chosen axis margin showing 1-D data distribution. Backs `examples/composition/rug_with_histogram.rs`.
+- `Colorbar` chrome component (`starsight-layer-5/src/colorbar.rs`) — vertical gradient strip with 5 tick labels (min/25/50/75/max), 1px outline, optional rotated axis label. Auto-attached when any mark exposes a `ColormapLegend` via the new `Mark::colormap_legend()` trait hook (default `None`; `HeatmapMark` and `ContourMark` with a colormap return `Some`). Opt-out via `Figure::colorbar(false)`.
+- `Mark::colormap_legend() -> Option<ColormapLegend>` trait hook + `ColormapLegend { colormap, value_min, value_max, label, log_scale }` struct in `starsight-layer-3::marks` so layer-5 can introspect marks for a colormap legend without a closed enum.
+- Adaptive x-tick label rotation: `XTickLabelsComponent.band_width: Option<f32>` threads category band-width into layout reservation; `crate::layout::x_tick_label_rotation()` is the shared decision (0°, 45°, or 90° clockwise based on `max_label_width vs band_width`) used by both reservation and renderer. Bollinger volume panel hits 45°.
+- New showcase examples: `examples/scientific/{wind_rose, polar_calendar, error_bars}.rs` and `examples/composition/rug_with_histogram.rs` (count 34→38 in `examples/README.md`).
+- New snapshot tests: `snapshot_polar_{bar,rect}`, `snapshot_errorbar_{vertical,horizontal,asymmetric}`, `snapshot_rugmark_{x_axis,y_axis}`. Layer-5 now has 55+ snapshots.
 - **Polar coordinate system.** `Coord` trait (object-safe via `Any` super-trait + `as_any()`) covering `CartesianCoord` and the new `PolarCoord`. `PolarCoord::inscribed(theta_axis, r_axis, plot_area)` carves an inscribed disk; `data_to_pixel(theta, r)` uses compass convention (theta = 0 up, increasing clockwise).
 - `LogScale`, `SqrtScale`, `CategoricalScale` — `Box<dyn Scale>` subset that backs polar radial axes (`polar_radial_sqrt` is Florence Nightingale's value-as-area invariant) and log-scaled heatmap color bars.
 - Polar `Axis` constructors: `polar_angular`, `polar_angular_categorical`, `polar_radial`, `polar_radial_sqrt`, `polar_radial_log`.
@@ -48,6 +57,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Behavior change (auto-attached colorbar).** `HeatmapMark` and `ContourMark` figures now reserve a Right-side colorbar slot by default (16px gradient strip + 5 tick labels + 1px outline). Opt out via `Figure::colorbar(false)` to recover pre-0.3.0 layout. Tracked as `starsight-kdi`.
+- `DEFAULT_LIGHT` text colors bumped for ≥7:1 WCAG contrast against white: `tick_label` `#555555`→`#333333`, `axis` `#666666`→`#444444`, `title` `#222222`→`#111111`. `DEFAULT_DARK` lifted in lockstep against the `#1E1E1E` background. Tracked as `starsight-405`. Path-effects halo for label-over-fill cases (heatmap text, contour labels) deferred to 0.4.0.
+- `DEFAULT_FIGURE_PADDING_PX` bumped from 4 to 8 (matches `MultiPanelFigure::padding` default) — every chart kind now has a consistent 8px breathable margin between canvas edge and the layout slot stack. Tracked as `starsight-c6h`.
+- `render_title` now centers the title-x over the plot area rather than the full title-slot rect, so the title balances over the data on charts with a y-axis label slot. Tracked as `starsight-cet` (1).
+- Y-axis tick labels apply `tw.ceil()` and `.round()` to pixel-snap their right edge so labels read flush within sub-pixel precision. Tracked as `starsight-cet` (2).
+- Legend inset bumped 10px → 16px around the top-right corner so axis-extreme data points have visible breathing room before the legend rect. Tracked as `starsight-bls`.
+- `RadarMark` default `fill_alpha` lowered 40 → 25 so 3+ overlapping series stay distinguishable in PNG raster output. Tracked as `starsight-61l`.
+- `ContourMark::render_filled_bands` now strokes each band polygon with `PathStyle::stroke(color, 1.0)` — matplotlib's standard fix that covers anti-aliased seam pixels between adjacent cells/bands. Tracked as `starsight-3h6`.
+- `ArcMark` default palette extracted to a shared `crate::marks::palette::POLAR_DEFAULT` (Tableau 10 vibrant). `PolarBarMark` reuses the same default. `examples/scientific/nightingale.rs` "other causes" wedge color updated `0x8AA38E` (sage) → `0xC2A35F` (mustard) for higher visibility. Tracked as `starsight-dbh`.
+- `examples/scientific/gauge.rs` enriched with three layered `ArcMark`s (outer rim + bg track + value arc), each stroked white for definition. Title now reads "Battery — 78 / 100". Tracked as `starsight-0kb`.
 - **Breaking:** `Mark::render` and `Mark::render_bar` now take `coord: &dyn Coord` instead of `&CartesianCoord`. Cartesian marks call `require_cartesian(coord)?` at the top of their impl; polar marks (`ArcMark`) call `require_polar(coord)?`. Returns `StarsightError::Config` when the coord type doesn't match.
 - **Breaking:** `Axis.scale: LinearScale` widened to `Box<dyn Scale>` so a single `Axis` type carries linear / log / sqrt / categorical mappings — required by polar radial axes and log color bars. Constructor builders unaffected; struct-literal callers must wrap in `Box::new`.
 - **Breaking:** `render_grid_lines(coord, backend, theme)` now takes `coord: &dyn Coord` and dispatches by coord type. Cartesian path is unchanged; polar branch is additive.

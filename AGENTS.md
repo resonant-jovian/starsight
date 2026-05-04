@@ -67,7 +67,7 @@ Layer-N may only depend on layer-1..N-1.
 
 ## What works now (0.3.x)
 
-- Marks: Line, Point (per-point color/radius/alpha), Bar (vertical/horizontal/grouped/per-bar bases+colors+connectors), Area (with baseline), Heatmap (Linear + Log scale), Histogram (auto-bin), Step, BoxPlot+BoxPlotGroup, Violin+ViolinGroup+ViolinScale (KDE-driven, split mode, Area/Count/Width norm), Pie+PieLabelMode (donut via `inner_radius`, percent/value labels), Candlestick+Ohlc, **Contour (marching squares, isolines + colormap)**, **Arc (polar wedges for Nightingale / Gauge / Sunburst)**.
+- Marks: Line, Point (per-point color/radius/alpha), Bar (vertical/horizontal/grouped/per-bar bases+colors+connectors), Area (with baseline), Heatmap (Linear + Log scale), Histogram (auto-bin), Step, BoxPlot+BoxPlotGroup, Violin+ViolinGroup+ViolinScale (KDE-driven, split mode, Area/Count/Width norm), Pie+PieLabelMode (donut via `inner_radius`, percent/value labels), Candlestick+Ohlc, **Contour (marching squares, isolines + colormap, with seam-stroked filled bands)**, **Arc (polar wedges for Nightingale / Gauge / Sunburst)**, **Radar (polyline on polar)**, **PolarBar (stacked annular bars)**, **PolarRect (annular tile for spiral heatmaps)**, **ErrorBar (symmetric / asymmetric whiskers + caps)**, **Rug (1-D ticks along axis margin)**.
 - Polars: `polars` feature → `FrameSource` + `plot!(df, x="col", y="col", color="col")`.
 - Coords: `CartesianCoord` and **`PolarCoord`** (compass convention, `inscribed`/`with_center`/`with_radius` builders); `Mark::render` dispatches via `&dyn Coord` with `as_any()` downcast helpers.
 - Scales: `LinearScale`, `LogScale`, `SqrtScale`, `CategoricalScale`, `BandScale` (categorical x); `infer_chart_kind` chart-type inference.
@@ -77,13 +77,15 @@ Layer-N may only depend on layer-1..N-1.
 - Layout: title + axis labels; LayoutFonts shared between layout + render.
 - **Multi-panel**: `MultiPanelFigure(width, height, rows, cols)` + per-panel padding + per-panel independent axes; `Figure::render_within(viewport, backend)` is the parameterized dispatch point.
 - **Polar Figure mode**: `Figure::polar_axes(theta, r)` builds a `PolarCoord` and renders with `render_grid_lines`'s polar branch (radial spokes + concentric rings); skips cartesian axis chrome.
+- **Auto-attached `Colorbar`**: `Figure` introspects every mark via `Mark::colormap_legend()` and reserves a Right-side gradient strip slot when any mark exposes a legend (`HeatmapMark` and `ContourMark` with a colormap). Opt-out via `Figure::colorbar(false)`.
+- **Adaptive x-tick label rotation**: `XTickLabelsComponent.band_width` threads the categorical band width through layout reservation; `crate::layout::x_tick_label_rotation()` is the shared decision (0°, 45°, or 90° clockwise) that both reservation and renderer use.
 - Stats: `BoxPlotStats`, `Kde` (Gaussian, Silverman/Scott/Manual bandwidth), `percentile`, `std_dev`, **`Contour::compute(grid, &levels)` (average-of-corners saddle disambiguation)**.
 - Backends: Skia (raster, with AA auto-detect on axis-aligned paths), SVG (with opacity).
 - Figure + `plot!` macro (DataFrame arm gated on `polars`).
 
 ## Not yet implemented
 
-- 0.4.0: `FacetWrap`, shared axes across `MultiPanelFigure` panels, polar-aware legend placement, `ContourMode::FilledBands` polygon-tracing, `Colorbar`
+- 0.4.0: `FacetWrap`, shared axes across `MultiPanelFigure` panels, polar-aware legend placement, path-effects halo for label-over-fill text, log-scale colorbar ticks (`Colorbar` shipped 0.3.0)
 - 0.5.0: `SymLogScale`, `DateTimeScale` (LogScale/SqrtScale/CategoricalScale shipped 0.3.0)
 - 0.6.0: wgpu, hover/zoom/pan
 - 0.7.0: Animation, GIF
