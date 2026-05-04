@@ -17,4 +17,4 @@ pub mod layout;
 pub mod renders;
 pub mod sources;
 
-pub use figures::Figure;
+pub use figures::{Figure, MultiPanelFigure};

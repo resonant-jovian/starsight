@@ -18,7 +18,7 @@ use starsight_layer_3::marks::{
     ViolinMark,
 };
 use starsight_layer_3::statistics::Bandwidth;
-use starsight_layer_5::Figure;
+use starsight_layer_5::{Figure, MultiPanelFigure};
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -1023,6 +1023,38 @@ fn snapshot_polars_grouped_scatter() {
         .x_label("x")
         .y_label("y");
     let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── multi-panel grid ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_multipanel_2x2_basic() {
+    // 2×2 grid: a damped-cosine line, a small bar chart, a histogram, and a
+    // step plot. Tests that each panel composes its own axes/title/legend
+    // independently and that panel rects partition the canvas without
+    // overlap.
+    let (x, y) = damped_cosine(40);
+    let line_panel = Figure::new(400, 300)
+        .title("damped cosine")
+        .add(LineMark::new(x.clone(), y.clone()).color(Color::BLUE));
+    let bar_panel = Figure::new(400, 300).title("bars").add(BarMark::new(
+        vec!["a".into(), "b".into(), "c".into()],
+        vec![3.0, 1.5, 4.2],
+    ));
+    let histogram_panel = Figure::new(400, 300)
+        .title("histogram")
+        .add(HistogramMark::new(y.clone()));
+    let step_panel = Figure::new(400, 300)
+        .title("step")
+        .add(StepMark::new(x, y).position(StepPosition::Mid));
+    let mp = MultiPanelFigure::new(800, 600, 2, 2)
+        .padding(8.0)
+        .add(line_panel)
+        .add(bar_panel)
+        .add(histogram_panel)
+        .add(step_panel);
+    let svg = mp.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }
 
