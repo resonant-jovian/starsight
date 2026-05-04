@@ -956,10 +956,10 @@ y
 </text>
 <path d="M47.4,755 L782.8,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M47.4,48 L47.4,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="36" shape-rendering="crispEdges" width="79" x="693.8" y="58"/>
-<path d="M693.8,58 L772.8,58 L772.8,94 L693.8,94 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<rect fill="#21918c" height="12" shape-rendering="crispEdges" width="12" x="701.8" y="66"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="719.8" y="76">
+<rect fill="#ffffff" height="36" shape-rendering="crispEdges" width="79" x="687.8" y="64"/>
+<path d="M687.8,64 L766.8,64 L766.8,100 L687.8,100 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<rect fill="#21918c" height="12" shape-rendering="crispEdges" width="12" x="695.8" y="72"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="713.8" y="82">
 f(x, y)
 </text>
 </svg>

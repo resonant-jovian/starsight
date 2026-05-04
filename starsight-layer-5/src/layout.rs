@@ -244,6 +244,33 @@ pub struct XTickLabelsComponent<'a> {
     pub tick_len: f32,
     /// Gap between tick marks and labels, in pixels.
     pub gap: f32,
+    /// Pixel band width per category for categorical axes (`canvas_width /
+    /// n_categories`). When provided and labels would crowd horizontally
+    /// (`max_label_width > band_width * 0.9`), the layout reserves enough
+    /// vertical space below the plot for rotated labels — paired with the
+    /// renderer's matching adaptive rotation in `render_axes`. `None` keeps
+    /// the original horizontal-only reservation (numeric axes / sparse
+    /// categorical). Tracked as `starsight-74o`.
+    pub band_width: Option<f32>,
+}
+
+/// Tick-label rotation in degrees (clockwise) chosen by the adaptive
+/// crowding heuristic — shared between layout reservation and renderer so
+/// both agree without recomputing.
+///
+/// - `band_width >= max_label_width * 1.0`: 0 (horizontal)
+/// - `band_width >= max_label_width / 1.8`: 45 (sloped)
+/// - otherwise: 90 (vertical)
+#[must_use]
+pub fn x_tick_label_rotation(max_label_width: f32, band_width: Option<f32>) -> f32 {
+    let Some(bw) = band_width else { return 0.0 };
+    if max_label_width > bw * 1.8 {
+        90.0
+    } else if max_label_width > bw * 0.9 {
+        45.0
+    } else {
+        0.0
+    }
 }
 
 impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
@@ -269,15 +296,35 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
         if max_h <= 0.0 {
             max_h = ctx.fonts.label;
         }
+        // Adaptive vertical reservation: rotated labels take more vertical
+        // space than horizontal ones. The renderer derives the same rotation
+        // from `band_width` so reservation and draw agree.
+        let rotation = x_tick_label_rotation(max_w, self.band_width);
+        let label_height = if rotation >= 89.0 {
+            max_w
+        } else if rotation >= 44.0 {
+            // 45° label occupies max_w * sin(45°) = ~0.71 max_w vertically,
+            // plus a half-line of font height for the upper slope.
+            (max_w + max_h) * 0.71
+        } else {
+            max_h
+        };
+        let right_overflow = if rotation > 0.0 {
+            // Rotated last label hugs its tick column instead of overflowing
+            // half its glyph past plot.right.
+            2.0
+        } else {
+            max_w / 2.0 + 2.0
+        };
         vec![
             Reservation {
                 side: Side::Bottom,
-                size: self.tick_len + self.gap + max_h,
+                size: self.tick_len + self.gap + label_height,
                 priority: 0,
             },
             Reservation {
                 side: Side::Right,
-                size: max_w / 2.0 + 2.0,
+                size: right_overflow,
                 priority: 0,
             },
         ]
@@ -446,6 +493,7 @@ mod tests {
             labels: &[],
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         assert!(comp.reserve(&mut ctx).is_empty());
         assert_eq!(comp.id(), "x_tick_labels");
@@ -460,6 +508,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         let res = comp.reserve(&mut ctx);
         assert_eq!(res.len(), 2);
@@ -557,6 +606,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         });
         builder.add(&YTickLabelsComponent {
             labels: &labels,
@@ -665,6 +715,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         let res = comp.reserve(&mut ctx);
         // The Bottom reservation includes max_h = font_size = 12.0 fallback.

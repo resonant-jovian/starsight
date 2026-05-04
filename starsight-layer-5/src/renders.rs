@@ -54,6 +54,14 @@ pub fn render_axes(
             tick_color,
         )
     };
+    // Sloped/rotated x-tick label: top of label sits at the tick endpoint
+    // and the label slopes (45°) or descends (90°) downward. Pivot is the
+    // top-left of the visual; SVG/Skia rotate around that point clockwise.
+    let draw_rotated_x_label =
+        |backend: &mut dyn DrawBackend, label: &str, px: f32, rotation: f32| -> Result<()> {
+            let pivot = Point::new(px, area.bottom + tick_len + 4.0);
+            backend.draw_rotated_text(label, pivot, font_size, tick_color, rotation)
+        };
     let draw_y_label = |backend: &mut dyn DrawBackend, label: &str, py: f32| -> Result<()> {
         let (tw, _) = backend
             .text_extent(label, font_size)
@@ -99,9 +107,24 @@ pub fn render_axes(
         } else {
             // Labels on X-axis (bottom) - vertical bars, only Y ticks
             let band_width = area.width() / n_categories as f32;
+            // Mirror the layout's rotation decision so reservation and
+            // render agree on which path to take.
+            let mut max_label_w: f32 = 0.0;
+            for label in category_labels {
+                if let Ok((w, _)) = backend.text_extent(label, font_size)
+                    && w > max_label_w
+                {
+                    max_label_w = w;
+                }
+            }
+            let rotation = crate::layout::x_tick_label_rotation(max_label_w, Some(band_width));
             for (i, label) in category_labels.iter().enumerate() {
                 let px = area.left + (i as f32 + 0.5) * band_width;
-                draw_x_label(backend, label, px)?;
+                if rotation == 0.0 {
+                    draw_x_label(backend, label, px)?;
+                } else {
+                    draw_rotated_x_label(backend, label, px, rotation)?;
+                }
             }
             // NO X-axis ticks - category labels replace them
             // Y-axis: ticks right (data side)
@@ -352,10 +375,15 @@ pub fn render_legend(
     let legend_width = max_label_len as f32 * 7.0 + 30.0;
     let legend_height = (entries.len() as f32 * line_spacing) + padding * 2.0;
 
-    let legend_x = plot_area.right - legend_width - 10.0;
-    let legend_y = plot_area.top + 10.0;
+    // Inset bumped 10→16 so the legend sits visibly clear of axis-extreme
+    // data points (`starsight-bls`). The pre-existing
+    // `with_alpha(230).without_alpha()` chain was a no-op (`without_alpha`
+    // discards the alpha back to opaque) so the bg fully hides data — the
+    // inset is what gives visible breathing room.
+    let legend_x = plot_area.right - legend_width - 16.0;
+    let legend_y = plot_area.top + 16.0;
 
-    let bg_color = theme.background.with_alpha(230).without_alpha();
+    let bg_color = theme.background;
     let bg_rect = Rect::new(
         legend_x,
         legend_y,

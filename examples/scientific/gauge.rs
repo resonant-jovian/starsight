@@ -25,21 +25,31 @@ fn main() -> Result<()> {
     let r_axis = Axis::polar_radial(0.0, 1.0);
 
     Figure::new(800, 600)
-        .title(format!("Battery — {value:.0}%"))
+        .title(format!("Battery — {value:.0} / {max:.0}"))
         .polar_axes(theta_axis, r_axis)
-        // Background arc (the unfilled portion).
+        // Outer rim — a thin track at r=1.0 that frames the whole gauge so
+        // the dial reads as a meter, not a free-floating wedge.
         .add(
-            ArcMark::new(vec![bg_center], vec![1.0])
+            ArcMark::new(vec![bg_center], vec![1.02])
                 .theta_half_widths(vec![half_total])
-                .r_inner(vec![0.7])
-                .colors(vec![Color::from_hex(0x00DD_DDDD)]),
+                .r_inner(vec![0.99])
+                .colors(vec![Color::from_hex(0x008B_8B8B)]),
+        )
+        // Background track (the unfilled portion of the dial).
+        .add(
+            ArcMark::new(vec![bg_center], vec![0.99])
+                .theta_half_widths(vec![half_total])
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x00C8_C8C8)])
+                .stroke(Color::WHITE, 0.5),
         )
         // Foreground arc (the filled portion).
         .add(
-            ArcMark::new(vec![value_center], vec![1.0])
+            ArcMark::new(vec![value_center], vec![0.99])
                 .theta_half_widths(vec![half_value])
-                .r_inner(vec![0.7])
-                .colors(vec![Color::from_hex(0x004C_AF50)]),
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x004C_AF50)])
+                .stroke(Color::WHITE, 1.0),
         )
         .save("examples/scientific/gauge.png")
 }

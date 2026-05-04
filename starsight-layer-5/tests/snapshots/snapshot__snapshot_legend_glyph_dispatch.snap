@@ -47,18 +47,18 @@ c
 </text>
 <path d="M38.6,371 L586.4,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M38.6,48 L38.6,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79" x="497.40002" y="58"/>
-<path d="M497.40002,58 L576.4,58 L576.4,134 L497.40002,134 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<path d="M505.40002,72 L517.4,72" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="523.4" y="76">
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79" x="491.40002" y="64"/>
+<path d="M491.40002,64 L570.4,64 L570.4,140 L491.40002,140 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M499.40002,78 L511.40002,78" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="82">
 trend
 </text>
-<path d="M516.2,92 C516.2,94.65097,514.05096,96.8,511.40002,96.8 C508.74905,96.8,506.60004,94.65097,506.60004,92 C506.60004,89.34903,508.74905,87.2,511.40002,87.2 C514.05096,87.2,516.2,89.34903,516.2,92" fill="#ff0000" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="523.4" y="96">
+<path d="M510.2,98 C510.2,100.65097,508.051,102.8,505.40002,102.8 C502.74905,102.8,500.60004,100.65097,500.60004,98 C500.60004,95.34903,502.74905,93.2,505.40002,93.2 C508.051,93.2,510.2,95.34903,510.2,98" fill="#ff0000" stroke="#000000" stroke-width="0"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="102">
 samples
 </text>
-<rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="505.40002" y="106"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="523.4" y="116">
+<rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="499.40002" y="112"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="122">
 counts
 </text>
 </svg>

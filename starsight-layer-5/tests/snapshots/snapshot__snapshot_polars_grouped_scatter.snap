@@ -68,18 +68,18 @@ y
 </text>
 <path d="M54.6,555 L779.2,555" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M54.6,48 L54.6,555" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="37" x="732.2" y="58"/>
-<path d="M732.2,58 L769.2,58 L769.2,134 L732.2,134 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<path d="M751,72 C751,74.65097,748.85095,76.8,746.2,76.8 C743.5491,76.8,741.4,74.65097,741.4,72 C741.4,69.34903,743.5491,67.2,746.2,67.2 C748.85095,67.2,751,69.34903,751,72" fill="#3377bb" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="758.2" y="76">
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="37" x="726.2" y="64"/>
+<path d="M726.2,64 L763.2,64 L763.2,140 L726.2,140 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M745,78 C745,80.65097,742.85095,82.8,740.2,82.8 C737.5491,82.8,735.4,80.65097,735.4,78 C735.4,75.34903,737.5491,73.2,740.2,73.2 C742.85095,73.2,745,75.34903,745,78" fill="#3377bb" stroke="#000000" stroke-width="0"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="752.2" y="82">
 A
 </text>
-<path d="M751,92 C751,94.65097,748.85095,96.8,746.2,96.8 C743.5491,96.8,741.4,94.65097,741.4,92 C741.4,89.34903,743.5491,87.2,746.2,87.2 C748.85095,87.2,751,89.34903,751,92" fill="#ee7733" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="758.2" y="96">
+<path d="M745,98 C745,100.65097,742.85095,102.8,740.2,102.8 C737.5491,102.8,735.4,100.65097,735.4,98 C735.4,95.34903,737.5491,93.2,740.2,93.2 C742.85095,93.2,745,95.34903,745,98" fill="#ee7733" stroke="#000000" stroke-width="0"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="752.2" y="102">
 B
 </text>
-<path d="M751,112 C751,114.65097,748.85095,116.8,746.2,116.8 C743.5491,116.8,741.4,114.65097,741.4,112 C741.4,109.34903,743.5491,107.2,746.2,107.2 C748.85095,107.2,751,109.34903,751,112" fill="#33aa66" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="758.2" y="116">
+<path d="M745,118 C745,120.65097,742.85095,122.8,740.2,122.8 C737.5491,122.8,735.4,120.65097,735.4,118 C735.4,115.34903,737.5491,113.2,740.2,113.2 C742.85095,113.2,745,115.34903,745,118" fill="#33aa66" stroke="#000000" stroke-width="0"/>
+<text fill="#555555" font-family="sans-serif" font-size="12" x="752.2" y="122">
 C
 </text>
 </svg>

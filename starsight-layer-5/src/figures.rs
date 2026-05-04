@@ -385,10 +385,26 @@ impl Figure {
             builder.add(&TitleComponent {
                 title: self.title.as_deref(),
             });
+            // Categorical x-axes pass band_width so the layout (and the
+            // renderer that mirrors the same rotation decision) can
+            // reserve enough vertical space for rotated labels when they
+            // would crowd horizontally.
+            let x_band_width = if !category_labels.is_empty() && !use_y_axis_labels {
+                #[allow(clippy::cast_precision_loss)]
+                let n = category_labels.len() as f32;
+                if n > 0.0 {
+                    Some(viewport.width() / n)
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
             builder.add(&XTickLabelsComponent {
                 labels: &x_label_strings,
                 tick_len,
                 gap: label_gap,
+                band_width: x_band_width,
             });
             builder.add(&YTickLabelsComponent {
                 labels: &y_label_strings,
