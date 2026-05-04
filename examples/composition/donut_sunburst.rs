@@ -19,7 +19,8 @@ fn main() -> Result<()> {
         .add(
             ArcMark::new(vec![0.0], vec![0.30])
                 .theta_half_widths(vec![std::f64::consts::PI])
-                .colors(vec![Color::from_hex(0x002E_4D77)]),
+                .colors(vec![Color::from_hex(0x002E_4D77)])
+                .wedge_labels(vec!["root".into()]),
         )
         // Middle ring: 4 quadrants.
         .add(
@@ -40,7 +41,13 @@ fn main() -> Result<()> {
                 Color::from_hex(0x00E8_C547),
                 Color::from_hex(0x00B0_6AB3),
             ])
-            .stroke(Color::WHITE, 1.0),
+            .stroke(Color::WHITE, 1.0)
+            .wedge_labels(vec![
+                "frontend".into(),
+                "backend".into(),
+                "infra".into(),
+                "data".into(),
+            ]),
         )
         // Outer ring: 8 octants.
         .add(
@@ -64,7 +71,17 @@ fn main() -> Result<()> {
                 Color::from_hex(0x00C5_8FC9),
                 Color::from_hex(0x008F_5894),
             ])
-            .stroke(Color::WHITE, 1.0),
+            .stroke(Color::WHITE, 1.0)
+            .wedge_labels(vec![
+                "react".into(),
+                "css".into(),
+                "rust".into(),
+                "db".into(),
+                "k8s".into(),
+                "ci".into(),
+                "etl".into(),
+                "ml".into(),
+            ]),
         )
         .save("examples/composition/donut_sunburst.png")
 }

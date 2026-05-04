@@ -251,6 +251,27 @@ impl Mark for PieMark {
         LegendGlyph::Bar
     }
 
+    fn legend_entries(&self) -> Vec<(Color, String, LegendGlyph)> {
+        // One legend row per slice — the color → category map matters more
+        // for pie charts than the per-mark single-color entry. Empty
+        // labels fall back to the index. Tracked as Epic I.6.
+        self.values
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| **v > 0.0 && v.is_finite())
+            .map(|(i, _)| {
+                let color = self.slice_color(i);
+                let label = self
+                    .labels
+                    .get(i)
+                    .filter(|s| !s.is_empty())
+                    .cloned()
+                    .unwrap_or_else(|| (i + 1).to_string());
+                (color, label, LegendGlyph::Bar)
+            })
+            .collect()
+    }
+
     fn wants_axes(&self) -> bool {
         // Pie / donut charts are angular — numeric x/y axes around them
         // are visual noise. The figure suppresses axes + grid when every

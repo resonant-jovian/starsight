@@ -616,26 +616,22 @@ impl Figure {
 
         // Skip marks whose colormap is already shown by the auto-attached
         // Colorbar — bordered legend entry would duplicate the strip
-        // (`starsight-3bp.9.5` / Epic I.5). When `colorbar_opt` is None,
-        // every labeled mark gets its entry as before.
+        // (`starsight-3bp.9.5` / Epic I.5). PieMark / sunburst ArcMark with
+        // wedge_labels set return multiple entries for the color →
+        // category map (Epic I.6).
         let colorbar_active = colorbar_opt.is_some();
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()
-            .filter_map(|mark| {
-                if colorbar_active && mark.colormap_legend().is_some() {
-                    return None;
-                }
-                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
-                    && !label.is_empty()
-                {
-                    return Some(crate::renders::LegendEntry {
+            .filter(|mark| !(colorbar_active && mark.colormap_legend().is_some()))
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
                         color,
-                        label: label.to_string(),
-                        glyph: mark.legend_glyph(),
-                    });
-                }
-                None
+                        label,
+                        glyph,
+                    })
             })
             .collect();
 
@@ -762,17 +758,14 @@ impl Figure {
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()
-            .filter_map(|mark| {
-                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
-                    && !label.is_empty()
-                {
-                    return Some(crate::renders::LegendEntry {
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
                         color,
-                        label: label.to_string(),
-                        glyph: mark.legend_glyph(),
-                    });
-                }
-                None
+                        label,
+                        glyph,
+                    })
             })
             .collect();
 

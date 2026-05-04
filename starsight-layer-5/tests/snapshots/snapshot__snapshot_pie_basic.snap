@@ -27,4 +27,26 @@ Energy mix
 <text fill="#ffffff" font-family="sans-serif" font-size="12" x="199.2921" y="136.47899">
 12%
 </text>
+<rect fill="#ffffff" height="116" shape-rendering="crispEdges" width="79" x="380.6" y="64"/>
+<path d="M380.6,64 L459.6,64 L459.6,180 L380.6,180 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<rect fill="#3377bb" height="12" shape-rendering="crispEdges" width="12" x="388.6" y="72"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="406.6" y="82">
+Solar
+</text>
+<rect fill="#ee7733" height="12" shape-rendering="crispEdges" width="12" x="388.6" y="92"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="406.6" y="102">
+Wind
+</text>
+<rect fill="#33aa66" height="12" shape-rendering="crispEdges" width="12" x="388.6" y="112"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="406.6" y="122">
+Hydro
+</text>
+<rect fill="#cc3366" height="12" shape-rendering="crispEdges" width="12" x="388.6" y="132"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="406.6" y="142">
+Nuclear
+</text>
+<rect fill="#aa44aa" height="12" shape-rendering="crispEdges" width="12" x="388.6" y="152"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="406.6" y="162">
+Other
+</text>
 </svg>

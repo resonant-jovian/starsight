@@ -211,6 +211,25 @@ pub trait Mark {
     fn colormap_legend(&self) -> Option<ColormapLegend> {
         None
     }
+
+    /// Multi-entry legend list for marks that carry one slice / wedge /
+    /// bar per category (`PieMark`, `ArcMark` for sunburst). Default
+    /// derives a single entry from `legend_color` + `legend_label` +
+    /// `legend_glyph` so existing single-color marks (Line, Point, Bar,
+    /// etc.) keep working unchanged.
+    ///
+    /// When this returns multiple entries, the figure renders one legend
+    /// row per entry — color swatch + label — so a pie/sunburst gets a
+    /// proper "color → category" key off to the side.
+    fn legend_entries(&self) -> Vec<(Color, String, LegendGlyph)> {
+        if let (Some(c), Some(l)) = (self.legend_color(), self.legend_label())
+            && !l.is_empty()
+        {
+            vec![(c, l.to_string(), self.legend_glyph())]
+        } else {
+            Vec::new()
+        }
+    }
 }
 
 // ── ColormapLegend ───────────────────────────────────────────────────────────────────────────────

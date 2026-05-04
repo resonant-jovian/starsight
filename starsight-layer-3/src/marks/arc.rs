@@ -67,7 +67,13 @@ pub struct ArcMark {
     /// after axis mapping. Use for partial-sweep gauges (e.g. `-3π/4` so the
     /// 0° tick lands at the bottom-left of a 270° gauge).
     pub start_offset: f64,
-    /// Legend label.
+    /// Optional per-wedge labels for color → category legend rows. When
+    /// `None`, the figure builds a single mark-level legend row from
+    /// `label`. When `Some`, each wedge gets its own legend entry — used
+    /// by sunburst / nightingale to show what each color represents.
+    pub wedge_labels: Option<Vec<String>>,
+    /// Legend label for the mark as a whole. Falls back to a single-color
+    /// entry when `wedge_labels` is `None`.
     pub label: Option<String>,
 }
 
@@ -87,8 +93,20 @@ impl ArcMark {
             colors: Vec::new(),
             stroke: None,
             start_offset: 0.0,
+            wedge_labels: None,
             label: None,
         }
+    }
+
+    /// Builder: per-wedge labels for the color → category legend. Each
+    /// entry produces one bordered legend row (color swatch + label).
+    /// Defaults to `None` which falls back to a single mark-level entry
+    /// from `label`. Pair with `colors(...)` so each wedge has both a
+    /// visible color and a label.
+    #[must_use]
+    pub fn wedge_labels(mut self, labels: Vec<String>) -> Self {
+        self.wedge_labels = Some(labels);
+        self
     }
 
     /// Builder: per-wedge angular half-widths in data-space units.
@@ -243,6 +261,34 @@ impl Mark for ArcMark {
 
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
+    }
+
+    fn legend_entries(&self) -> Vec<(Color, String, LegendGlyph)> {
+        // When wedge_labels is set, render one legend row per wedge —
+        // sunburst / nightingale use this to show color → category map.
+        // Otherwise fall back to the trait default (single mark-level
+        // entry from `label`).
+        if let Some(labels) = &self.wedge_labels {
+            return self
+                .thetas
+                .iter()
+                .enumerate()
+                .filter_map(|(i, _)| {
+                    let label = labels
+                        .get(i)
+                        .filter(|s| !s.is_empty())
+                        .cloned()?;
+                    Some((self.color_at(i), label, LegendGlyph::Bar))
+                })
+                .collect();
+        }
+        if let (Some(c), Some(l)) = (self.legend_color(), self.legend_label())
+            && !l.is_empty()
+        {
+            vec![(c, l.to_string(), LegendGlyph::Bar)]
+        } else {
+            Vec::new()
+        }
     }
 
     fn legend_glyph(&self) -> LegendGlyph {
