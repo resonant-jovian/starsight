@@ -1125,25 +1125,72 @@ fn snapshot_arcmark_nested_sunburst() {
 
 // ── contour ──────────────────────────────────────────────────────────────────────────────────────
 
-#[test]
-fn snapshot_contour_isolines() {
-    // Rosenbrock function f(x, y) = (1-x)² + 100(y - x²)² over [-2, 2]² on a
-    // 60×60 grid. Pick contour levels on a roughly geometric ladder so the
-    // valley near (1, 1) shows up at multiple zoom levels.
-    let grid = Grid::sample(60, 60, -2.0, 2.0, -2.0, 2.0, |x, y| {
+fn rosenbrock_grid(nx: usize, ny: usize) -> Grid {
+    Grid::sample(nx, ny, -2.0, 2.0, -2.0, 2.0, |x, y| {
         let a = 1.0 - x;
         let b = y - x * x;
         a * a + 100.0 * b * b
-    });
+    })
+}
+
+#[test]
+fn snapshot_contour_isolines() {
+    // Rosenbrock function over [-2, 2]² on a 60×60 grid. Levels on a roughly
+    // geometric ladder show the valley near (1, 1) at multiple zoom levels.
+    let grid = rosenbrock_grid(60, 60);
     let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
     let fig = Figure::new(800, 800)
-        .title("Rosenbrock contour")
+        .title("Rosenbrock contour — isolines")
         .x_label("x")
         .y_label("y")
         .add(
             ContourMark::new(grid, levels)
                 .colormap(VIRIDIS)
                 .stroke_width(1.5)
+                .label("f(x, y)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_contour_filled() {
+    // Same field as the isoline test, but with `FilledBands` mode — each
+    // band between two consecutive levels samples the colormap at its
+    // band index. Tests the per-cell Sutherland-Hodgman polygon-clipping
+    // path.
+    let grid = rosenbrock_grid(60, 60);
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour — filled bands")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .filled()
+                .label("f(x, y)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_contour_combined() {
+    // FilledWithLines: filled bands underneath, isolines stroked on top.
+    // Bands tint via the colormap; isolines reuse the same colormap (each
+    // level gets its own per-level color).
+    let grid = rosenbrock_grid(60, 60);
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour — filled + lines")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .mode(starsight_layer_3::marks::ContourMode::FilledWithLines)
+                .stroke_width(1.0)
                 .label("f(x, y)"),
         );
     let svg = fig.render_svg().unwrap();

@@ -52,7 +52,8 @@ fn contour_panel(
         .add(
             ContourMark::new(grid, levels)
                 .colormap(VIRIDIS)
-                .stroke_width(1.2),
+                .mode(ContourMode::FilledWithLines)
+                .stroke_width(1.0),
         )
 }
 
