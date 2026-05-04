@@ -25,6 +25,14 @@ use crate::layout::{
     YAxisTitleComponent, YTickLabelsComponent,
 };
 
+/// Outer canvas padding used by every single-figure render path.
+///
+/// Bumped from 4.0 to 8.0 (matches `MultiPanelFigure::padding` default) so
+/// every chart kind has a consistent breathable margin between the canvas
+/// edge and the layout slot stack — fixes the inconsistent outer-margin
+/// issue tracked as `starsight-c6h`.
+pub(crate) const DEFAULT_FIGURE_PADDING_PX: f32 = 8.0;
+
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
 
 /// Top-level chart builder.
@@ -371,7 +379,7 @@ impl Figure {
                 height: viewport.height(),
                 backend,
                 fonts,
-                padding: 4.0,
+                padding: DEFAULT_FIGURE_PADDING_PX,
             };
             let mut builder = LayoutBuilder::new(ctx);
             builder.add(&TitleComponent {
@@ -427,7 +435,14 @@ impl Figure {
                 .copied()
                 .map(translate_slot);
             if let Some(slot) = slot {
-                crate::renders::render_title(title, &slot, backend, &self.theme, &fonts)?;
+                crate::renders::render_title(
+                    title,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
             }
         }
 
@@ -527,7 +542,7 @@ impl Figure {
                 height: viewport.height(),
                 backend,
                 fonts,
-                padding: 4.0,
+                padding: DEFAULT_FIGURE_PADDING_PX,
             };
             let mut builder = LayoutBuilder::new(ctx);
             builder.add(&TitleComponent {
@@ -558,7 +573,14 @@ impl Figure {
                 .copied()
                 .map(translate_slot);
             if let Some(slot) = slot {
-                crate::renders::render_title(title, &slot, backend, &self.theme, &fonts)?;
+                crate::renders::render_title(
+                    title,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
             }
         }
 

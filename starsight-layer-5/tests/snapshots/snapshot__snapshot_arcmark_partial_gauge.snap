@@ -3,9 +3,9 @@ source: starsight-layer-5/tests/snapshot.rs
 expression: svg
 ---
 <svg height="400" viewBox="0 0 600 400" width="600" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="360" shape-rendering="crispEdges" width="592" x="4" y="36"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="223.2" y="28">
+<rect fill="#ffffff" height="352" shape-rendering="crispEdges" width="584" x="8" y="40"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="223.2" y="32">
 Gauge — 65/100
 </text>
-<path d="M433.03864,271.1064 C410.75018,324.91553,358.24255,360,300,360 C241.75743,360,189.24982,324.91553,166.96135,271.1064 L208.53592,253.88565 C223.85925,290.87943,259.95825,315,300,315 C340.04175,315,376.14075,290.87943,391.46408,253.88565 z" fill="#4c72b0" stroke="#000000" stroke-width="0"/>
+<path d="M430.0822,269.88184 C408.28906,322.49518,356.94827,356.8,300,356.8 C243.05171,356.8,191.71092,322.49518,169.91777,269.88184 L210.56845,253.04376 C225.55127,289.21545,260.84805,312.8,300,312.8 C339.15195,312.8,374.44873,289.21545,389.43155,253.04376 z" fill="#4c72b0" stroke="#000000" stroke-width="0"/>
 </svg>

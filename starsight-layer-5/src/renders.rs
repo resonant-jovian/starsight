@@ -58,9 +58,15 @@ pub fn render_axes(
         let (tw, _) = backend
             .text_extent(label, font_size)
             .unwrap_or((0.0, font_size));
+        // Snap measured width up to the next integer pixel and start-anchor the
+        // text there. The right edge becomes `area.left - tick_len - 4.0` for
+        // every label up to ≤1px sub-pixel drift, fixing the inconsistent
+        // flush-right rendering tracked as `starsight-cet`.
+        let tw_px = tw.ceil();
+        let x = (area.left - tick_len - 4.0 - tw_px).round();
         backend.draw_text(
             label,
-            Point::new(area.left - tick_len - 4.0 - tw, py + font_size * 0.4),
+            Point::new(x, py + font_size * 0.4),
             font_size,
             tick_color,
         )
@@ -458,13 +464,20 @@ fn draw_filled_disk(
 
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
-/// Render the chart title centered inside its layout slot.
+/// Render the chart title horizontally centered over the *plot area* (so the
+/// title balances over the data, not the full canvas including y-axis label
+/// margin) and vertically centered inside the title slot.
+///
+/// Centering policy: title-x = midpoint of `plot_area`. Pre-fix `starsight-cet`
+/// centered to the title slot's full width, which on axis-bearing charts left
+/// the title offset to the right of the visible plot.
 ///
 /// # Errors
 /// Returns the backend's error if text measurement or drawing fails.
 pub fn render_title(
     title: &str,
     slot: &Slot,
+    plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
     fonts: &LayoutFonts,
@@ -474,7 +487,8 @@ pub fn render_title(
     let (tw, th) = backend
         .text_extent(title, font_size)
         .unwrap_or((0.0, font_size));
-    let x = slot.rect.left + (slot.rect.width() - tw) / 2.0;
+    let cx = f32::midpoint(plot_area.left, plot_area.right);
+    let x = cx - tw * 0.5;
     let y = f32::midpoint(slot.rect.height(), th) + slot.rect.top;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
@@ -612,15 +626,17 @@ mod tests {
     }
 
     #[test]
-    fn render_title_centers_in_slot() {
+    fn render_title_centers_over_plot_area() {
         let mut backend = SvgBackend::new(200, 50);
         let slot = Slot {
             rect: Rect::new(0.0, 0.0, 200.0, 30.0),
             side: Side::Top,
         };
+        let plot_area = Rect::new(20.0, 30.0, 180.0, 50.0);
         render_title(
             "Hello",
             &slot,
+            &plot_area,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),

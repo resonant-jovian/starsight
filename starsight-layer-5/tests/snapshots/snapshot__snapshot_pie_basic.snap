@@ -3,28 +3,28 @@ source: starsight-layer-5/tests/snapshot.rs
 expression: svg
 ---
 <svg height="500" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="431" shape-rendering="crispEdges" width="437.8" x="41.800003" y="44"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="202" y="28">
+<rect fill="#ffffff" height="423" shape-rendering="crispEdges" width="429.8" x="45.800003" y="48"/>
+<text fill="#222222" font-family="sans-serif" font-size="16" x="212.70001" y="32">
 Energy mix
 </text>
-<path d="M260.7,259.5 L260.7,44 C334.47467,44,403.12225,81.73932,442.65268,144.02933 C482.1831,206.31934,487.10196,284.50214,455.69025,351.25543 z" fill="#3377bb" stroke="#ffffff" stroke-width="1"/>
-<text fill="#ffffff" font-family="sans-serif" font-size="12" x="368.16925" y="189.24406">
+<path d="M260.7,259.5 L260.7,48 C333.10532,48,400.47867,85.03882,439.2754,146.17264 C478.07208,207.30644,482.8996,284.03806,452.07092,349.5523 z" fill="#3377bb" stroke="#ffffff" stroke-width="1"/>
+<text fill="#ffffff" font-family="sans-serif" font-size="12" x="365.974" y="190.63722">
 32%
 </text>
-<path d="M260.7,259.5 L455.69025,351.25543 C407.2522,454.19156,287.14362,501.7459,181.36917,459.86682 z" fill="#ee7733" stroke="#ffffff" stroke-width="1"/>
-<text fill="#000000" font-family="sans-serif" font-size="12" x="301.46506" y="394.53842">
+<path d="M260.7,259.5 L452.07092,349.5523 C404.53195,450.57782,286.6528,497.24945,182.84167,456.1477 z" fill="#ee7733" stroke="#ffffff" stroke-width="1"/>
+<text fill="#000000" font-family="sans-serif" font-size="12" x="300.50793" y="392.121">
 24%
 </text>
-<path d="M260.7,259.5 L181.36917,459.86682 C103.75325,429.1365,50.866882,356.34467,45.62526,273.03137 z" fill="#33aa66" stroke="#ffffff" stroke-width="1"/>
-<text fill="#ffffff" font-family="sans-serif" font-size="12" x="136.57695" y="346.634">
+<path d="M260.7,259.5 L182.84167,456.1477 C106.66641,425.9878,54.761703,354.5471,49.617355,272.78018 z" fill="#33aa66" stroke="#ffffff" stroke-width="1"/>
+<text fill="#ffffff" font-family="sans-serif" font-size="12" x="138.6804" y="345.10577">
 18%
 </text>
-<path d="M260.7,259.5 L45.62526,273.03137 C41.592422,208.93149,66.360916,146.3734,113.1801,102.40726 z" fill="#cc3366" stroke="#ffffff" stroke-width="1"/>
-<text fill="#ffffff" font-family="sans-serif" font-size="12" x="119.661575" y="212.73495">
+<path d="M260.7,259.5 L49.617355,272.78018 C45.659378,209.87012,69.96814,148.4732,115.91829,105.323135 z" fill="#cc3366" stroke="#ffffff" stroke-width="1"/>
+<text fill="#ffffff" font-family="sans-serif" font-size="12" x="122.078995" y="213.6921">
 14%
 </text>
-<path d="M260.7,259.5 L113.1801,102.40726 C153.13617,64.88603,205.88824,44,260.7,44 z" fill="#aa44aa" stroke="#ffffff" stroke-width="1"/>
-<text fill="#ffffff" font-family="sans-serif" font-size="12" x="198.33496" y="134.06157">
+<path d="M260.7,259.5 L115.91829,105.323135 C155.13272,68.49835,206.90564,48,260.7,48 z" fill="#aa44aa" stroke="#ffffff" stroke-width="1"/>
+<text fill="#ffffff" font-family="sans-serif" font-size="12" x="199.2921" y="136.47899">
 12%
 </text>
 </svg>
