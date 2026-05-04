@@ -393,6 +393,22 @@ impl Mark for ContourMark {
         // regions), so the rect glyph reads more accurately than a hairline.
         LegendGlyph::Bar
     }
+
+    fn colormap_legend(&self) -> Option<crate::marks::ColormapLegend> {
+        let cm = self.colormap?;
+        let lo = *self.levels.first()?;
+        let hi = *self.levels.last()?;
+        if !lo.is_finite() || !hi.is_finite() || hi <= lo {
+            return None;
+        }
+        Some(crate::marks::ColormapLegend {
+            colormap: cm,
+            value_min: lo,
+            value_max: hi,
+            label: self.label.clone(),
+            log_scale: false,
+        })
+    }
 }
 
 #[cfg(test)]

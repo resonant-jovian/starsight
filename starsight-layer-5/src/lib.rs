@@ -11,10 +11,12 @@
 //! - [`inferences`]: auto-pick a chart type from data shape (stub).
 //! - [`sources`]: data acceptance from slices, `DataFrames`, ndarray, Arrow (stub).
 
+pub mod colorbar;
 pub mod figures;
 pub mod inferences;
 pub mod layout;
 pub mod renders;
 pub mod sources;
 
+pub use colorbar::Colorbar;
 pub use figures::{Figure, MultiPanelFigure};

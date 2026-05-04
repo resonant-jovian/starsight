@@ -55,6 +55,10 @@ pub struct Figure {
     /// auto-inferred cartesian axes; only polar marks (e.g. `ArcMark`,
     /// `RadarMark`) accept this coord and cartesian marks return Config errors.
     pub polar_axes: Option<(Axis, Axis)>,
+    /// Colorbar opt-out flag. When `true`, suppresses the auto-attached
+    /// colormap legend that `HeatmapMark` and `ContourMark` would otherwise
+    /// trigger. Default is `false` (auto-attach). Tracked as `starsight-kdi`.
+    pub colorbar_disabled: bool,
 }
 
 impl Figure {
@@ -70,7 +74,18 @@ impl Figure {
             height,
             theme: Theme::default(),
             polar_axes: None,
+            colorbar_disabled: false,
         }
+    }
+
+    /// Builder: opt out of the auto-attached colorbar that
+    /// `HeatmapMark` and `ContourMark` would otherwise trigger. Pass
+    /// `false` to suppress, `true` to keep auto-attach (the default).
+    /// Tracked as `starsight-kdi`.
+    #[must_use]
+    pub fn colorbar(mut self, on: bool) -> Self {
+        self.colorbar_disabled = !on;
+        self
     }
 
     /// Builder: switch the figure into polar mode using the supplied
@@ -373,6 +388,19 @@ impl Figure {
             y_axis.tick_labels.clone()
         };
 
+        // Auto-attach colorbar: if any mark exposes a colormap legend
+        // (HeatmapMark, ContourMark with a colormap) and the figure has not
+        // opted out via `Figure::colorbar(false)`, build a Colorbar that
+        // takes a Right-side slot. Tracked as `starsight-kdi`.
+        let colorbar_opt: Option<crate::colorbar::Colorbar> = if self.colorbar_disabled {
+            None
+        } else {
+            self.marks
+                .iter()
+                .find_map(|m| m.colormap_legend())
+                .map(crate::colorbar::Colorbar::new)
+        };
+
         let layout = {
             let ctx = LayoutCtx {
                 width: viewport.width(),
@@ -419,6 +447,9 @@ impl Figure {
                 label: self.y_label.as_deref(),
                 gap: label_gap,
             });
+            if let Some(colorbar) = &colorbar_opt {
+                builder.add(&crate::colorbar::ColorbarComponent { colorbar });
+            }
             builder.finish()
         };
 
@@ -533,6 +564,27 @@ impl Figure {
                 &self.theme,
                 &fonts,
             )?;
+        }
+
+        // Auto-attached colorbar lands after marks/axes/legend so it sits
+        // on top of any background fill and never falls behind axis chrome.
+        if let Some(colorbar) = &colorbar_opt {
+            let slot = layout
+                .slots
+                .get("colorbar")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
+            if let Some(slot) = slot {
+                crate::colorbar::render_colorbar(
+                    colorbar,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
+            }
         }
 
         Ok(())

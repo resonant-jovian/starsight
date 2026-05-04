@@ -183,6 +183,41 @@ pub trait Mark {
     fn wants_axes(&self) -> bool {
         true
     }
+
+    /// Optional colormap legend description for this mark, used by the
+    /// figure to auto-attach a [`Colorbar`](starsight_layer_3::statistics).
+    /// Marks that map a continuous value range through a colormap
+    /// (`HeatmapMark`, `ContourMark` with a colormap) override this to
+    /// expose `(colormap, value_min, value_max, label?, log?)`. Other marks
+    /// return `None` (the default), so they don't trigger auto-attach.
+    fn colormap_legend(&self) -> Option<ColormapLegend> {
+        None
+    }
+}
+
+// ── ColormapLegend ───────────────────────────────────────────────────────────────────────────────
+
+/// Information a mark exposes when it wants the figure to render a
+/// colorbar/scale-to-colormap legend on its behalf.
+///
+/// Returned by [`Mark::colormap_legend`]. Layer-5 inspects every mark on
+/// the figure; when at least one returns `Some` and the figure has not
+/// opted out via `Figure::colorbar(false)`, a vertical colorbar strip is
+/// attached on the right side of the plot area.
+#[derive(Clone, Debug)]
+pub struct ColormapLegend {
+    /// Colormap used to render the mark's continuous value field.
+    pub colormap: starsight_layer_1::colormap::Colormap,
+    /// Lowest value the mark renders.
+    pub value_min: f64,
+    /// Highest value the mark renders.
+    pub value_max: f64,
+    /// Legend label (often the same as the mark's `label`). When `None`,
+    /// the colorbar reads as a bare value scale.
+    pub label: Option<String>,
+    /// Hint that the value range is log-distributed; the colorbar will
+    /// place ticks accordingly.
+    pub log_scale: bool,
 }
 
 // ── LineMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -1300,6 +1335,20 @@ impl Mark for HeatmapMark {
 
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Bar
+    }
+
+    fn colormap_legend(&self) -> Option<ColormapLegend> {
+        let (vmin, vmax) = self.value_range();
+        if !vmin.is_finite() || !vmax.is_finite() || vmax <= vmin {
+            return None;
+        }
+        Some(ColormapLegend {
+            colormap: self.colormap,
+            value_min: vmin,
+            value_max: vmax,
+            label: self.label.clone(),
+            log_scale: matches!(self.color_scale, HeatmapColorScale::Log),
+        })
     }
 }
 
