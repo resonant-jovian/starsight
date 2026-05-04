@@ -40,7 +40,9 @@ pub struct RadarMark {
     /// Stroke width in pixels.
     pub width: f32,
     /// Optional fill alpha (`0` = no fill, `255` = opaque). Defaults to
-    /// `40` so the underlying grid stays legible behind the area shading.
+    /// `25` so multiple overlapping radar series stay distinguishable in
+    /// raster output (`starsight-61l`); 40 was too opaque and the central
+    /// overlap of 3+ series desaturated to a near-uniform tone in PNG.
     pub fill_alpha: u8,
     /// Legend label.
     pub label: Option<String>,
@@ -59,7 +61,7 @@ impl RadarMark {
             values,
             color: Color::from_hex(0x004C_72B0),
             width: 2.0,
-            fill_alpha: 40,
+            fill_alpha: 25,
             label: None,
         }
     }

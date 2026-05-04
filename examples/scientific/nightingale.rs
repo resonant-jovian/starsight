@@ -72,7 +72,7 @@ fn main() -> Result<()> {
             ArcMark::new(thetas, r_outer_layer3)
                 .r_inner(r_inner_layer3)
                 .theta_half_width(0.5)
-                .colors(vec![Color::from_hex(0x008A_A38E); 12])
+                .colors(vec![Color::from_hex(0x00C2_A35F); 12])
                 .stroke(Color::WHITE, 0.8)
                 .label("other causes"),
         )

@@ -51,6 +51,7 @@ pub mod box_plot;
 pub mod candlestick;
 pub mod contour;
 pub mod errorbar;
+pub(crate) mod palette;
 pub mod pie;
 pub mod radar;
 pub mod rect_polar;

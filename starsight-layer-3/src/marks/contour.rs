@@ -191,6 +191,12 @@ impl ContourMark {
             let high = self.levels[band_idx + 1];
             let color = self.band_color(band_idx);
             let style = PathStyle::fill(color);
+            // Same-color hairline stroke covers the anti-aliased seam between
+            // adjacent cells/bands (matplotlib's standard fix). Without it,
+            // filled-contour output shows a 1-px white grid because each
+            // cell's polygon AA leaves background pixels visible at edges.
+            // Tracked as `starsight-3h6`.
+            let seam_stroke = PathStyle::stroke(color, 1.0);
             for ci in 0..(ny - 1) {
                 for cj in 0..(nx - 1) {
                     let v0 = self.grid.values[ci * nx + cj];
@@ -226,6 +232,7 @@ impl ContourMark {
                     }
                     path = path.close();
                     backend.draw_path(&path, &style)?;
+                    backend.draw_path(&path, &seam_stroke)?;
                 }
             }
         }

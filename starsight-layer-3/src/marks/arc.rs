@@ -182,28 +182,15 @@ impl ArcMark {
 
     fn color_at(&self, i: usize) -> Color {
         if self.colors.is_empty() {
-            // Mirror PieMark's default palette logic at minimum: cycle a
-            // small built-in palette so unconfigured charts still distinguish
-            // wedges.
-            DEFAULT_PALETTE[i % DEFAULT_PALETTE.len()]
+            // Cycle the shared Tableau 10 palette (`POLAR_DEFAULT`) so
+            // unconfigured charts distinguish wedges with vibrant, modern
+            // categorical colors. Shared with `PolarBarMark`.
+            crate::marks::palette::POLAR_DEFAULT[i % crate::marks::palette::POLAR_DEFAULT.len()]
         } else {
             self.colors[i % self.colors.len()]
         }
     }
 }
-
-/// Default palette mirrors `PieMark`'s; chosen to match perceptually distinct
-/// hues at common counts (12 for Nightingale, 8 for radar, etc.).
-const DEFAULT_PALETTE: [Color; 8] = [
-    Color::from_hex(0x004C_72B0),
-    Color::from_hex(0x00DD_8452),
-    Color::from_hex(0x0055_A868),
-    Color::from_hex(0x00C4_4E52),
-    Color::from_hex(0x008B_8B6B),
-    Color::from_hex(0x0093_75A0),
-    Color::from_hex(0x008C_5C3D),
-    Color::from_hex(0x00DA_8BC3),
-];
 
 impl Mark for ArcMark {
     fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
@@ -356,7 +343,7 @@ mod tests {
         // Same index after cycling returns the same color.
         assert_eq!(
             mark.color_at(0),
-            mark.color_at(super::DEFAULT_PALETTE.len())
+            mark.color_at(crate::marks::palette::POLAR_DEFAULT.len())
         );
     }
 

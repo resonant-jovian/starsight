@@ -29,19 +29,6 @@ use crate::marks::{DataExtent, LegendGlyph, Mark};
 
 // ── PolarBarMark ─────────────────────────────────────────────────────────────────────────────────
 
-/// Default 8-color palette mirrors the cartesian `BarMark` cycling so users
-/// who skip `.color()` still get distinguishable bars.
-const DEFAULT_PALETTE: [Color; 8] = [
-    Color::from_hex(0x004C_72B0),
-    Color::from_hex(0x00DD_8452),
-    Color::from_hex(0x0055_A868),
-    Color::from_hex(0x00C4_4E52),
-    Color::from_hex(0x008B_8B6B),
-    Color::from_hex(0x0093_75A0),
-    Color::from_hex(0x008C_5C3D),
-    Color::from_hex(0x00DA_8BC3),
-];
-
 /// Annular bar mark plotted on a [`PolarCoord`].
 ///
 /// One entry per `(theta, value)` pair. Each bar spans
@@ -180,7 +167,7 @@ impl PolarBarMark {
 
     fn color_at(&self, i: usize) -> Color {
         if self.colors.is_empty() {
-            DEFAULT_PALETTE[i % DEFAULT_PALETTE.len()]
+            crate::marks::palette::POLAR_DEFAULT[i % crate::marks::palette::POLAR_DEFAULT.len()]
         } else {
             self.colors[i % self.colors.len()]
         }
@@ -262,7 +249,7 @@ mod tests {
         assert_ne!(mark.color_at(0), mark.color_at(1));
         assert_eq!(
             mark.color_at(0),
-            mark.color_at(super::DEFAULT_PALETTE.len())
+            mark.color_at(crate::marks::palette::POLAR_DEFAULT.len())
         );
     }
 
