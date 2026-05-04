@@ -391,6 +391,241 @@ impl Kde {
     }
 }
 
+// ── Grid / Polyline / Contour ────────────────────────────────────────────────────────────────────
+
+/// Polyline in data coordinates, tagged with the contour level it belongs to.
+///
+/// The 0.3.0 [`Contour`] extractor emits one `Polyline` per cell crossing —
+/// each carries exactly two points (a single line segment). `level` lets a
+/// `ContourMark` colormap or label each band. Future versions may merge
+/// adjacent segments into longer chains; consumers should not assume a fixed
+/// number of points.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Polyline {
+    /// Ordered points in data space.
+    pub points: Vec<(f64, f64)>,
+    /// Contour level this polyline belongs to.
+    pub level: f64,
+}
+
+/// Regular 2-D scalar grid backing [`Contour::compute`].
+///
+/// `values` is row-major (`values[i * nx + j]` = value at column `j`, row
+/// `i`), with row 0 at `y_min` and the last row at `y_max`. `nx`/`ny` are
+/// vertex counts, not cell counts — at least `2 × 2` to produce any cells.
+#[derive(Clone, Debug)]
+pub struct Grid {
+    /// Row-major scalar values; `len() == nx * ny`.
+    pub values: Vec<f64>,
+    /// Vertex count along x.
+    pub nx: usize,
+    /// Vertex count along y.
+    pub ny: usize,
+    /// Domain x lower bound (column 0).
+    pub x_min: f64,
+    /// Domain x upper bound (column `nx - 1`).
+    pub x_max: f64,
+    /// Domain y lower bound (row 0).
+    pub y_min: f64,
+    /// Domain y upper bound (row `ny - 1`).
+    pub y_max: f64,
+}
+
+impl Grid {
+    /// Build a grid from a row-major value buffer plus domain bounds.
+    ///
+    /// # Errors
+    ///
+    /// Returns `None` if `values.len() != nx * ny` or if `nx < 2 || ny < 2`
+    /// (no cells).
+    #[must_use]
+    pub fn new(
+        values: Vec<f64>,
+        nx: usize,
+        ny: usize,
+        x_min: f64,
+        x_max: f64,
+        y_min: f64,
+        y_max: f64,
+    ) -> Option<Self> {
+        if nx < 2 || ny < 2 || values.len() != nx * ny {
+            return None;
+        }
+        Some(Self {
+            values,
+            nx,
+            ny,
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+        })
+    }
+
+    /// Sample a regular grid by evaluating `f(x, y)` over the rectangular
+    /// domain. Convenience for tests and examples.
+    #[must_use]
+    pub fn sample<F: Fn(f64, f64) -> f64>(
+        nx: usize,
+        ny: usize,
+        x_min: f64,
+        x_max: f64,
+        y_min: f64,
+        y_max: f64,
+        f: F,
+    ) -> Self {
+        let dx = if nx > 1 {
+            (x_max - x_min) / (nx - 1) as f64
+        } else {
+            0.0
+        };
+        let dy = if ny > 1 {
+            (y_max - y_min) / (ny - 1) as f64
+        } else {
+            0.0
+        };
+        let mut values = Vec::with_capacity(nx * ny);
+        for i in 0..ny {
+            let y = y_min + i as f64 * dy;
+            for j in 0..nx {
+                let x = x_min + j as f64 * dx;
+                values.push(f(x, y));
+            }
+        }
+        Self {
+            values,
+            nx,
+            ny,
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+        }
+    }
+
+    fn at(&self, j: usize, i: usize) -> f64 {
+        self.values[i * self.nx + j]
+    }
+}
+
+/// Marching-squares contour extractor.
+///
+/// `Contour::compute(grid, &levels)` emits one [`Polyline`] per cell crossing
+/// per level, using the standard marching-squares 16-case lookup with
+/// average-of-corners saddle disambiguation (matplotlib default). Each
+/// resulting polyline carries exactly two points — a single segment in cell
+/// coordinates — which `ContourMark` strokes for isolines or pairs across
+/// levels for filled bands.
+pub struct Contour;
+
+impl Contour {
+    /// Extract contour segments from `grid` at each level in `levels`.
+    ///
+    /// Output is unordered — segments from one level interleave with
+    /// segments from another. Filter by [`Polyline::level`] if a single
+    /// level's segments are needed in isolation.
+    #[must_use]
+    #[allow(clippy::many_single_char_names)] // t, u, v, x, y are math-vocab in marching squares.
+    pub fn compute(grid: &Grid, levels: &[f64]) -> Vec<Polyline> {
+        if grid.nx < 2 || grid.ny < 2 || levels.is_empty() {
+            return Vec::new();
+        }
+        let dx = (grid.x_max - grid.x_min) / (grid.nx - 1) as f64;
+        let dy = (grid.y_max - grid.y_min) / (grid.ny - 1) as f64;
+        let mut out = Vec::new();
+        for &level in levels {
+            for cell_i in 0..(grid.ny - 1) {
+                for cell_j in 0..(grid.nx - 1) {
+                    let v0 = grid.at(cell_j, cell_i); // BL
+                    let v1 = grid.at(cell_j + 1, cell_i); // BR
+                    let v2 = grid.at(cell_j + 1, cell_i + 1); // TR
+                    let v3 = grid.at(cell_j, cell_i + 1); // TL
+                    if !(v0.is_finite() && v1.is_finite() && v2.is_finite() && v3.is_finite()) {
+                        continue;
+                    }
+                    let mut mask = 0u8;
+                    if v0 > level {
+                        mask |= 1;
+                    }
+                    if v1 > level {
+                        mask |= 2;
+                    }
+                    if v2 > level {
+                        mask |= 4;
+                    }
+                    if v3 > level {
+                        mask |= 8;
+                    }
+                    if mask == 0 || mask == 15 {
+                        continue;
+                    }
+                    let edge_pt = |e: u8| -> (f64, f64) {
+                        // Local cell coords (u, v) in [0, 1]².
+                        let (a_v, b_v, a_uv, b_uv) = match e {
+                            0 => (v0, v1, (0.0, 0.0), (1.0, 0.0)),
+                            1 => (v1, v2, (1.0, 0.0), (1.0, 1.0)),
+                            2 => (v2, v3, (1.0, 1.0), (0.0, 1.0)),
+                            3 => (v3, v0, (0.0, 1.0), (0.0, 0.0)),
+                            _ => unreachable!(),
+                        };
+                        let denom = b_v - a_v;
+                        let t = if denom.abs() < f64::EPSILON {
+                            0.5
+                        } else {
+                            ((level - a_v) / denom).clamp(0.0, 1.0)
+                        };
+                        let u = a_uv.0 + t * (b_uv.0 - a_uv.0);
+                        let v = a_uv.1 + t * (b_uv.1 - a_uv.1);
+                        // Convert local (u, v) to data coords.
+                        let x = grid.x_min + (cell_j as f64 + u) * dx;
+                        let y = grid.y_min + (cell_i as f64 + v) * dy;
+                        (x, y)
+                    };
+                    let segments: &[(u8, u8)] = match mask {
+                        1 | 14 => &[(3, 0)],
+                        2 | 13 => &[(0, 1)],
+                        3 | 12 => &[(3, 1)],
+                        4 | 11 => &[(1, 2)],
+                        6 | 9 => &[(0, 2)],
+                        7 | 8 => &[(2, 3)],
+                        5 => {
+                            // Corners 0,2 above; saddle. avg > level → contour
+                            // wraps the two below corners (1 and 3) separately;
+                            // avg < level → contour wraps the two above corners
+                            // (0 and 2) separately.
+                            let avg = (v0 + v1 + v2 + v3) * 0.25;
+                            if avg > level {
+                                &[(0, 1), (2, 3)]
+                            } else {
+                                &[(3, 0), (1, 2)]
+                            }
+                        }
+                        10 => {
+                            // Corners 1,3 above; saddle.
+                            let avg = (v0 + v1 + v2 + v3) * 0.25;
+                            if avg > level {
+                                &[(3, 0), (1, 2)]
+                            } else {
+                                &[(0, 1), (2, 3)]
+                            }
+                        }
+                        _ => &[],
+                    };
+                    for &(ea, eb) in segments {
+                        let pa = edge_pt(ea);
+                        let pb = edge_pt(eb);
+                        out.push(Polyline {
+                            points: vec![pa, pb],
+                            level,
+                        });
+                    }
+                }
+            }
+        }
+        out
+    }
+}
+
 // ── Regression ───────────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub struct Regression { kind: RegressionKind, ci: Option<f64> }
 //              -- linear, polynomial, loess fits
@@ -405,8 +640,8 @@ impl Kde {
 #[cfg(test)]
 mod tests {
     use super::{
-        Bandwidth, Bin, BinMethod, BinTransform, BoxPlotStats, Kde, Kernel, percentile,
-        scott_bandwidth, silverman_bandwidth, std_dev,
+        Bandwidth, Bin, BinMethod, BinTransform, BoxPlotStats, Contour, Grid, Kde, Kernel,
+        percentile, scott_bandwidth, silverman_bandwidth, std_dev,
     };
 
     #[test]
@@ -654,5 +889,93 @@ mod tests {
         for (g, &y) in grid.iter().zip(&points) {
             assert!((*g - kde.evaluate_at(y, &data)).abs() < 1e-12);
         }
+    }
+
+    // ── Contour ──────────────────────────────────────────────────────────
+
+    #[test]
+    fn grid_new_rejects_size_mismatch() {
+        assert!(Grid::new(vec![0.0; 3], 2, 2, 0.0, 1.0, 0.0, 1.0).is_none());
+    }
+
+    #[test]
+    fn grid_new_rejects_too_small() {
+        // 1x2 has no cells; 2x1 likewise.
+        assert!(Grid::new(vec![0.0; 2], 1, 2, 0.0, 1.0, 0.0, 1.0).is_none());
+        assert!(Grid::new(vec![0.0; 2], 2, 1, 0.0, 1.0, 0.0, 1.0).is_none());
+    }
+
+    #[test]
+    fn grid_sample_evaluates_at_corners() {
+        // f(x,y) = x; with 2 columns at x=0, x=1, values should be 0,1,0,1.
+        let g = Grid::sample(2, 2, 0.0, 1.0, 0.0, 1.0, |x, _| x);
+        assert_eq!(g.values, vec![0.0, 1.0, 0.0, 1.0]);
+    }
+
+    #[test]
+    fn contour_empty_levels_returns_empty() {
+        let g = Grid::sample(4, 4, 0.0, 1.0, 0.0, 1.0, |x, y| x + y);
+        assert!(Contour::compute(&g, &[]).is_empty());
+    }
+
+    #[test]
+    fn contour_plane_x_at_level_05_cuts_vertically() {
+        // f(x,y) = x; level 0.5 should produce horizontal-ish line segments
+        // at x ≈ 0.5 across all rows. With a 5x5 grid, expect 4 vertically
+        // stacked segments (one per cell row).
+        let g = Grid::sample(5, 5, 0.0, 1.0, 0.0, 1.0, |x, _| x);
+        let polys = Contour::compute(&g, &[0.5]);
+        // 4 cells per row × 4 rows = 16 cells; only the column whose range
+        // straddles 0.5 will produce a segment. With 5 grid points x = 0,
+        // 0.25, 0.5, 0.75, 1.0 — the cell j=1 (x in [0.25, 0.5]) and j=2
+        // (x in [0.5, 0.75]) both touch 0.5 because the level matches a
+        // grid line. matplotlib accepts that. Just check the segments lie
+        // on the right vertical band.
+        assert!(!polys.is_empty(), "expected contour segments at level 0.5");
+        for p in &polys {
+            assert_eq!(p.points.len(), 2);
+            assert_eq!(p.level, 0.5);
+            for &(x, _) in &p.points {
+                assert!(
+                    (0.25..=0.75).contains(&x),
+                    "segment x out of expected band: {x}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn contour_saddle_emits_two_segments_per_saddle_cell() {
+        // Single 2×2 grid (one cell). Row-major order is [BL, BR, TL, TR]
+        // because row i=0 is at y_min, row i=1 at y_max. To trigger saddle
+        // case 5 (corners 0=BL and 2=TR above; corners 1=BR and 3=TL below),
+        // we need BL/TR > level and BR/TL < level. Use 1.5/1.0/0.0/0.0 in
+        // row-major so avg = 0.625 > 0.5 → saddle "above" branch.
+        let values = vec![1.5, 0.0, 0.0, 1.0]; // BL, BR, TL, TR
+        let g = Grid::new(values, 2, 2, 0.0, 1.0, 0.0, 1.0).unwrap();
+        let polys = Contour::compute(&g, &[0.5]);
+        // Saddle case 5 emits 2 segments (one per below-corner wrap).
+        assert_eq!(polys.len(), 2);
+        for p in &polys {
+            assert_eq!(p.points.len(), 2);
+            assert_eq!(p.level, 0.5);
+        }
+    }
+
+    #[test]
+    fn contour_skips_cells_with_nan() {
+        let mut values = vec![0.0; 9];
+        values[4] = f64::NAN; // center vertex of 3x3 grid
+        let g = Grid::new(values, 3, 3, 0.0, 1.0, 0.0, 1.0).unwrap();
+        // Levels far from any vertex value — should still skip NaN cells.
+        let polys = Contour::compute(&g, &[10.0]);
+        assert!(polys.is_empty());
+    }
+
+    #[test]
+    fn contour_uniform_grid_emits_nothing() {
+        // No crossing anywhere.
+        let g = Grid::sample(5, 5, 0.0, 1.0, 0.0, 1.0, |_, _| 1.0);
+        assert!(Contour::compute(&g, &[0.5]).is_empty());
     }
 }

@@ -14,13 +14,14 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::backends::rasters::SkiaBackend;
 use starsight_layer_1::backends::vectors::SvgBackend;
 use starsight_layer_1::errors::{Result, StarsightError};
+use starsight_layer_1::primitives::Rect;
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_2::coords::CartesianCoord;
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 
 use crate::layout::{
-    LayoutBuilder, LayoutCtx, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
+    LayoutBuilder, LayoutCtx, Slot, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
     YAxisTitleComponent, YTickLabelsComponent,
 };
 
@@ -276,6 +277,24 @@ impl Figure {
     /// axes and coordinate system, then dispatches drawing to the supplied
     /// backend trait object.
     fn render_to(&self, backend: &mut dyn DrawBackend) -> Result<()> {
+        let viewport = Rect::new(0.0, 0.0, self.width as f32, self.height as f32);
+        self.render_within(viewport, backend)
+    }
+
+    /// Render the figure into a sub-rect of the backend. Used by
+    /// [`MultiPanelFigure`] to draw each panel into its assigned grid cell;
+    /// callers rendering a standalone figure go through [`render_to`] which
+    /// passes a viewport covering the full canvas.
+    ///
+    /// The layout is computed in viewport-local coords (so a 200×200 panel
+    /// composes its own legend, ticks, and title independent of the parent
+    /// canvas size), then every emitted rect is translated by the viewport
+    /// origin before drawing.
+    pub(crate) fn render_within(
+        &self,
+        viewport: Rect,
+        backend: &mut dyn DrawBackend,
+    ) -> Result<()> {
         let extent = self
             .merged_extent()
             .ok_or_else(|| StarsightError::Data("No data to render".into()))?;
@@ -322,8 +341,8 @@ impl Figure {
 
         let layout = {
             let ctx = LayoutCtx {
-                width: self.width as f32,
-                height: self.height as f32,
+                width: viewport.width(),
+                height: viewport.height(),
                 backend,
                 fonts,
                 padding: 4.0,
@@ -352,7 +371,19 @@ impl Figure {
             });
             builder.finish()
         };
-        let plot_area = layout.plot_rect;
+
+        // All layout rects are in viewport-local coords. Translate them into
+        // backend-absolute coords so MultiPanelFigure's per-panel viewport
+        // offsets land each panel correctly. Identity for full-canvas renders.
+        let dx = viewport.left;
+        let dy = viewport.top;
+        let translate_rect =
+            |r: Rect| Rect::new(r.left + dx, r.top + dy, r.right + dx, r.bottom + dy);
+        let translate_slot = |s: Slot| Slot {
+            rect: translate_rect(s.rect),
+            side: s.side,
+        };
+        let plot_area = translate_rect(layout.plot_rect);
 
         let coord = CartesianCoord {
             x_axis,
@@ -363,7 +394,12 @@ impl Figure {
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            let slot = layout.slots.get("title").and_then(|v| v.first()).copied();
+            let slot = layout
+                .slots
+                .get("title")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
             if let Some(slot) = slot {
                 crate::renders::render_title(title, &slot, backend, &self.theme, &fonts)?;
             }
@@ -373,12 +409,14 @@ impl Figure {
             .slots
             .get("x_axis_title")
             .and_then(|v| v.first())
-            .copied();
+            .copied()
+            .map(translate_slot);
         let y_axis_title_slot = layout
             .slots
             .get("y_axis_title")
             .and_then(|v| v.first())
-            .copied();
+            .copied()
+            .map(translate_slot);
         crate::renders::render_axis_labels(
             self.x_label.as_deref(),
             self.y_label.as_deref(),
@@ -513,9 +551,165 @@ impl Figure {
     }
 }
 
+// ── MultiPanelFigure ─────────────────────────────────────────────────────────────────────────────
+
+/// Grid of independent [`Figure`] panels rendered into a single canvas.
+///
+/// Each panel keeps its own marks, axes, title, and legend; layout-wise the
+/// canvas is split into a uniform `rows × cols` grid with `padding` pixels of
+/// gap between panels (and the same padding around the outer edge). Per-panel
+/// `width`/`height` are ignored — the parent canvas dimensions decide the cell
+/// size — so panels constructed at any nominal size compose cleanly.
+///
+/// 0.3.0 limitation: each panel computes its axes independently. Shared axes
+/// across rows/columns (and a per-row/per-column title) land in 0.4.0.
+pub struct MultiPanelFigure {
+    panels: Vec<Figure>,
+    /// Number of grid rows.
+    pub rows: u32,
+    /// Number of grid columns.
+    pub cols: u32,
+    /// Output width in pixels.
+    pub width: u32,
+    /// Output height in pixels.
+    pub height: u32,
+    /// Padding (px) between panels and around the outer canvas edge.
+    pub padding: f32,
+    /// Background theme for the canvas (each panel keeps its own theme).
+    pub theme: Theme,
+}
+
+impl MultiPanelFigure {
+    /// New empty `rows × cols` grid sized to `width × height` pixels.
+    #[must_use]
+    pub fn new(width: u32, height: u32, rows: u32, cols: u32) -> Self {
+        Self {
+            panels: Vec::new(),
+            rows,
+            cols,
+            width,
+            height,
+            padding: 8.0,
+            theme: Theme::default(),
+        }
+    }
+
+    /// Builder: append one panel. Panels fill the grid in row-major order
+    /// (top-left first, then across, then down).
+    #[must_use]
+    pub fn add(mut self, panel: Figure) -> Self {
+        self.panels.push(panel);
+        self
+    }
+
+    /// Builder: padding (px) between panels and around the canvas edge.
+    #[must_use]
+    pub fn padding(mut self, padding: f32) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    /// Builder: canvas background theme.
+    #[must_use]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
+    }
+
+    /// Borrow the underlying panel list.
+    #[must_use]
+    pub fn panels(&self) -> &[Figure] {
+        &self.panels
+    }
+
+    /// Allocate the rect for the panel at `(row, col)` within the canvas.
+    fn panel_rect(&self, row: u32, col: u32) -> Rect {
+        let rows = self.rows.max(1) as f32;
+        let cols = self.cols.max(1) as f32;
+        let w = self.width as f32;
+        let h = self.height as f32;
+        let pad = self.padding;
+        let cell_w = ((w - pad * (cols + 1.0)) / cols).max(1.0);
+        let cell_h = ((h - pad * (rows + 1.0)) / rows).max(1.0);
+        let left = pad + col as f32 * (cell_w + pad);
+        let top = pad + row as f32 * (cell_h + pad);
+        Rect::new(left, top, left + cell_w, top + cell_h)
+    }
+
+    fn render_to(&self, backend: &mut dyn DrawBackend) -> Result<()> {
+        let canvas = Rect::new(0.0, 0.0, self.width as f32, self.height as f32);
+        crate::renders::render_background(&canvas, backend, &self.theme)?;
+        for (idx, panel) in self.panels.iter().enumerate() {
+            let row = idx as u32 / self.cols.max(1);
+            let col = idx as u32 % self.cols.max(1);
+            if row >= self.rows {
+                break; // Extra panels past rows × cols are ignored.
+            }
+            let viewport = self.panel_rect(row, col);
+            panel.render_within(viewport, backend)?;
+        }
+        Ok(())
+    }
+
+    /// Render the panel grid to a PNG byte buffer.
+    ///
+    /// # Errors
+    /// - [`StarsightError::Render`] if the backend fails.
+    /// - [`StarsightError::Data`] if any panel has no data (panels error
+    ///   independently; the first failure short-circuits).
+    /// - [`StarsightError::Scale`] if any panel cannot build its axes.
+    /// - [`StarsightError::Export`] if PNG encoding fails.
+    pub fn render_png(&self) -> Result<Vec<u8>> {
+        let mut backend = SkiaBackend::new(self.width, self.height)?;
+        backend.fill(self.theme.background);
+        self.render_to(&mut backend)?;
+        backend.png_bytes()
+    }
+
+    /// Render the panel grid to an in-memory SVG string.
+    ///
+    /// # Errors
+    /// Same conditions as [`render_png`](Self::render_png), minus the PNG
+    /// encode step.
+    pub fn render_svg(&self) -> Result<String> {
+        let mut backend = SvgBackend::new(self.width, self.height);
+        self.render_to(&mut backend)?;
+        Ok(backend.svg_string())
+    }
+
+    /// Save the panel grid to disk; format chosen by extension (`.png` /
+    /// `.svg`).
+    ///
+    /// # Errors
+    /// - Any error from [`render_png`](Self::render_png) or
+    ///   [`render_svg`](Self::render_svg).
+    /// - [`StarsightError::Io`] if writing fails.
+    /// - [`StarsightError::Export`] if the extension is unsupported.
+    pub fn save(&self, path: impl AsRef<std::path::Path>) -> Result<()> {
+        let path = path.as_ref();
+        let ext = path
+            .extension()
+            .and_then(|s| s.to_str())
+            .map(str::to_ascii_lowercase);
+        match ext.as_deref() {
+            Some("svg") => {
+                let svg = self.render_svg()?;
+                std::fs::write(path, svg).map_err(StarsightError::Io)
+            }
+            Some("png") | None => {
+                let bytes = self.render_png()?;
+                std::fs::write(path, bytes).map_err(StarsightError::Io)
+            }
+            Some(other) => Err(StarsightError::Export(format!(
+                "unsupported file extension: .{other}"
+            ))),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::Figure;
+    use super::{Figure, MultiPanelFigure};
     use starsight_layer_1::errors::StarsightError;
     use starsight_layer_1::primitives::Color;
     use starsight_layer_1::theme::DEFAULT_DARK;
@@ -620,5 +814,87 @@ mod tests {
         let path = dir.path().join("out.bmp");
         let r = fig.save(&path);
         assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+
+    // ── MultiPanelFigure ─────────────────────────────────────────────────
+
+    fn line_panel() -> Figure {
+        Figure::new(200, 200).add(LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 4.0]))
+    }
+
+    #[test]
+    fn multi_panel_new_has_no_panels() {
+        let mp = MultiPanelFigure::new(400, 300, 2, 2);
+        assert!(mp.panels().is_empty());
+        assert_eq!(mp.rows, 2);
+        assert_eq!(mp.cols, 2);
+    }
+
+    #[test]
+    fn multi_panel_add_appends() {
+        let mp = MultiPanelFigure::new(400, 300, 1, 2)
+            .add(line_panel())
+            .add(line_panel());
+        assert_eq!(mp.panels().len(), 2);
+    }
+
+    #[test]
+    fn multi_panel_padding_builder() {
+        let mp = MultiPanelFigure::new(400, 300, 2, 2).padding(20.0);
+        assert!((mp.padding - 20.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn multi_panel_rect_partitions_canvas() {
+        // 400×300 canvas, 2×2 grid, 8px padding → cell ≈ 188×134.
+        let mp = MultiPanelFigure::new(400, 300, 2, 2);
+        let r00 = mp.panel_rect(0, 0);
+        let r01 = mp.panel_rect(0, 1);
+        let r10 = mp.panel_rect(1, 0);
+        // Same cell size everywhere.
+        assert!((r00.width() - r01.width()).abs() < 1e-3);
+        assert!((r00.height() - r10.height()).abs() < 1e-3);
+        // Top-left starts at padding offset.
+        assert!((r00.left - 8.0).abs() < 1e-3);
+        assert!((r00.top - 8.0).abs() < 1e-3);
+        // Right column shifted by cell + padding.
+        assert!(r01.left > r00.right);
+    }
+
+    #[test]
+    fn multi_panel_render_svg_with_two_panels_succeeds() {
+        let mp = MultiPanelFigure::new(600, 400, 1, 2)
+            .add(line_panel())
+            .add(line_panel());
+        let svg = mp.render_svg().unwrap();
+        assert!(svg.contains("<svg"));
+    }
+
+    #[test]
+    fn multi_panel_save_svg_writes_file() {
+        let mp = MultiPanelFigure::new(400, 300, 1, 1).add(line_panel());
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("multi.svg");
+        mp.save(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn multi_panel_extra_panels_past_grid_are_ignored() {
+        // 1x1 grid with 3 panels — only the first should render; the rest are
+        // dropped (no panic, no error).
+        let mp = MultiPanelFigure::new(200, 200, 1, 1)
+            .add(line_panel())
+            .add(line_panel())
+            .add(line_panel());
+        let svg = mp.render_svg().unwrap();
+        assert!(svg.contains("<svg"));
+    }
+
+    #[test]
+    fn multi_panel_empty_panel_errors() {
+        // A panel with no marks fails (StarsightError::Data).
+        let mp = MultiPanelFigure::new(200, 200, 1, 1).add(Figure::new(200, 200));
+        assert!(matches!(mp.render_svg(), Err(StarsightError::Data(_))));
     }
 }
