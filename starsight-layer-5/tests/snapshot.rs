@@ -15,9 +15,9 @@ use starsight_layer_1::primitives::{Color, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark, HeatmapColorScale,
-    HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark, StepPosition,
-    ViolinGroup, ViolinMark,
+    ArcMark, AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
+    HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark,
+    StepPosition, ViolinGroup, ViolinMark,
 };
 use starsight_layer_3::statistics::{Bandwidth, Grid};
 use starsight_layer_5::{Figure, MultiPanelFigure};
@@ -1024,6 +1024,100 @@ fn snapshot_polars_grouped_scatter() {
         .title("color = 'group' → 3 PointMarks")
         .x_label("x")
         .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── arc mark ─────────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_arcmark_full_nightingale() {
+    // Florence Nightingale's coxcomb invariant — 12 monthly slices, area
+    // proportional to value via sqrt radial axis. Each wedge spans 1/12 of
+    // the disk; outer radius encodes month value.
+    let thetas: Vec<f64> = (0..12).map(f64::from).collect();
+    let values = vec![
+        12.0, 19.0, 25.0, 18.0, 28.0, 35.0, 42.0, 38.0, 30.0, 22.0, 16.0, 10.0,
+    ];
+    let theta_axis = Axis::polar_angular_categorical(12);
+    let r_axis = Axis::polar_radial_sqrt(0.0, 50.0);
+    let fig = Figure::new(600, 600)
+        .title("Nightingale coxcomb (synthetic)")
+        .polar_axes(theta_axis, r_axis)
+        .add(ArcMark::new(thetas, values).theta_half_width(0.5));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_arcmark_partial_gauge() {
+    // Gauge: single wedge spanning a 270° sweep that starts at -135° (so
+    // both endpoints sit toward the bottom). The wedge uses polar angular
+    // and radial axes; theta_half_width = 135° in radians, start_offset
+    // shifts the whole wedge so it draws across the bottom half plus the
+    // sides.
+    let theta_axis = Axis::polar_angular(0.0, std::f64::consts::TAU);
+    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let fig = Figure::new(600, 400)
+        .title("Gauge — 65/100")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            ArcMark::new(vec![0.0], vec![80.0])
+                .r_inner(vec![55.0])
+                .theta_half_widths(vec![3.0 * std::f64::consts::PI / 8.0])
+                .start_offset(std::f64::consts::PI),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_arcmark_nested_sunburst() {
+    // Three concentric rings of wedges (sunburst). Each ring uses a
+    // different inner radius to stack outward.
+    let theta_axis = Axis::polar_angular(0.0, std::f64::consts::TAU);
+    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let fig = Figure::new(600, 600)
+        .title("Sunburst — 3 levels")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            // Innermost: 4 wedges spanning the full circle.
+            ArcMark::new(
+                vec![
+                    std::f64::consts::PI * 0.25,
+                    std::f64::consts::PI * 0.75,
+                    std::f64::consts::PI * 1.25,
+                    std::f64::consts::PI * 1.75,
+                ],
+                vec![30.0, 30.0, 30.0, 30.0],
+            )
+            .theta_half_widths(vec![std::f64::consts::PI * 0.25; 4]),
+        )
+        .add(
+            // Middle ring: 8 wedges.
+            ArcMark::new(
+                (0..8u32)
+                    .map(|i| std::f64::consts::PI * 0.125 + std::f64::consts::PI * 0.25 * f64::from(i))
+                    .collect(),
+                vec![60.0; 8],
+            )
+            .r_inner(vec![30.0; 8])
+            .theta_half_widths(vec![std::f64::consts::PI * 0.125; 8]),
+        )
+        .add(
+            // Outer ring: 16 wedges.
+            ArcMark::new(
+                (0..16u32)
+                    .map(|i| {
+                        std::f64::consts::PI * 0.0625
+                            + std::f64::consts::PI * 0.125 * f64::from(i)
+                    })
+                    .collect(),
+                vec![100.0; 16],
+            )
+            .r_inner(vec![60.0; 16])
+            .theta_half_widths(vec![std::f64::consts::PI * 0.0625; 16]),
+        );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }

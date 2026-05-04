@@ -17,7 +17,7 @@ use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::primitives::Rect;
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, PolarCoord};
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 
 use crate::layout::{
@@ -42,6 +42,11 @@ pub struct Figure {
     pub height: u32,
     /// Theme for colors.
     pub theme: Theme,
+    /// Polar mode: when set, the figure renders into a [`PolarCoord`] instead
+    /// of a [`CartesianCoord`]. The `(theta_axis, r_axis)` tuple replaces the
+    /// auto-inferred cartesian axes; only polar marks (e.g. `ArcMark`,
+    /// `RadarMark`) accept this coord and cartesian marks return Config errors.
+    pub polar_axes: Option<(Axis, Axis)>,
 }
 
 impl Figure {
@@ -56,7 +61,25 @@ impl Figure {
             width,
             height,
             theme: Theme::default(),
+            polar_axes: None,
         }
+    }
+
+    /// Builder: switch the figure into polar mode using the supplied
+    /// angular and radial axes. Pair with polar marks (e.g.
+    /// [`crate::Figure::add`] of an `ArcMark` or `RadarMark`); cartesian
+    /// marks added to a polar figure error at render time.
+    ///
+    /// Polar figures bypass the cartesian tick / axis-title chrome — the
+    /// inscribed disk fills the available rect, with only `title` honored
+    /// from the standard chrome set. Grid lines and legend draw via
+    /// [`crate::renders::render_grid_lines`]'s polar branch and the
+    /// existing legend stack respectively (the legend overlaps the disk
+    /// in 0.3.0 per the documented limitation).
+    #[must_use]
+    pub fn polar_axes(mut self, theta_axis: Axis, r_axis: Axis) -> Self {
+        self.polar_axes = Some((theta_axis, r_axis));
+        self
     }
 
     /// Builder: set the theme for colors.
@@ -295,6 +318,9 @@ impl Figure {
         viewport: Rect,
         backend: &mut dyn DrawBackend,
     ) -> Result<()> {
+        if self.polar_axes.is_some() {
+            return self.render_polar_within(viewport, backend);
+        }
         let extent = self
             .merged_extent()
             .ok_or_else(|| StarsightError::Data("No data to render".into()))?;
@@ -451,6 +477,100 @@ impl Figure {
             )?;
         }
 
+        let legend_entries: Vec<crate::renders::LegendEntry> = self
+            .marks
+            .iter()
+            .filter_map(|mark| {
+                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
+                    && !label.is_empty()
+                {
+                    return Some(crate::renders::LegendEntry {
+                        color,
+                        label: label.to_string(),
+                        glyph: mark.legend_glyph(),
+                    });
+                }
+                None
+            })
+            .collect();
+
+        if !legend_entries.is_empty() {
+            crate::renders::render_legend(
+                &legend_entries,
+                &plot_area,
+                backend,
+                &self.theme,
+                &fonts,
+            )?;
+        }
+
+        Ok(())
+    }
+
+    /// Polar-mode render path. Mirrors [`render_within`](Self::render_within)
+    /// but builds a [`PolarCoord`] inscribed in the viewport (minus a small
+    /// title strip) instead of a [`CartesianCoord`], and skips the cartesian
+    /// tick / axis chrome.
+    fn render_polar_within(&self, viewport: Rect, backend: &mut dyn DrawBackend) -> Result<()> {
+        let (theta_axis, r_axis) = self
+            .polar_axes
+            .as_ref()
+            .expect("render_polar_within called without polar_axes set");
+
+        let fonts = crate::layout::LayoutFonts::default();
+
+        // Reserve only top space for the title; everything else is the
+        // inscribed disk.
+        let layout = {
+            let ctx = LayoutCtx {
+                width: viewport.width(),
+                height: viewport.height(),
+                backend,
+                fonts,
+                padding: 4.0,
+            };
+            let mut builder = LayoutBuilder::new(ctx);
+            builder.add(&TitleComponent {
+                title: self.title.as_deref(),
+            });
+            builder.finish()
+        };
+
+        let dx = viewport.left;
+        let dy = viewport.top;
+        let translate_rect =
+            |r: Rect| Rect::new(r.left + dx, r.top + dy, r.right + dx, r.bottom + dy);
+        let translate_slot = |s: Slot| Slot {
+            rect: translate_rect(s.rect),
+            side: s.side,
+        };
+        let plot_area = translate_rect(layout.plot_rect);
+
+        let coord = PolarCoord::inscribed(theta_axis.clone(), r_axis.clone(), plot_area);
+
+        crate::renders::render_background(&plot_area, backend, &self.theme)?;
+
+        if let Some(title) = &self.title {
+            let slot = layout
+                .slots
+                .get("title")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
+            if let Some(slot) = slot {
+                crate::renders::render_title(title, &slot, backend, &self.theme, &fonts)?;
+            }
+        }
+
+        backend.set_clip(Some(plot_area))?;
+        crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        for mark in &self.marks {
+            mark.render(&coord, backend)?;
+        }
+        backend.set_clip(None)?;
+
+        // Legend: same dispatch as cartesian. Will overlap the disk per
+        // documented limitation; reposition in 0.4.0.
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()

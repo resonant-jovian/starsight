@@ -10,9 +10,9 @@ pub use crate::colormap::{Colormap, DEFAULT};
 pub use crate::common::inferences::ChartKind;
 pub use crate::common::{Figure, MultiPanelFigure};
 pub use crate::components::marks::{
-    BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark, ContourMode, HistogramMark,
-    LineMark, Mark, Ohlc, Orientation, PieMark, PointMark, StepMark, ViolinGroup, ViolinMark,
-    ViolinScale,
+    ArcMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark, ContourMode,
+    HistogramMark, LineMark, Mark, Ohlc, Orientation, PieMark, PointMark, StepMark, ViolinGroup,
+    ViolinMark, ViolinScale,
 };
 pub use crate::plot;
 pub use crate::theme::{DEFAULT_DARK, DEFAULT_LIGHT, Theme};

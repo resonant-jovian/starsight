@@ -11,11 +11,22 @@ pub trait Scale {
     fn map(&self, value: f64) -> f64;
     /// Inverse: map a normalized position back to data space.
     fn inverse(&self, normalized: f64) -> f64;
+    /// Cloning hook so `Box<dyn Scale>` (and the [`Axis`](crate::axes::Axis)
+    /// types that own one) can implement `Clone`. Implementations should
+    /// return a fresh box of `self`'s concrete type.
+    fn clone_box(&self) -> Box<dyn Scale>;
+}
+
+impl Clone for Box<dyn Scale> {
+    fn clone(&self) -> Self {
+        (**self).clone_box()
+    }
 }
 
 // ── LinearScale ──────────────────────────────────────────────────────────────────────────────────
 
 /// Linear (`y = ax + b`) mapping.
+#[derive(Clone, Copy, Debug)]
 pub struct LinearScale {
     /// Lower bound of the data domain.
     pub domain_min: f64,
@@ -34,6 +45,10 @@ impl Scale for LinearScale {
     fn inverse(&self, normalized: f64) -> f64 {
         normalized * (self.domain_max - self.domain_min) + self.domain_min
     }
+
+    fn clone_box(&self) -> Box<dyn Scale> {
+        Box::new(*self)
+    }
 }
 
 // ── LogScale ─────────────────────────────────────────────────────────────────────────────────────
@@ -44,6 +59,7 @@ impl Scale for LinearScale {
 /// The base of the log cancels in normalization, so internally `ln` is used —
 /// the user's expected base only matters for tick label formatting (handled by
 /// the axis layer, not the scale).
+#[derive(Clone, Copy, Debug)]
 pub struct LogScale {
     /// Lower bound (must be > 0).
     pub domain_min: f64,
@@ -66,6 +82,10 @@ impl Scale for LogScale {
         let lmax = self.domain_max.ln();
         (lmin + normalized * (lmax - lmin)).exp()
     }
+
+    fn clone_box(&self) -> Box<dyn Scale> {
+        Box::new(*self)
+    }
 }
 
 // ── SqrtScale ────────────────────────────────────────────────────────────────────────────────────
@@ -73,6 +93,7 @@ impl Scale for LogScale {
 /// Square-root mapping. Useful when an area encodes value (Nightingale's
 /// `r ∝ √v` makes the rendered slice area proportional to value, not to r).
 /// `domain_min` and `domain_max` must be ≥ 0.
+#[derive(Clone, Copy, Debug)]
 pub struct SqrtScale {
     /// Lower bound (must be ≥ 0).
     pub domain_min: f64,
@@ -96,6 +117,10 @@ impl Scale for SqrtScale {
         let s = smin + normalized * (smax - smin);
         s * s
     }
+
+    fn clone_box(&self) -> Box<dyn Scale> {
+        Box::new(*self)
+    }
 }
 
 // ── CategoricalScale ─────────────────────────────────────────────────────────────────────────────
@@ -107,6 +132,7 @@ impl Scale for SqrtScale {
 /// each compass bin / month / category. For Cartesian band layouts use
 /// [`Axis::category`](crate::axes::Axis::category) instead, which keeps tick
 /// positions at band edges.
+#[derive(Clone, Copy, Debug)]
 pub struct CategoricalScale {
     /// Total number of categories. Zero produces a degenerate midpoint scale.
     pub n_categories: usize,
@@ -125,6 +151,10 @@ impl Scale for CategoricalScale {
             return 0.0;
         }
         normalized * self.n_categories as f64 - 0.5
+    }
+
+    fn clone_box(&self) -> Box<dyn Scale> {
+        Box::new(*self)
     }
 }
 

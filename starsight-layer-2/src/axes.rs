@@ -9,6 +9,7 @@ use crate::scales::{CategoricalScale, LinearScale, LogScale, Scale, SqrtScale};
 /// `scale` is a `Box<dyn Scale>` so the same `Axis` type can carry linear /
 /// log / sqrt / categorical mappings — required by polar radial axes
 /// (`Nightingale` wants sqrt) and log heatmap color bars.
+#[derive(Clone)]
 pub struct Axis {
     /// The scale that maps data values to the normalized range.
     pub scale: Box<dyn Scale>,

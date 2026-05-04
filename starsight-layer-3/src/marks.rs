@@ -15,7 +15,7 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
-use starsight_layer_2::coords::{CartesianCoord, Coord};
+use starsight_layer_2::coords::{CartesianCoord, Coord, PolarCoord};
 use std::collections::HashMap;
 
 /// Downcast a `&dyn Coord` to the concrete `CartesianCoord` required by every
@@ -30,17 +30,28 @@ pub(crate) fn require_cartesian(coord: &dyn Coord) -> Result<&CartesianCoord> {
         })
 }
 
+/// Downcast a `&dyn Coord` to the concrete `PolarCoord`. Mirror of
+/// [`require_cartesian`] for polar marks ([`crate::marks::ArcMark`],
+/// `RadarMark`, etc.).
+pub(crate) fn require_polar(coord: &dyn Coord) -> Result<&PolarCoord> {
+    coord.as_any().downcast_ref::<PolarCoord>().ok_or_else(|| {
+        StarsightError::Config("this mark requires a polar coordinate system".to_string())
+    })
+}
+
 // ── Submodule marks (0.3.0+) ─────────────────────────────────────────────────────────────────────
 //
 // Statistical marks added in 0.3.0 live in their own submodule files to keep
 // this top-level file readable. Each submodule re-exports its public type(s)
 // up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
 // caring that the implementation lives in a sibling file.
+pub mod arc;
 pub mod box_plot;
 pub mod candlestick;
 pub mod contour;
 pub mod pie;
 pub mod violin;
+pub use arc::ArcMark;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 pub use candlestick::{CandlestickMark, Ohlc};
 pub use contour::{ContourMark, ContourMode};
