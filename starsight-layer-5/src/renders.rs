@@ -11,7 +11,7 @@ use starsight_layer_1::errors::Result;
 use starsight_layer_1::paths::{Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, Coord, PolarCoord};
 use starsight_layer_3::marks::LegendGlyph;
 
 use crate::layout::{LayoutFonts, Slot};
@@ -161,11 +161,30 @@ pub fn render_axes(
 
 // ── render_grid_lines ────────────────────────────────────────────────────────────────────────────
 
-/// Render light grid lines for both axes.
+/// Render light grid lines for the figure's coord system.
+///
+/// Dispatches by coord type: [`CartesianCoord`] gets vertical/horizontal grid
+/// lines at each tick; [`PolarCoord`] gets concentric rings at each radial
+/// tick plus radial spokes at each angular tick. Unknown coord types render
+/// nothing — extension point for future ternary / 3D coords.
 ///
 /// # Errors
 /// Returns the backend's error if any line draw call fails.
 pub fn render_grid_lines(
+    coord: &dyn Coord,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
+    if let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() {
+        render_cartesian_grid_lines(cart, backend, theme)
+    } else if let Some(polar) = coord.as_any().downcast_ref::<PolarCoord>() {
+        render_polar_grid_lines(polar, backend, theme)
+    } else {
+        Ok(())
+    }
+}
+
+fn render_cartesian_grid_lines(
     coord: &CartesianCoord,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
@@ -191,6 +210,87 @@ pub fn render_grid_lines(
     }
 
     Ok(())
+}
+
+/// Polar grid: concentric rings at each radial tick + radial spokes at each
+/// angular tick.
+///
+/// Ring/spoke styling follows the cartesian grid (theme.grid color, 1px
+/// stroke). Spokes start at the polar center and end at the rim of the
+/// inscribed disk; rings are full circles centered on the polar center.
+/// Tick positions go through the axis scales — `polar_radial_sqrt` will
+/// place rings closer together near the rim, `polar_angular_categorical`
+/// will place spokes at band-center angles.
+///
+/// # Errors
+/// Returns the backend's error if any draw call fails.
+fn render_polar_grid_lines(
+    coord: &PolarCoord,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
+    let grid_color = theme.grid;
+    let line_style = PathStyle::stroke(grid_color, 1.0);
+    let center = coord.center;
+    let radius = coord.radius;
+
+    // Concentric rings at each r-tick (skip the degenerate r=0 ring).
+    for &r_tick in &coord.r_axis.tick_positions {
+        let r_norm = coord.r_axis.scale.map(r_tick) as f32;
+        let r_pixels = radius * r_norm;
+        if r_pixels <= 0.5 {
+            continue;
+        }
+        let circle = build_circle_path(center, r_pixels);
+        backend.draw_path(&circle, &line_style)?;
+    }
+
+    // Radial spokes at each theta-tick. Compass convention: theta=0 is up,
+    // angle increases clockwise — matches PolarCoord::data_to_pixel.
+    for &theta_tick in &coord.theta_axis.tick_positions {
+        let theta_norm = coord.theta_axis.scale.map(theta_tick);
+        let angle = theta_norm * std::f64::consts::TAU;
+        let edge_x = center.x + radius * (angle.sin() as f32);
+        let edge_y = center.y - radius * (angle.cos() as f32);
+        let path = Path::new()
+            .move_to(center)
+            .line_to(Point::new(edge_x, edge_y));
+        backend.draw_path(&path, &line_style)?;
+    }
+
+    Ok(())
+}
+
+/// Four-cubic-Bezier circle approximation. Magic constant
+/// `k = 4/3 · tan(π/8) ≈ 0.5523` makes the cubic tangent match the true
+/// circle within 0.027% — invisible at any practical chart scale.
+fn build_circle_path(center: Point, r: f32) -> Path {
+    let cx = center.x;
+    let cy = center.y;
+    let k = 0.552_284_8_f32;
+    let kr = k * r;
+    let mut path = Path::new().move_to(Point::new(cx + r, cy));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + r, cy + kr),
+        Point::new(cx + kr, cy + r),
+        Point::new(cx, cy + r),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - kr, cy + r),
+        Point::new(cx - r, cy + kr),
+        Point::new(cx - r, cy),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - r, cy - kr),
+        Point::new(cx - kr, cy - r),
+        Point::new(cx, cy - r),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + kr, cy - r),
+        Point::new(cx + r, cy - kr),
+        Point::new(cx + r, cy),
+    ));
+    path.close()
 }
 
 // ── render_background ────────────────────────────────────────────────────────────────────────────

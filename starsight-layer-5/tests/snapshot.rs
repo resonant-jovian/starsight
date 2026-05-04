@@ -11,7 +11,9 @@
 //! `blue_rect_on_white` test, neither of which depends on font rendering.
 
 use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
-use starsight_layer_1::primitives::Color;
+use starsight_layer_1::primitives::{Color, Rect};
+use starsight_layer_1::theme::Theme;
+use starsight_layer_2::axes::Axis;
 use starsight_layer_3::marks::{
     AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, HeatmapColorScale, HeatmapMark,
     HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark, StepPosition, ViolinGroup,
@@ -1024,6 +1026,70 @@ fn snapshot_polars_grouped_scatter() {
         .y_label("y");
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
+}
+
+// ── polar grid ───────────────────────────────────────────────────────────────────────────────────
+
+fn polar_grid_svg(theta_axis: Axis, r_axis: Axis) -> String {
+    use starsight_layer_1::backends::vectors::SvgBackend;
+    use starsight_layer_2::coords::PolarCoord;
+    use starsight_layer_5::renders::{render_background, render_grid_lines};
+
+    let mut backend = SvgBackend::new(400, 400);
+    let plot_area = Rect::new(20.0, 20.0, 380.0, 380.0);
+    let coord = PolarCoord::inscribed(theta_axis, r_axis, plot_area);
+    let theme = Theme::default();
+    render_background(&plot_area, &mut backend, &theme).unwrap();
+    render_grid_lines(&coord, &mut backend, &theme).unwrap();
+    backend.svg_string()
+}
+
+#[test]
+fn snapshot_polar_grid_linear() {
+    // 8-spoke compass + 5 concentric rings on a linear radial axis.
+    let mut theta = Axis::polar_angular(0.0, 360.0);
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_degrees(8);
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial(0.0, 100.0);
+    r.tick_positions = vec![20.0, 40.0, 60.0, 80.0, 100.0];
+    r.tick_labels = vec![
+        "20".into(),
+        "40".into(),
+        "60".into(),
+        "80".into(),
+        "100".into(),
+    ];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
+}
+
+#[test]
+fn snapshot_polar_grid_log() {
+    // 4-spoke + log radial axis (decade tick spacing visualizes how rings
+    // cluster near the rim under log scaling).
+    let mut theta = Axis::polar_angular(0.0, 360.0);
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_degrees(4);
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial_log(1.0, 1000.0);
+    r.tick_positions = vec![1.0, 10.0, 100.0, 1000.0];
+    r.tick_labels = vec!["1".into(), "10".into(), "100".into(), "1k".into()];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
+}
+
+#[test]
+fn snapshot_polar_grid_categorical() {
+    // 12-month categorical angular axis (Nightingale layout).
+    let theta = Axis::polar_angular_categorical(12);
+    let labels: Vec<String> = (0..12).map(|i| format!("M{}", i + 1)).collect();
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_categorical(&labels);
+    let mut theta = theta;
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial_sqrt(0.0, 100.0);
+    r.tick_positions = vec![25.0, 50.0, 75.0, 100.0];
+    r.tick_labels = vec!["25".into(), "50".into(), "75".into(), "100".into()];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
 }
 
 // ── multi-panel grid ─────────────────────────────────────────────────────────────────────────────
