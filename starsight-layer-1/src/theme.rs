@@ -96,25 +96,32 @@ impl From<&chromata::Theme> for Theme {
 // ── Default Theme ─────────────────────────────────────────────────────────────────────────────
 
 /// Default light theme (white background, dark text).
+///
+/// Text colors picked for ≥7:1 WCAG contrast against the white background
+/// — bumped from the previous medium-grey tones (`#555555` / `#666666`) in
+/// `starsight-405` for crisper labels.
 pub const DEFAULT_LIGHT: Theme = Theme {
     background: Color::WHITE,
     foreground: Color::from_hex(0x33_3333),
     grid: Color::from_hex(0xDD_DDDD),
     accent: Color::from_hex(0x21_96F3),
-    axis: Color::from_hex(0x66_6666),
-    tick_label: Color::from_hex(0x55_5555),
-    title: Color::from_hex(0x22_2222),
+    axis: Color::from_hex(0x44_4444),
+    tick_label: Color::from_hex(0x33_3333),
+    title: Color::from_hex(0x11_1111),
     is_dark: false,
 };
 
 /// Default dark theme (dark background, light text).
+///
+/// Text colors picked for ≥7:1 WCAG contrast against the `#1E1E1E`
+/// background (`starsight-405`).
 pub const DEFAULT_DARK: Theme = Theme {
     background: Color::from_hex(0x1E_1E1E),
-    foreground: Color::from_hex(0xE0_E0E0),
+    foreground: Color::from_hex(0xF0_F0F0),
     grid: Color::from_hex(0x3A_3A3A),
     accent: Color::from_hex(0x64_B5F6),
-    axis: Color::from_hex(0xAA_AAAA),
-    tick_label: Color::from_hex(0xBB_BBBB),
+    axis: Color::from_hex(0xCC_CCCC),
+    tick_label: Color::from_hex(0xDD_DDDD),
     title: Color::from_hex(0xFF_FFFF),
     is_dark: true,
 };

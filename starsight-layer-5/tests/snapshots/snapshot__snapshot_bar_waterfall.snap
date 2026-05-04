@@ -4,10 +4,10 @@ expression: svg
 ---
 <svg height="700" viewBox="0 0 1200 700" width="1200" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="623" shape-rendering="crispEdges" width="1056.2001" x="90.600006" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="484.3" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="484.3" y="32">
 Waterfall Chart — P&amp;L Walk
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 395.5)" x="22" y="395.5">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 395.5)" x="22" y="395.5">
 Amount ($)
 </text>
 <path d="M90.600006,671 L90.600006,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -48,66 +48,66 @@ Amount ($)
 <path d="M808.81616,430.7 L851.0641,430.7" fill="none" shape-rendering="crispEdges" stroke="#888888" stroke-width="1"/>
 <path d="M914.43616,444.05 L956.6841,444.05" fill="none" shape-rendering="crispEdges" stroke="#888888" stroke-width="1"/>
 <path d="M1020.05615,448.5 L1062.3041,448.5" fill="none" shape-rendering="crispEdges" stroke="#888888" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="118.21001" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="118.21001" y="688">
 Revenue
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="234.63004" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="234.63004" y="688">
 COGS
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="311.45" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="311.45" y="688">
 Gross Profit
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="445.87006" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="445.87006" y="688">
 OpEx
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="555.09" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="555.09" y="688">
 R&amp;D
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="639.11" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="639.11" y="688">
 Marketing
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="755.53015" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="755.53015" y="688">
 EBITDA
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="871.95013" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="871.95013" y="688">
 D&amp;A
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="959.5701" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="959.5701" y="688">
 Interest
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="1057.9901" y="688">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1057.9901" y="688">
 Net Income
 </text>
-<path d="M90.600006,671 L95.600006,671" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="675.8">
+<path d="M90.600006,671 L95.600006,671" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="675.8">
 -2000000
 </text>
-<path d="M90.600006,582 L95.600006,582" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="586.8">
+<path d="M90.600006,582 L95.600006,582" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="586.8">
 -1000000
 </text>
-<path d="M90.600006,493 L95.600006,493" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="74" y="497.8">
+<path d="M90.600006,493 L95.600006,493" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="74" y="497.8">
 0
 </text>
-<path d="M90.600006,404 L95.600006,404" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="408.8">
+<path d="M90.600006,404 L95.600006,404" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="408.8">
 1000000
 </text>
-<path d="M90.600006,315 L95.600006,315" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="319.8">
+<path d="M90.600006,315 L95.600006,315" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="319.8">
 2000000
 </text>
-<path d="M90.600006,226 L95.600006,226" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="230.8">
+<path d="M90.600006,226 L95.600006,226" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="230.8">
 3000000
 </text>
-<path d="M90.600006,137 L95.600006,137" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="141.8">
+<path d="M90.600006,137 L95.600006,137" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="141.8">
 4000000
 </text>
-<path d="M90.600006,48 L95.600006,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="52.8">
+<path d="M90.600006,48 L95.600006,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="52.8">
 5000000
 </text>
 <path d="M90.600006,671 L1146.8,671" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

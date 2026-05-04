@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="707" shape-rendering="crispEdges" width="1121" x="54.6" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="475.89996" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="475.89996" y="32">
 Energy Generation Mix by Year
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="600.69995" y="790">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="600.69995" y="790">
 Year
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 444.7)" x="21.999998" y="444.7">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 444.7)" x="21.999998" y="444.7">
 Energy (TWh)
 </text>
 <path d="M54.6,755 L54.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -60,38 +60,38 @@ Energy (TWh)
 <rect fill="#607d8b" height="141.40002" shape-rendering="crispEdges" width="149.46667" x="633.78326" y="-446.90002"/>
 <rect fill="#607d8b" height="129.61658" shape-rendering="crispEdges" width="149.46667" x="820.61664" y="-494.03333"/>
 <rect fill="#607d8b" height="117.833496" shape-rendering="crispEdges" width="149.46661" x="1007.4499" y="-552.9501"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="133.61667" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="133.61667" y="772">
 2019
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="320.45" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="320.45" y="772">
 2020
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="507.2833" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="507.2833" y="772">
 2021
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="694.1166" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="694.1166" y="772">
 2022
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="880.94995" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="880.94995" y="772">
 2023
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="1067.7832" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1067.7832" y="772">
 2024
 </text>
-<path d="M54.6,755 L59.6,755" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="759.8">
+<path d="M54.6,755 L59.6,755" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="759.8">
 0
 </text>
-<path d="M54.6,519.3333 L59.6,519.3333" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="524.1333">
+<path d="M54.6,519.3333 L59.6,519.3333" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="524.1333">
 100
 </text>
-<path d="M54.6,283.66666 L59.6,283.66666" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="288.46664">
+<path d="M54.6,283.66666 L59.6,283.66666" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="288.46664">
 200
 </text>
-<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="52.8">
+<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="52.8">
 300
 </text>
 <path d="M54.6,755 L1175.6,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 600 600" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="552" shape-rendering="crispEdges" width="584" x="8" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="151.2" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="151.2" y="32">
 Nightingale coxcomb (synthetic)
 </text>
 <path d="M300,316 L300,180.78816 C323.73462,180.78816,347.05112,187.0358,367.60593,198.9031 z" fill="#4e79a7" stroke="#000000" stroke-width="0"/>

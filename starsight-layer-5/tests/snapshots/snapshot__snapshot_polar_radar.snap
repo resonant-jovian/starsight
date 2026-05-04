@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 600 600" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="552" shape-rendering="crispEdges" width="584" x="8" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="175.2" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="175.2" y="32">
 Radar — 2 series, 8 dims
 </text>
 <path d="M369,316 C369,354.10767,338.10767,385,300,385 C261.89233,385,231,354.10767,231,316 C231,277.89233,261.89233,247,300,247 C338.10767,247,369,277.89233,369,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
@@ -24,13 +24,13 @@ Radar — 2 series, 8 dims
 <path d="M363.37238,163.00555 L542.2412,215.6604 L491.24307,395.21548 L358.09134,456.2449 L210.22247,532.7421 L75.60814,408.94617 L121.50648,242.06557 L247.18968,188.50462 L363.37238,163.00555" fill="#c44e52" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
 <path d="M363.37238,163.00555 L542.2412,215.6604 L491.24307,395.21548 L358.09134,456.2449 L210.22247,532.7421 L75.60814,408.94617 L121.50648,242.06557 L247.18968,188.50462 L363.37238,163.00555" fill="none" stroke="#c44e52" stroke-width="2"/>
 <rect fill="#ffffff" height="56" shape-rendering="crispEdges" width="37" x="539" y="56"/>
-<path d="M539,56 L576,56 L576,112 L539,112 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M539,56 L576,56 L576,112 L539,112 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
 <path d="M547,70 L559,70" fill="none" shape-rendering="crispEdges" stroke="#4c72b0" stroke-width="2"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="565" y="74">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="565" y="74">
 A
 </text>
 <path d="M547,90 L559,90" fill="none" shape-rendering="crispEdges" stroke="#c44e52" stroke-width="2"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="565" y="94">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="565" y="94">
 B
 </text>
 </svg>

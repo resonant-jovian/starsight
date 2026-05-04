@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="500" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="423" shape-rendering="crispEdges" width="429.8" x="45.800003" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="179.1" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="179.1" y="32">
 Vote distribution
 </text>
 <path d="M260.7,48 C364.553,48,453.0406,123.40149,469.52023,225.93864 C485.99988,328.47577,425.59518,427.8071,326.97226,460.3488 L293.83612,359.92438 C343.14758,343.65356,373.34995,293.98788,365.1101,242.71933 C356.8703,191.45074,312.6265,153.75,260.7,153.75 z" fill="#3377bb" stroke="#ffffff" stroke-width="1"/>

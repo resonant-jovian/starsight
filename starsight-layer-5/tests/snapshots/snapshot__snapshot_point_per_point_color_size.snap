@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="400" viewBox="0 0 600 400" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="307" shape-rendering="crispEdges" width="531.80005" x="54.6" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="195.7" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="195.7" y="32">
 Per-point colors and radii
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="316.9" y="390">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="316.9" y="390">
 x
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 205.1)" x="21.999998" y="205.1">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 205.1)" x="21.999998" y="205.1">
 y
 </text>
 <path d="M54.6,355 L54.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -27,44 +27,44 @@ y
 <path d="M377.68002,48 C377.68002,50.20914,375.88916,52,373.68002,52 C371.4709,52,369.68002,50.20914,369.68002,48 C369.68002,45.79086,371.4709,44,373.68002,44 C375.88916,44,377.68002,45.79086,377.68002,48 z" fill="#ff0000" fill-opacity="0.5" opacity="0.5" stroke="#ff0000" stroke-opacity="0.5" stroke-width="0"/>
 <path d="M488.04004,191.26666 C488.04004,195.68494,484.4583,199.26666,480.04004,199.26666 C475.62177,199.26666,472.04004,195.68494,472.04004,191.26666 C472.04004,186.84839,475.62177,183.26666,480.04004,183.26666 C484.4583,183.26666,488.04004,186.84839,488.04004,191.26666 z" fill="#00ff00" fill-opacity="0.5" opacity="0.5" stroke="#00ff00" stroke-opacity="0.5" stroke-width="0"/>
 <path d="M598.4,314.06668 C598.4,320.6941,593.02747,326.06668,586.4,326.06668 C579.7726,326.06668,574.4,320.6941,574.4,314.06668 C574.4,307.43927,579.7726,302.06668,586.4,302.06668 C593.02747,302.06668,598.4,307.43927,598.4,314.06668 z" fill="#ff8800" fill-opacity="0.5" opacity="0.5" stroke="#ff8800" stroke-opacity="0.5" stroke-width="0"/>
-<path d="M54.6,355 L54.6,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="51" y="372">
+<path d="M54.6,355 L54.6,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="51" y="372">
 0
 </text>
-<path d="M160.96,355 L160.96,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="157.36" y="372">
+<path d="M160.96,355 L160.96,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="157.36" y="372">
 1
 </text>
-<path d="M267.32,355 L267.32,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="263.72" y="372">
+<path d="M267.32,355 L267.32,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="263.72" y="372">
 2
 </text>
-<path d="M373.68002,355 L373.68002,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="370.08002" y="372">
+<path d="M373.68002,355 L373.68002,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="370.08002" y="372">
 3
 </text>
-<path d="M480.04004,355 L480.04004,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="476.44003" y="372">
+<path d="M480.04004,355 L480.04004,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="476.44003" y="372">
 4
 </text>
-<path d="M586.4,355 L586.4,360" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="582.80005" y="372">
+<path d="M586.4,355 L586.4,360" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="582.80005" y="372">
 5
 </text>
-<path d="M54.6,355 L49.6,355" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="359.8">
+<path d="M54.6,355 L49.6,355" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="359.8">
 1
 </text>
-<path d="M54.6,252.66667 L49.6,252.66667" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="257.46667">
+<path d="M54.6,252.66667 L49.6,252.66667" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="257.46667">
 1.5
 </text>
-<path d="M54.6,150.33333 L49.6,150.33333" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="155.13333">
+<path d="M54.6,150.33333 L49.6,150.33333" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="155.13333">
 2
 </text>
-<path d="M54.6,48 L49.6,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="52.8">
+<path d="M54.6,48 L49.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="52.8">
 2.5
 </text>
 <path d="M54.6,355 L586.4,355" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

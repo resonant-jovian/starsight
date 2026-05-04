@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="350" viewBox="0 0 500 350" width="500" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="257" shape-rendering="crispEdges" width="439" x="47.4" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="146.9" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="146.9" y="32">
 Error bars — asymmetric
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="263.3" y="340">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="263.3" y="340">
 x
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 180.1)" x="22" y="180.1">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 180.1)" x="22" y="180.1">
 y
 </text>
 <path d="M47.4,305 L47.4,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -42,64 +42,64 @@ y
 <path d="M486.4,139.78572 L486.4,66.35714" fill="none" shape-rendering="crispEdges" stroke="#76b7b2" stroke-width="1.5"/>
 <path d="M483.4,139.78572 L489.4,139.78572" fill="none" shape-rendering="crispEdges" stroke="#76b7b2" stroke-width="1.5"/>
 <path d="M483.4,66.35714 L489.4,66.35714" fill="none" shape-rendering="crispEdges" stroke="#76b7b2" stroke-width="1.5"/>
-<path d="M47.4,305 L47.4,310" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="43.800003" y="322">
+<path d="M47.4,305 L47.4,310" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="43.800003" y="322">
 0
 </text>
-<path d="M157.15,305 L157.15,310" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="153.54999" y="322">
+<path d="M157.15,305 L157.15,310" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="153.54999" y="322">
 1
 </text>
-<path d="M266.9,305 L266.9,310" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="263.3" y="322">
+<path d="M266.9,305 L266.9,310" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="263.3" y="322">
 2
 </text>
-<path d="M376.65,305 L376.65,310" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="373.05" y="322">
+<path d="M376.65,305 L376.65,310" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="373.05" y="322">
 3
 </text>
-<path d="M486.4,305 L486.4,310" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="482.8" y="322">
+<path d="M486.4,305 L486.4,310" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="482.8" y="322">
 4
 </text>
-<path d="M47.4,305 L42.4,305" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="30" y="309.8">
+<path d="M47.4,305 L42.4,305" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="30" y="309.8">
 9
 </text>
-<path d="M47.4,268.2857 L42.4,268.2857" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="273.0857">
+<path d="M47.4,268.2857 L42.4,268.2857" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="273.0857">
 10
 </text>
-<path d="M47.4,231.57143 L42.4,231.57143" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="236.37143">
+<path d="M47.4,231.57143 L42.4,231.57143" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="236.37143">
 11
 </text>
-<path d="M47.4,194.85715 L42.4,194.85715" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="199.65715">
+<path d="M47.4,194.85715 L42.4,194.85715" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="199.65715">
 12
 </text>
-<path d="M47.4,158.14285 L42.4,158.14285" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="162.94286">
+<path d="M47.4,158.14285 L42.4,158.14285" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="162.94286">
 13
 </text>
-<path d="M47.4,121.42857 L42.4,121.42857" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="126.22858">
+<path d="M47.4,121.42857 L42.4,121.42857" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="126.22858">
 14
 </text>
-<path d="M47.4,84.71429 L42.4,84.71429" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="89.51429">
+<path d="M47.4,84.71429 L42.4,84.71429" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="89.51429">
 15
 </text>
-<path d="M47.4,48 L42.4,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="52.8">
+<path d="M47.4,48 L42.4,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="52.8">
 16
 </text>
 <path d="M47.4,305 L486.4,305" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M47.4,48 L47.4,305" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="36" shape-rendering="crispEdges" width="86" x="384.4" y="64"/>
-<path d="M384.4,64 L470.4,64 L470.4,100 L384.4,100 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M384.4,64 L470.4,64 L470.4,100 L384.4,100 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
 <path d="M403.19998,78 C403.19998,80.65097,401.05096,82.8,398.4,82.8 C395.74902,82.8,393.6,80.65097,393.6,78 C393.6,75.34903,395.74902,73.2,398.4,73.2 C401.05096,73.2,403.19998,75.34903,403.19998,78" fill="#76b7b2" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="410.4" y="82">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="410.4" y="82">
 estimate
 </text>
 </svg>

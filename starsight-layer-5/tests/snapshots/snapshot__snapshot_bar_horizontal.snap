@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="707" shape-rendering="crispEdges" width="1074.2001" x="112.200005" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="562.89996" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="562.89996" y="32">
 Population by City
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="573.69995" y="790">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="573.69995" y="790">
 Population (millions)
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 415.9)" x="22" y="415.9">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 415.9)" x="22" y="415.9">
 City
 </text>
 <path d="M112.200005,755 L112.200005,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -43,60 +43,60 @@ City
 <rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="510.245" x="112.200005" y="584.1417"/>
 <rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="483.39" x="112.200005" y="643.05835"/>
 <rect fill="#0000ff" height="47.1333" shape-rendering="crispEdges" width="429.68" x="112.200005" y="701.97504"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="67" y="82.25834">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="82.25834">
 Tokyo
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="67" y="141.175">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="141.175">
 Delhi
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="45" y="200.09167">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="45" y="200.09167">
 Shanghai
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="259.00833">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="259.00833">
 São Paulo
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="317.925">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="317.925">
 Mexico City
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="67" y="376.84167">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="376.84167">
 Cairo
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="59" y="435.75833">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="59" y="435.75833">
 Mumbai
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="52" y="494.675">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="52" y="494.675">
 Beijing
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="67" y="553.5917">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="553.5917">
 Dhaka
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="67" y="612.50836">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="67" y="612.50836">
 Osaka
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="45" y="671.425">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="45" y="671.425">
 New York
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="52" y="730.3417">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="52" y="730.3417">
 Karachi
 </text>
-<path d="M112.200005,755 L112.200005,760" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="108.600006" y="772">
+<path d="M112.200005,755 L112.200005,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="108.600006" y="772">
 0
 </text>
-<path d="M380.75003,755 L380.75003,760" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="377.15002" y="772">
+<path d="M380.75003,755 L380.75003,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="377.15002" y="772">
 1
 </text>
-<path d="M649.30005,755 L649.30005,760" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="645.7001" y="772">
+<path d="M649.30005,755 L649.30005,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="645.7001" y="772">
 2
 </text>
-<path d="M917.85004,755 L917.85004,760" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="914.25006" y="772">
+<path d="M917.85004,755 L917.85004,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="914.25006" y="772">
 3
 </text>
-<path d="M1186.4,755 L1186.4,760" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="1182.8" y="772">
+<path d="M1186.4,755 L1186.4,760" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1182.8" y="772">
 4
 </text>
 <path d="M112.200005,755 L1186.4,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

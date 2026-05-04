@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="600" viewBox="0 0 600 600" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="552" shape-rendering="crispEdges" width="584" x="8" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="199.2" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="199.2" y="32">
 Sunburst — 3 levels
 </text>
 <path d="M300,316 L300,233.2 C345.7292,233.2,382.8,270.2708,382.8,316 z" fill="#4e79a7" stroke="#000000" stroke-width="0"/>

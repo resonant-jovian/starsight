@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="500" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="452" shape-rendering="crispEdges" width="484" x="8" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="115.59999" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="115.59999" y="32">
 Polar rect — annular tiles
 </text>
 <path d="M250,266 L250,190.66666 C291.60547,190.66666,325.33334,224.39455,325.33334,266 z" fill="#440256" stroke="#000000" stroke-width="0"/>

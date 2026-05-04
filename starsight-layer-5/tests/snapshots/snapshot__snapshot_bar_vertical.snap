@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="800" viewBox="0 0 1200 800" width="1200" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="707" shape-rendering="crispEdges" width="1124.6" x="54.6" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="501.69995" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="501.69995" y="32">
 Monthly Average Rainfall
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="598.89996" y="790">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="598.89996" y="790">
 Month
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 448.3)" x="21.999998" y="448.3">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 448.3)" x="21.999998" y="448.3">
 Rainfall (mm)
 </text>
 <path d="M54.6,755 L54.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -43,60 +43,60 @@ Rainfall (mm)
 <rect fill="#0000ff" height="559.7084" shape-rendering="crispEdges" width="74.97339" x="907.42163" y="195.29163"/>
 <rect fill="#0000ff" height="600.95" shape-rendering="crispEdges" width="74.97339" x="1001.1383" y="154.04999"/>
 <rect fill="#0000ff" height="459.55" shape-rendering="crispEdges" width="74.97339" x="1094.855" y="295.45"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="90.658325" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="90.658325" y="772">
 Jan
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="184.37498" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="184.37498" y="772">
 Feb
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="278.09167" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="278.09167" y="772">
 Mar
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="371.80835" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="371.80835" y="772">
 Apr
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="465.52502" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="465.52502" y="772">
 May
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="559.24164" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="559.24164" y="772">
 Jun
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="652.9583" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="652.9583" y="772">
 Jul
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="746.675" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="746.675" y="772">
 Aug
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="840.39166" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="840.39166" y="772">
 Sep
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="934.10834" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="934.10834" y="772">
 Oct
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="1027.825" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1027.825" y="772">
 Nov
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="1121.5416" y="772">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="1121.5416" y="772">
 Dec
 </text>
-<path d="M54.6,755 L59.6,755" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="759.8">
+<path d="M54.6,755 L59.6,755" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="759.8">
 0
 </text>
-<path d="M54.6,578.25 L59.6,578.25" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="583.05">
+<path d="M54.6,578.25 L59.6,578.25" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="583.05">
 30
 </text>
-<path d="M54.6,401.5 L59.6,401.5" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="406.3">
+<path d="M54.6,401.5 L59.6,401.5" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="406.3">
 60
 </text>
-<path d="M54.6,224.75 L59.6,224.75" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="229.55">
+<path d="M54.6,224.75 L59.6,224.75" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="229.55">
 90
 </text>
-<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="52.8">
+<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="52.8">
 120
 </text>
 <path d="M54.6,755 L1179.2,755" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="400" viewBox="0 0 600 400" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="323" shape-rendering="crispEdges" width="547.80005" x="38.6" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="230.9" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="230.9" y="32">
 Mixed-mark legend
 </text>
 <path d="M38.6,371 L38.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -20,45 +20,45 @@ Mixed-mark legend
 <rect fill="#33aa33" height="86.13333" shape-rendering="crispEdges" width="146.08002" x="56.86" y="284.86667"/>
 <rect fill="#33aa33" height="172.26668" shape-rendering="crispEdges" width="146.08002" x="239.46002" y="198.73332"/>
 <rect fill="#33aa33" height="129.2" shape-rendering="crispEdges" width="146.08002" x="422.06006" y="241.8"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="126.30001" y="388">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="126.30001" y="388">
 a
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="308.90002" y="388">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="308.90002" y="388">
 b
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="491.50006" y="388">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="491.50006" y="388">
 c
 </text>
-<path d="M38.6,371 L43.6,371" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="22" y="375.8">
+<path d="M38.6,371 L43.6,371" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="22" y="375.8">
 0
 </text>
-<path d="M38.6,263.33334 L43.6,263.33334" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="8" y="268.13333">
+<path d="M38.6,263.33334 L43.6,263.33334" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="8" y="268.13333">
 0.5
 </text>
-<path d="M38.6,155.66667 L43.6,155.66667" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="22" y="160.46667">
+<path d="M38.6,155.66667 L43.6,155.66667" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="22" y="160.46667">
 1
 </text>
-<path d="M38.6,48 L43.6,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="8" y="52.8">
+<path d="M38.6,48 L43.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="8" y="52.8">
 1.5
 </text>
 <path d="M38.6,371 L586.4,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M38.6,48 L38.6,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79" x="491.40002" y="64"/>
-<path d="M491.40002,64 L570.4,64 L570.4,140 L491.40002,140 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M491.40002,64 L570.4,64 L570.4,140 L491.40002,140 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
 <path d="M499.40002,78 L511.40002,78" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="82">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="82">
 trend
 </text>
 <path d="M510.2,98 C510.2,100.65097,508.051,102.8,505.40002,102.8 C502.74905,102.8,500.60004,100.65097,500.60004,98 C500.60004,95.34903,502.74905,93.2,505.40002,93.2 C508.051,93.2,510.2,95.34903,510.2,98" fill="#ff0000" stroke="#000000" stroke-width="0"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="102">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="102">
 samples
 </text>
 <rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="499.40002" y="112"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="517.4" y="122">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="122">
 counts
 </text>
 </svg>

@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="400" viewBox="0 0 600 400" width="600" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="307" shape-rendering="crispEdges" width="502.99997" x="54.6" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="166.89996" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="166.89996" y="32">
 Treatment effect — box plot
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="288.09998" y="390">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="288.09998" y="390">
 group
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 230.3)" x="21.999998" y="230.3">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 21.999998, 230.3)" x="21.999998" y="230.3">
 response
 </text>
 <path d="M54.6,355 L54.6,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -35,30 +35,30 @@ response
 <path d="M387.83746,78.70001 L475.8625,78.70001" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M431.84998,201.5 L431.84998,262.9" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M387.83746,262.9 L475.8625,262.9" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="155.15" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="155.15" y="372">
 control
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="399.44998" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="399.44998" y="372">
 treatment
 </text>
-<path d="M54.6,355 L59.6,355" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="359.8">
+<path d="M54.6,355 L59.6,355" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="359.8">
 0
 </text>
-<path d="M54.6,278.25 L59.6,278.25" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="283.05">
+<path d="M54.6,278.25 L59.6,278.25" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="283.05">
 2.5
 </text>
-<path d="M54.6,201.5 L59.6,201.5" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="38" y="206.3">
+<path d="M54.6,201.5 L59.6,201.5" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="38" y="206.3">
 5
 </text>
-<path d="M54.6,124.75 L59.6,124.75" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="24" y="129.55">
+<path d="M54.6,124.75 L59.6,124.75" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="24" y="129.55">
 7.5
 </text>
-<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="31" y="52.8">
+<path d="M54.6,48 L59.6,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="31" y="52.8">
 10
 </text>
 <path d="M54.6,355 L557.6,355" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>

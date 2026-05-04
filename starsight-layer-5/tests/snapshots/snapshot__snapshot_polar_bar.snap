@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg height="500" viewBox="0 0 500 500" width="500" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="452" shape-rendering="crispEdges" width="484" x="8" y="40"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="86.79999" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="86.79999" y="32">
 Polar bar — stacked annular bars
 </text>
 <path d="M250,266 L250,209.5 C264.98474,209.5,279.3557,215.45267,289.95154,226.04846 z" fill="#76b7b2" stroke="#000000" stroke-width="0"/>
@@ -40,13 +40,13 @@ Polar bar — stacked annular bars
 <path d="M196.7313,212.7313 C210.85902,198.60355,230.02036,190.66666,250,190.66666 L250,218.91667 C237.51273,218.91667,225.5369,223.87721,216.70706,232.70706 z" fill="#f28e2b" stroke="#000000" stroke-width="0"/>
 <path d="M196.7313,212.7313 C210.85902,198.60355,230.02036,190.66666,250,190.66666 L250,218.91667 C237.51273,218.91667,225.5369,223.87721,216.70706,232.70706 z" fill="none" stroke="#ffffff" stroke-width="0.6"/>
 <rect fill="#ffffff" height="56" shape-rendering="crispEdges" width="58" x="418" y="56"/>
-<path d="M418,56 L476,56 L476,112 L418,112 z" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
+<path d="M418,56 L476,56 L476,112 L418,112 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
 <rect fill="#76b7b2" height="12" shape-rendering="crispEdges" width="12" x="426" y="64"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="444" y="74">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="444" y="74">
 low
 </text>
 <rect fill="#f28e2b" height="12" shape-rendering="crispEdges" width="12" x="426" y="84"/>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="444" y="94">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="444" y="94">
 high
 </text>
 </svg>

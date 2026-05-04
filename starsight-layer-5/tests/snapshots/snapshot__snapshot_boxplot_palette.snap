@@ -4,13 +4,13 @@ expression: svg
 ---
 <svg height="400" viewBox="0 0 800 400" width="800" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="307" shape-rendering="crispEdges" width="735.39996" x="47.4" y="48"/>
-<text fill="#222222" font-family="sans-serif" font-size="16" x="319.1" y="32">
+<text fill="#111111" font-family="sans-serif" font-size="16" x="319.1" y="32">
 Quarterly throughput
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" x="389.9" y="390">
+<text fill="#333333" font-family="sans-serif" font-size="12" x="389.9" y="390">
 quarter
 </text>
-<text fill="#555555" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 244.7)" x="22" y="244.7">
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 244.7)" x="22" y="244.7">
 requests / s
 </text>
 <path d="M47.4,355 L47.4,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
@@ -51,36 +51,36 @@ requests / s
 <path d="M658.70123,63.350006 L723.04877,63.350006" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M690.875,143.9375 L690.875,170.79999" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M658.70123,170.79999 L723.04877,170.79999" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="132.125" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="132.125" y="372">
 Q1
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="315.97498" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="315.97498" y="372">
 Q2
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="499.82495" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="499.82495" y="372">
 Q3
 </text>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="683.675" y="372">
+<text fill="#444444" font-family="sans-serif" font-size="12" x="683.675" y="372">
 Q4
 </text>
-<path d="M47.4,355 L52.4,355" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="359.8">
+<path d="M47.4,355 L52.4,355" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="359.8">
 10
 </text>
-<path d="M47.4,278.25 L52.4,278.25" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="283.05">
+<path d="M47.4,278.25 L52.4,278.25" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="283.05">
 15
 </text>
-<path d="M47.4,201.5 L52.4,201.5" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="206.3">
+<path d="M47.4,201.5 L52.4,201.5" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="206.3">
 20
 </text>
-<path d="M47.4,124.75 L52.4,124.75" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="129.55">
+<path d="M47.4,124.75 L52.4,124.75" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="129.55">
 25
 </text>
-<path d="M47.4,48 L52.4,48" fill="none" shape-rendering="crispEdges" stroke="#666666" stroke-width="1"/>
-<text fill="#666666" font-family="sans-serif" font-size="12" x="23" y="52.8">
+<path d="M47.4,48 L52.4,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="52.8">
 30
 </text>
 <path d="M47.4,355 L782.8,355" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
