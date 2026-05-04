@@ -24,7 +24,11 @@ fn synthetic_ohlc(n: usize) -> (Vec<Ohlc>, Vec<f64>) {
     for i in 0..n {
         let i_f = i as f64;
         // Drift + sinusoid + a "crash" in the middle quartile.
-        let drift = if (n / 3..2 * n / 3).contains(&i) { -0.18 } else { 0.05 };
+        let drift = if (n / 3..2 * n / 3).contains(&i) {
+            -0.18
+        } else {
+            0.05
+        };
         let wave = (i_f * 0.18).sin() * 0.6;
         let shock = (i_f * 1.7).sin() * 0.45;
         let prev = price;
