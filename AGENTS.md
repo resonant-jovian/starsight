@@ -67,19 +67,24 @@ Layer-N may only depend on layer-1..N-1.
 
 ## What works now (0.3.x)
 
-- Marks: Line, Point (per-point color/radius/alpha), Bar (vertical/horizontal/grouped/per-bar bases+colors+connectors), Area (with baseline), Heatmap (Linear + Log scale), Histogram (auto-bin), Step, BoxPlot+BoxPlotGroup, Violin+ViolinGroup+ViolinScale (KDE-driven, split mode, Area/Count/Width norm), Pie+PieLabelMode (donut via `inner_radius`, percent/value labels), Candlestick+Ohlc.
+- Marks: Line, Point (per-point color/radius/alpha), Bar (vertical/horizontal/grouped/per-bar bases+colors+connectors), Area (with baseline), Heatmap (Linear + Log scale), Histogram (auto-bin), Step, BoxPlot+BoxPlotGroup, Violin+ViolinGroup+ViolinScale (KDE-driven, split mode, Area/Count/Width norm), Pie+PieLabelMode (donut via `inner_radius`, percent/value labels), Candlestick+Ohlc, **Contour (marching squares, isolines + colormap)**, **Arc (polar wedges for Nightingale / Gauge / Sunburst)**.
 - Polars: `polars` feature → `FrameSource` + `plot!(df, x="col", y="col", color="col")`.
-- Scales: BandScale (categorical x); `infer_chart_kind` chart-type inference.
+- Coords: `CartesianCoord` and **`PolarCoord`** (compass convention, `inscribed`/`with_center`/`with_radius` builders); `Mark::render` dispatches via `&dyn Coord` with `as_any()` downcast helpers.
+- Scales: `LinearScale`, `LogScale`, `SqrtScale`, `CategoricalScale`, `BandScale` (categorical x); `infer_chart_kind` chart-type inference.
+- Axes: `Axis::auto_from_data` + `Axis::category` + polar variants (`polar_angular`, `polar_angular_categorical`, `polar_radial`, `polar_radial_sqrt`, `polar_radial_log`).
+- Ticks: Wilkinson Extended for numeric; `polar_ticks_{degrees,radians,categorical}` formatters (π-fraction labels reduced to lowest terms).
 - Color: `Color::cycle_next` (Tableau10); LegendGlyph dispatch (line/point/bar/area).
 - Layout: title + axis labels; LayoutFonts shared between layout + render.
-- Stats: `BoxPlotStats`, `Kde` (Gaussian, Silverman/Scott/Manual bandwidth), `percentile`, `std_dev`.
+- **Multi-panel**: `MultiPanelFigure(width, height, rows, cols)` + per-panel padding + per-panel independent axes; `Figure::render_within(viewport, backend)` is the parameterized dispatch point.
+- **Polar Figure mode**: `Figure::polar_axes(theta, r)` builds a `PolarCoord` and renders with `render_grid_lines`'s polar branch (radial spokes + concentric rings); skips cartesian axis chrome.
+- Stats: `BoxPlotStats`, `Kde` (Gaussian, Silverman/Scott/Manual bandwidth), `percentile`, `std_dev`, **`Contour::compute(grid, &levels)` (average-of-corners saddle disambiguation)**.
 - Backends: Skia (raster, with AA auto-detect on axis-aligned paths), SVG (with opacity).
 - Figure + `plot!` macro (DataFrame arm gated on `polars`).
 
 ## Not yet implemented
 
-- 0.4.0: GridLayout, faceting, legends, colorbars
-- 0.5.0: LogScale, SymLogScale, DateTimeScale
+- 0.4.0: `FacetWrap`, shared axes across `MultiPanelFigure` panels, polar-aware legend placement, `ContourMode::FilledBands` polygon-tracing, `Colorbar`
+- 0.5.0: `SymLogScale`, `DateTimeScale` (LogScale/SqrtScale/CategoricalScale shipped 0.3.0)
 - 0.6.0: wgpu, hover/zoom/pan
 - 0.7.0: Animation, GIF
 - 0.8.0: Terminal backends

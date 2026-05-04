@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Polar coordinate system.** `Coord` trait (object-safe via `Any` super-trait + `as_any()`) covering `CartesianCoord` and the new `PolarCoord`. `PolarCoord::inscribed(theta_axis, r_axis, plot_area)` carves an inscribed disk; `data_to_pixel(theta, r)` uses compass convention (theta = 0 up, increasing clockwise).
+- `LogScale`, `SqrtScale`, `CategoricalScale` — `Box<dyn Scale>` subset that backs polar radial axes (`polar_radial_sqrt` is Florence Nightingale's value-as-area invariant) and log-scaled heatmap color bars.
+- Polar `Axis` constructors: `polar_angular`, `polar_angular_categorical`, `polar_radial`, `polar_radial_sqrt`, `polar_radial_log`.
+- `polar_ticks_{degrees,radians,categorical}` formatters in `starsight::ticks` — degree-suffixed labels, π-fraction labels reduced to lowest terms, categorical band-center positions matching `CategoricalScale`.
+- `Scale::clone_box` + `impl Clone for Box<dyn Scale>` — enables `Axis: Clone`, which `Figure::polar_axes` uses to bundle the configured polar axes into the figure builder.
+- `Figure::polar_axes(theta_axis, r_axis)` switches a figure to polar mode. The figure renders into a `PolarCoord` instead of a `CartesianCoord`, dispatching through `render_grid_lines`'s polar branch (radial spokes + concentric rings) and skipping cartesian axis chrome.
+- `MultiPanelFigure` — uniform `(rows, cols)` grid of sibling `Figure`s with configurable padding. Each panel composes its own axes/title/legend independently; `Figure::render_within(viewport, backend)` is the parameterized dispatch point that translates layout output by the panel origin.
+- `ContourMark` + `ContourMode { Isolines, FilledBands, FilledWithLines }` — marching-squares contours with optional colormap tinting per level. `Isolines` mode ships fully; `FilledBands` is API-stable but currently falls back to isoline rendering (polygon-tracing follow-up tracked separately).
+- `Contour::compute(grid, &levels) -> Vec<Polyline>` — marching-squares extractor with average-of-corners saddle disambiguation (matplotlib default). New `Grid` (row-major scalar field) and `Polyline` (per-segment 2-point output) types in `statistics`.
+- `ArcMark` — polar wedge mark for Nightingale coxcomb (#34), Gauge (#41), and Sunburst (#39 var C). Per-wedge `r_inner`/`theta_half_widths`/`start_offset` plus a default 8-color palette and per-wedge stroke.
+- New showcase examples: `examples/scientific/{nightingale,gauge,contour_fields}.rs` and `examples/composition/donut_sunburst.rs` — covering `.spec/SHOWCASE_INPUTS.md` entries #22, #34, #39 var C, and #41.
+- `ChartKind::Contour` variant; the enum becomes `#[non_exhaustive]` so future polar / 3D variants slot in without a breaking change.
+- New snapshot tests: `snapshot_polar_grid_{linear,log,categorical}`, `snapshot_multipanel_2x2_basic`, `snapshot_contour_isolines`, `snapshot_arcmark_{full_nightingale,partial_gauge,nested_sunburst}`.
 - `BarMark` per-bar bases via `bases: Option<Vec<f64>>` and `bases(Vec<f64>)` builder
 - `BarMark` per-bar colors via `colors: Option<Vec<Color>>` and `colors(Vec<Color>)` builder
 - `BarMark::connectors(bool)` builder — draws thin gray (#888) 1px lines between consecutive bars at running-total level (vertical orientation only)
@@ -35,6 +48,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Breaking:** `Mark::render` and `Mark::render_bar` now take `coord: &dyn Coord` instead of `&CartesianCoord`. Cartesian marks call `require_cartesian(coord)?` at the top of their impl; polar marks (`ArcMark`) call `require_polar(coord)?`. Returns `StarsightError::Config` when the coord type doesn't match.
+- **Breaking:** `Axis.scale: LinearScale` widened to `Box<dyn Scale>` so a single `Axis` type carries linear / log / sqrt / categorical mappings — required by polar radial axes and log color bars. Constructor builders unaffected; struct-literal callers must wrap in `Box::new`.
+- **Breaking:** `render_grid_lines(coord, backend, theme)` now takes `coord: &dyn Coord` and dispatches by coord type. Cartesian path is unchanged; polar branch is additive.
+- **Breaking:** `ChartKind` becomes `#[non_exhaustive]` so future `Polar` / 3D variants can land without a major bump.
 - **Breaking:** `BarMark.base: Option<f64>` renamed and retyped to `bases: Option<Vec<f64>>`. The `.base(f64)` builder is kept as a single-broadcast convenience (stores `Some(vec![b])`), so callers using only the builder are unaffected. Direct struct-literal construction must update the field name.
 - **Breaking:** `BarMark.color: Option<Color>` renamed and retyped to `colors: Option<Vec<Color>>`. Same broadcast convenience for `.color(Color)`.
 - **Breaking:** `PointMark.color: Color` renamed and retyped to `colors: Option<Vec<Color>>`. `.color(Color)` builder kept; struct-literal construction must migrate.
@@ -59,6 +76,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Layout font-size duplication (`starsight-h4l`) — title / tick / axis-title font sizes are now sourced from a single `LayoutFonts` instance, eliminating drift between layout and render passes.
 - Legend glyph dispatch (`starsight-f4t`) — `PointMark` legends show a filled dot, bar / area entries get the right swatch shape; line marks remain on a horizontal stroke.
 - Gallery build performance (`starsight-qv7`) — `cargo xtask gallery` now builds examples once and exec's each binary, removing the cargo overhead per invocation.
+- `category_axis_panics_on_empty_labels` test now gated on `cfg(debug_assertions)` so `cargo tarpaulin --release` no longer fails on a `debug_assert!` that's a no-op in release (`5642de7`).
+- `cargo xtask gallery` now passes `--all-features` to its `cargo build` invocation so feature-gated examples (e.g. `polars_integration` with `required-features = ["starsight/polars"]`) build alongside the default set instead of being silently skipped (`bc66ae4`).
 
 ## [0.2.0] - 2026-04-27
 

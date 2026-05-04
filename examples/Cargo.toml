@@ -135,6 +135,10 @@ path = "scientific/gauge.rs"
 name = "contour_fields"
 path = "scientific/contour_fields.rs"
 
+[[example]]
+name = "bollinger_candlestick"
+path = "scientific/bollinger_candlestick.rs"
+
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
 # static PNG announcing the deferred feature so `cargo xtask gallery` always

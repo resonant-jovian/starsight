@@ -343,7 +343,11 @@ The facade crate (`starsight`) exposes three access patterns so users can pick t
 | Polars `DataFrame` integration | working | 0.3.0 | `plot!(df, x="col", y="col", color="col")` (feature `polars`) |
 | `LegendGlyph` dispatch | working | 0.3.0 | Per-mark legend swatch shape (line / point / bar / area) |
 | Statistical transforms (Bin, KDE, ...) | working | 0.3.0 | `BoxPlotStats`, `Kde`, bandwidth helpers; histograms shipped in 0.2.0 |
-| Layout + faceting + legends | planned | 0.4.0 | `GridLayout`, `FacetWrap`, `Colorbar` |
+| Polar coordinate system | working | 0.3.0 | `PolarCoord`, `Axis::polar_*`, `Figure::polar_axes()`, polar grid in `render_grid_lines` |
+| `ContourMark` + marching-squares stat | working | 0.3.0 | Isolines + per-level colormap; filled bands API-stable, polygon-tracing follow-up |
+| `ArcMark` (Nightingale / Gauge / Sunburst) | working | 0.3.0 | Polar-data-mapped wedges with `r_inner` / `theta_half_widths` / `start_offset` |
+| `MultiPanelFigure` (basic grid) | working | 0.3.0 | `Vec<Figure>` on a `(rows, cols)` grid with padding; independent per-panel axes |
+| Faceting + shared axes + colorbars | planned | 0.4.0 | `FacetWrap`, shared axis dispatch across `MultiPanelFigure` panels, `Colorbar` |
 | GPU rendering (wgpu) | planned | 0.6.0 | Native windows + WebGPU |
 | Interactivity (hover/zoom/pan) | planned | 0.6.0 | winit event loop |
 | Animation + GIF export | planned | 0.7.0 | Frame recording |
@@ -406,9 +410,9 @@ Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of L
 
 - [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
 - [x] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
-- [x] 0.3.0 Statistical charts + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, Polars `DataFrame` integration (pulled forward from 0.11.0)
-- [ ] 0.4.0 Layout — `GridLayout`, faceting, legends, colorbars
-- [ ] 0.5.0 Scale infrastructure — `LogScale`, `SymLogScale`, `DateTimeScale`, `BandScale`
+- [x] 0.3.0 Statistical charts + Polar + Contour + Grid + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, **`PolarCoord` + `ArcMark` (Nightingale / Gauge / Sunburst)**, **`ContourMark` + marching-squares stat**, **`MultiPanelFigure` (basic grid)**, Polars `DataFrame` integration (pulled forward from 0.11.0)
+- [ ] 0.4.0 Layout — `FacetWrap`, shared axes across panels, `Colorbar`, polar-aware legend placement, contour filled bands
+- [ ] 0.5.0 Scale infrastructure — `SymLogScale`, `DateTimeScale`, `BandScale` (`LogScale`/`SqrtScale`/`CategoricalScale` shipped in 0.3.0)
 - [ ] 0.6.0 GPU + interactivity — wgpu native, hover / zoom / pan, winit event loop
 - [ ] 0.7.0 Animation — timeline, frame recording, GIF
 - [ ] 0.8.0 Terminal backend — Kitty / Sixel / iTerm2 / half-block / Braille
