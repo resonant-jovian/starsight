@@ -50,12 +50,14 @@ pub mod box_plot;
 pub mod candlestick;
 pub mod contour;
 pub mod pie;
+pub mod radar;
 pub mod violin;
 pub use arc::ArcMark;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 pub use candlestick::{CandlestickMark, Ohlc};
 pub use contour::{ContourMark, ContourMode};
 pub use pie::PieMark;
+pub use radar::RadarMark;
 pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 

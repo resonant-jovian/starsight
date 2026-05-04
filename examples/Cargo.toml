@@ -139,6 +139,10 @@ path = "scientific/contour_fields.rs"
 name = "bollinger_candlestick"
 path = "scientific/bollinger_candlestick.rs"
 
+[[example]]
+name = "radar_spider"
+path = "scientific/radar_spider.rs"
+
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
 # static PNG announcing the deferred feature so `cargo xtask gallery` always

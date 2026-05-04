@@ -1028,6 +1028,48 @@ fn snapshot_polars_grouped_scatter() {
     insta::assert_snapshot!(svg);
 }
 
+// ── radar mark ───────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_radar() {
+    // 8-dimensional radar with three overlay series. Tests the polar
+    // polyline path and the transparent-fill code in `RadarMark::render`.
+    use starsight_layer_3::marks::RadarMark;
+    let dims: Vec<String> = [
+        "pass", "shoot", "drib", "def", "stam", "speed", "vis", "lead",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect();
+    let thetas: Vec<f64> = (0..dims.len() as u32).map(f64::from).collect();
+    let player_a = vec![85.0, 70.0, 90.0, 50.0, 80.0, 78.0, 92.0, 75.0];
+    let player_b = vec![60.0, 95.0, 75.0, 55.0, 85.0, 88.0, 70.0, 50.0];
+
+    let mut theta_axis = Axis::polar_angular_categorical(dims.len());
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_categorical(&dims);
+    theta_axis.tick_positions = theta_pos;
+    theta_axis.tick_labels = theta_lab;
+    let mut r_axis = Axis::polar_radial(0.0, 100.0);
+    r_axis.tick_positions = vec![25.0, 50.0, 75.0, 100.0];
+    r_axis.tick_labels = vec!["25".into(), "50".into(), "75".into(), "100".into()];
+
+    let fig = Figure::new(600, 600)
+        .title("Radar — 2 series, 8 dims")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            RadarMark::new(thetas.clone(), player_a)
+                .color(Color::from_hex(0x004C_72B0))
+                .label("A"),
+        )
+        .add(
+            RadarMark::new(thetas, player_b)
+                .color(Color::from_hex(0x00C4_4E52))
+                .label("B"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
 // ── arc mark ─────────────────────────────────────────────────────────────────────────────────────
 
 #[test]

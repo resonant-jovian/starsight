@@ -1,6 +1,6 @@
 # starsight examples
 
-Thirty-three runnable examples grouped by what they teach. Each `.rs` file lives
+Thirty-four runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -75,6 +75,7 @@ Both run their own ODE/transform integration before plotting.
 | [`gauge`](scientific/gauge.rs) — [PNG](scientific/gauge.png) | Single-value 270° gauge — partial-sweep `ArcMark` with foreground value arc + muted background arc (spec #41) |
 | [`contour_fields`](scientific/contour_fields.rs) — [PNG](scientific/contour_fields.png) | 2×2 `MultiPanelFigure` of Rosenbrock + Himmelblau + Rastrigin + Gaussian-mixture contour plots (spec #22) |
 | [`bollinger_candlestick`](scientific/bollinger_candlestick.rs) — [PNG](scientific/bollinger_candlestick.png) | Two-panel `MultiPanelFigure`: candles + 20d SMA + Bollinger bands on top, daily volume `BarMark` below (spec #38) |
+| [`radar_spider`](scientific/radar_spider.rs) — [PNG](scientific/radar_spider.png) | Three-player competence radar across 8 dimensions — `RadarMark` overlays on `Figure::polar_axes` with translucent fill (spec #31) |
 
 ### [`data/`](data) — DataFrame integrations
 

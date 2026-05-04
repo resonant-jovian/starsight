@@ -6,6 +6,6 @@
 pub use crate::components::marks::{
     ArcMark, AreaBaseline, AreaMark, BarMark, BarRenderContext, BoxPlotGroup, BoxPlotMark,
     CandlestickMark, ContourMark, ContourMode, DataExtent, HeatmapMark, HistogramMark, LegendGlyph,
-    LineMark, Mark, Ohlc, Orientation, PieMark, PointMark, StepMark, StepPosition, ViolinGroup,
-    ViolinMark, ViolinScale,
+    LineMark, Mark, Ohlc, Orientation, PieMark, PointMark, RadarMark, StepMark, StepPosition,
+    ViolinGroup, ViolinMark, ViolinScale,
 };
