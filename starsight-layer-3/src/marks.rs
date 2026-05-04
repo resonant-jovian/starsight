@@ -46,18 +46,26 @@ pub(crate) fn require_polar(coord: &dyn Coord) -> Result<&PolarCoord> {
 // up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
 // caring that the implementation lives in a sibling file.
 pub mod arc;
+pub mod bar_polar;
 pub mod box_plot;
 pub mod candlestick;
 pub mod contour;
+pub mod errorbar;
 pub mod pie;
 pub mod radar;
+pub mod rect_polar;
+pub mod rug;
 pub mod violin;
 pub use arc::ArcMark;
+pub use bar_polar::PolarBarMark;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 pub use candlestick::{CandlestickMark, Ohlc};
 pub use contour::{ContourMark, ContourMode};
+pub use errorbar::{ErrorBarMark, ErrorBarOrientation};
 pub use pie::PieMark;
 pub use radar::RadarMark;
+pub use rect_polar::PolarRectMark;
+pub use rug::{AxisDir, RugMark};
 pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
@@ -1294,15 +1302,6 @@ impl Mark for HeatmapMark {
     }
 }
 
-// ── BoxMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct BoxMark { groups: Vec<Vec<f64>>, color: Color, ... }
-
-// ── ViolinMark ───────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct ViolinMark { groups: Vec<Vec<f64>>, ... }
-
-// ── PieMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.4.0): pub struct PieMark { values: Vec<f64>, labels: Vec<String>, ... }
-
 // ── ContourMark ──────────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub struct ContourMark { z: Vec<Vec<f64>>, levels: Vec<f64>, ... }
 
@@ -1543,12 +1542,6 @@ impl Mark for HistogramMark {
         LegendGlyph::Bar
     }
 }
-
-// ── ErrorBarMark ─────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct ErrorBarMark { x: Vec<f64>, y: Vec<f64>, err: Vec<f64>, color: Color }
-
-// ── RugMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct RugMark { values: Vec<f64>, side: Side, color: Color }
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 

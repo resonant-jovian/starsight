@@ -277,8 +277,9 @@ impl Mark for ArcMark {
 /// straight line to inner-arc end, inner arc back from `b → a`, close.
 ///
 /// Compass convention: `(angle.sin, -angle.cos) * r` — angle = 0 lands above
-/// the center. Matches [`PolarCoord::data_to_pixel`].
-fn build_arc_wedge(center: Point, r_in: f32, r_out: f32, a: f64, b: f64) -> Path {
+/// the center. Matches [`PolarCoord::data_to_pixel`]. Shared with sibling
+/// polar marks (`PolarBarMark`, `PolarRectMark`) via `pub(crate)`.
+pub(crate) fn build_arc_wedge(center: Point, r_in: f32, r_out: f32, a: f64, b: f64) -> Path {
     let cx = center.x;
     let cy = center.y;
     let outer_start = compass_point(cx, cy, r_out, a);
@@ -299,7 +300,9 @@ fn build_arc_wedge(center: Point, r_in: f32, r_out: f32, a: f64, b: f64) -> Path
     }
 }
 
-fn compass_point(cx: f32, cy: f32, r: f32, angle: f64) -> Point {
+/// Compass-space `(cx + r·sin(angle), cy - r·cos(angle))`. Shared with sibling
+/// polar marks via `pub(crate)`.
+pub(crate) fn compass_point(cx: f32, cy: f32, r: f32, angle: f64) -> Point {
     let s = angle.sin() as f32;
     let c = angle.cos() as f32;
     Point::new(cx + r * s, cy - r * c)
@@ -308,7 +311,8 @@ fn compass_point(cx: f32, cy: f32, r: f32, angle: f64) -> Point {
 /// Approximate an arc from `start → end` in compass space using cubic Beziers.
 /// Mirrors `pie::arc_to` but in compass coords (theta = 0 up, increasing
 /// clockwise) instead of mathematical (theta = 0 right, increasing CCW).
-fn arc_compass(path: &mut Path, cx: f32, cy: f32, r: f32, start: f64, end: f64) {
+/// Shared with sibling polar marks via `pub(crate)`.
+pub(crate) fn arc_compass(path: &mut Path, cx: f32, cy: f32, r: f32, start: f64, end: f64) {
     let segments = ((end - start).abs() / FRAC_PI_2).ceil().max(1.0) as usize;
     let step = (end - start) / segments as f64;
     for s in 0..segments {
