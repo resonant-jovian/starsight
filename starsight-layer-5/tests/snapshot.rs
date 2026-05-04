@@ -15,9 +15,10 @@ use starsight_layer_1::primitives::{Color, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_3::marks::{
-    ArcMark, AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
-    HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark,
-    StepPosition, ViolinGroup, ViolinMark,
+    ArcMark, AreaMark, AxisDir, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
+    ErrorBarMark, HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark,
+    PointMark, PolarBarMark, PolarRectMark, RugMark, StepMark, StepPosition, ViolinGroup,
+    ViolinMark,
 };
 use starsight_layer_3::statistics::{Bandwidth, Grid};
 use starsight_layer_5::{Figure, MultiPanelFigure};
@@ -1361,6 +1362,188 @@ fn snapshot_legend_glyph_dispatch() {
             )
             .color(Color::from_hex(0x0033_AA33))
             .label("counts"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── polar bar mark ───────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_bar() {
+    // Two stacked layers of 8 bins — minimal wind-rose-style PolarBarMark
+    // exercise. r_base on the second layer threads through the axis scale
+    // so the bars stack rather than overlap.
+    let n = 8usize;
+    let thetas: Vec<f64> = (0..n).map(|i| i as f64).collect();
+    let layer_a = vec![3.0, 4.0, 5.0, 6.0, 5.5, 4.0, 3.0, 2.5];
+    let layer_b = vec![2.0, 3.0, 2.5, 3.5, 4.0, 3.5, 2.0, 1.5];
+    let layer_b_base = layer_a.clone();
+
+    let theta_axis = Axis::polar_angular_categorical(n);
+    let r_axis = Axis::polar_radial(0.0, 12.0);
+
+    let fig = Figure::new(500, 500)
+        .title("Polar bar — stacked annular bars")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            PolarBarMark::new(thetas.clone(), layer_a)
+                .color(Color::from_hex(0x0076_B7B2))
+                .stroke(Color::WHITE, 0.6)
+                .label("low"),
+        )
+        .add(
+            PolarBarMark::new(thetas, layer_b)
+                .r_base(layer_b_base)
+                .color(Color::from_hex(0x00F2_8E2B))
+                .stroke(Color::WHITE, 0.6)
+                .label("high"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── polar rect mark ──────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_rect() {
+    // 4-week × 3-year mini polar calendar — annular tile geometry.
+    let weeks = 4usize;
+    let years = 3usize;
+    let mut theta_min = Vec::with_capacity(weeks * years);
+    let mut theta_max = Vec::with_capacity(weeks * years);
+    let mut r_min = Vec::with_capacity(weeks * years);
+    let mut r_max = Vec::with_capacity(weeks * years);
+    let mut colors = Vec::with_capacity(weeks * years);
+    for y in 0..years {
+        for w in 0..weeks {
+            theta_min.push(w as f64 / weeks as f64);
+            theta_max.push((w as f64 + 1.0) / weeks as f64);
+            r_min.push(y as f64 / years as f64);
+            r_max.push((y as f64 + 1.0) / years as f64);
+            let t = (y * weeks + w) as f64 / (weeks * years - 1) as f64;
+            colors.push(VIRIDIS.sample(t));
+        }
+    }
+    let theta_axis = Axis::polar_angular(0.0, 1.0);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+    let fig = Figure::new(500, 500)
+        .title("Polar rect — annular tiles")
+        .polar_axes(theta_axis, r_axis)
+        .add(PolarRectMark::new(theta_min, theta_max, r_min, r_max).colors(colors));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── error bars ───────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_errorbar_vertical() {
+    let xs: Vec<f64> = (0..6).map(f64::from).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| 2.0 * x + 1.0).collect();
+    let errs = vec![0.5, 0.7, 0.9, 1.1, 1.3, 1.5];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — vertical")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x004E_79A7))
+                .radius(5.0)
+                .label("data"),
+        )
+        .add(ErrorBarMark::new(xs, ys, errs).color(Color::from_hex(0x004E_79A7)));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_errorbar_horizontal() {
+    let xs: Vec<f64> = (0..6).map(|i| f64::from(i) * 2.0).collect();
+    let ys: Vec<f64> = (0..6).map(f64::from).collect();
+    let errs = vec![0.4, 0.6, 0.8, 1.0, 0.7, 0.5];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — horizontal")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x00E1_5759))
+                .radius(5.0)
+                .label("data"),
+        )
+        .add(
+            ErrorBarMark::new(xs, ys, errs)
+                .horizontal()
+                .color(Color::from_hex(0x00E1_5759)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_errorbar_asymmetric() {
+    let xs: Vec<f64> = (0..5).map(f64::from).collect();
+    let ys = vec![10.0, 12.0, 14.0, 13.0, 15.0];
+    let pairs = vec![(0.5, 1.5), (0.8, 1.2), (1.0, 1.0), (1.2, 0.8), (1.5, 0.5)];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — asymmetric")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x0076_B7B2))
+                .radius(5.0)
+                .label("estimate"),
+        )
+        .add(
+            ErrorBarMark::new(xs, ys, vec![0.0; 5])
+                .errors_pair(pairs)
+                .color(Color::from_hex(0x0076_B7B2)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── rug mark ─────────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_rugmark_x_axis() {
+    let xs: Vec<f64> = (0..30).map(|i| f64::from(i) * 0.3).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| (x * 0.5).sin() * 2.0 + 3.0).collect();
+    let fig = Figure::new(500, 350)
+        .title("Rug along x-axis")
+        .x_label("x")
+        .y_label("y")
+        .add(LineMark::new(xs.clone(), ys).color(Color::from_hex(0x004E_79A7)))
+        .add(
+            RugMark::new(xs, AxisDir::X)
+                .length(8.0)
+                .color(Color::from_hex(0x0030_303A)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_rugmark_y_axis() {
+    let ys: Vec<f64> = (0..20)
+        .map(|i| f64::from(i) * 0.5 + (f64::from(i) * 0.7).sin())
+        .collect();
+    let xs: Vec<f64> = (0..20).map(|i| f64::from(i) * 0.5).collect();
+    let fig = Figure::new(500, 350)
+        .title("Rug along y-axis")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs, ys.clone())
+                .color(Color::from_hex(0x00E1_5759))
+                .radius(4.0),
+        )
+        .add(
+            RugMark::new(ys, AxisDir::Y)
+                .length(8.0)
+                .color(Color::from_hex(0x0030_303A)),
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);

@@ -1,6 +1,6 @@
 # starsight examples
 
-Thirty-four runnable examples grouped by what they teach. Each `.rs` file lives
+Thirty-eight runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -59,6 +59,7 @@ auto-derived legend lives here.
 | [`pie`](composition/pie.rs) — [PNG](composition/pie.png) | `PieMark` with `show_percent()` and a custom 6-color palette |
 | [`donut`](composition/donut.rs) — [PNG](composition/donut.png) | `PieMark` with `inner_radius(0.5)` and raw value labels |
 | [`donut_sunburst`](composition/donut_sunburst.rs) — [PNG](composition/donut_sunburst.png) | Three-level nested `ArcMark` sunburst on `Figure::polar_axes` (spec #39 var C) |
+| [`rug_with_histogram`](composition/rug_with_histogram.rs) — [PNG](composition/rug_with_histogram.png) | `HistogramMark` (40-bin Gaussian) + `RugMark` overlay on the x-axis margin showing per-sample density |
 
 ### [`scientific/`](scientific) — real numerical experiments
 
@@ -76,6 +77,9 @@ Both run their own ODE/transform integration before plotting.
 | [`contour_fields`](scientific/contour_fields.rs) — [PNG](scientific/contour_fields.png) | 2×2 `MultiPanelFigure` of Rosenbrock + Himmelblau + Rastrigin + Gaussian-mixture contour plots (spec #22) |
 | [`bollinger_candlestick`](scientific/bollinger_candlestick.rs) — [PNG](scientific/bollinger_candlestick.png) | Two-panel `MultiPanelFigure`: candles + 20d SMA + Bollinger bands on top, daily volume `BarMark` below (spec #38) |
 | [`radar_spider`](scientific/radar_spider.rs) — [PNG](scientific/radar_spider.png) | Three-player competence radar across 8 dimensions — `RadarMark` overlays on `Figure::polar_axes` with translucent fill (spec #31) |
+| [`wind_rose`](scientific/wind_rose.rs) — [PNG](scientific/wind_rose.png) | 16 compass directions × 4 wind-speed bins — stacked `PolarBarMark` layers via `r_base` (spec #33) |
+| [`polar_calendar`](scientific/polar_calendar.rs) — [PNG](scientific/polar_calendar.png) | 21 years × 52 weeks of synthetic seasonal data on `PolarRectMark` — annular tile heatmap (spec #8) |
+| [`error_bars`](scientific/error_bars.rs) — [PNG](scientific/error_bars.png) | Two regression series with symmetric and asymmetric `ErrorBarMark` whiskers + caps |
 
 ### [`data/`](data) — DataFrame integrations
 

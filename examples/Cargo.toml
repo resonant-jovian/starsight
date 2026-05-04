@@ -103,6 +103,10 @@ path = "composition/donut.rs"
 name = "donut_sunburst"
 path = "composition/donut_sunburst.rs"
 
+[[example]]
+name = "rug_with_histogram"
+path = "composition/rug_with_histogram.rs"
+
 # ── scientific ──────────────────────────────────────────────────────────────
 # Real numerical experiments: integrate an ODE, render a relativity diagram.
 # These exist to prove the library handles real data, not just toy series.
@@ -142,6 +146,18 @@ path = "scientific/bollinger_candlestick.rs"
 [[example]]
 name = "radar_spider"
 path = "scientific/radar_spider.rs"
+
+[[example]]
+name = "wind_rose"
+path = "scientific/wind_rose.rs"
+
+[[example]]
+name = "polar_calendar"
+path = "scientific/polar_calendar.rs"
+
+[[example]]
+name = "error_bars"
+path = "scientific/error_bars.rs"
 
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
