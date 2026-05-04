@@ -409,6 +409,12 @@ impl Mark for ContourMark {
             log_scale: false,
         })
     }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Contour fields tile the grid extent — padding would create
+        // empty borders around the data.
+        false
+    }
 }
 
 #[cfg(test)]

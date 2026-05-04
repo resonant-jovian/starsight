@@ -184,6 +184,24 @@ pub trait Mark {
         true
     }
 
+    /// Whether this mark needs the axis to inset 5% on both ends so its
+    /// data extremes don't visually sit on the plot edge. Default `true`
+    /// for point-like marks (`PointMark`, `LineMark`, `AreaMark`,
+    /// `ErrorBarMark`, `BoxPlotMark`, `ViolinMark`, `CandlestickMark`,
+    /// `StepMark`, `RugMark` — anything where a single value at the extreme
+    /// would otherwise touch the axis line).
+    ///
+    /// Bar-shaped marks (`BarMark`, `HistogramMark`, `HeatmapMark`,
+    /// `ContourMark`) override to `false` because their data IS the axis
+    /// structure — bars naturally span band edges, heatmap cells tile to
+    /// the plot rect, contour bands fill explicit level boundaries.
+    ///
+    /// `Figure::render_within` aggregates this with `any()` across marks:
+    /// the figure pads only when at least one mark wants padding.
+    fn wants_axis_padding(&self) -> bool {
+        true
+    }
+
     /// Optional colormap legend description for this mark, used by the
     /// figure to auto-attach a [`Colorbar`](starsight_layer_3::statistics).
     /// Marks that map a continuous value range through a colormap
@@ -974,6 +992,13 @@ impl Mark for BarMark {
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Bar
     }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Bars span band edges by design — their data IS the axis structure,
+        // so 5% inset would just push bars away from the axis line and
+        // create awkward gaps.
+        false
+    }
 }
 
 // ── AreaMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -1350,6 +1375,12 @@ impl Mark for HeatmapMark {
             log_scale: matches!(self.color_scale, HeatmapColorScale::Log),
         })
     }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Heatmap cells tile the plot rect — padding would create empty
+        // gutters between the data cells and the axes.
+        false
+    }
 }
 
 // ── ContourMark ──────────────────────────────────────────────────────────────────────────────────
@@ -1590,6 +1621,12 @@ impl Mark for HistogramMark {
 
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Bar
+    }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Histogram bins tile the x-axis range — padding would push the
+        // first/last bin off the data extents.
+        false
     }
 }
 

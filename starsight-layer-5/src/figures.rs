@@ -33,6 +33,27 @@ use crate::layout::{
 /// issue tracked as `starsight-c6h`.
 pub(crate) const DEFAULT_FIGURE_PADDING_PX: f32 = 8.0;
 
+/// Inset a `Linear`-shaped axis's scale by `factor * (raw_max - raw_min)`
+/// without touching tick positions — matches matplotlib's
+/// `axes.margins(factor)` convention. Tick labels stay on clean numbers,
+/// the data just no longer touches the plot edges. Tracked as
+/// `starsight-3bp.9.1` (Epic I.1, refined).
+fn pad_linear_axis_in_place(axis: &mut starsight_layer_2::axes::Axis, factor: f64) {
+    if factor <= 0.0 {
+        return;
+    }
+    let raw_min = axis.scale.inverse(0.0);
+    let raw_max = axis.scale.inverse(1.0);
+    if !raw_min.is_finite() || !raw_max.is_finite() || raw_max <= raw_min {
+        return;
+    }
+    let pad = (raw_max - raw_min) * factor;
+    axis.scale = Box::new(starsight_layer_2::scales::LinearScale {
+        domain_min: raw_min - pad,
+        domain_max: raw_max + pad,
+    });
+}
+
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
 
 /// Top-level chart builder.
@@ -59,6 +80,14 @@ pub struct Figure {
     /// colormap legend that `HeatmapMark` and `ContourMark` would otherwise
     /// trigger. Default is `false` (auto-attach). Tracked as `starsight-kdi`.
     pub colorbar_disabled: bool,
+    /// User override for axis padding. `None` (default) lets the figure
+    /// pick automatically based on the mix of marks
+    /// (`Mark::wants_axis_padding`); point/line/box/violin marks vote yes,
+    /// bar/heatmap/contour vote no, and the figure pads if any mark votes
+    /// yes. `Some(0.0)` force-disables; `Some(f)` force-enables with the
+    /// given factor (matplotlib's `axes.margins(...)`). Tracked as
+    /// `starsight-3bp.9.1` (Epic I.1, refined per user direction).
+    pub axis_padding_override: Option<f64>,
 }
 
 impl Figure {
@@ -75,6 +104,7 @@ impl Figure {
             theme: Theme::default(),
             polar_axes: None,
             colorbar_disabled: false,
+            axis_padding_override: None,
         }
     }
 
@@ -85,6 +115,19 @@ impl Figure {
     #[must_use]
     pub fn colorbar(mut self, on: bool) -> Self {
         self.colorbar_disabled = !on;
+        self
+    }
+
+    /// Builder: override the auto-detected axis padding factor. By
+    /// default (`None`) the figure decides based on the mix of marks —
+    /// point-shaped marks (Point/Line/Area/ErrorBar/BoxPlot/Violin/
+    /// Candlestick/Step/Rug) trigger 5% inset, bar-shaped marks (Bar/
+    /// Histogram/Heatmap/Contour) leave the axis edge-aligned. Pass
+    /// `Some(0.0)` to force-disable padding, or `Some(f)` to force a
+    /// specific factor (matches matplotlib's `axes.margins(f)`).
+    #[must_use]
+    pub fn axis_padding(mut self, factor: Option<f64>) -> Self {
+        self.axis_padding_override = factor;
         self
     }
 
@@ -348,6 +391,25 @@ impl Figure {
             .merged_extent()
             .ok_or_else(|| StarsightError::Data("No data to render".into()))?;
 
+        // Mark-mix-aware axis padding: when at least one mark on the figure
+        // is point-shaped (Point/Line/Area/ErrorBar/BoxPlot/Violin/
+        // Candlestick/Step/Rug per `Mark::wants_axis_padding`), inset the
+        // numeric scale by 5% so extreme points don't sit on the plot edge.
+        // Bar / histogram / heatmap / contour figures stay edge-aligned
+        // because their data IS the axis structure. User override
+        // `Figure::axis_padding(Some(f))` wins. Padding is applied to the
+        // SCALE post-Wilkinson so tick positions stay on clean numbers
+        // (matplotlib axes.margins convention).
+        let pad_factor = match self.axis_padding_override {
+            Some(f) => f.max(0.0),
+            None => {
+                if !self.marks.is_empty() && self.marks.iter().any(|m| m.wants_axis_padding()) {
+                    0.05
+                } else {
+                    0.0
+                }
+            }
+        };
         let x_vals: Vec<f64> = vec![extent.x_min, extent.x_max];
         let y_vals: Vec<f64> = vec![extent.y_min, extent.y_max];
 
@@ -357,18 +419,31 @@ impl Figure {
         // Bar charts get a category axis on the orientation-appropriate side so
         // bars span the full plot area instead of being squeezed into a Wilkinson-
         // extended numeric range. Numeric axes still use Wilkinson for "nice" ticks.
-        let x_axis = if !category_labels.is_empty() && !use_y_axis_labels {
+        let x_is_category = !category_labels.is_empty() && !use_y_axis_labels;
+        let y_is_category = !category_labels.is_empty() && use_y_axis_labels;
+        let mut x_axis = if x_is_category {
             Axis::category(&category_labels)
         } else {
             Axis::auto_from_data(&x_vals, 5)
                 .ok_or_else(|| StarsightError::Scale("Cannot build X axis".into()))?
         };
-        let y_axis = if !category_labels.is_empty() && use_y_axis_labels {
+        let mut y_axis = if y_is_category {
             Axis::category(&category_labels)
         } else {
             Axis::auto_from_data(&y_vals, 5)
                 .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?
         };
+        // Apply axis padding to the SCALE post-Wilkinson so tick positions
+        // stay on clean numbers (matplotlib axes.margins convention). Skip
+        // categorical axes where band edges are intentional.
+        if pad_factor > 0.0 {
+            if !x_is_category {
+                pad_linear_axis_in_place(&mut x_axis, pad_factor);
+            }
+            if !y_is_category {
+                pad_linear_axis_in_place(&mut y_axis, pad_factor);
+            }
+        }
 
         let fonts = crate::layout::LayoutFonts::default();
         let tick_len: f32 = 5.0;
@@ -539,10 +614,18 @@ impl Figure {
             )?;
         }
 
+        // Skip marks whose colormap is already shown by the auto-attached
+        // Colorbar — bordered legend entry would duplicate the strip
+        // (`starsight-3bp.9.5` / Epic I.5). When `colorbar_opt` is None,
+        // every labeled mark gets its entry as before.
+        let colorbar_active = colorbar_opt.is_some();
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()
             .filter_map(|mark| {
+                if colorbar_active && mark.colormap_legend().is_some() {
+                    return None;
+                }
                 if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
                     && !label.is_empty()
                 {
@@ -629,7 +712,19 @@ impl Figure {
         };
         let plot_area = translate_rect(layout.plot_rect);
 
-        let coord = PolarCoord::inscribed(theta_axis.clone(), r_axis.clone(), plot_area);
+        // Polar marks frequently render slightly past the unit disk (gauge
+        // outer rim at r=1.02, stacked bars that exceed the configured
+        // r-axis max). Inset the disc by 12px so those overflows stay inside
+        // plot_area instead of bleeding into title / canvas margins. Tracked
+        // as Epic I.2 (`starsight-3bp.9.2`).
+        let polar_inset: f32 = 12.0;
+        let polar_disc_area = Rect::new(
+            plot_area.left + polar_inset,
+            plot_area.top + polar_inset,
+            plot_area.right - polar_inset,
+            plot_area.bottom - polar_inset,
+        );
+        let coord = PolarCoord::inscribed(theta_axis.clone(), r_axis.clone(), polar_disc_area);
 
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
@@ -661,6 +756,9 @@ impl Figure {
 
         // Legend: same dispatch as cartesian. Will overlap the disk per
         // documented limitation; reposition in 0.4.0.
+        // Polar Figures don't auto-attach a Colorbar (no polar mark exposes
+        // a `ColormapLegend` today), so the colorbar-suppression filter
+        // from the cartesian path doesn't apply here.
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-label="starsight roadmap timeline 0.1 → 1.0" preserveAspectRatio="xMidYMid meet">
+  <title>roadmap</title>
+    <text x="80" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#8a8fa3">// roadmap · 0.1 → 1.0 · 3 of 13 milestones shipped</text>
+  <line x1="80" y1="170" x2="1200" y2="170" stroke="#d4d4d4" stroke-width="2"/>
+  <line x1="80" y1="170" x2="360.0" y2="170" stroke="#e87a3e" stroke-width="2.5"/>
+  <text x="80.0" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">Foundation</text>
+  <circle cx="80.0" cy="170" r="6" fill="#e87a3e" stroke="#e87a3e" stroke-width="2"/>
+  <text x="80.0" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">0.1</text>
+  <text x="173.3" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">Core charts</text>
+  <circle cx="173.3" cy="170" r="6" fill="#e87a3e" stroke="#e87a3e" stroke-width="2"/>
+  <text x="173.3" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">0.2</text>
+  <text x="266.7" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">Stats + Polars</text>
+  <circle cx="266.7" cy="170" r="6" fill="#e87a3e" stroke="#e87a3e" stroke-width="2"/>
+  <text x="266.7" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">0.3</text>
+  <text x="360.0" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="600" font-size="11" fill="#e87a3e" text-anchor="middle">Layout</text>
+  <circle cx="360.0" cy="170" r="8" fill="white" stroke="#e87a3e" stroke-width="2"/>
+  <text x="360.0" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" text-anchor="middle">0.4</text>
+  <text x="453.3" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">Scales</text>
+  <circle cx="453.3" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="453.3" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.5</text>
+  <text x="546.7" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">GPU + interactive</text>
+  <circle cx="546.7" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="546.7" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.6</text>
+  <text x="640.0" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">Animation</text>
+  <circle cx="640.0" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="640.0" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.7</text>
+  <text x="733.3" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">Terminal</text>
+  <circle cx="733.3" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="733.3" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.8</text>
+  <text x="826.7" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">3D</text>
+  <circle cx="826.7" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="826.7" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.9</text>
+  <text x="920.0" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">PDF + WASM</text>
+  <circle cx="920.0" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="920.0" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.10</text>
+  <text x="1013.3" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">Data accept</text>
+  <circle cx="1013.3" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="1013.3" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.11</text>
+  <text x="1106.7" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">Docs + gallery</text>
+  <circle cx="1106.7" cy="170" r="5" fill="white" stroke="#8a8fa3" stroke-width="2"/>
+  <text x="1106.7" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="400" font-size="11" fill="#8a8fa3" text-anchor="middle">0.12</text>
+  <text x="1200.0" y="142" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">Stable</text>
+  <circle cx="1200.0" cy="170" r="9" fill="white" stroke="#2d2d2d" stroke-width="2"/>
+  <text x="1200.0" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#2d2d2d" text-anchor="middle">1.0</text>
+  <text x="80" y="270" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e">SHIPPED</text>
+  <text x="160" y="270" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#586172">0.1 foundation · 0.2 core charts · 0.3 stats + Polars + Polar/Contour</text>
+  <text x="80" y="292" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e">NEXT</text>
+  <text x="160" y="292" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#586172">0.4 — GridLayout, faceting, legends, colorbars</text>
+</svg>

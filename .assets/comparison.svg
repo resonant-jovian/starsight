@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 554" role="img" aria-label="starsight vs. plotters / charming / poloto" preserveAspectRatio="xMidYMid meet">
+  <title>comparison</title>
+    <text x="40" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#8a8fa3">// vs. siblings · rust plotting space · as of 0.3</text>
+  <line x1="40" y1="122" x2="860" y2="122" stroke="#2d2d2d" stroke-width="0.8"/>
+  <text x="40" y="118" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">FEATURE</text>
+  <rect x="304" y="60" width="132" height="56" rx="6" fill="#fff8f1" stroke="#e87a3e" stroke-width="1.0"/>
+  <text x="370" y="84" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#e87a3e" text-anchor="middle">starsight</text>
+  <text x="370" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#586172" text-anchor="middle">unified · pre-1.0</text>
+  <rect x="444" y="60" width="132" height="56" rx="6" fill="transparent" stroke="transparent" stroke-width="0"/>
+  <text x="510" y="84" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#2d2d2d" text-anchor="middle">plotters</text>
+  <text x="510" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#586172" text-anchor="middle">mature · syn-tree</text>
+  <rect x="584" y="60" width="132" height="56" rx="6" fill="transparent" stroke="transparent" stroke-width="0"/>
+  <text x="650" y="84" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#2d2d2d" text-anchor="middle">charming</text>
+  <text x="650" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#586172" text-anchor="middle">echarts wrapper</text>
+  <rect x="724" y="60" width="132" height="56" rx="6" fill="transparent" stroke="transparent" stroke-width="0"/>
+  <text x="790" y="84" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#2d2d2d" text-anchor="middle">poloto</text>
+  <text x="790" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#586172" text-anchor="middle">svg-only · simple</text>
+  <text x="40" y="148" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">CPU raster</text>
+  <circle cx="370" cy="144" r="4" fill="#e87a3e"/>
+  <circle cx="510" cy="144" r="4" fill="#2d2d2d"/>
+  <text x="650" y="148" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="148" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="156" x2="860" y2="156" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="174" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">SVG export</text>
+  <circle cx="370" cy="170" r="4" fill="#e87a3e"/>
+  <circle cx="510" cy="170" r="4" fill="#2d2d2d"/>
+  <circle cx="650" cy="170" r="4" fill="#2d2d2d"/>
+  <circle cx="790" cy="170" r="4" fill="#2d2d2d"/>
+  <line x1="40" y1="182" x2="860" y2="182" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="200" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">PDF export</text>
+  <text x="370" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="510" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="208" x2="860" y2="208" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="226" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">GPU rendering</text>
+  <text x="370" y="226" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="510" cy="222" r="4" fill="#2d2d2d"/>
+  <text x="650" y="226" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="226" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="234" x2="860" y2="234" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="252" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Terminal</text>
+  <text x="370" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="510" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="252" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="260" x2="860" y2="260" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="278" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">3D charts</text>
+  <text x="370" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="510" cy="274" r="4" fill="#2d2d2d"/>
+  <circle cx="650" cy="274" r="4" fill="#2d2d2d"/>
+  <text x="790" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="286" x2="860" y2="286" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="304" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Polars / DataFrame</text>
+  <circle cx="370" cy="300" r="4" fill="#e87a3e"/>
+  <text x="510" y="304" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="304" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="304" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="312" x2="860" y2="312" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="330" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">WASM / browser</text>
+  <text x="370" y="330" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="510" cy="326" r="4" fill="#2d2d2d"/>
+  <circle cx="650" cy="326" r="4" fill="#2d2d2d"/>
+  <text x="790" y="330" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="338" x2="860" y2="338" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="356" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Themes &amp; colormaps</text>
+  <circle cx="370" cy="352" r="4" fill="#e87a3e"/>
+  <text x="510" y="356" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="650" cy="352" r="4" fill="#2d2d2d"/>
+  <text x="790" y="356" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="364" x2="860" y2="364" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="382" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Interactive (zoom/pan)</text>
+  <text x="370" y="382" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="510" y="382" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="650" cy="378" r="4" fill="#2d2d2d"/>
+  <text x="790" y="382" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="390" x2="860" y2="390" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="408" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Animation</text>
+  <text x="370" y="408" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="510" y="408" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="408" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="408" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="416" x2="860" y2="416" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="434" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Pure-Rust core</text>
+  <circle cx="370" cy="430" r="4" fill="#e87a3e"/>
+  <circle cx="510" cy="430" r="4" fill="#2d2d2d"/>
+  <text x="650" y="434" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <circle cx="790" cy="430" r="4" fill="#2d2d2d"/>
+  <line x1="40" y1="442" x2="860" y2="442" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="460" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Statistical marks</text>
+  <circle cx="370" cy="456" r="4" fill="#e87a3e"/>
+  <text x="510" y="460" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="460" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="460" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <line x1="40" y1="468" x2="860" y2="468" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="40" y="486" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2d2d2d">Faceting</text>
+  <text x="370" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="510" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="650" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="790" y="486" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#d4d4d4" text-anchor="middle">·</text>
+  <text x="40" y="524" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#586172">starsight is the pre-1.0 newcomer — the bet: one crate covering CPU + GPU + terminal + PDF with shared themes/colormaps via chromata + prismatica.</text>
+</svg>

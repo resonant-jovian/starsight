@@ -55,7 +55,9 @@ fn main() -> Result<()> {
         .collect();
 
     let theta_axis = Axis::polar_angular_categorical(n);
-    let r_axis = Axis::polar_radial(0.0, 12.0);
+    // r_axis upper bound = max stacked total (~13.0) + 1 for breathing
+    // room so the topmost ring doesn't graze the polar disc edge.
+    let r_axis = Axis::polar_radial(0.0, 14.0);
 
     Figure::new(800, 800)
         .title("Wind rose — frequency × direction × speed")

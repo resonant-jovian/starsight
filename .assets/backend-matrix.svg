@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 470" role="img" aria-label="starsight backend matrix" preserveAspectRatio="xMidYMid meet">
+  <title>backends</title>
+    <text x="60" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#8a8fa3">// backends · DrawBackend trait · pluggable per output</text>
+  <text x="60" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">BACKEND</text>
+  <text x="280" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">KIND</text>
+  <text x="550" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">OUTPUT</text>
+  <text x="700" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">STATUS</text>
+  <text x="870" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#8a8fa3" letter-spacing="0.6">FLAG</text>
+  <line x1="60" y1="90" x2="940" y2="90" stroke="#2d2d2d" stroke-width="0.8"/>
+  <text x="60" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#2d2d2d">tiny-skia</text>
+  <text x="280" y="128" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">CPU raster</text>
+  <text x="550" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">.png</text>
+  <circle cx="706" cy="124" r="4" fill="#3fa53e"/>
+  <text x="720" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#3fa53e">working</text>
+  <text x="870" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">default</text>
+  <line x1="60" y1="136" x2="940" y2="136" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#2d2d2d">SVG</text>
+  <text x="280" y="158" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">vector</text>
+  <text x="550" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">.svg</text>
+  <circle cx="706" cy="154" r="4" fill="#3fa53e"/>
+  <text x="720" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#3fa53e">working</text>
+  <text x="870" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">default</text>
+  <line x1="60" y1="166" x2="940" y2="166" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">wgpu</text>
+  <text x="280" y="188" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">GPU</text>
+  <text x="550" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">window</text>
+  <circle cx="706" cy="184" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">gpu</text>
+  <line x1="60" y1="196" x2="940" y2="196" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">WebGPU</text>
+  <text x="280" y="218" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">GPU (browser)</text>
+  <text x="550" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">wasm</text>
+  <circle cx="706" cy="214" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">web</text>
+  <line x1="60" y1="226" x2="940" y2="226" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">krilla</text>
+  <text x="280" y="248" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">PDF vector</text>
+  <text x="550" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">.pdf</text>
+  <circle cx="706" cy="244" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="248" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">pdf</text>
+  <line x1="60" y1="256" x2="940" y2="256" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">Kitty</text>
+  <text x="280" y="278" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">terminal image</text>
+  <text x="550" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">tty</text>
+  <circle cx="706" cy="274" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="278" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">terminal</text>
+  <line x1="60" y1="286" x2="940" y2="286" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">Sixel</text>
+  <text x="280" y="308" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">terminal image</text>
+  <text x="550" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">tty</text>
+  <circle cx="706" cy="304" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">terminal</text>
+  <line x1="60" y1="316" x2="940" y2="316" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="338" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">iTerm2</text>
+  <text x="280" y="338" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">terminal image</text>
+  <text x="550" y="338" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">tty</text>
+  <circle cx="706" cy="334" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="338" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="338" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">terminal</text>
+  <line x1="60" y1="346" x2="940" y2="346" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">Braille</text>
+  <text x="280" y="368" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">terminal text</text>
+  <text x="550" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">tty</text>
+  <circle cx="706" cy="364" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">terminal</text>
+  <line x1="60" y1="376" x2="940" y2="376" stroke="#d4d4d4" stroke-width="0.4" stroke-dasharray="2,2"/>
+  <text x="60" y="398" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="13" fill="#586172">half-block</text>
+  <text x="280" y="398" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#586172">terminal text</text>
+  <text x="550" y="398" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">tty</text>
+  <circle cx="706" cy="394" r="4" fill="none" stroke="#8a8fa3" stroke-width="1.2"/>
+  <text x="720" y="398" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#8a8fa3">planned</text>
+  <text x="870" y="398" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#586172">terminal</text>
+</svg>

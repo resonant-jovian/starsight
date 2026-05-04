@@ -24,11 +24,11 @@ pub struct Axis {
 impl Axis {
     /// Build an axis whose ticks are chosen by the Wilkinson Extended algorithm.
     ///
-    /// Applies a 5% inset on both ends of the scale so points / bars at the
-    /// data extremes don't visually sit on the plot edge — matches
-    /// matplotlib's default `margins(0.05)`. Tracked as `starsight-3bp.9.1`
-    /// (Epic I.1). Categorical axes (`Axis::category`) skip this inset
-    /// because band-edge ticks are intentional.
+    /// No automatic margin inset — see [`Self::with_padding`] for the opt-in
+    /// 5% inset that point / line / errorbar / box / violin charts apply
+    /// via `Figure::render_within` based on the mix of marks. Bar /
+    /// histogram / heatmap / contour figures stay edge-aligned because
+    /// their data IS the axis structure.
     pub fn auto_from_data(values: &[f64], target_ticks: usize) -> Option<Self> {
         let dmin = values.iter().copied().fold(f64::INFINITY, f64::min);
         let dmax = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
@@ -37,19 +37,17 @@ impl Axis {
         }
         let ticks = crate::ticks::wilkinson_extended(dmin, dmax, target_ticks, true);
         let labels: Vec<String> = ticks.iter().map(|t| format!("{t}")).collect();
-        let raw_min = ticks[0];
-        let raw_max = *ticks.last()?;
-        let pad = (raw_max - raw_min).max(f64::EPSILON) * 0.05;
         Some(Self {
             scale: Box::new(LinearScale {
-                domain_min: raw_min - pad,
-                domain_max: raw_max + pad,
+                domain_min: ticks[0],
+                domain_max: *ticks.last()?,
             }),
             label: None,
             tick_positions: ticks,
             tick_labels: labels,
         })
     }
+
 
     /// Build a category axis covering exactly `[0, n]` for `n` labels, with
     /// tick positions at band edges so grid lines fall between categories.

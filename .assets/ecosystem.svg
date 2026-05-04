@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" role="img" aria-label="starsight ecosystem" preserveAspectRatio="xMidYMid meet">
+  <title>ecosystem</title>
+    <text x="40" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#8a8fa3">// ecosystem · resonant-jovian · latin/greek scientific rust</text>
+  <text x="52" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e" letter-spacing="0.6">VISUALIZATION</text>
+  <line x1="52" y1="92" x2="388" y2="92" stroke="#e87a3e" stroke-width="0.6" opacity="0.4"/>
+  <rect x="52" y="110" width="336" height="100" rx="6" fill="#fff8f1" stroke="#e87a3e" stroke-width="1.4"/>
+  <text x="64" y="136" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#2d2d2d">starsight</text>
+  <text x="376" y="136" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#e87a3e">// you are here</text>
+  <text x="64" y="160" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#586172">unified scientific viz</text>
+  <circle cx="68" cy="184" r="4" fill="#d9a01a"/>
+  <text x="82" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#d9a01a">this crate</text>
+  <text x="432" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e" letter-spacing="0.6">PALETTE</text>
+  <line x1="432" y1="92" x2="768" y2="92" stroke="#e87a3e" stroke-width="0.6" opacity="0.4"/>
+  <rect x="432" y="110" width="336" height="100" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+  <text x="444" y="136" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#2d2d2d">chromata</text>
+  <text x="444" y="160" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#586172">1,104 editor / terminal themes</text>
+  <circle cx="448" cy="184" r="4" fill="#3fa53e"/>
+  <text x="462" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#3fa53e">published</text>
+  <rect x="432" y="230" width="336" height="100" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+  <text x="444" y="256" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#2d2d2d">prismatica</text>
+  <text x="444" y="280" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#586172">260+ perceptually uniform colormaps</text>
+  <circle cx="448" cy="304" r="4" fill="#3fa53e"/>
+  <text x="462" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#3fa53e">published</text>
+  <text x="812" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e" letter-spacing="0.6">SIMULATION</text>
+  <line x1="812" y1="92" x2="1148" y2="92" stroke="#e87a3e" stroke-width="0.6" opacity="0.4"/>
+  <rect x="812" y="110" width="336" height="100" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+  <text x="824" y="136" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#2d2d2d">caustic</text>
+  <text x="824" y="160" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#586172">6D Vlasov–Poisson plasma solver</text>
+  <circle cx="828" cy="184" r="4" fill="#d9a01a"/>
+  <text x="842" y="188" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#d9a01a">early</text>
+  <rect x="812" y="230" width="336" height="100" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+  <text x="824" y="256" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#2d2d2d">phasma</text>
+  <text x="824" y="280" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#586172">terminal UI for caustic</text>
+  <circle cx="828" cy="304" r="4" fill="#d9a01a"/>
+  <text x="842" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#d9a01a">early</text>
+  <text x="40" y="418" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#8a8fa3">github.com/resonant-jovian</text>
+</svg>

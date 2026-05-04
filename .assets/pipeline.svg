@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" role="img" aria-label="starsight pipeline" preserveAspectRatio="xMidYMid meet">
+  <title>pipeline</title>
+  <text x="71" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#8a8fa3">// pipeline · what plot!() actually does</text>
+<rect x="71" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="83" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">DATA</text>
+<text x="83" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Vec&lt;f64&gt;</text>
+<text x="83" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">slices</text>
+<text x="83" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Polars</text>
+<text x="83" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">ndarray</text>
+<rect x="215" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="227" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">MARK</text>
+<text x="227" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">LineMark</text>
+<text x="227" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">PointMark</text>
+<text x="227" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">BarMark</text>
+<text x="227" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">…</text>
+<rect x="359" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="371" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">STATS</text>
+<text x="371" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Bin</text>
+<text x="371" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">KDE</text>
+<text x="371" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Boxplot</text>
+<rect x="503" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="515" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">SCALE</text>
+<text x="515" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Linear</text>
+<text x="515" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Log</text>
+<text x="515" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Band</text>
+<text x="515" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Wilkinson</text>
+<rect x="647" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="659" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">LAYOUT</text>
+<text x="659" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Figure</text>
+<text x="659" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Grid</text>
+<text x="659" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Facet</text>
+<text x="659" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Legend</text>
+<rect x="791" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="803" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">SCENE</text>
+<text x="803" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Path</text>
+<text x="803" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Text</text>
+<text x="803" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Group</text>
+<text x="803" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Clip</text>
+<rect x="935" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="947" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">BACKEND</text>
+<text x="947" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Skia</text>
+<text x="947" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">SVG</text>
+<text x="947" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">wgpu</text>
+<text x="947" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">PDF</text>
+<text x="947" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">Kitty</text>
+<rect x="1079" y="80" width="130" height="180" rx="6" fill="white" stroke="#d4d4d4" stroke-width="0.8"/>
+<text x="1091" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="600" font-size="11" fill="#e87a3e" letter-spacing="0.5">OUTPUT</text>
+<text x="1091" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">.png</text>
+<text x="1091" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">.svg</text>
+<text x="1091" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">window</text>
+<text x="1091" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">tty</text>
+<line x1="203" y1="170" x2="213" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="213,170 208,166 208,174" fill="#8a8fa3"/>
+<line x1="347" y1="170" x2="357" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="357,170 352,166 352,174" fill="#8a8fa3"/>
+<line x1="491" y1="170" x2="501" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="501,170 496,166 496,174" fill="#8a8fa3"/>
+<line x1="635" y1="170" x2="645" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="645,170 640,166 640,174" fill="#8a8fa3"/>
+<line x1="779" y1="170" x2="789" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="789,170 784,166 784,174" fill="#8a8fa3"/>
+<line x1="923" y1="170" x2="933" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="933,170 928,166 928,174" fill="#8a8fa3"/>
+<line x1="1067" y1="170" x2="1077" y2="170" stroke="#8a8fa3" stroke-width="1.2"/><polygon points="1077,170 1072,166 1072,174" fill="#8a8fa3"/>
+  <g>
+    <rect x="71" y="310" width="1138" height="100" rx="6" fill="#fafafa" stroke="#d4d4d4" stroke-width="0.8"/>
+    <text x="89" y="332" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#e87a3e" letter-spacing="0.5">TRACE</text>
+    <text x="89" y="356" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" fill="#2d2d2d">plot!(&amp;[1.0, 2.0, 3.0], &amp;[10., 20., 15.]).save("chart.png")</text>
+    <text x="89" y="384" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#586172">DATA → MARK·LineMark → SCALE·Linear → LAYOUT·Figure 800×600 → SCENE → BACKEND·Skia → OUTPUT·png</text>
+  </g>
+</svg>
