@@ -10,6 +10,7 @@
 
 /// Inferred chart type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum ChartKind {
     /// Line chart for continuous numeric data.
     #[default]
@@ -22,6 +23,12 @@ pub enum ChartKind {
     Histogram,
     /// Heatmap for 2D data.
     Heatmap,
+    /// Contour plot of a 2-D scalar grid. Inferred only when a `Grid`-shaped
+    /// input is given; the array-based [`infer_chart_kind`] never returns
+    /// this variant — it's reserved for explicit dispatch by [`ContourMark`].
+    ///
+    /// [`ContourMark`]: starsight_layer_3::marks::ContourMark
+    Contour,
 }
 
 // ── infer_chart_kind ─────────────────────────────────────────────────────────────────────────────

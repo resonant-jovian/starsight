@@ -15,11 +15,11 @@ use starsight_layer_1::primitives::{Color, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, HeatmapColorScale, HeatmapMark,
-    HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark, StepPosition, ViolinGroup,
-    ViolinMark,
+    AreaMark, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark, HeatmapColorScale,
+    HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark, PointMark, StepMark, StepPosition,
+    ViolinGroup, ViolinMark,
 };
-use starsight_layer_3::statistics::Bandwidth;
+use starsight_layer_3::statistics::{Bandwidth, Grid};
 use starsight_layer_5::{Figure, MultiPanelFigure};
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
@@ -1024,6 +1024,33 @@ fn snapshot_polars_grouped_scatter() {
         .title("color = 'group' → 3 PointMarks")
         .x_label("x")
         .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── contour ──────────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_contour_isolines() {
+    // Rosenbrock function f(x, y) = (1-x)² + 100(y - x²)² over [-2, 2]² on a
+    // 60×60 grid. Pick contour levels on a roughly geometric ladder so the
+    // valley near (1, 1) shows up at multiple zoom levels.
+    let grid = Grid::sample(60, 60, -2.0, 2.0, -2.0, 2.0, |x, y| {
+        let a = 1.0 - x;
+        let b = y - x * x;
+        a * a + 100.0 * b * b
+    });
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .stroke_width(1.5)
+                .label("f(x, y)"),
+        );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }

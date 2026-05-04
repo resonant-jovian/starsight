@@ -38,10 +38,12 @@ pub(crate) fn require_cartesian(coord: &dyn Coord) -> Result<&CartesianCoord> {
 // caring that the implementation lives in a sibling file.
 pub mod box_plot;
 pub mod candlestick;
+pub mod contour;
 pub mod pie;
 pub mod violin;
 pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 pub use candlestick::{CandlestickMark, Ohlc};
+pub use contour::{ContourMark, ContourMode};
 pub use pie::PieMark;
 pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
