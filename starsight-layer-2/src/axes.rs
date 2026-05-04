@@ -100,14 +100,31 @@ impl Axis {
     /// scale's normalized range stays inside `[0.0, 0.75]`.
     #[must_use]
     pub fn polar_angular(domain_min: f64, domain_max: f64) -> Self {
+        // Auto-fill 8 evenly-spaced angular ticks so polar Figures render a
+        // default grid (8 spokes). Two flavors picked from the data range:
+        // degrees if the range looks degree-shaped (around 360), radians if
+        // it looks radian-shaped (around 2π). Tracked as `starsight-3bp.9.11`
+        // (Epic I.10).
+        let span = (domain_max - domain_min).abs();
+        let degrees_like = (span - 360.0).abs() < 1e-3 || span > std::f64::consts::TAU * 1.5;
+        let (positions, labels) = if degrees_like {
+            crate::ticks::polar_ticks_degrees(8)
+        } else {
+            crate::ticks::polar_ticks_radians(8)
+        };
+        // Translate normalized [0..1) tick positions into the data range.
+        let scale_pos: Vec<f64> = positions
+            .into_iter()
+            .map(|t| domain_min + t * span)
+            .collect();
         Self {
             scale: Box::new(LinearScale {
                 domain_min,
                 domain_max,
             }),
             label: None,
-            tick_positions: vec![],
-            tick_labels: vec![],
+            tick_positions: scale_pos,
+            tick_labels: labels,
         }
     }
 
@@ -117,11 +134,17 @@ impl Axis {
     /// wind rose (16 directions), polar bar plots in general.
     #[must_use]
     pub fn polar_angular_categorical(n: usize) -> Self {
+        // Auto-fill `n` placeholder labels (`1`..`n`) so polar Figures show a
+        // default `n`-spoke grid even when the caller doesn't override the
+        // labels. Callers can replace `tick_labels` with month / direction /
+        // etc. after construction. Tracked as Epic I.10.
+        let placeholder: Vec<String> = (1..=n).map(|i| i.to_string()).collect();
+        let (positions, labels) = crate::ticks::polar_ticks_categorical(&placeholder);
         Self {
             scale: Box::new(CategoricalScale { n_categories: n }),
             label: None,
-            tick_positions: vec![],
-            tick_labels: vec![],
+            tick_positions: positions,
+            tick_labels: labels,
         }
     }
 
@@ -130,14 +153,20 @@ impl Axis {
     /// fraction, and most radar / spider charts.
     #[must_use]
     pub fn polar_radial(domain_min: f64, domain_max: f64) -> Self {
+        // Auto-fill 4 evenly-spaced radial ticks so polar Figures render a
+        // default 4-ring grid. Wilkinson Extended would produce nicer ticks
+        // but adds a dependency on the ticks module here that breeds cycles
+        // — keep simple even-quarter spacing for radial defaults.
+        // Tracked as Epic I.10.
+        let (positions, labels) = polar_radial_default_ticks(domain_min, domain_max);
         Self {
             scale: Box::new(LinearScale {
                 domain_min,
                 domain_max,
             }),
             label: None,
-            tick_positions: vec![],
-            tick_labels: vec![],
+            tick_positions: positions,
+            tick_labels: labels,
         }
     }
 
@@ -146,14 +175,16 @@ impl Axis {
     /// design intent). `domain_min` must be ≥ 0.
     #[must_use]
     pub fn polar_radial_sqrt(domain_min: f64, domain_max: f64) -> Self {
+        // Same 4-tick auto-fill as `polar_radial` for default grid coverage.
+        let (positions, labels) = polar_radial_default_ticks(domain_min, domain_max);
         Self {
             scale: Box::new(SqrtScale {
                 domain_min,
                 domain_max,
             }),
             label: None,
-            tick_positions: vec![],
-            tick_labels: vec![],
+            tick_positions: positions,
+            tick_labels: labels,
         }
     }
 
@@ -161,15 +192,68 @@ impl Axis {
     /// single disk. Both endpoints must be > 0.
     #[must_use]
     pub fn polar_radial_log(domain_min: f64, domain_max: f64) -> Self {
+        // Decade ticks: one per power of 10 between domain_min and domain_max.
+        let mut positions = Vec::new();
+        let mut labels = Vec::new();
+        if domain_min > 0.0 && domain_max > 0.0 && domain_max > domain_min {
+            let lo = domain_min.log10().floor() as i32;
+            let hi = domain_max.log10().ceil() as i32;
+            for power in lo..=hi {
+                let v = 10f64.powi(power);
+                if v >= domain_min && v <= domain_max {
+                    positions.push(v);
+                    labels.push(format_log_tick(v));
+                }
+            }
+        }
         Self {
             scale: Box::new(LogScale {
                 domain_min,
                 domain_max,
             }),
             label: None,
-            tick_positions: vec![],
-            tick_labels: vec![],
+            tick_positions: positions,
+            tick_labels: labels,
         }
+    }
+}
+
+/// 4 evenly-spaced ticks at 25/50/75/100% of the data range, with short
+/// numeric labels. Shared by `polar_radial` and `polar_radial_sqrt` defaults.
+fn polar_radial_default_ticks(domain_min: f64, domain_max: f64) -> (Vec<f64>, Vec<String>) {
+    if !domain_min.is_finite() || !domain_max.is_finite() || domain_max <= domain_min {
+        return (Vec::new(), Vec::new());
+    }
+    let range = domain_max - domain_min;
+    let mut positions = Vec::with_capacity(4);
+    let mut labels = Vec::with_capacity(4);
+    for q in [0.25_f64, 0.5, 0.75, 1.0] {
+        let v = domain_min + q * range;
+        positions.push(v);
+        labels.push(format_radial_tick(v));
+    }
+    (positions, labels)
+}
+
+fn format_radial_tick(v: f64) -> String {
+    if v == 0.0 {
+        "0".to_string()
+    } else if v.abs() >= 100.0 || v.abs() < 0.1 {
+        format!("{v:.0}")
+    } else if v.abs() >= 10.0 {
+        format!("{v:.1}")
+    } else {
+        format!("{v:.2}")
+    }
+}
+
+fn format_log_tick(v: f64) -> String {
+    if v >= 1000.0 {
+        format!("{}k", (v / 1000.0) as i64)
+    } else if v >= 1.0 {
+        format!("{}", v as i64)
+    } else {
+        format!("{v}")
     }
 }
 

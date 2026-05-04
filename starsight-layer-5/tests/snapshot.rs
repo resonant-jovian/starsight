@@ -1094,21 +1094,51 @@ fn snapshot_arcmark_full_nightingale() {
 
 #[test]
 fn snapshot_arcmark_partial_gauge() {
-    // Gauge: single wedge spanning a 270° sweep that starts at -135° (so
-    // both endpoints sit toward the bottom). The wedge uses polar angular
-    // and radial axes; theta_half_width = 135° in radians, start_offset
-    // shifts the whole wedge so it draws across the bottom half plus the
-    // sides.
+    // Real layered gauge — mirrors the example pattern (Epic I.3 fix for
+    // `starsight-3bp.9.3`). 270° dial sweep with three layers:
+    // 1. Outer rim (thin track)
+    // 2. Background track (the unfilled portion)
+    // 3. Foreground value arc
+    //
+    // The previous snapshot rendered only the value arc with no track, so
+    // it didn't read as a gauge. This version is the canonical demo.
+    let value: f64 = 65.0;
+    let max: f64 = 100.0;
+    let total_sweep = 1.5 * std::f64::consts::PI;
+    let half_total = total_sweep / 2.0;
+    let value_sweep = (value / max) * total_sweep;
+    let half_value = value_sweep / 2.0;
+    let value_center = -half_total + half_value;
+    let bg_center: f64 = 0.0;
+
     let theta_axis = Axis::polar_angular(0.0, std::f64::consts::TAU);
-    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+
     let fig = Figure::new(600, 400)
-        .title("Gauge — 65/100")
+        .title("Gauge — 65 / 100")
         .polar_axes(theta_axis, r_axis)
         .add(
-            ArcMark::new(vec![0.0], vec![80.0])
-                .r_inner(vec![55.0])
-                .theta_half_widths(vec![3.0 * std::f64::consts::PI / 8.0])
-                .start_offset(std::f64::consts::PI),
+            // Outer rim
+            ArcMark::new(vec![bg_center], vec![1.02])
+                .theta_half_widths(vec![half_total])
+                .r_inner(vec![0.99])
+                .colors(vec![Color::from_hex(0x008B_8B8B)]),
+        )
+        .add(
+            // Background track
+            ArcMark::new(vec![bg_center], vec![0.99])
+                .theta_half_widths(vec![half_total])
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x00C8_C8C8)])
+                .stroke(Color::WHITE, 0.5),
+        )
+        .add(
+            // Foreground value arc
+            ArcMark::new(vec![value_center], vec![0.99])
+                .theta_half_widths(vec![half_value])
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x004C_AF50)])
+                .stroke(Color::WHITE, 1.0),
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
@@ -1520,6 +1550,38 @@ fn snapshot_rugmark_x_axis() {
             RugMark::new(xs, AxisDir::X)
                 .length(8.0)
                 .color(Color::from_hex(0x0030_303A)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_polar_grid_with_data() {
+    // Demonstrates polar grid + data overlay together. After Epic I.10
+    // auto-fills tick_positions on Axis::polar_*, this snapshot exercises
+    // the typical 'Figure::polar_axes(...).add(some polar mark)' path so
+    // grid lines (rings + spokes) are visible alongside the data.
+    use starsight_layer_3::marks::{ArcMark, RadarMark};
+    let theta_axis = Axis::polar_angular_categorical(8);
+    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let fig = Figure::new(500, 500)
+        .title("Polar grid + data overlay")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            // 8-spoke wedge ring at outer half.
+            ArcMark::new((0..8).map(f64::from).collect(), vec![55.0; 8])
+                .theta_half_widths(vec![std::f64::consts::PI * 0.06; 8])
+                .colors(vec![Color::from_hex(0x004E_79A7); 8])
+                .stroke(Color::WHITE, 0.6),
+        )
+        .add(
+            // Single radar polyline tracing across all 8 spokes.
+            RadarMark::new(
+                (0..8).map(f64::from).collect(),
+                vec![45.0, 70.0, 90.0, 60.0, 75.0, 50.0, 80.0, 65.0],
+            )
+            .color(Color::from_hex(0x00E1_5759))
+            .width(2.0),
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);

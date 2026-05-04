@@ -7,6 +7,18 @@ expression: svg
 <text fill="#111111" font-family="sans-serif" font-size="16" x="199.2" y="32">
 Sunburst — 3 levels
 </text>
+<path d="M369,316 C369,354.10767,338.10767,385,300,385 C261.89233,385,231,354.10767,231,316 C231,277.89233,261.89233,247,300,247 C338.10767,247,369,277.89233,369,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M438,316 C438,392.2153,376.2153,454,300,454 C223.7847,454,162,392.2153,162,316 C162,239.7847,223.7847,178,300,178 C376.2153,178,438,239.7847,438,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M507,316 C507,430.32294,414.32294,523,300,523 C185.67705,523,93,430.32294,93,316 C93,201.67705,185.67705,109,300,109 C414.32294,109,507,201.67705,507,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M576,316 C576,468.4306,452.4306,592,300,592 C147.5694,592,24,468.4306,24,316 C24,163.5694,147.5694,40,300,40 C452.4306,40,576,163.5694,576,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L300,40" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L30.798431,255.1188" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L181.23686,565.1412" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L516.80707,486.7943" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L514.4115,142.20786" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L177.78445,68.53412" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L31.670929,380.6181" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M300,316 L303.8373,591.9733" fill="none" stroke="#dddddd" stroke-width="1"/>
 <path d="M300,316 L300,233.2 C345.7292,233.2,382.8,270.2708,382.8,316 z" fill="#4e79a7" stroke="#000000" stroke-width="0"/>
 <path d="M300,316 L382.8,316 C382.8,361.7292,345.7292,398.8,300,398.8 z" fill="#f28e2b" stroke="#000000" stroke-width="0"/>
 <path d="M300,316 L300,398.8 C254.27081,398.8,217.2,361.7292,217.2,316 z" fill="#e15759" stroke="#000000" stroke-width="0"/>
