@@ -1097,7 +1097,9 @@ fn snapshot_arcmark_nested_sunburst() {
             // Middle ring: 8 wedges.
             ArcMark::new(
                 (0..8u32)
-                    .map(|i| std::f64::consts::PI * 0.125 + std::f64::consts::PI * 0.25 * f64::from(i))
+                    .map(|i| {
+                        std::f64::consts::PI * 0.125 + std::f64::consts::PI * 0.25 * f64::from(i)
+                    })
                     .collect(),
                 vec![60.0; 8],
             )
@@ -1109,8 +1111,7 @@ fn snapshot_arcmark_nested_sunburst() {
             ArcMark::new(
                 (0..16u32)
                     .map(|i| {
-                        std::f64::consts::PI * 0.0625
-                            + std::f64::consts::PI * 0.125 * f64::from(i)
+                        std::f64::consts::PI * 0.0625 + std::f64::consts::PI * 0.125 * f64::from(i)
                     })
                     .collect(),
                 vec![100.0; 16],

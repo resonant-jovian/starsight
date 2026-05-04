@@ -99,6 +99,10 @@ path = "composition/pie.rs"
 name = "donut"
 path = "composition/donut.rs"
 
+[[example]]
+name = "donut_sunburst"
+path = "composition/donut_sunburst.rs"
+
 # ── scientific ──────────────────────────────────────────────────────────────
 # Real numerical experiments: integrate an ODE, render a relativity diagram.
 # These exist to prove the library handles real data, not just toy series.
@@ -118,6 +122,18 @@ path = "scientific/kruskal_szekeres_line.rs"
 [[example]]
 name = "laser_plasma"
 path = "scientific/laser_plasma.rs"
+
+[[example]]
+name = "nightingale"
+path = "scientific/nightingale.rs"
+
+[[example]]
+name = "gauge"
+path = "scientific/gauge.rs"
+
+[[example]]
+name = "contour_fields"
+path = "scientific/contour_fields.rs"
 
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
