@@ -77,5 +77,8 @@ fn main() -> Result<()> {
                 .stroke(Color::WHITE, 0.8)
                 .label("other causes"),
         )
-        .save(format!("examples/scientific/nightingale{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/nightingale{}.png",
+            theme_suffix_from_env()
+        ))
 }

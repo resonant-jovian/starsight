@@ -56,10 +56,26 @@ fn read_meta(root: &Path) -> Result<Meta> {
         .and_then(|w| w.get("package"))
         .ok_or_else(|| anyhow!("no [workspace.package]"))?;
     Ok(Meta {
-        version: pkg.get("version").and_then(|v| v.as_str()).unwrap_or("0.0.0").to_string(),
-        msrv: pkg.get("rust-version").and_then(|v| v.as_str()).unwrap_or("1.89").to_string(),
-        license: pkg.get("license").and_then(|v| v.as_str()).unwrap_or("GPL-3.0-only").to_string(),
-        edition: pkg.get("edition").and_then(|v| v.as_str()).unwrap_or("2024").to_string(),
+        version: pkg
+            .get("version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("0.0.0")
+            .to_string(),
+        msrv: pkg
+            .get("rust-version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("1.89")
+            .to_string(),
+        license: pkg
+            .get("license")
+            .and_then(|v| v.as_str())
+            .unwrap_or("GPL-3.0-only")
+            .to_string(),
+        edition: pkg
+            .get("edition")
+            .and_then(|v| v.as_str())
+            .unwrap_or("2024")
+            .to_string(),
     })
 }
 
@@ -71,7 +87,8 @@ fn compose(theme: Theme, meta: &Meta) -> Result<Pixmap> {
     let card = render_card_svg(theme, meta);
     let pix = rasterize_svg(&card, W, H)?;
     canvas.draw_pixmap(
-        0, 0,
+        0,
+        0,
         pix.as_ref(),
         &PixmapPaint::default(),
         Transform::identity(),

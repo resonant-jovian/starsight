@@ -11,9 +11,7 @@
 
 use anyhow::{Context, Result, anyhow};
 use std::path::Path;
-use tiny_skia::{
-    FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Shader, Stroke, Transform,
-};
+use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Shader, Stroke, Transform};
 
 use super::eclipse;
 use super::palette::{MONO_FAMILY, SANS, Theme, palette, rgba};
@@ -70,11 +68,32 @@ fn read_meta(root: &Path) -> Result<Meta> {
         .get("workspace")
         .and_then(|w| w.get("package"))
         .ok_or_else(|| anyhow!("no [workspace.package]"))?;
-    let version = pkg.get("version").and_then(|v| v.as_str()).unwrap_or("0.0.0").to_string();
-    let edition = pkg.get("edition").and_then(|v| v.as_str()).unwrap_or("2024").to_string();
-    let msrv = pkg.get("rust-version").and_then(|v| v.as_str()).unwrap_or("1.89").to_string();
-    let license = pkg.get("license").and_then(|v| v.as_str()).unwrap_or("GPL-3.0-only").to_string();
-    Ok(Meta { version, edition, msrv, license })
+    let version = pkg
+        .get("version")
+        .and_then(|v| v.as_str())
+        .unwrap_or("0.0.0")
+        .to_string();
+    let edition = pkg
+        .get("edition")
+        .and_then(|v| v.as_str())
+        .unwrap_or("2024")
+        .to_string();
+    let msrv = pkg
+        .get("rust-version")
+        .and_then(|v| v.as_str())
+        .unwrap_or("1.89")
+        .to_string();
+    let license = pkg
+        .get("license")
+        .and_then(|v| v.as_str())
+        .unwrap_or("GPL-3.0-only")
+        .to_string();
+    Ok(Meta {
+        version,
+        edition,
+        msrv,
+        license,
+    })
 }
 
 fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<Pixmap> {
@@ -116,7 +135,15 @@ fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<Pixmap> {
         let x0 = PAD + col * (cell_w + GUTTER);
         let y0 = PAD + TOP_H + row * (cell_h + GUTTER);
         let path = root.join(format!("{base}{suffix}.png"));
-        composite_thumb(&mut canvas, &path, x0 as i32, y0 as i32, cell_w, cell_h, theme)?;
+        composite_thumb(
+            &mut canvas,
+            &path,
+            x0 as i32,
+            y0 as i32,
+            cell_w,
+            cell_h,
+            theme,
+        )?;
     }
 
     // outer rounded card stroke — drawn last so no later blit can overwrite it
@@ -168,7 +195,11 @@ fn rasterize_svg(svg: &str, w: u32, h: u32) -> Result<Pixmap> {
     let mut pix = Pixmap::new(w, h).ok_or_else(|| anyhow!("alloc top-strip pixmap"))?;
     let scale_x = (w as f32) / tree.size().width();
     let scale_y = (h as f32) / tree.size().height();
-    resvg::render(&tree, Transform::from_scale(scale_x, scale_y), &mut pix.as_mut());
+    resvg::render(
+        &tree,
+        Transform::from_scale(scale_x, scale_y),
+        &mut pix.as_mut(),
+    );
     Ok(pix)
 }
 
@@ -193,8 +224,7 @@ fn composite_thumb(
     let scale = (cell_w as f32 / sw as f32).min(cell_h as f32 / sh as f32);
     let tw = (sw as f32 * scale).round() as u32;
     let th = (sh as f32 * scale).round() as u32;
-    let resized =
-        image::imageops::resize(&img, tw, th, image::imageops::FilterType::Lanczos3);
+    let resized = image::imageops::resize(&img, tw, th, image::imageops::FilterType::Lanczos3);
 
     let tx = x + ((cell_w - tw) / 2) as i32;
     let ty = y + ((cell_h - th) / 2) as i32;

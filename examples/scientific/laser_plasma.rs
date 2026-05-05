@@ -50,7 +50,10 @@ fn main() -> Result<()> {
         .x_label("x bin (159.0..160.0 µm across 200 cells)")
         .y_label("p bin (-5..5 keV/c across 200 cells)")
         .add(HeatmapMark::new(cells).colormap(VIRIDIS).log_scale())
-        .save(format!("examples/scientific/laser_plasma{}.png", theme_suffix_from_env()))?;
+        .save(format!(
+            "examples/scientific/laser_plasma{}.png",
+            theme_suffix_from_env()
+        ))?;
 
     println!("saved laser_plasma.png");
     Ok(())

@@ -45,5 +45,8 @@ fn main() -> Result<()> {
                 .radius(4.0)
                 .label("Group β"),
         )
-        .save(format!("examples/basics/scatter{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/basics/scatter{}.png",
+            theme_suffix_from_env()
+        ))
 }

@@ -81,7 +81,10 @@ pub fn run(args: ChromeArgs) -> Result<()> {
         if let Some(s) = stats.as_ref() {
             status_panel::regen(&root, theme, s)?;
         } else {
-            eprintln!("status_panel ({}): skipping — crates.io fetch failed", theme.suffix());
+            eprintln!(
+                "status_panel ({}): skipping — crates.io fetch failed",
+                theme.suffix()
+            );
         }
         hero::regen(&root, theme)?;
         roadmap::regen(&root, theme)?;

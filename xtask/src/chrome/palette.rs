@@ -89,5 +89,4 @@ pub mod rgba {
 
 pub const SANS: &str =
     "-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif";
-pub const MONO_FAMILY: &str =
-    "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+pub const MONO_FAMILY: &str = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";

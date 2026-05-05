@@ -101,5 +101,8 @@ fn main() -> Result<()> {
         .x_label("session")
         .y_label("price")
         .add(CandlestickMark::new(data))
-        .save(format!("examples/scientific/candlestick{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/candlestick{}.png",
+            theme_suffix_from_env()
+        ))
 }

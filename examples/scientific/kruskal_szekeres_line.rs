@@ -192,7 +192,10 @@ fn main() -> Result<()> {
         label: None,
     });
 
-    fig.save(format!("examples/scientific/kruskal_szekeres_line{}.png", theme_suffix_from_env()))?;
+    fig.save(format!(
+        "examples/scientific/kruskal_szekeres_line{}.png",
+        theme_suffix_from_env()
+    ))?;
     println!("Saved kruskal_szekeres_line.png");
     Ok(())
 }

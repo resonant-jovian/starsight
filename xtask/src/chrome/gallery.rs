@@ -16,15 +16,18 @@ const CAP_H: u32 = 30;
 const RADIUS: f32 = 12.0;
 
 const GALLERY: &[(&str, &str)] = &[
-    ("examples/basics/heatmap",                "heatmap"),
-    ("examples/basics/bubble_scatter",         "bubble · scatter"),
-    ("examples/basics/movie_heatmap",          "categorical heatmap"),
-    ("examples/scientific/gauge",              "gauge · polar arc"),
-    ("examples/scientific/wind_rose",          "wind rose · polar bar"),
-    ("examples/scientific/polar_calendar",     "polar calendar"),
-    ("examples/scientific/kruskal_szekeres_line", "kruskal–szekeres"),
-    ("examples/scientific/laser_plasma",       "laser plasma · contour"),
-    ("examples/scientific/error_bars",         "error bars · rug"),
+    ("examples/basics/heatmap", "heatmap"),
+    ("examples/basics/bubble_scatter", "bubble · scatter"),
+    ("examples/basics/movie_heatmap", "categorical heatmap"),
+    ("examples/scientific/gauge", "gauge · polar arc"),
+    ("examples/scientific/wind_rose", "wind rose · polar bar"),
+    ("examples/scientific/polar_calendar", "polar calendar"),
+    (
+        "examples/scientific/kruskal_szekeres_line",
+        "kruskal–szekeres",
+    ),
+    ("examples/scientific/laser_plasma", "laser plasma · contour"),
+    ("examples/scientific/error_bars", "error bars · rug"),
 ];
 
 pub fn regen(root: &Path, theme: Theme) -> Result<()> {

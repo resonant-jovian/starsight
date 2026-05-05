@@ -22,5 +22,8 @@ fn main() -> Result<()> {
                 .color(Color::from_hex(0x2E_7CB8))
                 .width(2.5),
         )
-        .save(format!("examples/basics/line_chart{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/basics/line_chart{}.png",
+            theme_suffix_from_env()
+        ))
 }

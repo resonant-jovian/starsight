@@ -116,7 +116,10 @@ fn main() -> Result<()> {
         });
     }
 
-    fig.save(format!("examples/scientific/lorenz_line{}.png", theme_suffix_from_env()))?;
+    fig.save(format!(
+        "examples/scientific/lorenz_line{}.png",
+        theme_suffix_from_env()
+    ))?;
     println!("saved lorenz_line.png");
     Ok(())
 }

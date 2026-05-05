@@ -36,8 +36,10 @@ fn render(theme: Theme) -> String {
     ));
 
     // Eclipse mark at (24, 60), size 100×100
-    out.push_str(&format!(r#"  <g transform="translate(24,60)">
-"#));
+    out.push_str(&format!(
+        r#"  <g transform="translate(24,60)">
+"#
+    ));
     out.push_str(&eclipse::svg_inner(p));
     out.push_str("  </g>\n");
 

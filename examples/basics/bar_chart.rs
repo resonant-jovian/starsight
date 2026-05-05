@@ -32,5 +32,8 @@ fn main() -> Result<()> {
                 .label("Gizmos")
                 .group("gizmos"),
         )
-        .save(format!("examples/basics/bar_chart{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/basics/bar_chart{}.png",
+            theme_suffix_from_env()
+        ))
 }

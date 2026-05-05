@@ -12,13 +12,48 @@ use super::svg::{header, write_atomic};
 const W: u32 = 880;
 
 const LAYERS: &[(&str, &str, &str, Status)] = &[
-    ("L7", "export",        "interchange · data sources · pdf",          Status::Planned),
-    ("L6", "interactive",   "input · animation · windowing",             Status::Planned),
-    ("L5", "common",        "figures · plot! · render helpers",          Status::Shipped),
-    ("L4", "composition",   "layouts · faceting · legends · colorbars",  Status::Shipped),
-    ("L3", "components",    "marks · stats · aesthetics · adjustments",  Status::Shipped),
-    ("L2", "modifiers",     "scales · ticks · axes · coords",            Status::Shipped),
-    ("L1", "background",    "primitives · errors · drawing · backends",  Status::Shipped),
+    (
+        "L7",
+        "export",
+        "interchange · data sources · pdf",
+        Status::Planned,
+    ),
+    (
+        "L6",
+        "interactive",
+        "input · animation · windowing",
+        Status::Planned,
+    ),
+    (
+        "L5",
+        "common",
+        "figures · plot! · render helpers",
+        Status::Shipped,
+    ),
+    (
+        "L4",
+        "composition",
+        "layouts · faceting · legends · colorbars",
+        Status::Shipped,
+    ),
+    (
+        "L3",
+        "components",
+        "marks · stats · aesthetics · adjustments",
+        Status::Shipped,
+    ),
+    (
+        "L2",
+        "modifiers",
+        "scales · ticks · axes · coords",
+        Status::Shipped,
+    ),
+    (
+        "L1",
+        "background",
+        "primitives · errors · drawing · backends",
+        Status::Shipped,
+    ),
 ];
 
 #[derive(Copy, Clone)]

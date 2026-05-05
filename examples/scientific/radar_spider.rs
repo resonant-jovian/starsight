@@ -50,5 +50,8 @@ fn main() -> Result<()> {
                 .color(Color::from_hex(0x0055_A868))
                 .label("Player C"),
         )
-        .save(format!("examples/scientific/radar_spider{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/radar_spider{}.png",
+            theme_suffix_from_env()
+        ))
 }

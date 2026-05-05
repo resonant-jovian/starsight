@@ -26,5 +26,8 @@ fn main() -> Result<()> {
         .x_label("X bin")
         .y_label("Y bin")
         .add(HeatmapMark::new(data))
-        .save(format!("examples/basics/heatmap{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/basics/heatmap{}.png",
+            theme_suffix_from_env()
+        ))
 }

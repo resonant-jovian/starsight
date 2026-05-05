@@ -26,7 +26,10 @@ fn render(theme: Theme, s: &crates_io::Stats) -> String {
         H,
         &format!(
             "starsight live status · v{} · rust {} · {} ({})",
-            s.version, s.msrv, s.license, theme.suffix()
+            s.version,
+            s.msrv,
+            s.license,
+            theme.suffix()
         ),
         "starsight status panel",
     );

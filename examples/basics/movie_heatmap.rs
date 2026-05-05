@@ -47,7 +47,10 @@ fn main() -> Result<()> {
         .x_label("Rotten Tomatoes bin (0..100% across 30 buckets)")
         .y_label("IMDB bin (1.0..10.0 across 30 buckets)")
         .add(HeatmapMark::new(cells).colormap(VIRIDIS).log_scale())
-        .save(format!("examples/basics/movie_heatmap{}.png", theme_suffix_from_env()))?;
+        .save(format!(
+            "examples/basics/movie_heatmap{}.png",
+            theme_suffix_from_env()
+        ))?;
 
     println!("saved movie_heatmap.png");
     Ok(())

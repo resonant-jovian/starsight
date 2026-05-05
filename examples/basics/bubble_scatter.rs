@@ -86,7 +86,10 @@ fn main() -> Result<()> {
                 .alpha(0.5)
                 .label("Wine samples"),
         )
-        .save(format!("examples/basics/bubble_scatter{}.png", theme_suffix_from_env()))?;
+        .save(format!(
+            "examples/basics/bubble_scatter{}.png",
+            theme_suffix_from_env()
+        ))?;
 
     println!("saved bubble_scatter.png");
     Ok(())

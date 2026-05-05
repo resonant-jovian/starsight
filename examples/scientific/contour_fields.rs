@@ -81,5 +81,8 @@ fn main() -> Result<()> {
             |nx, ny, x0, x1, y0, y1| Grid::sample(nx, ny, x0, x1, y0, y1, gaussian_mixture),
             vec![0.05, 0.1, 0.3, 0.5, 0.7, 0.9],
         ));
-    mp.save(format!("examples/scientific/contour_fields{}.png", theme_suffix_from_env()))
+    mp.save(format!(
+        "examples/scientific/contour_fields{}.png",
+        theme_suffix_from_env()
+    ))
 }

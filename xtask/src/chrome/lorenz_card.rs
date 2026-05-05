@@ -33,9 +33,7 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
 
 fn compose(root: &Path, theme: Theme) -> Result<Pixmap> {
     let suffix = theme.example_suffix();
-    let src = root.join(format!(
-        "examples/scientific/lorenz_line{suffix}.png"
-    ));
+    let src = root.join(format!("examples/scientific/lorenz_line{suffix}.png"));
     let img = image::open(&src)
         .with_context(|| format!("opening {}", src.display()))?
         .to_rgba8();

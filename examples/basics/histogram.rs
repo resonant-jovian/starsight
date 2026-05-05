@@ -25,5 +25,8 @@ fn main() -> Result<()> {
         .x_label("Value")
         .y_label("Frequency")
         .add(HistogramMark::new(samples).color(Color::from_hex(0x4F_8AB8)))
-        .save(format!("examples/basics/histogram{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/basics/histogram{}.png",
+            theme_suffix_from_env()
+        ))
 }

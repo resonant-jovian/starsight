@@ -72,13 +72,16 @@ pub fn fetch() -> Result<Stats> {
     let updated_days_ago = days_since(&krate.updated_at)?;
 
     Ok(Stats {
-        version: krate.max_stable_version.clone().unwrap_or_else(|| krate.max_version.clone()),
-        edition: v_meta.edition.clone().unwrap_or_else(|| "2024".into()),
-        msrv: v_meta
-            .rust_version
+        version: krate
+            .max_stable_version
             .clone()
-            .unwrap_or_else(|| "1.89".into()),
-        license: v_meta.license.clone().unwrap_or_else(|| "GPL-3.0-only".into()),
+            .unwrap_or_else(|| krate.max_version.clone()),
+        edition: v_meta.edition.clone().unwrap_or_else(|| "2024".into()),
+        msrv: v_meta.rust_version.clone().unwrap_or_else(|| "1.89".into()),
+        license: v_meta
+            .license
+            .clone()
+            .unwrap_or_else(|| "GPL-3.0-only".into()),
         downloads_30d,
         downloads_30d_total,
         downloads_lifetime: krate.downloads,

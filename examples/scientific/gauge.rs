@@ -52,5 +52,8 @@ fn main() -> Result<()> {
                 .colors(vec![Color::from_hex(0x004C_AF50)])
                 .stroke(Color::WHITE, 1.0),
         )
-        .save(format!("examples/scientific/gauge{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/gauge{}.png",
+            theme_suffix_from_env()
+        ))
 }

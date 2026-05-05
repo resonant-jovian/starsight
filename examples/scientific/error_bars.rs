@@ -70,5 +70,8 @@ fn main() -> Result<()> {
                 .cap_width(8.0)
                 .width(1.5),
         )
-        .save(format!("examples/scientific/error_bars{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/error_bars{}.png",
+            theme_suffix_from_env()
+        ))
 }

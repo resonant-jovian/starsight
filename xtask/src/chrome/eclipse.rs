@@ -53,4 +53,3 @@ pub fn svg_inner(p: &Palette) -> String {
 
     out
 }
-

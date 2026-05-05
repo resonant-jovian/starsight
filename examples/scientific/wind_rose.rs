@@ -86,5 +86,8 @@ fn main() -> Result<()> {
                 .stroke(Color::WHITE, 0.6)
                 .label("15+ m/s"),
         )
-        .save(format!("examples/scientific/wind_rose{}.png", theme_suffix_from_env()))
+        .save(format!(
+            "examples/scientific/wind_rose{}.png",
+            theme_suffix_from_env()
+        ))
 }
