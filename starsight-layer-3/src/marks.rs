@@ -51,6 +51,7 @@ pub mod box_plot;
 pub mod candlestick;
 pub mod contour;
 pub mod errorbar;
+pub mod extent;
 pub(crate) mod palette;
 pub mod pie;
 pub mod radar;
@@ -63,6 +64,7 @@ pub use box_plot::{BoxPlotGroup, BoxPlotMark};
 pub use candlestick::{CandlestickMark, Ohlc};
 pub use contour::{ContourMark, ContourMode};
 pub use errorbar::{ErrorBarMark, ErrorBarOrientation};
+pub use extent::MarkExtent;
 pub use pie::PieMark;
 pub use radar::RadarMark;
 pub use rect_polar::PolarRectMark;
@@ -160,6 +162,36 @@ pub trait Mark {
     }
     /// Bounding box of this mark's data, or `None` if it is empty.
     fn data_extent(&self) -> Option<DataExtent>;
+    /// Pixel-space rendered footprint of this mark.
+    ///
+    /// Used by the legend dodge in layer-5 to find a corner that does not
+    /// overlap any mark. The default impl projects [`Self::data_extent`]
+    /// through `coord` and returns [`MarkExtent::Bbox`] — exact for marks
+    /// whose footprint matches their data bbox (point, bar, heatmap, candle,
+    /// pie, donut, rug). Marks where the bbox over-claims coverage
+    /// ([`LineMark`] on diagonal data, [`AreaMark`] / contour bands that
+    /// fill non-rectangular regions, polar marks whose footprint is annular)
+    /// override this to a tighter [`MarkExtent`] variant.
+    ///
+    /// For non-cartesian coords (e.g. [`PolarCoord`]) the default falls back
+    /// to `coord.plot_area()` because projecting only the `(x_min, y_min)` /
+    /// `(x_max, y_max)` corners of a polar [`DataExtent`] does not bound the
+    /// disk-space footprint. Polar marks should override.
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        if let Some(ext) = self.data_extent()
+            && coord.as_any().downcast_ref::<CartesianCoord>().is_some()
+        {
+            let p1 = coord.data_to_pixel(ext.x_min, ext.y_min);
+            let p2 = coord.data_to_pixel(ext.x_max, ext.y_max);
+            return MarkExtent::Bbox(Rect::new(
+                p1.x.min(p2.x),
+                p1.y.min(p2.y),
+                p1.x.max(p2.x),
+                p1.y.max(p2.y),
+            ));
+        }
+        MarkExtent::Bbox(coord.plot_area())
+    }
     /// Returns the color of this mark for legend display.
     fn legend_color(&self) -> Option<Color> {
         None
