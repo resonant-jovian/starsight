@@ -851,6 +851,52 @@ fn snapshot_violin_palette() {
 }
 
 #[test]
+fn snapshot_violin_raincloud() {
+    // Composition for Epic I.8: violin envelope (with built-in inner box) +
+    // jittered PointMark strip overlay shifted to the right side of each
+    // band. Two categories with visually distinct shapes — bimodal vs
+    // unimodal — so the inner box plus envelope plus rain reads as three
+    // distinct layers.
+    let groups = vec![
+        ViolinGroup::new("bimodal", vec![1.0, 1.5, 2.0, 2.5, 3.0, 7.0, 7.5, 8.0, 8.5, 9.0]),
+        ViolinGroup::new("unimodal", vec![3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]),
+    ];
+    let palette = vec![
+        Color::from_hex(0x0033_77BB),
+        Color::from_hex(0x0033_AA66),
+    ];
+    // Strip points at band-right (idx + 0.78) with deterministic ±0.13 jitter.
+    let strip_x = vec![
+        0.78, 0.85, 0.71, 0.82, 0.76, // bimodal — 5 reproducible jitter values
+        1.78, 1.85, 1.71, 1.82, 1.76, // unimodal — same offsets, shifted band
+    ];
+    let strip_y = vec![1.0, 8.0, 2.5, 7.5, 1.5, 4.0, 5.5, 3.5, 6.0, 5.0];
+    let strip_colors: Vec<Color> = (0..5)
+        .map(|_| palette[0])
+        .chain((0..5).map(|_| palette[1]))
+        .collect();
+    let fig = Figure::new(600, 400)
+        .title("Raincloud — violin + strip")
+        .x_label("category")
+        .y_label("value")
+        .add(
+            ViolinMark::new(groups)
+                .palette(palette)
+                .half_width(0.20)
+                .show_box(true)
+                .cut(0.0),
+        )
+        .add(
+            PointMark::new(strip_x, strip_y)
+                .colors(strip_colors)
+                .radius(2.5)
+                .alpha(0.7),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
 fn snapshot_pie_basic() {
     // Five-slice pie with the default palette and percentage labels at each
     // midpoint. Visual baseline: clean wedges at the conventional top start

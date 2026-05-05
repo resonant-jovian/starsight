@@ -1,6 +1,6 @@
 # starsight examples
 
-Thirty-eight runnable examples grouped by what they teach. Each `.rs` file lives
+Thirty-nine runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -60,6 +60,7 @@ auto-derived legend lives here.
 | [`donut`](composition/donut.rs) — [PNG](composition/donut.png) | `PieMark` with `inner_radius(0.5)` and raw value labels |
 | [`donut_sunburst`](composition/donut_sunburst.rs) — [PNG](composition/donut_sunburst.png) | Three-level nested `ArcMark` sunburst on `Figure::polar_axes` (spec #39 var C) |
 | [`rug_with_histogram`](composition/rug_with_histogram.rs) — [PNG](composition/rug_with_histogram.png) | `HistogramMark` (40-bin Gaussian) + `RugMark` overlay on the x-axis margin showing per-sample density |
+| [`violin_raincloud`](composition/violin_raincloud.rs) — [PNG](composition/violin_raincloud.png) | Raincloud composition — `ViolinMark` with built-in inner box plot, plus a jittered `PointMark` strip shifted to the right side of each band (spec #19) |
 
 ### [`scientific/`](scientific) — real numerical experiments
 

@@ -92,6 +92,10 @@ name = "violin"
 path = "composition/violin.rs"
 
 [[example]]
+name = "violin_raincloud"
+path = "composition/violin_raincloud.rs"
+
+[[example]]
 name = "pie"
 path = "composition/pie.rs"
 
