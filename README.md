@@ -6,10 +6,11 @@
       Ammonia sanitization.
     - No inline <svg>, no <style>, no Mermaid, no class/id hooks.
     - LaTeX $$...$$ renders on GitHub; degrades to readable source on crates.io.
-  Image paths are relative on the development branch for local preview.
-  A pre-publish hook (.github/workflows/release.yml) rewrites them to
-  absolute https://raw.githubusercontent.com/.../v<TAG>/assets/... so the
-  published-crate README on crates.io resolves images correctly.
+  PREVIEW MODE: image and link paths are relative (`assets/...`, `./examples/...`)
+  for inspection on the development branch. A pre-publish hook (or sed-style
+  rewrite) flips them to absolute https://raw.githubusercontent.com/.../main/...
+  before crates.io publish — relative paths don't resolve on crates.io
+  (rust-lang/crates.io issue #982).
   Each chrome asset has paired light + dark variants under `assets/...-{light,dark}.{svg,png}`,
   selected via <picture> + prefers-color-scheme (works on GitHub since 2022 and on
   crates.io since the July 2024 update).
@@ -163,11 +164,12 @@ fn main() -> starsight::Result<()> {
 
 Real source: [`examples/scientific/lorenz_line.rs`](./examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](./examples/scientific/kruskal_szekeres_line.rs).
 
-<p align="center">
-  <img src="examples/scientific/lorenz_line.png"
-       alt="Eleven Lorenz attractor trajectories projected onto the x–z plane, coloured by ρ"
-       width="78%">
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/lorenz-dark.png">
+  <img alt="Eleven Lorenz attractor trajectories projected onto the x–z plane, coloured by ρ — bordered chrome card."
+       src="assets/lorenz-light.png"
+       width="100%">
+</picture>
 
 ## showcase
 
@@ -309,3 +311,12 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
   orcid   = {0009-0008-1372-1727}
 }
 ```
+
+---
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/social/card-dark.png">
+  <img alt="starsight wordmark and tagline — scientific visualization for Rust, typed, layered, eight backends. v0.3.0 · rust 1.89 · edition 2024 · GPL-3.0-only · github.com/resonant-jovian/starsight"
+       src="assets/social/card-light.png"
+       width="100%">
+</picture>

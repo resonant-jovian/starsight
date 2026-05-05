@@ -20,8 +20,10 @@ mod crates_io;
 mod eclipse;
 mod gallery;
 mod hero;
+mod lorenz_card;
 mod palette;
 mod roadmap;
+mod social_card;
 mod status_panel;
 mod svg;
 mod wordmark;
@@ -53,6 +55,8 @@ pub enum Asset {
     Architecture,
     Gallery,
     Wordmark,
+    LorenzCard,
+    SocialCard,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -88,6 +92,8 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             architecture::regen(&root, theme)?;
             gallery::regen(&root, theme)?;
             wordmark::regen(&root, theme)?;
+            lorenz_card::regen(&root, theme)?;
+            social_card::regen(&root, theme)?;
         }
     }
     Ok(())
@@ -104,6 +110,8 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::Architecture => architecture::regen(root, theme),
         Asset::Gallery => gallery::regen(root, theme),
         Asset::Wordmark => wordmark::regen(root, theme),
+        Asset::LorenzCard => lorenz_card::regen(root, theme),
+        Asset::SocialCard => social_card::regen(root, theme),
     }
 }
 

@@ -107,9 +107,10 @@ fn render(current: &str, theme: Theme) -> String {
             }
             State::Planned => {
                 out.push_str(&format!(
-                    r#"  <circle cx="{cx:.1}" cy="{y}" r="5" fill="none" stroke="{c}" stroke-width="1.2"/>
+                    r#"  <circle cx="{cx:.1}" cy="{y}" r="5" fill="{bg}" stroke="{c}" stroke-width="1.2"/>
 "#,
                     y = axis_y,
+                    bg = p.card,
                     c = p.muted
                 ));
             }
@@ -163,8 +164,9 @@ fn render(current: &str, theme: Theme) -> String {
                 c = p.text
             )),
             State::Planned => out.push_str(&format!(
-                r#"  <circle cx="{x:.1}" cy="{ly:.1}" r="4" fill="none" stroke="{c}" stroke-width="1"/>
+                r#"  <circle cx="{x:.1}" cy="{ly:.1}" r="4" fill="{bg}" stroke="{c}" stroke-width="1"/>
 "#,
+                bg = p.card,
                 c = p.muted
             )),
         }

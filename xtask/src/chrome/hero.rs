@@ -87,9 +87,6 @@ fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<Pixmap> {
     let (br, bg, bb, ba) = rgba::bg(theme);
     canvas.fill(tiny_skia::Color::from_rgba8(br, bg, bb, ba));
 
-    // outer rounded card (full canvas extent)
-    draw_card(&mut canvas, theme);
-
     // top strip via SVG → raster
     let top = render_top_strip(meta, theme)?;
     canvas.draw_pixmap(
@@ -121,6 +118,9 @@ fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<Pixmap> {
         let path = root.join(format!("{base}{suffix}.png"));
         composite_thumb(&mut canvas, &path, x0 as i32, y0 as i32, cell_w, cell_h, theme)?;
     }
+
+    // outer rounded card stroke — drawn last so no later blit can overwrite it
+    draw_card(&mut canvas, theme);
     Ok(canvas)
 }
 

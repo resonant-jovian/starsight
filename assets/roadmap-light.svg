@@ -13,34 +13,34 @@
   <circle cx="170.7" cy="100" r="5" fill="#1a1a1a"/>
   <text x="170.7" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#1a1a1a" text-anchor="middle">0.3</text>
   <text x="170.7" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#555555" text-anchor="middle">stats</text>
-  <circle cx="238.0" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="238.0" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="238.0" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.4</text>
   <text x="238.0" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">layout</text>
-  <circle cx="305.3" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="305.3" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="305.3" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.5</text>
   <text x="305.3" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">scales</text>
-  <circle cx="372.7" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="372.7" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="372.7" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.6</text>
   <text x="372.7" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">gpu</text>
-  <circle cx="440.0" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="440.0" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="440.0" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.7</text>
   <text x="440.0" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">anim</text>
-  <circle cx="507.3" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="507.3" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="507.3" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.8</text>
   <text x="507.3" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">term</text>
-  <circle cx="574.7" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="574.7" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="574.7" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.9</text>
   <text x="574.7" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">3d</text>
-  <circle cx="642.0" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="642.0" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="642.0" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.10</text>
   <text x="642.0" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">export</text>
-  <circle cx="709.3" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="709.3" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="709.3" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.11</text>
   <text x="709.3" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">data</text>
-  <circle cx="776.7" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="776.7" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="776.7" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">0.12</text>
   <text x="776.7" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">polish</text>
-  <circle cx="844.0" cy="100" r="5" fill="none" stroke="#888888" stroke-width="1.2"/>
+  <circle cx="844.0" cy="100" r="5" fill="#ffffff" stroke="#888888" stroke-width="1.2"/>
   <text x="844.0" y="78" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#888888" text-anchor="middle">1.0</text>
   <text x="844.0" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888" text-anchor="middle">stable</text>
   <circle cx="30.0" cy="174.0" r="4" fill="#1a1a1a"/>
@@ -48,6 +48,6 @@
   <circle cx="134.0" cy="174.0" r="7" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
   <circle cx="134.0" cy="174.0" r="3.5" fill="#1a1a1a"/>
   <text x="144.0" y="178.0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#555555">current</text>
-  <circle cx="239.0" cy="174.0" r="4" fill="none" stroke="#888888" stroke-width="1"/>
+  <circle cx="239.0" cy="174.0" r="4" fill="#ffffff" stroke="#888888" stroke-width="1"/>
   <text x="249.0" y="178.0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#555555">planned</text>
 </svg>

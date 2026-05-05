@@ -54,8 +54,6 @@ fn compose(root: &Path, theme: Theme) -> Result<Pixmap> {
     let (br, bg, bb, ba) = rgba::bg(theme);
     canvas.fill(tiny_skia::Color::from_rgba8(br, bg, bb, ba));
 
-    draw_card(&mut canvas, theme);
-
     let p = palette(theme);
     let eyebrow = format!(
         r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">
@@ -115,6 +113,7 @@ fn compose(root: &Path, theme: Theme) -> Result<Pixmap> {
             None,
         );
     }
+    draw_card(&mut canvas, theme);
     Ok(canvas)
 }
 
