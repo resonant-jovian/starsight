@@ -2,26 +2,20 @@
   starsight — README.md
   Renders on GitHub, crates.io (Comrak + Ammonia), docs.rs, lib.rs.
   Constraints respected:
-    - Absolute-URL <img> only (relative paths don't resolve on crates.io —
-      see rust-lang/crates.io issue #982).
-    - <picture> with prefers-color-scheme works on GitHub *and* crates.io
-      (since the July 2024 crates.io update).
     - <details>/<summary>, GFM tables, GitHub alerts (> [!NOTE]) all survive
       Ammonia sanitization.
     - No inline <svg>, no <style>, no Mermaid, no class/id hooks.
     - LaTeX $$...$$ renders on GitHub; degrades to readable source on crates.io.
-  All asset URLs reference the `main` branch — the published-crate README
-  on crates.io will continue resolving these as long as the asset paths stay
-  stable. A pre-publish URL-rewrite step can pin to a version tag if needed.
+  Image paths are relative on the development branch for local preview.
+  A pre-publish hook (.github/workflows/release.yml) rewrites them to
+  absolute https://raw.githubusercontent.com/.../v<TAG>/assets/... so the
+  published-crate README on crates.io resolves images correctly.
+  Single-variant chrome assets only — light theme, monochrome (no dark mode).
 -->
 
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="assets/hero/starsight-hero-dark.png">
-  <img alt="starsight — scientific visualization for Rust. Eclipse mark, wordmark, tagline, and a 3×3 grid of real example renders: line chart, scatter, bar chart, histogram, contour fields, nightingale, candlestick, radar spider, Lorenz attractor."
-       src="assets/hero/starsight-hero-light.png"
-       width="100%">
-</picture>
+<img alt="starsight — scientific visualization for Rust. Eclipse mark, wordmark, tagline, and a 3×3 grid of real example renders: line chart, scatter, bar chart, histogram, contour fields, nightingale, candlestick, radar spider, Lorenz attractor."
+     src="assets/hero/starsight-hero-light.png"
+     width="100%">
 
 # starsight
 
@@ -29,13 +23,9 @@
 
 starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatmap, box-plot, violin, KDE, pie, contour, candlestick, polar arc, radar, error bars, …) into pixel-perfect output through a tiny-skia or SVG backend, with PDF, terminal, and GPU paths arriving on the [roadmap](#roadmap). It is designed for the moments when a paper, a notebook, and a service need to render the same chart.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="assets/status/panel-dark.svg">
-  <img alt="Live status panel: starsight v0.3.0 · MSRV rust 1.89 · GPL-3.0-only · edition 2024 · 28 downloads since 2026-04-07 · 0 dependents · updated 8 days ago"
-       src="assets/status/panel-light.svg"
-       width="100%">
-</picture>
+<img alt="Live status panel: starsight version, MSRV, license, edition, 30-day download trajectory, dependents, last update — fetched daily from the crates.io API."
+     src="assets/status/panel-light.svg"
+     width="100%">
 
 > [!WARNING]
 > **starsight is at 0.3.0 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
@@ -79,13 +69,9 @@ The `default` feature ships a usable starting set: `LineMark`, `PointMark`, `Bar
 
 ## architecture
 
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="assets/architecture-dark.svg">
-  <img alt="starsight architecture diagram — the facade crate re-exports seven layers: L1 background (primitives, error types, drawing, backends), L2 modifiers (scales, ticks, axes, coordinate systems), L3 components (marks, stats, aesthetics, position adjustments), L4 composition (layouts, faceting, legends, colorbars), L5 common (figures, plot!, rendering helpers, data acceptance), L6 interactivity (planned), L7 export (planned). Layer N may depend only on layers N-1 through 1; enforced at workspace Cargo.toml level."
-       src="assets/architecture-light.svg"
-       width="100%">
-</picture>
+<img alt="starsight architecture diagram — the facade crate re-exports seven layers: L1 background (primitives, error types, drawing, backends), L2 modifiers (scales, ticks, axes, coordinate systems), L3 components (marks, stats, aesthetics, position adjustments), L4 composition (layouts, faceting, legends, colorbars), L5 common (figures, plot!, rendering helpers, data acceptance), L6 interactivity (planned), L7 export (planned). Layer N may depend only on layers N-1 through 1; enforced at workspace Cargo.toml level."
+     src="assets/architecture-light.svg"
+     width="100%">
 
 A pipeline of three stages — **compose**, **resolve**, **render**:
 
@@ -174,13 +160,9 @@ Real source: [`examples/scientific/lorenz_line.rs`](./examples/scientific/lorenz
 
 ## showcase
 
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="assets/gallery-dark.png">
-  <img alt="starsight showcase composite — 9 example renders across 3×3: heatmap, bubble scatter, categorical heatmap, gauge polar arc, wind rose polar bar, polar calendar, Kruskal–Szekeres line, laser plasma contour, error bars with rug."
-       src="assets/gallery-light.png"
-       width="100%">
-</picture>
+<img alt="starsight showcase composite — 9 example renders across 3×3: heatmap, bubble scatter, categorical heatmap, gauge polar arc, wind rose polar bar, polar calendar, Kruskal–Szekeres line, laser plasma contour, error bars with rug."
+     src="assets/gallery-light.png"
+     width="100%">
 
 Source for every panel — and 29 more — lives under [`examples/`](./examples), regenerated by `cargo xtask gallery`.
 
@@ -259,13 +241,9 @@ The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with
 
 ## roadmap
 
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="assets/roadmap-dark.svg">
-  <img alt="starsight roadmap timeline 0.1 → 1.0 — 3 of 13 milestones shipped (foundation, core charts, stats + polar). Currently 0.3."
-       src="assets/roadmap-light.svg"
-       width="100%">
-</picture>
+<img alt="starsight roadmap timeline 0.1 → 1.0 — 3 of 13 milestones shipped (foundation, core charts, stats + polar). Currently 0.3."
+     src="assets/roadmap-light.svg"
+     width="100%">
 
 - [x] **0.1** Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark` / `PointMark`, `Figure`, `plot!`, snapshots
 - [x] **0.2** Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`

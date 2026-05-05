@@ -1,0 +1,56 @@
+name: Chrome
+
+# Daily regeneration of README chrome assets that carry live data:
+#   - assets/status/panel-light.svg  (downloads, dependents, updated_at)
+#   - assets/hero/starsight-hero-light.png  (meta strip from Cargo.toml)
+#   - assets/roadmap-light.svg  (current milestone derived from version)
+#
+# Run: 06:00 UTC daily, on push that touches the regenerator, manual.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "xtask/src/chrome/**"
+      - "xtask/Cargo.toml"
+      - "Cargo.toml"
+  workflow_dispatch:
+
+concurrency:
+  group: chrome
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
+
+jobs:
+  chrome:
+    name: regen live chrome
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate live chrome assets
+        run: cargo run -p xtask --release -- chrome --live
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- assets/; then
+            echo "no chrome changes"
+            exit 0
+          fi
+          git config user.name  "starsight-bot"
+          git config user.email "noreply@github.com"
+          git add assets/status/ assets/hero/ assets/roadmap-light.svg
+          git commit -m "chore(chrome): regen live assets [skip ci]"
+          git push

@@ -10,6 +10,7 @@
 //! - `cargo xtask benches`             — run the benchmarks suite (stub).
 
 mod benches;
+mod chrome;
 mod gallery;
 mod showcase;
 mod snapshots;
@@ -31,6 +32,8 @@ enum Cmd {
         #[command(subcommand)]
         action: SnapshotsAction,
     },
+    /// Regenerate documentation chrome assets (status panel, hero, roadmap, …).
+    Chrome(chrome::ChromeArgs),
 }
 
 #[derive(Subcommand)]
@@ -53,5 +56,6 @@ fn main() -> anyhow::Result<()> {
             SnapshotsAction::Accept => snapshots::accept(),
             SnapshotsAction::Prune => snapshots::prune(),
         },
+        Cmd::Chrome(args) => chrome::run(args),
     }
 }
