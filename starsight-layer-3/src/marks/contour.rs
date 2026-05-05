@@ -387,7 +387,10 @@ impl Mark for ContourMark {
             cart.data_to_pixel(self.grid.x_max, self.grid.y_max).x,
             cart.data_to_pixel(self.grid.x_max, self.grid.y_min).y,
         ));
-        if matches!(self.mode, ContourMode::FilledBands | ContourMode::FilledWithLines) {
+        if matches!(
+            self.mode,
+            ContourMode::FilledBands | ContourMode::FilledWithLines
+        ) {
             return bbox;
         }
         // Isolines: bbox is much larger than the actual stroke. Project the

@@ -9,6 +9,21 @@
 //! - `cargo xtask snapshots prune`     — delete orphan `.snap` files.
 //! - `cargo xtask benches`             — run the benchmarks suite (stub).
 
+// xtask is build automation, not library code — graphics-heavy chrome rendering
+// uses conventional short names (cx, cy, r, w, h, dx, dy, ...) and a relaxed
+// clippy stance is appropriate.
+#![allow(
+    clippy::many_single_char_names,
+    clippy::needless_pass_by_value,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::format_push_string,
+    clippy::field_reassign_with_default,
+    clippy::match_wildcard_for_single_variants,
+    clippy::unnecessary_wraps
+)]
+
 mod benches;
 mod chrome;
 mod gallery;
