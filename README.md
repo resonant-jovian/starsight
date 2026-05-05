@@ -17,9 +17,9 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)"
-          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/hero/starsight-hero-dark.png">
+          srcset="assets/hero/starsight-hero-dark.png">
   <img alt="starsight — scientific visualization for Rust. Eclipse mark, wordmark, tagline, and a 3×3 grid of real example renders: line chart, scatter, bar chart, histogram, contour fields, nightingale, candlestick, radar spider, Lorenz attractor."
-       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/hero/starsight-hero-light.png"
+       src="assets/hero/starsight-hero-light.png"
        width="100%">
 </picture>
 
@@ -31,9 +31,9 @@ starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatma
 
 <picture>
   <source media="(prefers-color-scheme: dark)"
-          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/status/panel-dark.svg">
+          srcset="assets/status/panel-dark.svg">
   <img alt="Live status panel: starsight v0.3.0 · MSRV rust 1.89 · GPL-3.0-only · edition 2024 · 28 downloads since 2026-04-07 · 0 dependents · updated 8 days ago"
-       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/status/panel-light.svg"
+       src="assets/status/panel-light.svg"
        width="100%">
 </picture>
 
@@ -57,7 +57,7 @@ fn main() -> starsight::Result<()> {
 }
 ```
 
-The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×600 figure with a single `LineMark` and dispatches to the tiny-skia backend by file extension. There is no global state, no implicit theme, no runtime config — every figure is a value. See [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples) for 38 self-contained programs.
+The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×600 figure with a single `LineMark` and dispatches to the tiny-skia backend by file extension. There is no global state, no implicit theme, no runtime config — every figure is a value. See [`examples/`](./examples) for 38 self-contained programs.
 
 ## install
 
@@ -81,9 +81,9 @@ The `default` feature ships a usable starting set: `LineMark`, `PointMark`, `Bar
 
 <picture>
   <source media="(prefers-color-scheme: dark)"
-          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/architecture-dark.svg">
+          srcset="assets/architecture-dark.svg">
   <img alt="starsight architecture diagram — the facade crate re-exports seven layers: L1 background (primitives, error types, drawing, backends), L2 modifiers (scales, ticks, axes, coordinate systems), L3 components (marks, stats, aesthetics, position adjustments), L4 composition (layouts, faceting, legends, colorbars), L5 common (figures, plot!, rendering helpers, data acceptance), L6 interactivity (planned), L7 export (planned). Layer N may depend only on layers N-1 through 1; enforced at workspace Cargo.toml level."
-       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/architecture-light.svg"
+       src="assets/architecture-light.svg"
        width="100%">
 </picture>
 
@@ -164,10 +164,10 @@ fn main() -> starsight::Result<()> {
 
 </details>
 
-Real source: [`examples/scientific/lorenz_line.rs`](https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/kruskal_szekeres_line.rs).
+Real source: [`examples/scientific/lorenz_line.rs`](./examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](./examples/scientific/kruskal_szekeres_line.rs).
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/scientific/lorenz_line.png"
+  <img src="examples/scientific/lorenz_line.png"
        alt="Eleven Lorenz attractor trajectories projected onto the x–z plane, coloured by ρ"
        width="78%">
 </p>
@@ -176,13 +176,13 @@ Real source: [`examples/scientific/lorenz_line.rs`](https://github.com/resonant-
 
 <picture>
   <source media="(prefers-color-scheme: dark)"
-          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/gallery-dark.png">
+          srcset="assets/gallery-dark.png">
   <img alt="starsight showcase composite — 9 example renders across 3×3: heatmap, bubble scatter, categorical heatmap, gauge polar arc, wind rose polar bar, polar calendar, Kruskal–Szekeres line, laser plasma contour, error bars with rug."
-       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/gallery-light.png"
+       src="assets/gallery-light.png"
        width="100%">
 </picture>
 
-Source for every panel — and 29 more — lives under [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples), regenerated by `cargo xtask gallery`.
+Source for every panel — and 29 more — lives under [`examples/`](./examples), regenerated by `cargo xtask gallery`.
 
 ## what works at 0.3.0
 
@@ -261,9 +261,9 @@ The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with
 
 <picture>
   <source media="(prefers-color-scheme: dark)"
-          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/roadmap-dark.svg">
+          srcset="assets/roadmap-dark.svg">
   <img alt="starsight roadmap timeline 0.1 → 1.0 — 3 of 13 milestones shipped (foundation, core charts, stats + polar). Currently 0.3."
-       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/roadmap-light.svg"
+       src="assets/roadmap-light.svg"
        width="100%">
 </picture>
 
@@ -281,7 +281,7 @@ The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with
 - [ ] **0.12** Documentation, examples, gallery polish
 - [ ] **1.0** Stable release — semver guarantees freeze
 
-The full task-level roadmap with 338 checkboxes lives in [`.spec/STARSIGHT.md`](https://github.com/resonant-jovian/starsight/blob/main/.spec/STARSIGHT.md).
+The full task-level roadmap with 338 checkboxes lives in [`.spec/STARSIGHT.md`](./.spec/STARSIGHT.md).
 
 ## minimum supported rust version
 
@@ -289,11 +289,11 @@ starsight 0.3.x compiles on **Rust 1.89** and later, edition 2024. The MSRV trac
 
 ## contributing
 
-Contribution guide: [`CONTRIBUTING.md`](https://github.com/resonant-jovian/starsight/blob/main/CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](https://github.com/resonant-jovian/starsight/blob/main/AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
+Contribution guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](./AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
 
 ## license
 
-starsight is licensed under **GPL-3.0-only**. See [`LICENSE`](https://github.com/resonant-jovian/starsight/blob/main/LICENSE). Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If the GPL is incompatible with your use case, [reach out](mailto:albin@sjoegren.se) — a permissively-licensed core may be carved out post-1.0.
+starsight is licensed under **GPL-3.0-only**. See [`LICENSE`](./LICENSE). Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If the GPL is incompatible with your use case, [reach out](mailto:albin@sjoegren.se) — a permissively-licensed core may be carved out post-1.0.
 
 ## funding
 
@@ -301,7 +301,7 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
 
 ## citing
 
-[`CITATION.cff`](https://github.com/resonant-jovian/starsight/blob/main/CITATION.cff) is the canonical source — GitHub renders a "Cite this repository" button from it automatically. The BibTeX block below is the manual fallback:
+[`CITATION.cff`](./CITATION.cff) is the canonical source — GitHub renders a "Cite this repository" button from it automatically. The BibTeX block below is the manual fallback:
 
 ```bibtex
 @software{starsight,
