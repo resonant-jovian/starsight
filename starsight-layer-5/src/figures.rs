@@ -635,10 +635,23 @@ impl Figure {
             })
             .collect();
 
+        // Project the merged data extent into pixel space so the legend can
+        // dodge corners that would overlap the data (Epic I.4 — `…9.4`). The
+        // four corners account for the inverted y-axis: data y_min lands at
+        // pixel bottom, y_max at pixel top.
+        let p1 = coord.data_to_pixel(extent.x_min, extent.y_min);
+        let p2 = coord.data_to_pixel(extent.x_max, extent.y_max);
+        let data_pixel_rect = Rect::new(
+            p1.x.min(p2.x),
+            p1.y.min(p2.y),
+            p1.x.max(p2.x),
+            p1.y.max(p2.y),
+        );
         if !legend_entries.is_empty() {
             crate::renders::render_legend(
                 &legend_entries,
                 &plot_area,
+                Some(&data_pixel_rect),
                 backend,
                 &self.theme,
                 &fonts,
@@ -770,9 +783,13 @@ impl Figure {
             .collect();
 
         if !legend_entries.is_empty() {
+            // Polar legend keeps the TR default — Epic I.4's overlap-aware
+            // placement is cartesian-only (polar marks don't expose a
+            // `data_extent` rect that maps to pixel space the same way).
             crate::renders::render_legend(
                 &legend_entries,
                 &plot_area,
+                None,
                 backend,
                 &self.theme,
                 &fonts,

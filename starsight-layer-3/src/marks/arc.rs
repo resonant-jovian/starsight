@@ -274,10 +274,7 @@ impl Mark for ArcMark {
                 .iter()
                 .enumerate()
                 .filter_map(|(i, _)| {
-                    let label = labels
-                        .get(i)
-                        .filter(|s| !s.is_empty())
-                        .cloned()?;
+                    let label = labels.get(i).filter(|s| !s.is_empty()).cloned()?;
                     Some((self.color_at(i), label, LegendGlyph::Bar))
                 })
                 .collect();

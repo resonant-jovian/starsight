@@ -43,11 +43,7 @@ fn main() -> Result<()> {
 
     // Stack r_base[i] = sum of all preceding bins at index i.
     let bin_5_10_base: Vec<f64> = bin_0_5.clone();
-    let bin_10_15_base: Vec<f64> = bin_0_5
-        .iter()
-        .zip(&bin_5_10)
-        .map(|(a, b)| a + b)
-        .collect();
+    let bin_10_15_base: Vec<f64> = bin_0_5.iter().zip(&bin_5_10).map(|(a, b)| a + b).collect();
     let bin_15_plus_base: Vec<f64> = bin_10_15_base
         .iter()
         .zip(&bin_10_15)

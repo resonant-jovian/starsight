@@ -162,13 +162,21 @@ pub fn render_colorbar(
     // 1px outline so the strip reads as a defined element against the
     // figure background.
     let outline = starsight_layer_1::paths::Path::new()
-        .move_to(starsight_layer_1::primitives::Point::new(strip_left, strip_top))
-        .line_to(starsight_layer_1::primitives::Point::new(strip_right, strip_top))
+        .move_to(starsight_layer_1::primitives::Point::new(
+            strip_left, strip_top,
+        ))
+        .line_to(starsight_layer_1::primitives::Point::new(
+            strip_right,
+            strip_top,
+        ))
         .line_to(starsight_layer_1::primitives::Point::new(
             strip_right,
             strip_bottom,
         ))
-        .line_to(starsight_layer_1::primitives::Point::new(strip_left, strip_bottom))
+        .line_to(starsight_layer_1::primitives::Point::new(
+            strip_left,
+            strip_bottom,
+        ))
         .close();
     backend.draw_path(
         &outline,

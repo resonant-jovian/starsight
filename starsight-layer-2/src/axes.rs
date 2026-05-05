@@ -48,7 +48,6 @@ impl Axis {
         })
     }
 
-
     /// Build a category axis covering exactly `[0, n]` for `n` labels, with
     /// tick positions at band edges so grid lines fall between categories.
     ///

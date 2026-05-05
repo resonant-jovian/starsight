@@ -10,7 +10,7 @@ use starsight::prelude::*;
 fn main() -> Result<()> {
     // Synthetic dataset: y = 2x + 3 + noise, with confidence-interval
     // half-widths growing toward the ends of the x range.
-    let xs: Vec<f64> = (0..12).map(|i| f64::from(i)).collect();
+    let xs: Vec<f64> = (0..12).map(f64::from).collect();
     let ys: Vec<f64> = xs
         .iter()
         .map(|x| 2.0 * x + 3.0 + 0.7 * (x * 0.7).sin())

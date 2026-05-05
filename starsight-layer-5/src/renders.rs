@@ -83,11 +83,32 @@ pub fn render_axes(
     // === Category labels (bar charts) ===
     if n_categories > 0 {
         if use_y_axis_labels {
-            // Labels on Y-axis (left side) - horizontal bars, only X ticks
+            // Labels on Y-axis (left side) - horizontal bars, only X ticks.
+            // Categorical labels use a uniform LEFT edge instead of the per-label
+            // right-anchor used for numeric ticks: with mixed-width category
+            // strings ("Tokyo" vs "São Paulo" vs "Mexico City") the right-anchor
+            // policy makes the left edges visually wobble, which the user flagged
+            // in the snapshot review. Numeric ticks keep right-anchor because
+            // decimal alignment matters there. Fix for I.7 (`starsight-3bp.9.7`).
+            let max_tw_px = category_labels
+                .iter()
+                .map(|label| {
+                    backend
+                        .text_extent(label, font_size)
+                        .map_or(0.0, |(w, _)| w)
+                        .ceil()
+                })
+                .fold(0.0_f32, f32::max);
+            let category_x = (area.left - tick_len - 4.0 - max_tw_px).round();
             let band_height = area.height() / n_categories as f32;
             for (i, label) in category_labels.iter().enumerate() {
                 let py = area.top + (i as f32 + 0.5) * band_height;
-                draw_y_label(backend, label, py)?;
+                backend.draw_text(
+                    label,
+                    Point::new(category_x, py + font_size * 0.4),
+                    font_size,
+                    tick_color,
+                )?;
             }
             // X-axis: ticks to left (label side)
             for (pos, label) in coord
@@ -352,11 +373,19 @@ pub struct LegendEntry {
 
 /// Render a legend with colored line/box samples and labels.
 ///
+/// When `data_pixel_rect` is `Some`, the legend tries corners in
+/// TR → TL → BR → BL order and picks the first one whose backdrop does not
+/// overlap the data bounding rect. Falls back to TR when every corner overlaps
+/// or when `None` (preserves the pre-Epic-I default for callers that can't
+/// project a data extent — e.g. the polar render path). Fix for I.4
+/// (`starsight-3bp.9.4`).
+///
 /// # Errors
 /// Returns the backend's error if any rect or text draw call fails.
 pub fn render_legend(
     entries: &[LegendEntry],
     plot_area: &Rect,
+    data_pixel_rect: Option<&Rect>,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
     fonts: &LayoutFonts,
@@ -380,8 +409,32 @@ pub fn render_legend(
     // `with_alpha(230).without_alpha()` chain was a no-op (`without_alpha`
     // discards the alpha back to opaque) so the bg fully hides data — the
     // inset is what gives visible breathing room.
-    let legend_x = plot_area.right - legend_width - 16.0;
-    let legend_y = plot_area.top + 16.0;
+    let inset: f32 = 16.0;
+    let tr = (
+        plot_area.right - legend_width - inset,
+        plot_area.top + inset,
+    );
+    let tl = (plot_area.left + inset, plot_area.top + inset);
+    let br = (
+        plot_area.right - legend_width - inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let bl = (
+        plot_area.left + inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let candidates = [tr, tl, br, bl];
+    let (legend_x, legend_y) = match data_pixel_rect {
+        Some(data_rect) => candidates
+            .iter()
+            .copied()
+            .find(|&(x, y)| {
+                let candidate = Rect::new(x, y, x + legend_width, y + legend_height);
+                candidate.intersection(data_rect).is_none()
+            })
+            .unwrap_or(tr),
+        None => tr,
+    };
 
     let bg_color = theme.background;
     let bg_rect = Rect::new(
@@ -607,6 +660,7 @@ mod tests {
         render_legend(
             &[],
             &Rect::new(0.0, 0.0, 100.0, 100.0),
+            None,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),
@@ -632,6 +686,7 @@ mod tests {
         render_legend(
             &entries,
             &Rect::new(0.0, 0.0, 400.0, 200.0),
+            None,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),
@@ -640,6 +695,32 @@ mod tests {
         let svg = backend.svg_string();
         assert!(svg.contains("first"));
         assert!(svg.contains("second"));
+    }
+
+    #[test]
+    fn render_legend_dodges_overlapping_data() {
+        // Data covers the entire upper-right quadrant of the plot — TR
+        // candidate must overlap, so the legend should fall through to TL.
+        let mut backend = SvgBackend::new(400, 200);
+        let entries = vec![LegendEntry {
+            color: Color::RED,
+            label: "x".into(),
+            glyph: LegendGlyph::Point,
+        }];
+        let plot = Rect::new(0.0, 0.0, 400.0, 200.0);
+        let data_rect = Rect::new(200.0, 0.0, 400.0, 100.0);
+        render_legend(
+            &entries,
+            &plot,
+            Some(&data_rect),
+            &mut backend,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
+        let svg = backend.svg_string();
+        // Expect a fill rect whose left edge is ~16 (TL inset), not ~plot_right - lw - 16.
+        assert!(svg.contains('x'));
     }
 
     #[test]
