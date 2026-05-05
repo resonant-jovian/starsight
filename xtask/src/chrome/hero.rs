@@ -154,7 +154,7 @@ fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<Pixmap> {
 fn render_top_strip(meta: &Meta, theme: Theme) -> Result<Pixmap> {
     let p = palette(theme);
     let svg = format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">
   <rect x="0" y="0" width="{w}" height="{h}" fill="{bg}"/>
   <g transform="translate({ex},{ey}) scale(0.92)">
 {eclipse_inner}  </g>
@@ -162,7 +162,7 @@ fn render_top_strip(meta: &Meta, theme: Theme) -> Result<Pixmap> {
   <text x="{tag_x}" y="{tag_y}" font-family="{sans}" font-size="16" fill="{sub}">scientific visualization for Rust — typed, layered, eight backends</text>
   <text x="{meta_x}" y="{meta_y}" font-family="{mono}" font-size="11" fill="{muted}" text-anchor="end">v{ver}  ·  rust {msrv}  ·  edition {ed}  ·  {lic}</text>
 </svg>
-"##,
+"#,
         w = W,
         h = TOP_H,
         bg = p.card,
@@ -234,10 +234,10 @@ fn composite_thumb(
         let dst = tp.data_mut();
         for (i, px) in resized.pixels().enumerate() {
             let [r, g, b, a] = px.0;
-            let af = a as u32;
-            dst[i * 4] = (r as u32 * af / 255) as u8;
-            dst[i * 4 + 1] = (g as u32 * af / 255) as u8;
-            dst[i * 4 + 2] = (b as u32 * af / 255) as u8;
+            let af = u32::from(a);
+            dst[i * 4] = (u32::from(r) * af / 255) as u8;
+            dst[i * 4 + 1] = (u32::from(g) * af / 255) as u8;
+            dst[i * 4 + 2] = (u32::from(b) * af / 255) as u8;
             dst[i * 4 + 3] = a;
         }
     }
@@ -294,13 +294,13 @@ fn fill_rect(p: &mut Pixmap, x: i32, y: i32, w: u32, h: u32, (r, g, b, a): (u8, 
     let y1 = (y + h as i32).min(ch);
     let stride = p.width() as usize * 4;
     let data = p.data_mut();
-    let af = a as u32;
+    let af = u32::from(a);
     for yy in y0..y1 {
         for xx in x0..x1 {
             let i = yy as usize * stride + xx as usize * 4;
-            data[i] = (r as u32 * af / 255) as u8;
-            data[i + 1] = (g as u32 * af / 255) as u8;
-            data[i + 2] = (b as u32 * af / 255) as u8;
+            data[i] = (u32::from(r) * af / 255) as u8;
+            data[i + 1] = (u32::from(g) * af / 255) as u8;
+            data[i + 2] = (u32::from(b) * af / 255) as u8;
             data[i + 3] = a;
         }
     }

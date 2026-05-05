@@ -60,10 +60,10 @@ fn compose(root: &Path, theme: Theme) -> Result<Pixmap> {
         let dst = tp.data_mut();
         for (i, px) in resized.pixels().enumerate() {
             let [r, g, b, a] = px.0;
-            let af = a as u32;
-            dst[i * 4] = (r as u32 * af / 255) as u8;
-            dst[i * 4 + 1] = (g as u32 * af / 255) as u8;
-            dst[i * 4 + 2] = (b as u32 * af / 255) as u8;
+            let af = u32::from(a);
+            dst[i * 4] = (u32::from(r) * af / 255) as u8;
+            dst[i * 4 + 1] = (u32::from(g) * af / 255) as u8;
+            dst[i * 4 + 2] = (u32::from(b) * af / 255) as u8;
             dst[i * 4 + 3] = a;
         }
     }

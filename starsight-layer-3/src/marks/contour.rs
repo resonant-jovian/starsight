@@ -19,8 +19,10 @@ use starsight_layer_1::paths::{Path, PathStyle};
 use starsight_layer_1::primitives::{Color, Point};
 use starsight_layer_2::coords::Coord;
 
-use crate::marks::{DataExtent, LegendGlyph, Mark};
+use crate::marks::{DataExtent, LegendGlyph, Mark, MarkExtent};
 use crate::statistics::{Contour, Grid};
+use starsight_layer_1::primitives::Rect;
+use starsight_layer_2::coords::CartesianCoord;
 
 // ── ContourMode ──────────────────────────────────────────────────────────────────────────────────
 
@@ -371,6 +373,41 @@ impl Mark for ContourMark {
             y_min: self.grid.y_min,
             y_max: self.grid.y_max,
         })
+    }
+
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        // Bbox of the grid in pixel space — used as a fallback and for
+        // FilledBands / FilledWithLines which densely cover the bbox.
+        let bbox = MarkExtent::Bbox(Rect::new(
+            cart.data_to_pixel(self.grid.x_min, self.grid.y_min).x,
+            cart.data_to_pixel(self.grid.x_min, self.grid.y_max).y,
+            cart.data_to_pixel(self.grid.x_max, self.grid.y_max).x,
+            cart.data_to_pixel(self.grid.x_max, self.grid.y_min).y,
+        ));
+        if matches!(self.mode, ContourMode::FilledBands | ContourMode::FilledWithLines) {
+            return bbox;
+        }
+        // Isolines: bbox is much larger than the actual stroke. Project the
+        // marching-squares output to pixel-space segments so the legend dodge
+        // sees the real footprint.
+        let mut segments: Vec<(Point, Point)> = Vec::new();
+        for level in &self.levels {
+            for poly in Contour::compute(&self.grid, &[*level]) {
+                for window in poly.points.windows(2) {
+                    let p0 = cart.data_to_pixel(window[0].0, window[0].1);
+                    let p1 = cart.data_to_pixel(window[1].0, window[1].1);
+                    segments.push((p0, p1));
+                }
+            }
+        }
+        if segments.is_empty() {
+            bbox
+        } else {
+            MarkExtent::Segments(segments)
+        }
     }
 
     fn legend_color(&self) -> Option<Color> {

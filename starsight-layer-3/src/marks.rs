@@ -381,6 +381,30 @@ impl Mark for LineMark {
         extent_from_xy(&self.x, &self.y)
     }
 
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        let mut segments = Vec::with_capacity(self.x.len().saturating_sub(1));
+        let mut prev: Option<Point> = None;
+        for (xv, yv) in self.x.iter().zip(&self.y) {
+            if xv.is_nan() || yv.is_nan() {
+                prev = None;
+                continue;
+            }
+            let p = cart.data_to_pixel(*xv, *yv);
+            if let Some(prev_p) = prev {
+                segments.push((prev_p, p));
+            }
+            prev = Some(p);
+        }
+        if segments.is_empty() {
+            MarkExtent::Bbox(cart.plot_area)
+        } else {
+            MarkExtent::Segments(segments)
+        }
+    }
+
     fn legend_color(&self) -> Option<Color> {
         Some(self.color)
     }
@@ -1230,6 +1254,57 @@ impl Mark for AreaMark {
         })
     }
 
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        let baseline_y = match self.baseline {
+            AreaBaseline::Zero => 0.0,
+            AreaBaseline::Fixed(y) => y,
+        };
+        // Match render_segment's polygon shape: data points top, then back
+        // along the baseline. NaN gaps split into separate polygons.
+        let mut polygons: Vec<Vec<Point>> = Vec::new();
+        let mut current: Vec<Point> = Vec::new();
+        let mut current_first_x: Option<f64> = None;
+        let mut current_last_x: Option<f64> = None;
+        let n = self.x.len().min(self.y.len());
+        for i in 0..n {
+            let xi = self.x[i];
+            let yi = self.y[i];
+            if xi.is_nan() || yi.is_nan() {
+                if current.len() >= 2
+                    && let (Some(fx), Some(lx)) = (current_first_x, current_last_x)
+                {
+                    current.push(cart.data_to_pixel(lx, baseline_y));
+                    current.push(cart.data_to_pixel(fx, baseline_y));
+                    polygons.push(std::mem::take(&mut current));
+                }
+                current.clear();
+                current_first_x = None;
+                current_last_x = None;
+                continue;
+            }
+            if current.is_empty() {
+                current_first_x = Some(xi);
+            }
+            current.push(cart.data_to_pixel(xi, yi));
+            current_last_x = Some(xi);
+        }
+        if current.len() >= 2
+            && let (Some(fx), Some(lx)) = (current_first_x, current_last_x)
+        {
+            current.push(cart.data_to_pixel(lx, baseline_y));
+            current.push(cart.data_to_pixel(fx, baseline_y));
+            polygons.push(current);
+        }
+        if polygons.is_empty() {
+            MarkExtent::Bbox(cart.plot_area)
+        } else {
+            MarkExtent::Polygons(polygons)
+        }
+    }
+
     fn legend_glyph(&self) -> LegendGlyph {
         LegendGlyph::Area
     }
@@ -1577,6 +1652,50 @@ impl Mark for StepMark {
 
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
+    }
+
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        // Reproduce the rendered L-leg path as discrete segments so the
+        // legend dodge sees the real footprint, not the diagonal between
+        // consecutive data points.
+        let valid: Vec<(f64, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter_map(|(x, y)| (!x.is_nan() && !y.is_nan()).then_some((*x, *y)))
+            .collect();
+        if valid.len() < 2 {
+            return MarkExtent::Bbox(cart.plot_area);
+        }
+        let mut segments = Vec::with_capacity(valid.len() * 2);
+        let pts: Vec<Point> = valid
+            .iter()
+            .map(|(x, y)| cart.data_to_pixel(*x, *y))
+            .collect();
+        for i in 1..pts.len() {
+            let prev = pts[i - 1];
+            let curr = pts[i];
+            match self.where_ {
+                StepPosition::Pre => {
+                    segments.push((prev, Point::new(curr.x, prev.y)));
+                    segments.push((Point::new(curr.x, prev.y), curr));
+                }
+                StepPosition::Post => {
+                    segments.push((prev, Point::new(prev.x, curr.y)));
+                    segments.push((Point::new(prev.x, curr.y), curr));
+                }
+                StepPosition::Mid => {
+                    let mid_x = f32::midpoint(prev.x, curr.x);
+                    segments.push((prev, Point::new(mid_x, prev.y)));
+                    segments.push((Point::new(mid_x, prev.y), Point::new(mid_x, curr.y)));
+                    segments.push((Point::new(mid_x, curr.y), curr));
+                }
+            }
+        }
+        MarkExtent::Segments(segments)
     }
 }
 

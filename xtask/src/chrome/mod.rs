@@ -155,13 +155,11 @@ fn ensure_dark_examples(root: &Path) -> Result<()> {
             todo.push(*name);
             continue;
         }
-        if let (Ok(d), Ok(s)) = (std::fs::metadata(&dark), std::fs::metadata(&rs)) {
-            if let (Ok(dt), Ok(st)) = (d.modified(), s.modified()) {
-                if st > dt {
+        if let (Ok(d), Ok(s)) = (std::fs::metadata(&dark), std::fs::metadata(&rs))
+            && let (Ok(dt), Ok(st)) = (d.modified(), s.modified())
+                && st > dt {
                     todo.push(*name);
                 }
-            }
-        }
     }
 
     if todo.is_empty() {

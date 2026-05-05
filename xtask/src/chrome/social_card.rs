@@ -117,7 +117,7 @@ fn render_card_svg(theme: Theme, meta: &Meta) -> String {
     );
 
     format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">
   <rect x="0" y="0" width="{W}" height="{H}" fill="{bg}"/>
   <g transform="translate({ex},{ey}) scale({s})">
 {eclipse_inner}  </g>
@@ -126,7 +126,7 @@ fn render_card_svg(theme: Theme, meta: &Meta) -> String {
   <text x="{meta_x}" y="{meta_y}" font-family="{mono}" font-size="20" fill="{muted}">{meta}</text>
   <text x="{repo_x}" y="{meta_y}" font-family="{mono}" font-size="20" fill="{muted}" text-anchor="end">github.com/resonant-jovian/starsight</text>
 </svg>
-"##,
+"#,
         W = W,
         H = H,
         bg = p.bg,

@@ -1,6 +1,6 @@
 //! Minimal crates.io API client — three endpoints, blocking, mandatory User-Agent.
 //!
-//! - `GET /api/v1/crates/{crate}` — version, license, MSRV, updated_at
+//! - `GET /api/v1/crates/{crate}` — version, license, MSRV, `updated_at`
 //! - `GET /api/v1/crates/{crate}/downloads` — full daily download series
 //! - `GET /api/v1/crates/{crate}/reverse_dependencies` — dependents count
 //!

@@ -11,13 +11,9 @@ use std::path::Path;
 
 pub fn header(width: u32, height: u32, aria: &str, title: &str) -> String {
     format!(
-        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="100%" height="auto" role="img" aria-label="{aria}" preserveAspectRatio="xMidYMid meet">
+        r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" height="auto" role="img" aria-label="{aria}" preserveAspectRatio="xMidYMid meet">
   <title>{title}</title>
-"#,
-        w = width,
-        h = height,
-        aria = aria,
-        title = title
+"#
     )
 }
 

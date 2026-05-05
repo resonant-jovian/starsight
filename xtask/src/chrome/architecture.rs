@@ -170,12 +170,8 @@ fn render(theme: Theme) -> String {
             Status::Planned => ("planned", p.bg, p.muted),
         };
         out.push_str(&format!(
-            r#"  <rect x="{px:.1}" y="{py:.1}" width="80" height="22" rx="11" fill="{f}" stroke="{s}" stroke-width="1"/>
-"#,
-            px = pill_x,
-            py = pill_y,
-            f = fill,
-            s = stroke
+            r#"  <rect x="{pill_x:.1}" y="{pill_y:.1}" width="80" height="22" rx="11" fill="{fill}" stroke="{stroke}" stroke-width="1"/>
+"#
         ));
         let pill_text_color = match status {
             Status::Shipped => p.bg,
