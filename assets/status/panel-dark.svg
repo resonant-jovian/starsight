@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 148" width="100%" height="auto" role="img" aria-label="starsight live status · v0.3.0 · rust 1.89 · GPL-3.0-only (dark)" preserveAspectRatio="xMidYMid meet">
+  <title>starsight status panel</title>
+  <rect x="0.5" y="0.5" width="879" height="147" rx="8" fill="#181825" stroke="#45475a" stroke-width="1"/>
+  <text x="24" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#7f849c" letter-spacing="0.6">// status · live from crates.io api</text>
+  <text x="36.0" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#7f849c" letter-spacing="0.4">CURRENT</text>
+  <text x="36.0" y="70" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#cdd6f4">v0.3.0</text>
+  <text x="244.0" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#7f849c" letter-spacing="0.4">MSRV</text>
+  <text x="244.0" y="70" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#cdd6f4">rust 1.89</text>
+  <text x="452.0" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#7f849c" letter-spacing="0.4">LICENSE</text>
+  <text x="452.0" y="70" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#cdd6f4">GPL-3.0-only</text>
+  <text x="660.0" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#7f849c" letter-spacing="0.4">EDITION</text>
+  <text x="660.0" y="70" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="16" fill="#cdd6f4">2024</text>
+  <line x1="24" y1="88" x2="856" y2="88" stroke="#313244" stroke-width="0.8"/>
+  <line x1="24" y1="116.5" x2="224" y2="116.5" stroke="#313244" stroke-width="0.5"/>
+  <line x1="24" y1="110.0" x2="224" y2="110.0" stroke="#313244" stroke-width="0.5"/>
+  <line x1="24" y1="103.5" x2="224" y2="103.5" stroke="#313244" stroke-width="0.5"/>
+  <polyline points="24.0,123.0 30.9,123.0 37.8,123.0 44.7,119.8 51.6,116.5 58.5,119.8 65.4,116.5 72.3,113.2 79.2,110.0 86.1,113.2 93.0,116.5 99.9,113.2 106.8,110.0 113.7,106.8 120.6,110.0 127.4,113.2 134.3,110.0 141.2,106.8 148.1,103.5 155.0,106.8 161.9,110.0 168.8,106.8 175.7,103.5 182.6,100.2 189.5,103.5 196.4,106.8 203.3,103.5 210.2,100.2 217.1,97.0 224.0,100.2" fill="none" stroke="#cba6f7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="24" y="137.0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#7f849c">last 30d downloads</text>
+  <text x="856" y="114" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#a6adc8" text-anchor="end">28 downloads since 2026-04-07  ·  0 dependents  ·  updated 8d ago</text>
+</svg>
