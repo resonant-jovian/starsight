@@ -50,6 +50,7 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(900, 900)
+        .theme(theme_from_env())
         .title("Mortality by month — Nightingale's rose")
         .polar_axes(theta_axis, r_axis)
         .add(
@@ -76,5 +77,5 @@ fn main() -> Result<()> {
                 .stroke(Color::WHITE, 0.8)
                 .label("other causes"),
         )
-        .save("examples/scientific/nightingale.png")
+        .save(format!("examples/scientific/nightingale{}.png", theme_suffix_from_env()))
 }

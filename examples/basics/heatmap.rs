@@ -21,9 +21,10 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(720, 720)
+        .theme(theme_from_env())
         .title("2D Density Heatmap")
         .x_label("X bin")
         .y_label("Y bin")
         .add(HeatmapMark::new(data))
-        .save("examples/basics/heatmap.png")
+        .save(format!("examples/basics/heatmap{}.png", theme_suffix_from_env()))
 }

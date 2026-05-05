@@ -43,13 +43,14 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(900, 700)
+        .theme(theme_from_env())
         .title("Stimulated Raman Scattering — electron phase space (δ = 0.15)")
         // 0.3.0 limitation: heatmap axes label cell indices, not the underlying
         // physical units. The labels below describe what each bin maps to.
         .x_label("x bin (159.0..160.0 µm across 200 cells)")
         .y_label("p bin (-5..5 keV/c across 200 cells)")
         .add(HeatmapMark::new(cells).colormap(VIRIDIS).log_scale())
-        .save("examples/scientific/laser_plasma.png")?;
+        .save(format!("examples/scientific/laser_plasma{}.png", theme_suffix_from_env()))?;
 
     println!("saved laser_plasma.png");
     Ok(())

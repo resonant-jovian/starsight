@@ -16,6 +16,7 @@ fn main() -> Result<()> {
     let gizmos = vec![22.0, 28.0, 35.0, 42.0];
 
     Figure::new(900, 600)
+        .theme(theme_from_env())
         .title("Quarterly Revenue by Product Line")
         .x_label("Quarter")
         .y_label("Revenue (M USD)")
@@ -31,5 +32,5 @@ fn main() -> Result<()> {
                 .label("Gizmos")
                 .group("gizmos"),
         )
-        .save("examples/basics/bar_chart.png")
+        .save(format!("examples/basics/bar_chart{}.png", theme_suffix_from_env()))
 }

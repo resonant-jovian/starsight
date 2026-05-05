@@ -32,6 +32,7 @@ fn main() -> Result<()> {
     r_axis.tick_labels = vec!["25".into(), "50".into(), "75".into(), "100".into()];
 
     Figure::new(800, 800)
+        .theme(theme_from_env())
         .title("Player profiles — 8 dimensions")
         .polar_axes(theta_axis, r_axis)
         .add(
@@ -49,5 +50,5 @@ fn main() -> Result<()> {
                 .color(Color::from_hex(0x0055_A868))
                 .label("Player C"),
         )
-        .save("examples/scientific/radar_spider.png")
+        .save(format!("examples/scientific/radar_spider{}.png", theme_suffix_from_env()))
 }

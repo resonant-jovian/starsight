@@ -25,6 +25,7 @@ fn main() -> Result<()> {
     let r_axis = Axis::polar_radial(0.0, 1.0);
 
     Figure::new(800, 600)
+        .theme(theme_from_env())
         .title(format!("Battery — {value:.0} / {max:.0}"))
         .polar_axes(theta_axis, r_axis)
         // Outer rim — a thin track at r=1.0 that frames the whole gauge so
@@ -51,5 +52,5 @@ fn main() -> Result<()> {
                 .colors(vec![Color::from_hex(0x004C_AF50)])
                 .stroke(Color::WHITE, 1.0),
         )
-        .save("examples/scientific/gauge.png")
+        .save(format!("examples/scientific/gauge{}.png", theme_suffix_from_env()))
 }

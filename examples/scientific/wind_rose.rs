@@ -56,6 +56,7 @@ fn main() -> Result<()> {
     let r_axis = Axis::polar_radial(0.0, 14.0);
 
     Figure::new(800, 800)
+        .theme(theme_from_env())
         .title("Wind rose — frequency × direction × speed")
         .polar_axes(theta_axis, r_axis)
         .add(
@@ -85,5 +86,5 @@ fn main() -> Result<()> {
                 .stroke(Color::WHITE, 0.6)
                 .label("15+ m/s"),
         )
-        .save("examples/scientific/wind_rose.png")
+        .save(format!("examples/scientific/wind_rose{}.png", theme_suffix_from_env()))
 }

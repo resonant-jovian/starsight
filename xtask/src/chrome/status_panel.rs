@@ -1,52 +1,36 @@
-//! `assets/status/panel-light.svg` — live crates.io status panel.
-//!
-//! Layout (880×148):
-//! - eyebrow `// status · live from crates.io api` (mono 11)
-//! - 4-column fact strip: CURRENT · MSRV · LICENSE · EDITION
-//! - hairline rule
-//! - 30-point sparkline (real per-day downloads) + caption + activity line
-//!
-//! On API failure: returns Ok(()) without writing — the existing panel stays.
+//! `assets/status/panel-{light,dark}.svg` — live crates.io status panel.
 
 use anyhow::Result;
 use std::path::Path;
 
 use super::crates_io;
-use super::palette::{MONO, MONO_FAMILY, SANS};
+use super::palette::{MONO_FAMILY, SANS, Theme, palette};
 use super::svg::{header, write_atomic};
 
 const W: u32 = 880;
 const H: u32 = 148;
 const PAD_X: f32 = 24.0;
 
-pub fn regen(root: &Path) -> Result<()> {
-    let stats = match crates_io::fetch() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("status_panel: skipping — crates.io fetch failed: {e}");
-            return Ok(());
-        }
-    };
-    let svg = render(&stats);
-    let out = root.join("assets/status/panel-light.svg");
+pub fn regen(root: &Path, theme: Theme, stats: &crates_io::Stats) -> Result<()> {
+    let svg = render(theme, stats);
+    let out = root.join(format!("assets/status/panel-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
     Ok(())
 }
 
-fn render(s: &crates_io::Stats) -> String {
-    let p = &MONO;
+fn render(theme: Theme, s: &crates_io::Stats) -> String {
+    let p = palette(theme);
     let mut out = header(
         W,
         H,
         &format!(
-            "starsight live status · v{} · rust {} · {}",
-            s.version, s.msrv, s.license
+            "starsight live status · v{} · rust {} · {} ({})",
+            s.version, s.msrv, s.license, theme.suffix()
         ),
         "starsight status panel",
     );
 
-    // outer card
     out.push_str(&format!(
         r#"  <rect x="0.5" y="0.5" width="{}" height="{}" rx="8" fill="{}" stroke="{}" stroke-width="1"/>
 "#,
@@ -56,7 +40,6 @@ fn render(s: &crates_io::Stats) -> String {
         p.border
     ));
 
-    // eyebrow
     out.push_str(&format!(
         r#"  <text x="{x}" y="22" font-family="{f}" font-size="11" fill="{c}" letter-spacing="0.6">// status · live from crates.io api</text>
 "#,
@@ -65,7 +48,6 @@ fn render(s: &crates_io::Stats) -> String {
         c = p.muted
     ));
 
-    // 4 fact columns
     let facts = [
         ("CURRENT", format!("v{}", s.version)),
         ("MSRV", format!("rust {}", s.msrv)),
@@ -90,7 +72,6 @@ fn render(s: &crates_io::Stats) -> String {
         ));
     }
 
-    // rule between facts and sparkline
     out.push_str(&format!(
         r#"  <line x1="{l}" y1="88" x2="{r}" y2="88" stroke="{c}" stroke-width="0.8"/>
 "#,
@@ -99,7 +80,6 @@ fn render(s: &crates_io::Stats) -> String {
         c = p.rule
     ));
 
-    // sparkline (left)
     let spark_x0: f32 = PAD_X;
     let spark_y_mid: f32 = 110.0;
     let spark_w: f32 = 200.0;
@@ -108,7 +88,6 @@ fn render(s: &crates_io::Stats) -> String {
     if series.len() > 1 {
         let max_v = (*series.iter().max().unwrap_or(&1)).max(1) as f32;
 
-        // background hairlines (3 inner gridlines)
         for v in [0.25_f32, 0.5, 0.75] {
             let yy = spark_y_mid + spark_h / 2.0 - v * spark_h;
             out.push_str(&format!(
@@ -146,7 +125,6 @@ fn render(s: &crates_io::Stats) -> String {
         ));
     }
 
-    // activity text (right)
     let activity = format!(
         "{tot} downloads since {since}  ·  {dep} dependents  ·  updated {d}d ago",
         tot = s.downloads_lifetime,

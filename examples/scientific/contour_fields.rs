@@ -46,6 +46,7 @@ fn contour_panel(
 ) -> Figure {
     let grid = grid_factory(80, 80, -3.0, 3.0, -3.0, 3.0);
     Figure::new(400, 400)
+        .theme(theme_from_env())
         .title(title)
         .x_label("x")
         .y_label("y")
@@ -80,5 +81,5 @@ fn main() -> Result<()> {
             |nx, ny, x0, x1, y0, y1| Grid::sample(nx, ny, x0, x1, y0, y1, gaussian_mixture),
             vec![0.05, 0.1, 0.3, 0.5, 0.7, 0.9],
         ));
-    mp.save("examples/scientific/contour_fields.png")
+    mp.save(format!("examples/scientific/contour_fields{}.png", theme_suffix_from_env()))
 }

@@ -92,7 +92,7 @@ fn main() -> Result<()> {
     let rho_values: &[f64] = &[28.];
     let n = rho_values.len() as f64;
 
-    let mut fig = Figure::new(1600, 1000);
+    let mut fig = Figure::new(1600, 1000).theme(theme_from_env());
     fig = fig
         .title("Lorenz attractor family — x–z projection")
         .x_label("x")
@@ -116,7 +116,7 @@ fn main() -> Result<()> {
         });
     }
 
-    fig.save("examples/scientific/lorenz_line.png")?;
+    fig.save(format!("examples/scientific/lorenz_line{}.png", theme_suffix_from_env()))?;
     println!("saved lorenz_line.png");
     Ok(())
 }

@@ -1,11 +1,12 @@
 name: Chrome
 
 # Daily regeneration of README chrome assets that carry live data:
-#   - assets/status/panel-light.svg  (downloads, dependents, updated_at)
-#   - assets/hero/starsight-hero-light.png  (meta strip from Cargo.toml)
-#   - assets/roadmap-light.svg  (current milestone derived from version)
+#   - assets/status/panel-{light,dark}.svg     (downloads, dependents, updated_at)
+#   - assets/hero/starsight-hero-{light,dark}.png  (meta strip + theme-matched thumbs)
+#   - assets/roadmap-{light,dark}.svg          (current milestone derived from version)
 #
-# Run: 06:00 UTC daily, on push that touches the regenerator, manual.
+# `cargo xtask chrome --live` also re-renders the dark example PNGs that feed
+# the dark hero composite when their .rs source changed.
 
 on:
   schedule:
@@ -34,23 +35,24 @@ jobs:
   chrome:
     name: regen live chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Regenerate live chrome assets
+      - name: Regenerate live chrome assets (light + dark)
         run: cargo run -p xtask --release -- chrome --live
       - name: Commit if changed
         run: |
-          if git diff --quiet -- assets/; then
+          if git diff --quiet -- assets/ examples/; then
             echo "no chrome changes"
             exit 0
           fi
           git config user.name  "starsight-bot"
           git config user.email "noreply@github.com"
-          git add assets/status/ assets/hero/ assets/roadmap-light.svg
+          git add assets/status/ assets/hero/ assets/roadmap-light.svg assets/roadmap-dark.svg
+          git add examples/basics/*_dark.png examples/scientific/*_dark.png 2>/dev/null || true
           git commit -m "chore(chrome): regen live assets [skip ci]"
           git push

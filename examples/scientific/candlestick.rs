@@ -96,9 +96,10 @@ fn main() -> Result<()> {
     ];
 
     Figure::new(900, 500)
+        .theme(theme_from_env())
         .title("Twelve-session OHLC")
         .x_label("session")
         .y_label("price")
         .add(CandlestickMark::new(data))
-        .save("examples/scientific/candlestick.png")
+        .save(format!("examples/scientific/candlestick{}.png", theme_suffix_from_env()))
 }

@@ -39,6 +39,7 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(900, 800)
+        .theme(theme_from_env())
         .title("Movie Ratings Cross-Tab — Rotten Tomatoes × IMDB (log scale)")
         // HeatmapMark axes are cell indices in 0.3.0; categorical/continuous
         // axis scales for heatmaps land with the broader scale infrastructure
@@ -46,7 +47,7 @@ fn main() -> Result<()> {
         .x_label("Rotten Tomatoes bin (0..100% across 30 buckets)")
         .y_label("IMDB bin (1.0..10.0 across 30 buckets)")
         .add(HeatmapMark::new(cells).colormap(VIRIDIS).log_scale())
-        .save("examples/basics/movie_heatmap.png")?;
+        .save(format!("examples/basics/movie_heatmap{}.png", theme_suffix_from_env()))?;
 
     println!("saved movie_heatmap.png");
     Ok(())

@@ -12,7 +12,7 @@
 use anyhow::Result;
 use std::path::Path;
 
-use super::palette::{MONO, MONO_FAMILY, SANS};
+use super::palette::{MONO_FAMILY, SANS, Theme, palette};
 use super::svg::{header, write_atomic};
 
 const STOPS: &[(&str, &str)] = &[
@@ -34,17 +34,17 @@ const STOPS: &[(&str, &str)] = &[
 const W: u32 = 880;
 const H: u32 = 200;
 
-pub fn regen(root: &Path) -> Result<()> {
+pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     let current = read_current_minor(root).unwrap_or_else(|_| "0.3".to_string());
-    let svg = render(&current);
-    let out = root.join("assets/roadmap-light.svg");
+    let svg = render(&current, theme);
+    let out = root.join(format!("assets/roadmap-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
     Ok(())
 }
 
-fn render(current: &str) -> String {
-    let p = &MONO;
+fn render(current: &str, theme: Theme) -> String {
+    let p = palette(theme);
     let mut out = header(
         W,
         H,

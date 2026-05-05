@@ -1,12 +1,10 @@
-//! `assets/gallery-light.png` — showcase composite (different 9 examples + captions).
-//!
-//! Same compositor primitives as [`super::hero`], with caption strips.
+//! `assets/gallery-{light,dark}.png` — showcase composite, paired variants.
 
 use anyhow::{Context, Result, anyhow};
 use std::path::Path;
-use tiny_skia::{Color, Pixmap, PixmapPaint, Transform};
+use tiny_skia::{Paint, PathBuilder, Pixmap, PixmapPaint, Shader, Stroke, Transform};
 
-use super::palette::{MONO, MONO_FAMILY, SANS, rgba};
+use super::palette::{MONO_FAMILY, SANS, Theme, palette, rgba};
 
 const W: u32 = 880;
 const PAD: u32 = 24;
@@ -15,22 +13,23 @@ const COLS: u32 = 3;
 const ROWS: u32 = 3;
 const EYEBROW_H: u32 = 36;
 const CAP_H: u32 = 30;
+const RADIUS: f32 = 12.0;
 
 const GALLERY: &[(&str, &str)] = &[
-    ("examples/basics/heatmap.png",                 "heatmap"),
-    ("examples/basics/bubble_scatter.png",          "bubble · scatter"),
-    ("examples/basics/movie_heatmap.png",           "categorical heatmap"),
-    ("examples/scientific/gauge.png",               "gauge · polar arc"),
-    ("examples/scientific/wind_rose.png",           "wind rose · polar bar"),
-    ("examples/scientific/polar_calendar.png",      "polar calendar"),
-    ("examples/scientific/kruskal_szekeres_line.png", "kruskal–szekeres"),
-    ("examples/scientific/laser_plasma.png",        "laser plasma · contour"),
-    ("examples/scientific/error_bars.png",          "error bars · rug"),
+    ("examples/basics/heatmap",                "heatmap"),
+    ("examples/basics/bubble_scatter",         "bubble · scatter"),
+    ("examples/basics/movie_heatmap",          "categorical heatmap"),
+    ("examples/scientific/gauge",              "gauge · polar arc"),
+    ("examples/scientific/wind_rose",          "wind rose · polar bar"),
+    ("examples/scientific/polar_calendar",     "polar calendar"),
+    ("examples/scientific/kruskal_szekeres_line", "kruskal–szekeres"),
+    ("examples/scientific/laser_plasma",       "laser plasma · contour"),
+    ("examples/scientific/error_bars",         "error bars · rug"),
 ];
 
-pub fn regen(root: &Path) -> Result<()> {
-    let canvas = compose(root)?;
-    let out = root.join("assets/gallery-light.png");
+pub fn regen(root: &Path, theme: Theme) -> Result<()> {
+    let canvas = compose(root, theme)?;
+    let out = root.join(format!("assets/gallery-{}.png", theme.suffix()));
     canvas
         .save_png(&out)
         .map_err(|e| anyhow!("write gallery png: {e}"))?;
@@ -44,7 +43,7 @@ pub fn regen(root: &Path) -> Result<()> {
     Ok(())
 }
 
-fn compose(root: &Path) -> Result<Pixmap> {
+fn compose(root: &Path, theme: Theme) -> Result<Pixmap> {
     let cell_w = (W - 2 * PAD - GUTTER * (COLS - 1)) / COLS;
     let cell_img_h = ((cell_w as f32) * 0.62) as u32;
     let cell_h = cell_img_h + CAP_H;
@@ -52,11 +51,12 @@ fn compose(root: &Path) -> Result<Pixmap> {
     let h = EYEBROW_H + grid_h + 2 * PAD;
 
     let mut canvas = Pixmap::new(W, h).ok_or_else(|| anyhow!("alloc gallery"))?;
-    let (br, bg, bb, ba) = rgba::BG;
-    canvas.fill(Color::from_rgba8(br, bg, bb, ba));
+    let (br, bg, bb, ba) = rgba::bg(theme);
+    canvas.fill(tiny_skia::Color::from_rgba8(br, bg, bb, ba));
 
-    // eyebrow text rendered via SVG slice
-    let p = &MONO;
+    draw_card(&mut canvas, theme);
+
+    let p = palette(theme);
     let eyebrow = format!(
         r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">
   <text x="24" y="22" font-family="{f}" font-size="12" fill="{c}" letter-spacing="0.6">// showcase  ·  9 of 38 examples  ·  source under examples/</text>
@@ -76,22 +76,24 @@ fn compose(root: &Path) -> Result<Pixmap> {
         None,
     );
 
-    for (i, (path, caption)) in GALLERY.iter().enumerate() {
+    let suffix = theme.example_suffix();
+    for (i, (base, caption)) in GALLERY.iter().enumerate() {
         let col = (i as u32) % COLS;
         let row = (i as u32) / COLS;
         let x0 = PAD + col * (cell_w + GUTTER);
         let y0 = EYEBROW_H + PAD + row * (cell_h + GUTTER);
 
+        let png = root.join(format!("{base}{suffix}.png"));
         composite_thumb(
             &mut canvas,
-            &root.join(path),
+            &png,
             x0 as i32,
             y0 as i32,
             cell_w,
             cell_img_h,
+            theme,
         )?;
 
-        // caption strip rendered via SVG into a CAP_H-tall slice
         let cap_svg = format!(
             r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}">
   <text x="{cx}" y="20" font-family="{f}" font-weight="700" font-size="12" fill="{c}" text-anchor="middle">{caption}</text>
@@ -134,8 +136,11 @@ fn composite_thumb(
     y: i32,
     cell_w: u32,
     cell_h: u32,
+    theme: Theme,
 ) -> Result<()> {
+    fill_rect(canvas, x, y, cell_w, cell_h, rgba::card(theme));
     if !src.exists() {
+        draw_rect_outline(canvas, x, y, cell_w, cell_h, rgba::border(theme));
         return Ok(());
     }
     let img = image::open(src)?.to_rgba8();
@@ -143,18 +148,12 @@ fn composite_thumb(
     let scale = (cell_w as f32 / sw as f32).min(cell_h as f32 / sh as f32);
     let tw = (sw as f32 * scale).round() as u32;
     let th = (sh as f32 * scale).round() as u32;
-    let resized = image::imageops::resize(
-        &img,
-        tw,
-        th,
-        image::imageops::FilterType::Lanczos3,
-    );
-
-    fill_rect(canvas, x, y, cell_w, cell_h, rgba::BG);
+    let resized = image::imageops::resize(&img, tw, th, image::imageops::FilterType::Lanczos3);
 
     let tx = x + ((cell_w - tw) / 2) as i32;
     let ty = y + ((cell_h - th) / 2) as i32;
-    let mut tp = Pixmap::new(tw, th).ok_or_else(|| anyhow!("alloc thumb {tw}×{th}"))?;
+
+    let mut tp = Pixmap::new(tw, th).ok_or_else(|| anyhow!("alloc thumb"))?;
     {
         let dst = tp.data_mut();
         for (i, px) in resized.pixels().enumerate() {
@@ -175,8 +174,37 @@ fn composite_thumb(
         None,
     );
 
-    draw_rect_outline(canvas, x, y, cell_w, cell_h, rgba::BORDER);
+    draw_rect_outline(canvas, x, y, cell_w, cell_h, rgba::border(theme));
     Ok(())
+}
+
+fn draw_card(canvas: &mut Pixmap, theme: Theme) {
+    let w = canvas.width() as f32;
+    let h = canvas.height() as f32;
+    let mut pb = PathBuilder::new();
+    add_round_rect(&mut pb, 0.5, 0.5, w - 1.0, h - 1.0, RADIUS);
+    let path = pb.finish().expect("rounded card path");
+    let mut paint = Paint::default();
+    let (r, g, b, a) = rgba::border(theme);
+    paint.shader = Shader::SolidColor(tiny_skia::Color::from_rgba8(r, g, b, a));
+    paint.anti_alias = true;
+    let mut stroke = Stroke::default();
+    stroke.width = 1.0;
+    canvas.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+}
+
+fn add_round_rect(pb: &mut PathBuilder, x: f32, y: f32, w: f32, h: f32, r: f32) {
+    let r = r.min(w / 2.0).min(h / 2.0);
+    pb.move_to(x + r, y);
+    pb.line_to(x + w - r, y);
+    pb.quad_to(x + w, y, x + w, y + r);
+    pb.line_to(x + w, y + h - r);
+    pb.quad_to(x + w, y + h, x + w - r, y + h);
+    pb.line_to(x + r, y + h);
+    pb.quad_to(x, y + h, x, y + h - r);
+    pb.line_to(x, y + r);
+    pb.quad_to(x, y, x + r, y);
+    pb.close();
 }
 
 fn fill_rect(p: &mut Pixmap, x: i32, y: i32, w: u32, h: u32, (r, g, b, a): (u8, u8, u8, u8)) {

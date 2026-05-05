@@ -75,6 +75,7 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(900, 700)
+        .theme(theme_from_env())
         .title("Wine: alcohol × proline (size = √proline, color = intensity)")
         .x_label("Alcohol (% vol)")
         .y_label("Proline (mg/L)")
@@ -85,7 +86,7 @@ fn main() -> Result<()> {
                 .alpha(0.5)
                 .label("Wine samples"),
         )
-        .save("examples/basics/bubble_scatter.png")?;
+        .save(format!("examples/basics/bubble_scatter{}.png", theme_suffix_from_env()))?;
 
     println!("saved bubble_scatter.png");
     Ok(())

@@ -85,7 +85,7 @@ fn t_arc(t: f64, su: f64, steps: usize) -> (Vec<f64>, Vec<f64>) {
 // ── Main ───────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    let mut fig = Figure::new(1200, 1200);
+    let mut fig = Figure::new(1200, 1200).theme(theme_from_env());
     fig = fig
         .title("Kruskal–Szekeres Diagram  (M = 1)")
         .x_label("u  (spacelike Kruskal)")
@@ -192,7 +192,7 @@ fn main() -> Result<()> {
         label: None,
     });
 
-    fig.save("examples/scientific/kruskal_szekeres_line.png")?;
+    fig.save(format!("examples/scientific/kruskal_szekeres_line{}.png", theme_suffix_from_env()))?;
     println!("Saved kruskal_szekeres_line.png");
     Ok(())
 }

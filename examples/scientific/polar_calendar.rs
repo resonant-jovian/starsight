@@ -53,8 +53,9 @@ fn main() -> Result<()> {
     let r_axis = Axis::polar_radial(0.0, 1.0);
 
     Figure::new(800, 800)
+        .theme(theme_from_env())
         .title("21-year seasonal calendar (week × year)")
         .polar_axes(theta_axis, r_axis)
         .add(PolarRectMark::new(theta_min, theta_max, r_min, r_max).colors(colors))
-        .save("examples/scientific/polar_calendar.png")
+        .save(format!("examples/scientific/polar_calendar{}.png", theme_suffix_from_env()))
 }

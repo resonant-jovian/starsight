@@ -17,4 +17,4 @@ pub use crate::components::marks::{
 };
 pub use crate::plot;
 pub use crate::statistics::BinMethod;
-pub use crate::theme::{DEFAULT_DARK, DEFAULT_LIGHT, Theme};
+pub use crate::theme::{DEFAULT_DARK, DEFAULT_LIGHT, Theme, theme_from_env, theme_suffix_from_env};

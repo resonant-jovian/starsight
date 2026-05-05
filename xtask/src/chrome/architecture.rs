@@ -6,7 +6,7 @@
 use anyhow::Result;
 use std::path::Path;
 
-use super::palette::{MONO, MONO_FAMILY, SANS};
+use super::palette::{MONO_FAMILY, SANS, Theme, palette};
 use super::svg::{header, write_atomic};
 
 const W: u32 = 880;
@@ -27,16 +27,16 @@ enum Status {
     Planned,
 }
 
-pub fn regen(root: &Path) -> Result<()> {
-    let svg = render();
-    let out = root.join("assets/architecture-light.svg");
+pub fn regen(root: &Path, theme: Theme) -> Result<()> {
+    let svg = render(theme);
+    let out = root.join(format!("assets/architecture-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
     Ok(())
 }
 
-fn render() -> String {
-    let p = &MONO;
+fn render(theme: Theme) -> String {
+    let p = palette(theme);
     let pad: f32 = 24.0;
     let row_h: f32 = 56.0;
     let header_h: f32 = 60.0;

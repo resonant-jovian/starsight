@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" width="100%" height="auto" role="img" aria-label="starsight wordmark" preserveAspectRatio="xMidYMid meet">
   <title>starsight</title>
-  <rect x="0.5" y="0.5" width="719" height="219" rx="8" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+  <rect x="0.5" y="0.5" width="719" height="219" rx="8" fill="#16161a" stroke="#2c2c33" stroke-width="1"/>
   <g transform="translate(24,60)">
-    <circle cx="50" cy="50" r="50" fill="none" stroke="#cccccc" stroke-width="0.5" opacity="0.6"/>
-    <g stroke="#888888" stroke-width="0.4" stroke-linecap="round" opacity="0.55">
+    <circle cx="50" cy="50" r="50" fill="none" stroke="#2c2c33" stroke-width="0.5" opacity="0.6"/>
+    <g stroke="#6b6b75" stroke-width="0.4" stroke-linecap="round" opacity="0.55">
       <line x1="83.00" y1="50.00" x2="142.00" y2="50.00"/>
       <line x1="82.87" y1="52.88" x2="145.99" y2="58.40"/>
       <line x1="82.50" y1="55.73" x2="142.74" y2="66.35"/>
@@ -77,8 +77,8 @@
       <line x1="82.50" y1="44.27" x2="136.43" y2="34.76"/>
       <line x1="82.87" y1="47.12" x2="139.12" y2="42.20"/>
     </g>
-    <circle cx="50" cy="50" r="18" fill="#1a1a1a"/>
+    <circle cx="50" cy="50" r="18" fill="#f4f4f6"/>
   </g>
-  <text x="170" y="156" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="104" fill="#1a1a1a" letter-spacing="-3">starsight</text>
-  <text x="172" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#888888">scientific visualization · rust crate</text>
+  <text x="170" y="156" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="104" fill="#f4f4f6" letter-spacing="-3">starsight</text>
+  <text x="172" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" fill="#6b6b75">scientific visualization · rust crate</text>
 </svg>

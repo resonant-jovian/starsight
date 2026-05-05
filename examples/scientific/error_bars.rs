@@ -41,6 +41,7 @@ fn main() -> Result<()> {
         .collect();
 
     Figure::new(900, 600)
+        .theme(theme_from_env())
         .title("Regression-fit residuals — symmetric vs. asymmetric errors")
         .x_label("x")
         .y_label("y")
@@ -69,5 +70,5 @@ fn main() -> Result<()> {
                 .cap_width(8.0)
                 .width(1.5),
         )
-        .save("examples/scientific/error_bars.png")
+        .save(format!("examples/scientific/error_bars{}.png", theme_suffix_from_env()))
 }
