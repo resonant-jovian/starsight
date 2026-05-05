@@ -216,6 +216,20 @@ pub trait Mark {
         true
     }
 
+    /// Whether a polar [`Figure`] should draw the radial-spoke + concentric-
+    /// ring grid behind this mark. Quantitative polar marks (`PolarBarMark`
+    /// wind roses, `RadarMark` spider charts, `PolarRectMark` polar heatmaps)
+    /// keep the default `true` because the grid carries axis context;
+    /// decorative wedge marks (`ArcMark` for gauge / nightingale / sunburst,
+    /// `PieMark`, `DonutMark`) override to `false` so their wedges don't
+    /// render against a distracting full-360 grid. The figure suppresses the
+    /// polar grid only when *every* mark returns `false`. Cartesian figures
+    /// ignore this method (they use [`Self::wants_axes`] instead). Fix for
+    /// Epic L (`starsight-3bp.10.14`).
+    fn wants_polar_grid(&self) -> bool {
+        true
+    }
+
     /// Whether this mark needs the axis to inset 5% on both ends so its
     /// data extremes don't visually sit on the plot edge. Default `true`
     /// for point-like marks (`PointMark`, `LineMark`, `AreaMark`,

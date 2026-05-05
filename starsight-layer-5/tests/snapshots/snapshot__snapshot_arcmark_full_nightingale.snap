@@ -7,22 +7,6 @@ expression: svg
 <text fill="#111111" font-family="sans-serif" font-size="16" x="151.2" y="32">
 Nightingale coxcomb (synthetic)
 </text>
-<path d="M432,316 C432,388.90158,372.90158,448,300,448 C227.09842,448,168,388.90158,168,316 C168,243.09842,227.09842,184,300,184 C372.90158,184,432,243.09842,432,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M486.6762,316 C486.6762,419.09842,403.09842,502.6762,300,502.6762 C196.90158,502.6762,113.32381,419.09842,113.32381,316 C113.32381,212.90158,196.90158,129.3238,300,129.3238 C403.09842,129.3238,486.6762,212.90158,486.6762,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M528.63074,316 C528.63074,442.26926,426.26926,544.63074,300,544.63074 C173.73074,544.63074,71.36929,442.26926,71.36929,316 C71.36929,189.73074,173.73074,87.36929,300,87.36929 C426.26926,87.36929,528.63074,189.73074,528.63074,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M564,316 C564,461.80316,445.80316,580,300,580 C154.19682,580,36,461.80316,36,316 C36,170.19682,154.19682,52,300,52 C445.80316,52,564,170.19682,564,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L432,87.36929" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L528.63074,184" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L564,316" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L528.63074,448" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L432,544.63074" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L300,580" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L168,544.63074" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L71.36929,448" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L36,316" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L71.36929,184" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L168,87.36929" fill="none" stroke="#dddddd" stroke-width="1"/>
-<path d="M300,316 L300,52" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
 <path d="M300,316 L300,186.66695 C322.7027,186.66695,345.00543,192.64294,364.66653,203.9943 z" fill="#4e79a7" stroke="#000000" stroke-width="0"/>
 <path d="M300,316 L381.37027,175.06258 C406.10995,189.34604,426.65396,209.89005,440.93744,234.62973 z" fill="#f28e2b" stroke="#000000" stroke-width="0"/>
 <path d="M300,316 L461.66632,222.6619 C478.0506,251.04027,486.6762,283.23148,486.6762,316 z" fill="#e15759" stroke="#000000" stroke-width="0"/>

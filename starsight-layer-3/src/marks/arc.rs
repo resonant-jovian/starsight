@@ -299,6 +299,14 @@ impl Mark for ArcMark {
         // axes when every mark agrees.
         false
     }
+
+    fn wants_polar_grid(&self) -> bool {
+        // ArcMark renders decorative wedges (gauges / nightingale / sunburst);
+        // a full-360 polar grid behind partial sweeps reads as visual noise.
+        // Quantitative polar marks (PolarBarMark, RadarMark) keep the
+        // default `true`. Fix for Epic L (`starsight-3bp.10.14`).
+        false
+    }
 }
 
 // ── arc geometry ─────────────────────────────────────────────────────────────────────────────────

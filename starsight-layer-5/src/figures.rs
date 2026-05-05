@@ -781,7 +781,18 @@ impl Figure {
         }
 
         backend.set_clip(Some(plot_area))?;
-        crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        // Suppress the polar grid when every mark on the figure opts out via
+        // `Mark::wants_polar_grid` → `false`. ArcMark/PieMark/DonutMark are
+        // decorative wedge marks that read better without a grid behind them
+        // (gauges, pies, sunbursts); quantitative polar marks (PolarBarMark
+        // for wind roses, RadarMark for spider charts, PolarRectMark for
+        // polar heatmaps) keep the default `true` so their grid context is
+        // visible. Tracked as Epic L (`starsight-3bp.10.14`).
+        let suppress_grid =
+            !self.marks.is_empty() && self.marks.iter().all(|m| !m.wants_polar_grid());
+        if !suppress_grid {
+            crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        }
         for mark in &self.marks {
             mark.render(&coord, backend)?;
         }

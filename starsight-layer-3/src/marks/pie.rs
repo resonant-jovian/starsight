@@ -278,6 +278,12 @@ impl Mark for PieMark {
         // mark on it returns `false` here (yrp.2).
         false
     }
+
+    fn wants_polar_grid(&self) -> bool {
+        // PieMark / DonutMark render decorative wedges; a polar grid behind
+        // them is distracting. Fix for Epic L (`starsight-3bp.10.14`).
+        false
+    }
 }
 
 /// Rec. 601 luminance for a sRGB color, in `[0.0, 1.0]`. Used to pick a
