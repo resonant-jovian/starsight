@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `Mark::wants_axis_padding() -> bool` and `Mark::legend_entries() -> Vec<(Color, String, LegendGlyph)>` trait hooks. Point-shape marks (the default `true`) drive the 5% axis inset; bar / heatmap / contour return `false` so their data stays edge-aligned. `legend_entries` lets `PieMark` and `ArcMark` (when `wedge_labels` is set) emit one entry per slice/wedge so the figure auto-builds a color → category legend.
+- `Figure::axis_padding(Option<f64>)` — explicit opt-in / opt-out override of the mark-mix-aware 5% padding default.
+- `ArcMark::wedge_labels(Vec<String>)` builder — per-wedge labels surfaced through `legend_entries` for sunburst color→category legends.
+- Polar `Axis` constructors auto-fill `tick_positions` + `tick_labels` from the existing polar tick formatters, so any figure on `Figure::polar_axes` now shows a default grid without needing to pre-build ticks.
+- New showcase examples: `examples/composition/violin_raincloud.rs` (#19), `examples/composition/distribution_dashboard.rs` (#2, 2×2 panel), `examples/scientific/reciprocal_space.rs` (#17, 2×3 heatmap + cut panel). Counts 38 → 41 in `examples/README.md`.
+- New snapshot tests: `snapshot_polar_grid_with_data`, `snapshot_violin_raincloud`.
+- Facade: `AreaMark`, `BinMethod`, `HeatmapMark`, `ColormapLegend`, `Colorbar` now re-exported through `starsight::prelude` and `starsight::marks` / `starsight::statistics` so example code doesn't need deep-path imports.
 - `PolarBarMark` — stacked annular bars (`r_base` for layered wind-rose stacks, optional uniform / per-bar angular widths). Backs `examples/scientific/wind_rose.rs` (#33).
 - `PolarRectMark` — annular tile mark for spiral heatmaps and polar calendars. Backs `examples/scientific/polar_calendar.rs` (#8). Both polar marks share `build_arc_wedge` from `arc.rs` (promoted to `pub(crate)`) and the new `crate::marks::palette::POLAR_DEFAULT` Tableau-10 cycle.
 - `ErrorBarMark` — vertical/horizontal whiskers attached to `(x, y)` points with optional perpendicular caps. Symmetric `ErrorBarMark::new(xs, ys, errors)` plus the asymmetric `.errors_pair(Vec<(low, high)>)` builder. Backs `examples/scientific/error_bars.rs`.
@@ -57,6 +64,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Numeric axes get a 5% inset via `Axis::auto_from_data` post-Wilkinson (matplotlib `axes.margins` convention) when at least one mark on the figure is point-shaped — `Point` / `Line` / `Area` / `ErrorBar` / `BoxPlot` / `Violin` / `Candlestick` / `Step` / `Rug`. Bar / histogram / heatmap / contour figures stay edge-aligned because their data IS the axis structure. `Figure::axis_padding(Some(f))` overrides per-figure.
+- Categorical y-tick labels on horizontal-bar charts use a uniform column-left x (max-label-width-aligned) instead of right-anchor, so mixed-length category strings ("Tokyo" vs "Mexico City") no longer wobble. Numeric ticks keep right-anchor for decimal alignment.
+- Bordered legend tries corners in TR → TL → BR → BL order, picking the first whose rect doesn't intersect the merged data extent (cartesian only — polar legends keep TR per the documented 0.3.0 limitation).
+- Mark legend entries are filtered out when their colormap is already shown by the auto-attached `Colorbar` — heatmap / contour figures no longer emit a redundant labeled-mark legend on top of the colorbar.
+- Polar render path inscribes the disk with a 12px inset and a slightly enlarged title slot, so titles and chart edges no longer collide on tight 800×600 canvases (gauge / polar_calendar / wind_rose).
+- `snapshot_arcmark_partial_gauge` rebuilt as a layered gauge (rim + track + value + tick labels) matching the example, so the snapshot reads as a real gauge instead of a single wedge.
 - **Behavior change (auto-attached colorbar).** `HeatmapMark` and `ContourMark` figures now reserve a Right-side colorbar slot by default (16px gradient strip + 5 tick labels + 1px outline). Opt out via `Figure::colorbar(false)` to recover pre-0.3.0 layout. Tracked as `starsight-kdi`.
 - `DEFAULT_LIGHT` text colors bumped for ≥7:1 WCAG contrast against white: `tick_label` `#555555`→`#333333`, `axis` `#666666`→`#444444`, `title` `#222222`→`#111111`. `DEFAULT_DARK` lifted in lockstep against the `#1E1E1E` background. Tracked as `starsight-405`. Path-effects halo for label-over-fill cases (heatmap text, contour labels) deferred to 0.4.0.
 - `DEFAULT_FIGURE_PADDING_PX` bumped from 4 to 8 (matches `MultiPanelFigure::padding` default) — every chart kind now has a consistent 8px breathable margin between canvas edge and the layout slot stack. Tracked as `starsight-c6h`.

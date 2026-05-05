@@ -86,7 +86,10 @@ fn cut_panel(title: &str, t_amp: f64) -> Figure {
     let xs: Vec<f64> = (0..n)
         .map(|i: u32| H_RANGE * f64::from(i) / f64::from(n - 1))
         .collect();
-    let ys: Vec<f64> = xs.iter().map(|h| structure_factor(*h, 0.5, t_amp)).collect();
+    let ys: Vec<f64> = xs
+        .iter()
+        .map(|h| structure_factor(*h, 0.5, t_amp))
+        .collect();
     // Treat S(h, k) as a count rate ~ I; std deviation ≈ √I.
     let errs: Vec<f64> = ys.iter().map(|y| y.max(0.0).sqrt() * 0.6).collect();
     Figure::new(420, 320)

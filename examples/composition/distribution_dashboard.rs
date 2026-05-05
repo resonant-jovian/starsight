@@ -91,11 +91,7 @@ fn main() -> Result<()> {
         .title("B — overall rating, KDE")
         .x_label("overall")
         .y_label("density")
-        .add(
-            AreaMark::new(grid, density)
-                .color(palette[1])
-                .opacity(0.55),
-        );
+        .add(AreaMark::new(grid, density).color(palette[1]).opacity(0.55));
 
     // Panel C — box plot of overall, grouped by country
     let mut by_country: Vec<Vec<f64>> = vec![Vec::new(); COUNTRIES.len()];
@@ -151,11 +147,7 @@ fn splitmix(mut z: u64) -> u64 {
 /// are shifted into independent slots of the u64 input so different triples
 /// produce uncorrelated outputs even when the components only differ by 1.
 fn uniform(seed: u32, idx: u32, salt: u32) -> f64 {
-    let mixed = splitmix(
-        u64::from(seed)
-            | (u64::from(idx) << 21)
-            | (u64::from(salt) << 42),
-    );
+    let mixed = splitmix(u64::from(seed) | (u64::from(idx) << 21) | (u64::from(salt) << 42));
     let frac = (mixed >> 11) as f64 / (1u64 << 53) as f64;
     frac.clamp(1e-12, 1.0 - 1e-12)
 }

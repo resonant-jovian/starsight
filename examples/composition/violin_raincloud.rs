@@ -113,8 +113,14 @@ fn jittered_offset(group: u32, idx: u32) -> f64 {
 
 /// Box–Muller pair off a deterministic LCG so the example reproduces.
 fn box_muller(seed: u32, idx: u32) -> (f64, f64) {
-    let mut s1 = seed.wrapping_mul(0x6C07_8965).wrapping_add(idx).wrapping_add(1);
-    let mut s2 = seed.wrapping_mul(0x4F1B_BCDC).wrapping_add(idx).wrapping_add(2);
+    let mut s1 = seed
+        .wrapping_mul(0x6C07_8965)
+        .wrapping_add(idx)
+        .wrapping_add(1);
+    let mut s2 = seed
+        .wrapping_mul(0x4F1B_BCDC)
+        .wrapping_add(idx)
+        .wrapping_add(2);
     s1 ^= s1 << 13;
     s1 ^= s1 >> 17;
     s1 ^= s1 << 5;
@@ -154,7 +160,12 @@ fn mixture_samples(
     n: usize,
 ) -> Vec<f64> {
     let mut out = normal_samples(seed, mu_1, sigma_1, n_1);
-    out.extend(normal_samples(seed.wrapping_add(0xDEAD), mu_2, sigma_2, n - n_1));
+    out.extend(normal_samples(
+        seed.wrapping_add(0xDEAD),
+        mu_2,
+        sigma_2,
+        n - n_1,
+    ));
     out
 }
 

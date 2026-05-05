@@ -858,13 +858,16 @@ fn snapshot_violin_raincloud() {
     // unimodal — so the inner box plus envelope plus rain reads as three
     // distinct layers.
     let groups = vec![
-        ViolinGroup::new("bimodal", vec![1.0, 1.5, 2.0, 2.5, 3.0, 7.0, 7.5, 8.0, 8.5, 9.0]),
-        ViolinGroup::new("unimodal", vec![3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]),
+        ViolinGroup::new(
+            "bimodal",
+            vec![1.0, 1.5, 2.0, 2.5, 3.0, 7.0, 7.5, 8.0, 8.5, 9.0],
+        ),
+        ViolinGroup::new(
+            "unimodal",
+            vec![3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0],
+        ),
     ];
-    let palette = vec![
-        Color::from_hex(0x0033_77BB),
-        Color::from_hex(0x0033_AA66),
-    ];
+    let palette = vec![Color::from_hex(0x0033_77BB), Color::from_hex(0x0033_AA66)];
     // Strip points at band-right (idx + 0.78) with deterministic ±0.13 jitter.
     let strip_x = vec![
         0.78, 0.85, 0.71, 0.82, 0.76, // bimodal — 5 reproducible jitter values

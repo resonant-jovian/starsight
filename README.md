@@ -1,52 +1,48 @@
-<div align="center">
+<!--
+  starsight — README.md
+  Renders on GitHub, crates.io (Comrak + Ammonia), docs.rs, lib.rs.
+  Constraints respected:
+    - Absolute-URL <img> only (relative paths don't resolve on crates.io —
+      see rust-lang/crates.io issue #982).
+    - <picture> with prefers-color-scheme works on GitHub *and* crates.io
+      (since the July 2024 crates.io update).
+    - <details>/<summary>, GFM tables, GitHub alerts (> [!NOTE]) all survive
+      Ammonia sanitization.
+    - No inline <svg>, no <style>, no Mermaid, no class/id hooks.
+    - LaTeX $$...$$ renders on GitHub; degrades to readable source on crates.io.
+  All asset URLs reference the `main` branch — the published-crate README
+  on crates.io will continue resolving these as long as the asset paths stay
+  stable. A pre-publish URL-rewrite step can pin to a version tag if needed.
+-->
 
-<img src=".assets/hero-banner.svg" alt="starsight — A unified scientific visualization crate for Rust, from zero-config one-liners to GPU-accelerated 3D" width="100%"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/hero/starsight-hero-dark.png">
+  <img alt="starsight — scientific visualization for Rust. Eclipse mark, wordmark, tagline, and a 3×3 grid of real example renders: line chart, scatter, bar chart, histogram, contour fields, nightingale, candlestick, radar spider, Lorenz attractor."
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/hero/starsight-hero-light.png"
+       width="100%">
+</picture>
 
-<sub>// funding</sub>
+# starsight
 
-[![Sponsor](https://img.shields.io/badge/Sponsor-resonant--jovian-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/resonant-jovian)
-[![Support on thanks.dev](https://img.shields.io/badge/thanks.dev-Support-green?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyMWMtNS41IDAtMTAtMy41LTEwLTkgMC00IDItNy41IDYtMTAgMS41IDIuNSAzIDQuNSA0IDQuNSAxLTEuNSAyLjUtMy41IDQtNC41IDQuNSAyLjUgNiA2IDYgMTAgMCA1LjUtNC41IDktMTAgOXoiLz48L3N2Zz4=)](https://thanks.dev/u/gh/resonant-jovian)
-[![ORCID](https://img.shields.io/badge/ORCID-0009--0008--1372--1727-a6ce39?style=for-the-badge&logo=orcid&logoColor=white)](https://orcid.org/0009-0008-1372-1727)
+*a typed, layered figure compiler for Rust — from zero-config one-liners to GPU-accelerated 3D, eight backends, no global state.*
 
-<sub>// package</sub>
+starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatmap, box-plot, violin, KDE, pie, contour, candlestick, polar arc, radar, error bars, …) into pixel-perfect output through a tiny-skia or SVG backend, with PDF, terminal, and GPU paths arriving on the [roadmap](#roadmap). It is designed for the moments when a paper, a notebook, and a service need to render the same chart.
 
-[![Crates.io](https://img.shields.io/crates/v/starsight?style=for-the-badge&logo=rust&logoColor=white&label=crates.io)](https://crates.io/crates/starsight)
-[![docs.rs](https://img.shields.io/docsrs/starsight?style=for-the-badge&logo=docsdotrs&logoColor=white&label=docs.rs)](https://docs.rs/starsight)
-[![Downloads](https://img.shields.io/crates/d/starsight?style=for-the-badge&logo=rust&logoColor=white&color=e6761b)](https://crates.io/crates/starsight)
-[![deps.rs](https://deps.rs/repo/github/resonant-jovian/starsight/status.svg?style=for-the-badge)](https://deps.rs/repo/github/resonant-jovian/starsight)
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/status/panel-dark.svg">
+  <img alt="Live status panel: starsight v0.3.0 · MSRV rust 1.89 · GPL-3.0-only · edition 2024 · 28 downloads since 2026-04-07 · 0 dependents · updated 8 days ago"
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/status/panel-light.svg"
+       width="100%">
+</picture>
 
-<sub>// license</sub>
-
-[![License](https://img.shields.io/crates/l/starsight?style=for-the-badge&logo=gnu&logoColor=white&color=3366cc)](https://www.gnu.org/licenses/gpl-3.0)
-[![MSRV](https://img.shields.io/crates/msrv/starsight?style=for-the-badge&logo=rust&logoColor=white&color=3366cc)](https://releases.rs/)
-[![Edition](https://img.shields.io/badge/Edition-2024-3366cc?style=for-the-badge&logo=rust&logoColor=white)](https://doc.rust-lang.org/edition-guide/)
-
-<sub>// build</sub>
-
-[![CI](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=ci)](https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml)
-[![Gallery](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/gallery.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=gallery)](https://github.com/resonant-jovian/starsight/actions/workflows/gallery.yml)
-[![Release](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/release.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=release)](https://github.com/resonant-jovian/starsight/actions/workflows/release.yml)
-[![Snapshots](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/snapshots.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=snapshots)](https://github.com/resonant-jovian/starsight/actions/workflows/snapshots.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&logoColor=white&label=coverage)](https://app.codecov.io/gh/resonant-jovian/starsight)
-
-<sub>// community</sub>
-
-[![Stars](https://img.shields.io/github/stars/resonant-jovian/starsight?style=for-the-badge&logo=github&logoColor=white)](https://github.com/resonant-jovian/starsight/stargazers)
-[![Contributors](https://img.shields.io/github/contributors/resonant-jovian/starsight?style=for-the-badge&logo=github&logoColor=white)](https://github.com/resonant-jovian/starsight/graphs/contributors)
-[![Last commit](https://img.shields.io/github/last-commit/resonant-jovian/starsight?style=for-the-badge&logo=git&logoColor=white)](https://github.com/resonant-jovian/starsight/commits/main)
-[![Maintenance](https://img.shields.io/maintenance/yes/2026?style=for-the-badge)](https://github.com/resonant-jovian/starsight/pulse)
-
-</div>
-
-> [!CAUTION]
-> **starsight** is pre-release software. The API is unstable until `1.0.0` — pin an exact version in your `Cargo.toml` if you depend on it.
+> [!WARNING]
+> **starsight is at 0.3.0 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
 
 ---
 
-## Quickstart
-
-> [!TIP]
-> Confused by anything in the docs? File it at [`resonant-jovian/starsight/issues`](https://github.com/resonant-jovian/starsight/issues) — every "this was unclear" report makes the next reader's life easier.
+## thirty seconds
 
 ```toml
 [dependencies]
@@ -61,384 +57,260 @@ fn main() -> starsight::Result<()> {
 }
 ```
 
-The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×600 figure with a single `LineMark` and dispatches to the tiny-skia backend by file extension. The library is organized into seven layered crates re-exported from the `starsight` facade — see [Architecture](#architecture) below.
+The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×600 figure with a single `LineMark` and dispatches to the tiny-skia backend by file extension. There is no global state, no implicit theme, no runtime config — every figure is a value. See [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples) for 38 self-contained programs.
 
----
+## install
 
-## Architecture
+The `default` feature ships a usable starting set: `LineMark`, `PointMark`, `BarMark`, `AreaMark`, `HistogramMark`, `HeatmapMark`, `BoxPlotMark`, `ViolinMark`, `PieMark`, `ContourMark`, `CandlestickMark`, polar marks (`ArcMark`, `PolarBarMark`, `PolarRectMark`, `RadarMark`), the tiny-skia raster backend, the SVG backend, and Wilkinson tick generation. Feature flags toggle the rest:
 
-<p align="center">
-  <img src=".assets/architecture.svg" alt="starsight 7-layer architecture: facade re-exports L1–L7; each layer depends only on layers below; rule enforced by Cargo" width="100%"/>
-</p>
+| flag | what it adds |
+|---|---|
+| `polars` | accept `polars::DataFrame` columns directly |
+| `ndarray` | accept `ndarray::ArrayN` views (planned 0.11) |
+| `arrow` | accept `arrow::RecordBatch` (planned 0.11) |
+| `gpu` | wgpu + vello GPU rendering (planned 0.6) |
+| `interactive` | winit + egui interactive windows (planned 0.6) |
+| `terminal` | TUI via ratatui — Kitty / Sixel / iTerm2 / half-block / Braille (planned 0.8) |
+| `pdf` | PDF export via krilla (planned 0.10) |
+| `web` | WASM + WebGPU browser target (planned 0.10) |
+| `3d` | 3D chart types via nalgebra (planned 0.9) |
 
-Each layer depends only on layers below it. The rule is enforced by `Cargo.toml`, not by convention — try to add an upward dependency and `cargo check` rejects it.
+`full` enables everything; `minimal` is core types only with no rendering. The `science` and `dashboard` bundles compose related flag sets.
 
-The facade crate (`starsight`) exposes three access patterns so users can pick the one that fits their style:
+## architecture
 
-- **Prelude:** `use starsight::prelude::*;` for the common types (`Figure`, `LineMark`, `PointMark`, `Color`, `plot!`, ...).
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/architecture-dark.svg">
+  <img alt="starsight architecture diagram — the facade crate re-exports seven layers: L1 background (primitives, error types, drawing, backends), L2 modifiers (scales, ticks, axes, coordinate systems), L3 components (marks, stats, aesthetics, position adjustments), L4 composition (layouts, faceting, legends, colorbars), L5 common (figures, plot!, rendering helpers, data acceptance), L6 interactivity (planned), L7 export (planned). Layer N may depend only on layers N-1 through 1; enforced at workspace Cargo.toml level."
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/architecture-light.svg"
+       width="100%">
+</picture>
+
+A pipeline of three stages — **compose**, **resolve**, **render**:
+
+1. **compose** — you build a `Figure` and add marks. Marks own their data references and their style.
+2. **resolve** — starsight computes scales, ticks, layout, and a flat list of geometric primitives. This stage is pure; it does not touch I/O.
+3. **render** — a backend walks the primitives and writes output.
+
+The facade crate (`starsight`) is the only crate users add to `Cargo.toml`. It exposes three access patterns so users can pick the one that fits their style:
+
+- **Prelude:** `use starsight::prelude::*;` for the common types.
 - **Semantic modules:** `use starsight::marks::LineMark;`, `use starsight::backends::SkiaBackend;` — by category.
-- **Latin layer aliases:** `use starsight::components::marks::LineMark;` — by layer (`background`, `modifiers`, `components`, `composition`, `common`, `interactivity`, `export`).
+- **Latin layer aliases:** `use starsight::components::marks::LineMark;` — by layer.
 
----
+<details>
+<summary><b>Why three stages and seven layers?</b></summary>
 
-## Pipeline
+Separating compose from render lets the same `Figure` produce a PNG for a notebook, an SVG for a paper, and a `Vec<u8>` for an HTTP response without re-stating intent. Separating resolve from compose lets us cache layout when only style changes — which is most of the time, in interactive contexts.
+
+The seven layers exist to encode a one-way dependency rule: marks (L3) cannot reach into figures (L5), and figures cannot reach into export (L7). This makes the library refactor-friendly: adding a new mark type touches one layer; adding a new backend touches two; adding a new statistical transform touches one. The rule is enforced at workspace `Cargo.toml` level, not by convention — try to add an upward dependency and `cargo check` rejects it.
+
+</details>
+
+## a worked example — the Lorenz attractor
+
+starsight is a viz library; the math is what it draws. The Lorenz system
+
+$$
+\dot{x} = \sigma (y - x), \qquad
+\dot{y} = x (\rho - z) - y, \qquad
+\dot{z} = x y - \beta z
+$$
+
+with $\sigma = 10$, $\beta = 8/3$, $\rho = 28$ is the textbook strange attractor. Eleven trajectories sweeping $\rho \in \{13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250\}$, integrated with RK4 at $\mathrm{d}t = 0.005$ for 80 000 steps and projected onto the $x$–$z$ plane:
+
+<details>
+<summary><b>Rust integration loop (RK4)</b></summary>
+
+```rust
+use starsight::prelude::*;
+
+#[derive(Clone, Copy)]
+struct State { x: f64, y: f64, z: f64 }
+
+fn deriv(s: State, sigma: f64, rho: f64, beta: f64) -> State {
+    State {
+        x: sigma * (s.y - s.x),
+        y: s.x * (rho - s.z) - s.y,
+        z: s.x * s.y - beta * s.z,
+    }
+}
+
+fn integrate(rho: f64) -> (Vec<f64>, Vec<f64>) {
+    let (sigma, beta, dt) = (10.0_f64, 8.0_f64 / 3.0, 0.005_f64);
+    let mut s = State { x: 1.0, y: 1.0, z: 1.0 };
+    let mut xs = Vec::with_capacity(75_000);
+    let mut zs = Vec::with_capacity(75_000);
+    for step in 0..80_000 {
+        // RK4 — see examples/scientific/lorenz_line.rs for full implementation
+        s = rk4_step(s, dt, sigma, rho, beta);
+        if step >= 5_000 {        // discard transient
+            xs.push(s.x);
+            zs.push(s.z);
+        }
+    }
+    (xs, zs)
+}
+
+fn main() -> starsight::Result<()> {
+    let (xs, zs) = integrate(28.0);
+    Figure::new(1000, 700)
+        .title("Lorenz attractor (σ=10, β=8/3, ρ=28)")
+        .add(LineMark::new(xs, zs).width(0.6))
+        .save("lorenz.png")
+}
+```
+
+</details>
+
+Real source: [`examples/scientific/lorenz_line.rs`](https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/kruskal_szekeres_line.rs).
 
 <p align="center">
-  <img src=".assets/pipeline.svg" alt="starsight pipeline: DATA → MARK → STATS → SCALE → LAYOUT → SCENE → BACKEND → OUTPUT" width="100%"/>
+  <img src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/examples/scientific/lorenz_line.png"
+       alt="Eleven Lorenz attractor trajectories projected onto the x–z plane, coloured by ρ"
+       width="78%">
 </p>
 
-Every `plot!()` call walks the same eight stages. Inputs (slices, `Vec<f64>`, Polars DataFrames) become `Mark` configs, optionally pass through statistical transforms, then through scales (with Wilkinson tick selection), composed by `Figure` into a `SceneNode` tree, and rasterized by the backend selected via the file extension you save to.
+## showcase
 
----
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/gallery-dark.png">
+  <img alt="starsight showcase composite — 9 example renders across 3×3: heatmap, bubble scatter, categorical heatmap, gauge polar arc, wind rose polar bar, polar calendar, Kruskal–Szekeres line, laser plasma contour, error bars with rug."
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/gallery-light.png"
+       width="100%">
+</picture>
 
-## Coming from another language?
+Source for every panel — and 29 more — lives under [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples), regenerated by `cargo xtask gallery`.
 
-<sub>// 12 mappings · 5 libraries · ranked by familiarity</sub>
+## what works at 0.3.0
 
-| You used | starsight | Key difference |
+| capability | available | added in |
 |---|---|---|
-| `plt.plot(x, y)` | `plot!(x, y)` | No global state |
-| `plt.scatter(x, y, c=c)` | `PointMark::new(x, y).color_by(&c)` | Builder pattern |
-| `plt.bar(labels, vals)` | `BarMark::new(categories, values)` | Grammar of graphics |
-| `plt.boxplot([a, b])` | `BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])` | Per-group `BoxPlotGroup` carries its label |
-| `sns.violinplot(data=df, x=…, y=…)` | `ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)` | Bandwidth strategy is a builder, not magic |
-| `plt.pie(values, labels=…)` | `PieMark::new(values, labels).show_percent()` | Add `.inner_radius(0.5)` for a donut |
-| `mpl_finance.candlestick_ohlc` | `CandlestickMark::new(vec![Ohlc { … }, …])` | Inline `Ohlc` rows; no helper crate |
-| `plt.savefig("out.png")` | `.save("out.png")?` | Returns `Result` |
-| `plt.show()` | `.show()?` | Feature `interactive` |
+| `LineMark`, `PointMark`, `Figure`, `plot!`, SVG + tiny-skia backends, Wilkinson ticks | ✓ | 0.1 |
+| `BarMark` (vertical / horizontal / grouped / stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark` | ✓ | 0.2 |
+| `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark` / donut, `CandlestickMark` | ✓ | 0.3 |
+| `PolarCoord`, `ArcMark` (Nightingale, Gauge, Sunburst), `PolarBarMark` (wind rose), `PolarRectMark` (polar calendar), `RadarMark` (spider) | ✓ | 0.3 |
+| `ContourMark` + marching-squares, `ErrorBarMark`, `RugMark`, auto-attached `Colorbar`, `MultiPanelFigure` | ✓ | 0.3 |
+| Polars `DataFrame` integration | ✓ (`polars` feature) | 0.3 |
+| `LogScale`, `SqrtScale`, `CategoricalScale` | ✓ | 0.3 |
+| `FacetWrap`, shared axes across panels, polar-aware legend placement, contour filled bands | planned | 0.4 |
+| `SymLogScale`, `DateTimeScale`, `BandScale` | planned | 0.5 |
+| GPU + interactivity (wgpu, hover / zoom / pan) | planned | 0.6 |
+| Animation, GIF, frame recording | planned | 0.7 |
+| Terminal backend (Kitty / Sixel / iTerm2 / half-block / Braille) | planned | 0.8 |
+| 3D marks (`Surface3D`, `Scatter3D`, isosurface) | planned | 0.9 |
+| PDF (krilla), interactive HTML, WebGPU | planned | 0.10 |
+| ndarray / Arrow data acceptance | planned | 0.11 |
+
+## backends
+
+| backend | output | dependencies | feature flag | status |
+|---|---|---|---|---|
+| `SkiaBackend` | `.png` / `.jpeg` / raw RGBA | tiny-skia | default | stable |
+| `SvgBackend` | `.svg` text | none | default | stable |
+| `WgpuBackend` | GPU surface, headless or windowed | wgpu, vello | `gpu` | planned 0.6 |
+| `RatatuiBackend` | TUI cells (Kitty / Sixel / iTerm2 / half-block / Braille) | ratatui | `terminal` | planned 0.8 |
+| `KrillaBackend` | `.pdf` | krilla | `pdf` | planned 0.10 |
+| `WasmBackend` | `<canvas>` in browser | wasm-bindgen, web-sys | `web` | planned 0.10 |
+
+The `DrawBackend` trait is the only interface marks need to render; new backends slot in by implementing it — no other layer needs to change.
+
+## ecosystem
+
+starsight composes with, but does not depend on:
+
+- **`polars`** / **`ndarray`** / **`arrow`** — feed columns into mark constructors via `From<&[T]>`; `polars` is wired today, `ndarray` and `arrow` arrive in 0.11.
+- **`time`** / **`chrono`** — `DateTimeScale` will consume either (planned 0.5).
+- **`serde`** — every mark and theme implements `Serialize` / `Deserialize` for spec-as-data workflows.
+- **`ratatui`** — the planned `RatatuiBackend` renders into TUI cells (planned 0.8).
+
+It is part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of Latin/Greek-named scientific Rust crates: [`chromata`](https://github.com/resonant-jovian/chromata) (1 104 editor / terminal color themes as compile-time constants), [`prismatica`](https://github.com/resonant-jovian/prismatica) (260+ perceptually uniform colormaps as compile-time LUTs), [`caustic`](https://github.com/resonant-jovian/caustic) (6D Vlasov–Poisson plasma solver), [`phasma`](https://github.com/resonant-jovian/phasma) (terminal UI for `caustic`).
+
+## coming from another language
+
+| you wrote | in starsight | note |
+|---|---|---|
+| `plt.plot(x, y)` (matplotlib) | `Figure::new(800, 600).add(LineMark::new(x, y))` | no global state |
+| `plt.scatter(x, y, c=c)` | `PointMark::new(x, y).color_by(&groups)` | builder pattern |
+| `plt.bar(labels, vals)` | `BarMark::new(categories, values)` | grammar of graphics |
+| `plt.boxplot([a, b])` | `BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])` | per-group label travels with the data |
+| `sns.violinplot(data=df, x=…, y=…)` | `ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)` | bandwidth strategy is a builder, not magic |
+| `plt.pie(values, labels=…)` | `PieMark::new(values, labels).show_percent()` | add `.inner_radius(0.5)` for a donut |
+| `mpl_finance.candlestick_ohlc` | `CandlestickMark::new(vec![Ohlc { … }, …])` | inline `Ohlc` rows; no helper crate |
+| `plt.savefig("out.png")` | `.save("out.png")?` | returns `Result` |
+| `plt.show()` | `.show()?` | feature `interactive` |
 | `sns.heatmap(data)` | `HeatmapMark::new(data)` | prismatica colormaps |
-| `ggplot + geom_point()` | `Figure::new().add(PointMark)` | Builder, not `+` |
-| `px.scatter(df, x="a")` | `plot!(df, x="a", y="b")` | Feature `polars` |
-
----
-
-## Examples
-
-<details>
-<summary><b>Line chart with title and labels</b></summary>
-
-```rust
-use starsight::prelude::*;
-
-fn main() -> starsight::Result<()> {
-    Figure::new(800, 600)
-        .title("Sales over time")
-        .x_label("month")
-        .y_label("revenue")
-        .add(LineMark::new(
-            vec![1.0, 2.0, 3.0, 4.0, 5.0],
-            vec![3.4, 4.1, 5.7, 4.9, 6.3],
-        ))
-        .save("line.png")
-}
-```
-
-✓ Available in 0.1.0
-</details>
-
-<details>
-<summary><b>Two series with colors</b></summary>
-
-```rust
-use starsight::prelude::*;
-
-fn main() -> starsight::Result<()> {
-    Figure::new(800, 600)
-        .add(
-            LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 1.0, 2.0, 1.5])
-                .color(Color::BLUE)
-                .width(2.5),
-        )
-        .add(
-            LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![3.0, 2.0, 1.0, 0.5])
-                .color(Color::RED)
-                .width(2.5),
-        )
-        .save("two_series.png")
-}
-```
-
-✓ Available in 0.1.0
-</details>
-
-<details>
-<summary><b>Scatter with grouped color</b></summary>
-
-```rust
-use starsight::prelude::*;
-use starsight::marks::PointMark;
-
-fn main() -> starsight::Result<()> {
-    let x = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-    let y = vec![2.0, 3.5, 1.8, 4.2, 3.1];
-    let groups = vec!["a", "a", "b", "b", "c"];
-
-    Figure::new(600, 400)
-        .add(PointMark::new(x, y).color_by(&groups).radius(5.0))
-        .save("scatter.png")
-}
-```
-
-✓ Available in 0.2.0
-</details>
-
-<details>
-<summary><b>SVG output</b></summary>
-
-```rust
-use starsight::prelude::*;
-
-fn main() -> starsight::Result<()> {
-    Figure::new(800, 600)
-        .add(LineMark::new(
-            vec![1.0, 2.0, 3.0, 4.0],
-            vec![10.0, 20.0, 15.0, 25.0],
-        ))
-        .save("chart.svg") // dispatches to SvgBackend by extension
-}
-```
-
-✓ Available in 0.1.0
-</details>
-
-<details>
-<summary><b>Apply chromata theme + prismatica colormap</b></summary>
-
-```rust
-use starsight::prelude::*;
-use starsight::marks::HeatmapMark;
-use chromata::popular::gruvbox;
-use prismatica::crameri::BATLOW;
-
-fn main() -> starsight::Result<()> {
-    let data: Vec<Vec<f64>> = (0..30)
-        .map(|i| (0..30).map(|j| ((i * j) as f64).sin()).collect())
-        .collect();
-
-    Figure::new(600, 600)
-        .theme(gruvbox::DARK_HARD.into())
-        .add(HeatmapMark::new(data).colormap(BATLOW))
-        .save("heatmap.png")
-}
-```
-
-✓ Available in 0.2.0
-</details>
-
-### What it actually renders today
-
-The full pipeline (Wilkinson ticks → axis rendering → cosmic-text labels → tiny-skia raster → PNG encoding) works end-to-end. Each card below is produced deterministically by `cargo xtask gallery` from the program in [`examples/`](https://github.com/resonant-jovian/starsight/tree/main/examples) — click an image to jump to its source. **All images are real outputs from `examples/` — nothing synthetic.**
-
-#### Basics
-<p align="center">
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/line_chart.rs">
-    <img src="examples/basics/line_chart.png" width="280" alt="LineMark with title and axis labels"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/scatter.rs">
-    <img src="examples/basics/scatter.png" width="280" alt="PointMark scatter with grouped color and auto-legend"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/bar_chart.rs">
-    <img src="examples/basics/bar_chart.png" width="280" alt="BarMark categorical bar chart"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/histogram.rs">
-    <img src="examples/basics/histogram.png" width="280" alt="HistogramMark with automatic Freedman–Diaconis binning"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/bubble_scatter.rs">
-    <img src="examples/basics/bubble_scatter.png" width="280" alt="PointMark bubble scatter with per-point colors and radii"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/basics/heatmap.rs">
-    <img src="examples/basics/heatmap.png" width="280" alt="HeatmapMark with prismatica colormap"/>
-  </a>
-</p>
-
-#### Composition
-<p align="center">
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/box_plot.rs">
-    <img src="examples/composition/box_plot.png" width="280" alt="BoxPlotMark with five-number summary and Tukey outliers"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/violin.rs">
-    <img src="examples/composition/violin.png" width="280" alt="ViolinMark with KDE-driven density envelopes"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/pie.rs">
-    <img src="examples/composition/pie.png" width="280" alt="PieMark with percent slice labels"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/donut.rs">
-    <img src="examples/composition/donut.png" width="280" alt="PieMark in donut mode (inner_radius set)"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/composition/waterfall_bar.rs">
-    <img src="examples/composition/waterfall_bar.png" width="280" alt="BarMark waterfall with per-bar bases, colors, and connectors"/>
-  </a>
-</p>
-
-#### Scientific & Data
-<p align="center">
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/candlestick.rs">
-    <img src="examples/scientific/candlestick.png" width="280" alt="CandlestickMark OHLC bars with up/down body color dispatch"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/scientific/laser_plasma.rs">
-    <img src="examples/scientific/laser_plasma.png" width="280" alt="Stimulated Raman scattering electron phase space, log-scale viridis"/>
-  </a>
-  <a href="https://github.com/resonant-jovian/starsight/blob/main/examples/data/polars_integration.rs">
-    <img src="examples/data/polars_integration.png" width="280" alt="plot!(df, x, y, color) macro with Polars LazyFrame"/>
-  </a>
-</p>
-
-> Note: snapshot tests in CI use the SVG backend (deterministic across operating systems and font setups).
-
----
-
-## Features
-
-<p align="center">
-  <img src=".assets/status-matrix.svg" alt="starsight feature status matrix — 18 of 25 features working as of 0.3.0" width="100%"/>
-</p>
-
-> [!IMPORTANT]
-> Only rows marked **`working`** are usable today. `wip` rows compile but are pre-MVP. `planned` rows are stub files with `TODO` markers. Don't depend on either in production.
-
-### Feature flags
-
-> [!TIP]
-> Feature flags toggle which sub-systems are compiled in, but most flags currently gate **planned** code. The `default` feature works today; the rest land per the [Roadmap](#roadmap). Listed in canonical order from `starsight/Cargo.toml`'s `[features]` block.
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `default` | yes | CPU rendering via tiny-skia, SVG, PNG export |
-| `full` | no | All features enabled |
-| `minimal` | no | Core types only, no rendering |
-| `science` | no | `stats` + `contour` + `3d` + `pdf` |
-| `dashboard` | no | `interactive` + `gpu` + `polars` |
-| `terminal` | no | TUI rendering via ratatui |
-| `web` | no | WASM + WebGPU browser target |
-| `gpu` | no | wgpu + vello GPU rendering |
-| `interactive` | no | winit + egui interactive windows |
-| `polars` | no | Polars DataFrame acceptance |
-| `ndarray` | no | ndarray acceptance |
-| `arrow` | no | Apache Arrow RecordBatch acceptance |
-| `3d` | no | 3D chart types via nalgebra |
-| `pdf` | no | PDF export via krilla |
-| `stats` | no | Statistical transforms via statrs |
-| `contour` | no | Isoline generation |
-| `geo` | no | Geospatial chart types |
-| `resvg` | no | SVG-to-PNG rasterization |
-
----
-
-## Backends
-
-<p align="center">
-  <img src=".assets/backend-matrix.svg" alt="starsight backends — DrawBackend trait implementations: tiny-skia, SVG, wgpu, krilla, Kitty, Sixel, iTerm2, Braille, half-block" width="100%"/>
-</p>
-
-The `DrawBackend` trait is the only interface marks need to render. New backends slot in by implementing it — no other layer needs to change. The two `default`-feature backends (tiny-skia for raster PNG, SVG for vector) are what runs today; the rest land per the [Roadmap](#roadmap).
-
----
-
-## Ecosystem
-
-<p align="center">
-  <img src=".assets/ecosystem.svg" alt="resonant-jovian ecosystem: starsight (visualization) · chromata + prismatica (palette) · caustic + phasma (simulation)" width="100%"/>
-</p>
-
-Part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of Latin/Greek-named scientific Rust crates:
-
-- [`starsight`](https://github.com/resonant-jovian/starsight) — Unified scientific visualization (this crate)
-- [`chromata`](https://github.com/resonant-jovian/chromata) — 1,104 editor / terminal color themes as compile-time constants
-- [`prismatica`](https://github.com/resonant-jovian/prismatica) — 260+ perceptually uniform colormaps as compile-time LUTs
-- [`caustic`](https://github.com/resonant-jovian/caustic) — 6D Vlasov–Poisson solver for plasma physics
-- [`phasma`](https://github.com/resonant-jovian/phasma) — Terminal UI for `caustic`
-
----
-
-## vs. Siblings
-
-<p align="center">
-  <img src=".assets/comparison.svg" alt="starsight vs. plotters / charming / poloto across 14 features" width="100%"/>
-</p>
-
-starsight is the pre-1.0 newcomer in this space. The bet: **one crate** covering CPU + GPU + terminal + PDF with a grammar-of-graphics builder and shared themes/colormaps via [`chromata`](https://github.com/resonant-jovian/chromata) + [`prismatica`](https://github.com/resonant-jovian/prismatica). Caveat: all four crates are alive and growing — the table is "as of starsight 0.3" and the gaps narrow as each ships.
-
----
-
-## Roadmap
-
-<p align="center">
-  <img src=".assets/roadmap.svg" alt="starsight roadmap timeline 0.1 → 1.0 — 3 of 13 milestones shipped" width="100%"/>
-</p>
-
-> [!TIP]
-> Pin an exact version while the workspace evolves toward `1.0.0`. The high-level milestones are below; the full task-level roadmap with checkboxes lives in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md). See also: [CHANGELOG](CHANGELOG.md).
-
-- [x] 0.1.0 Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark`/`PointMark`, `Figure`, `plot!`, snapshots
-- [x] 0.2.0 Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
-- [x] 0.3.0 Statistical charts + Polar + Contour + Grid + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, `LegendGlyph` dispatch, **`PolarCoord` + `ArcMark` (Nightingale / Gauge / Sunburst)**, **`PolarBarMark` (wind rose)**, **`PolarRectMark` (polar calendar)**, **`RadarMark` (spider chart)**, **`ContourMark` + marching-squares stat**, **`ErrorBarMark` + `RugMark`**, **auto-attached `Colorbar`**, **`MultiPanelFigure` (basic grid)**, Polars `DataFrame` integration (pulled forward from 0.11.0)
-- [ ] 0.4.0 Layout — `FacetWrap`, shared axes across panels, `Colorbar`, polar-aware legend placement, contour filled bands
-- [ ] 0.5.0 Scale infrastructure — `SymLogScale`, `DateTimeScale`, `BandScale` (`LogScale`/`SqrtScale`/`CategoricalScale` shipped in 0.3.0)
-- [ ] 0.6.0 GPU + interactivity — wgpu native, hover / zoom / pan, winit event loop
-- [ ] 0.7.0 Animation — timeline, frame recording, GIF
-- [ ] 0.8.0 Terminal backend — Kitty / Sixel / iTerm2 / half-block / Braille
-- [ ] 0.9.0 3D — `Surface3D`, `Scatter3D`, isosurface
-- [ ] 0.10.0 Export + WASM — PDF (krilla), interactive HTML, WebGPU
-- [ ] 0.11.0 Data acceptance — ndarray / Arrow (Polars landed early in 0.3.0)
-- [ ] 0.12.0 Documentation, examples, gallery
-- [ ] 1.0.0 Stable release
-
-Full task-level roadmap with 338 checkboxes: [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md).
-
----
-
-## Hard rules
-
-1. No JavaScript runtime dependencies.
-2. No C/C++ system library dependencies in default features.
-3. No `unsafe` in layers 3–7.
-4. No runtime file I/O for core functionality (colormaps, themes, fonts are compile-time).
-5. No `println!` or `eprintln!` in library code (`log` crate only).
-6. No panics except in `.show()` when no display backend is available.
-7. No nightly-only features required.
-8. No `async` in the public API.
-
----
-
-## Contribution
-
-[Contribution guidelines for this project](CONTRIBUTING.md)
-
----
-
-## Minimum supported Rust version
-
-Rust edition 2024, targeting **stable Rust 1.89+** — enforced via the `rust-version` field in `[workspace.package]`. MSRV tracks the minimum version required by direct dependencies (currently `cosmic-text` at 1.89). The long-term policy is _latest stable minus two_, consistent with `wgpu` and `ratatui`; if the dependency floor lets us, we will bump MSRV in step with that policy.
-
----
-
-## Citation
-
-> [!IMPORTANT]
-> If you use **starsight** in academic work, please cite it. [`CITATION.cff`](CITATION.cff) is the canonical source — GitHub renders a "Cite this repository" button from it automatically — and the BibTeX block below is the manual fallback.
+| `ggplot + geom_point()` | `Figure::new(W, H).add(PointMark::new(x, y))` | builder, not `+` |
+| `px.scatter(df, x="a")` (plotly) | `plot!(df, x="a", y="b")` | feature `polars` |
+
+## vs siblings
+
+| project | strengths | when to prefer starsight |
+|---|---|---|
+| **plotters** | mature, many backends, WASM-ready | want typed marks; want to compose figures rather than imperatively draw |
+| **plotly-rs** | interactive HTML out of the box | want static SVG/PNG; do not want a JS runtime |
+| **charming** | ECharts-quality visuals | do not want to ship a JS engine (deno_core) at runtime |
+| **plotters-iced / egui_plot** | live in a GUI | want headless rendering as the primary path |
+| **poloto** | small, no_std-friendly, terminal-first | want a richer mark set (polar, contour, candlestick) and academic publication output |
+
+The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with a grammar-of-graphics builder and shared themes/colormaps via `chromata` + `prismatica`. All siblings are alive and growing — these comparisons are "as of starsight 0.3" and the gaps narrow as each ships.
+
+## roadmap
+
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/roadmap-dark.svg">
+  <img alt="starsight roadmap timeline 0.1 → 1.0 — 3 of 13 milestones shipped (foundation, core charts, stats + polar). Currently 0.3."
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/roadmap-light.svg"
+       width="100%">
+</picture>
+
+- [x] **0.1** Foundation — `DrawBackend`, tiny-skia + SVG, `LinearScale`, Wilkinson ticks, axes, `LineMark` / `PointMark`, `Figure`, `plot!`, snapshots
+- [x] **0.2** Core charts — `BarMark` (vertical/horizontal/grouped/stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark`
+- [x] **0.3** Statistical + polar + contour + grid + Polars — `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark`/donut, `CandlestickMark`, polar suite (`PolarCoord`, `ArcMark`, `PolarBarMark`, `PolarRectMark`, `RadarMark`), `ContourMark` + marching-squares, `ErrorBarMark`, `RugMark`, auto-attached `Colorbar`, `MultiPanelFigure`, Polars `DataFrame` integration
+- [ ] **0.4** Layout — `FacetWrap`, shared axes across panels, polar-aware legend placement, contour filled bands
+- [ ] **0.5** Scale infrastructure — `SymLogScale`, `DateTimeScale`, `BandScale`
+- [ ] **0.6** GPU + interactivity — wgpu native, hover / zoom / pan, winit event loop
+- [ ] **0.7** Animation — timeline, frame recording, GIF
+- [ ] **0.8** Terminal — Kitty / Sixel / iTerm2 / half-block / Braille
+- [ ] **0.9** 3D — `Surface3D`, `Scatter3D`, isosurface
+- [ ] **0.10** Export + WASM — PDF (krilla), interactive HTML, WebGPU
+- [ ] **0.11** Data acceptance — ndarray / Arrow
+- [ ] **0.12** Documentation, examples, gallery polish
+- [ ] **1.0** Stable release — semver guarantees freeze
+
+The full task-level roadmap with 338 checkboxes lives in [`.spec/STARSIGHT.md`](https://github.com/resonant-jovian/starsight/blob/main/.spec/STARSIGHT.md).
+
+## minimum supported rust version
+
+starsight 0.3.x compiles on **Rust 1.89** and later, edition 2024. The MSRV tracks the floor required by direct dependencies (currently `cosmic-text` at 1.89). The long-term policy is *latest stable minus two*, consistent with `wgpu` and `ratatui`. **MSRV bumps require a minor version bump until 1.0.**
+
+## contributing
+
+Contribution guide: [`CONTRIBUTING.md`](https://github.com/resonant-jovian/starsight/blob/main/CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](https://github.com/resonant-jovian/starsight/blob/main/AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
+
+## license
+
+starsight is licensed under **GPL-3.0-only**. See [`LICENSE`](https://github.com/resonant-jovian/starsight/blob/main/LICENSE). Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If the GPL is incompatible with your use case, [reach out](mailto:albin@sjoegren.se) — a permissively-licensed core may be carved out post-1.0.
+
+## funding
+
+starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORCID 0009-0008-1372-1727](https://orcid.org/0009-0008-1372-1727)) as a solo open-source project. If your work depends on it, consider funding development so the next milestone lands sooner: [github sponsors](https://github.com/sponsors/resonant-jovian) · [thanks.dev](https://thanks.dev/u/gh/resonant-jovian).
+
+## citing
+
+[`CITATION.cff`](https://github.com/resonant-jovian/starsight/blob/main/CITATION.cff) is the canonical source — GitHub renders a "Cite this repository" button from it automatically. The BibTeX block below is the manual fallback:
 
 ```bibtex
 @software{starsight,
-  author       = {Sjögren, Albin},
-  title        = {starsight: unified scientific visualization for Rust},
-  url          = {https://github.com/resonant-jovian/starsight},
-  license      = {GPL-3.0-only},
-  orcid        = {0009-0008-1372-1727}
+  author  = {Sj{\"o}gren, Albin},
+  title   = {starsight: a typed, layered figure compiler for Rust},
+  url     = {https://github.com/resonant-jovian/starsight},
+  version = {0.3.0},
+  year    = {2026},
+  license = {GPL-3.0-only},
+  orcid   = {0009-0008-1372-1727}
 }
 ```
-
----
-
-## Support
-
-> [!NOTE]
-> **starsight** is built in spare time and released under GPL-3.0-only. If it saves you work or earns you money, consider funding development so the next milestone lands sooner — via [GitHub Sponsors](https://github.com/sponsors/resonant-jovian) or [thanks.dev](https://thanks.dev/u/gh/resonant-jovian).
-
----
-
-## License
-
-> [!WARNING]
-> **starsight** is licensed **GPL-3.0-only** and this is intentional. Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If you need a different licence for your use case, [reach out](mailto:albin@sjoegren.se) before integrating.
-
-This project is licensed under the [GNU General Public License v3.0](LICENSE).
