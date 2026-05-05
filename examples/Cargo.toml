@@ -96,6 +96,10 @@ name = "violin_raincloud"
 path = "composition/violin_raincloud.rs"
 
 [[example]]
+name = "distribution_dashboard"
+path = "composition/distribution_dashboard.rs"
+
+[[example]]
 name = "pie"
 path = "composition/pie.rs"
 
