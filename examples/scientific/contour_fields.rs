@@ -60,6 +60,7 @@ fn contour_panel(
 
 fn main() -> Result<()> {
     let mp = MultiPanelFigure::new(1000, 1000, 2, 2)
+        .theme(theme_from_env())
         .padding(12.0)
         .add(contour_panel(
             "Rosenbrock",
