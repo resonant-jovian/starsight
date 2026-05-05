@@ -1,6 +1,6 @@
 # starsight examples
 
-Forty runnable examples grouped by what they teach. Each `.rs` file lives
+Forty-one runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -79,6 +79,7 @@ Both run their own ODE/transform integration before plotting.
 | [`contour_fields`](scientific/contour_fields.rs) — [PNG](scientific/contour_fields.png) | 2×2 `MultiPanelFigure` of Rosenbrock + Himmelblau + Rastrigin + Gaussian-mixture contour plots (spec #22) |
 | [`bollinger_candlestick`](scientific/bollinger_candlestick.rs) — [PNG](scientific/bollinger_candlestick.png) | Two-panel `MultiPanelFigure`: candles + 20d SMA + Bollinger bands on top, daily volume `BarMark` below (spec #38) |
 | [`radar_spider`](scientific/radar_spider.rs) — [PNG](scientific/radar_spider.png) | Three-player competence radar across 8 dimensions — `RadarMark` overlays on `Figure::polar_axes` with translucent fill (spec #31) |
+| [`reciprocal_space`](scientific/reciprocal_space.rs) — [PNG](scientific/reciprocal_space.png) | 2×3 `MultiPanelFigure` of `S(h, k)` Lorentzian Bragg-peak heatmaps at three temperatures, with bottom-row 1D cuts and `ErrorBarMark` √I bars (spec #17) |
 | [`wind_rose`](scientific/wind_rose.rs) — [PNG](scientific/wind_rose.png) | 16 compass directions × 4 wind-speed bins — stacked `PolarBarMark` layers via `r_base` (spec #33) |
 | [`polar_calendar`](scientific/polar_calendar.rs) — [PNG](scientific/polar_calendar.png) | 21 years × 52 weeks of synthetic seasonal data on `PolarRectMark` — annular tile heatmap (spec #8) |
 | [`error_bars`](scientific/error_bars.rs) — [PNG](scientific/error_bars.png) | Two regression series with symmetric and asymmetric `ErrorBarMark` whiskers + caps |

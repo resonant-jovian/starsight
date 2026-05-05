@@ -167,6 +167,10 @@ path = "scientific/polar_calendar.rs"
 name = "error_bars"
 path = "scientific/error_bars.rs"
 
+[[example]]
+name = "reciprocal_space"
+path = "scientific/reciprocal_space.rs"
+
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
 # static PNG announcing the deferred feature so `cargo xtask gallery` always

@@ -11,9 +11,9 @@ pub use crate::common::inferences::ChartKind;
 pub use crate::common::{Colorbar, Figure, MultiPanelFigure};
 pub use crate::components::marks::{
     ArcMark, AreaMark, AxisDir, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
-    ContourMode, ErrorBarMark, ErrorBarOrientation, HistogramMark, LineMark, Mark, Ohlc,
-    Orientation, PieMark, PointMark, PolarBarMark, PolarRectMark, RadarMark, RugMark, StepMark,
-    ViolinGroup, ViolinMark, ViolinScale,
+    ContourMode, ErrorBarMark, ErrorBarOrientation, HeatmapMark, HistogramMark, LineMark, Mark,
+    Ohlc, Orientation, PieMark, PointMark, PolarBarMark, PolarRectMark, RadarMark, RugMark,
+    StepMark, ViolinGroup, ViolinMark, ViolinScale,
 };
 pub use crate::statistics::BinMethod;
 pub use crate::plot;
