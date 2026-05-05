@@ -47,18 +47,18 @@ c
 </text>
 <path d="M38.6,371 L586.4,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M38.6,48 L38.6,371" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79" x="491.40002" y="64"/>
-<path d="M491.40002,64 L570.4,64 L570.4,140 L491.40002,140 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<path d="M499.40002,78 L511.40002,78" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
-<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="82">
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="79.00001" x="54.6" y="64"/>
+<path d="M54.6,64 L133.6,64 L133.6,140 L54.6,140 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<path d="M62.6,78 L74.6,78" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="80.6" y="82">
 trend
 </text>
-<path d="M510.2,98 C510.2,100.65097,508.051,102.8,505.40002,102.8 C502.74905,102.8,500.60004,100.65097,500.60004,98 C500.60004,95.34903,502.74905,93.2,505.40002,93.2 C508.051,93.2,510.2,95.34903,510.2,98" fill="#ff0000" stroke="#000000" stroke-width="0"/>
-<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="102">
+<path d="M73.4,98 C73.4,100.65097,71.25097,102.8,68.6,102.8 C65.94903,102.8,63.8,100.65097,63.8,98 C63.8,95.34903,65.94903,93.2,68.6,93.2 C71.25097,93.2,73.4,95.34903,73.4,98" fill="#ff0000" stroke="#000000" stroke-width="0"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="80.6" y="102">
 samples
 </text>
-<rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="499.40002" y="112"/>
-<text fill="#333333" font-family="sans-serif" font-size="12" x="517.4" y="122">
+<rect fill="#33aa33" height="12" shape-rendering="crispEdges" width="12" x="62.6" y="112"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="80.6" y="122">
 counts
 </text>
 </svg>

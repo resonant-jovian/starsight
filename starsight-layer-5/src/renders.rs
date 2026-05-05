@@ -12,7 +12,7 @@ use starsight_layer_1::paths::{Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::coords::{CartesianCoord, Coord, PolarCoord};
-use starsight_layer_3::marks::LegendGlyph;
+use starsight_layer_3::marks::{LegendGlyph, MarkExtent};
 
 use crate::layout::{LayoutFonts, Slot};
 
@@ -371,21 +371,69 @@ pub struct LegendEntry {
     pub glyph: LegendGlyph,
 }
 
+/// Where the legend sits relative to the plot area.
+///
+/// [`Inside`](Self::Inside) (default) places the legend in a corner of
+/// `plot_area` and uses the per-mark dodge: try TR → TL → BR → BL, picking the
+/// first corner whose rect does not intersect any mark's pixel-space footprint.
+/// When no corner is fully clear, falls back to the corner with the lowest
+/// overlap (count tiebreaker first, then area, finally TR > TL > BR > BL).
+///
+/// [`Outside`](Self::Outside) places the legend on the opposite side of the
+/// chosen plot-area edge — equivalent to matplotlib's
+/// `bbox_to_anchor=(1.05, 1)` for `Outside(Edge::Right)`. The
+/// [`LayoutBuilder`](crate::layout::LayoutBuilder) reserves a strip on that
+/// edge so plot data never collides with the legend.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum LegendPosition {
+    /// In-plot placement with overlap-aware corner dodge. Default.
+    #[default]
+    Inside,
+    /// Out-of-plot placement on the given edge. Plot area shrinks to make
+    /// room; legend never overlaps data.
+    Outside(Edge),
+}
+
+/// Which edge of the plot area to reserve for [`LegendPosition::Outside`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum Edge {
+    /// Right of the plot area (matplotlib `bbox_to_anchor=(1.05, 1)`).
+    Right,
+    /// Left of the plot area.
+    Left,
+    /// Above the plot area.
+    Top,
+    /// Below the plot area.
+    Bottom,
+}
+
 /// Render a legend with colored line/box samples and labels.
 ///
-/// When `data_pixel_rect` is `Some`, the legend tries corners in
-/// TR → TL → BR → BL order and picks the first one whose backdrop does not
-/// overlap the data bounding rect. Falls back to TR when every corner overlaps
-/// or when `None` (preserves the pre-Epic-I default for callers that can't
-/// project a data extent — e.g. the polar render path). Fix for I.4
-/// (`starsight-3bp.9.4`).
+/// `occupancy` is one [`MarkExtent`] per mark on the figure (in pixel space).
+/// `position` controls placement strategy:
+///
+/// - [`LegendPosition::Inside`]: try corners TR → TL → BR → BL, pick the first
+///   that doesn't intersect any [`MarkExtent`]. When no corner is fully clear,
+///   pick the corner with the lowest count of intersecting marks; tiebreak by
+///   total clipped overlap area; final tiebreak by TR > TL > BR > BL priority.
+/// - [`LegendPosition::Outside(Edge)`]: place the legend just outside
+///   `plot_area` on the named edge. The figure layout reserves a strip there
+///   (see [`LayoutBuilder`](crate::layout::LayoutBuilder)) so the legend lives
+///   in canvas space outside the plot. No dodge.
+///
+/// Replaces the bbox-based `data_pixel_rect: Option<&Rect>` parameter from
+/// Epic I — the per-`MarkExtent` contributions are accurate even for diagonal
+/// line marks and full-range scatter where the bbox over-claimed coverage.
 ///
 /// # Errors
 /// Returns the backend's error if any rect or text draw call fails.
 pub fn render_legend(
     entries: &[LegendEntry],
     plot_area: &Rect,
-    data_pixel_rect: Option<&Rect>,
+    occupancy: &[MarkExtent],
+    position: LegendPosition,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
     fonts: &LayoutFonts,
@@ -405,35 +453,16 @@ pub fn render_legend(
     let legend_height = (entries.len() as f32 * line_spacing) + padding * 2.0;
 
     // Inset bumped 10→16 so the legend sits visibly clear of axis-extreme
-    // data points (`starsight-bls`). The pre-existing
-    // `with_alpha(230).without_alpha()` chain was a no-op (`without_alpha`
-    // discards the alpha back to opaque) so the bg fully hides data — the
-    // inset is what gives visible breathing room.
+    // data points (`starsight-bls`).
     let inset: f32 = 16.0;
-    let tr = (
-        plot_area.right - legend_width - inset,
-        plot_area.top + inset,
-    );
-    let tl = (plot_area.left + inset, plot_area.top + inset);
-    let br = (
-        plot_area.right - legend_width - inset,
-        plot_area.bottom - legend_height - inset,
-    );
-    let bl = (
-        plot_area.left + inset,
-        plot_area.bottom - legend_height - inset,
-    );
-    let candidates = [tr, tl, br, bl];
-    let (legend_x, legend_y) = match data_pixel_rect {
-        Some(data_rect) => candidates
-            .iter()
-            .copied()
-            .find(|&(x, y)| {
-                let candidate = Rect::new(x, y, x + legend_width, y + legend_height);
-                candidate.intersection(data_rect).is_none()
-            })
-            .unwrap_or(tr),
-        None => tr,
+
+    let (legend_x, legend_y) = match position {
+        LegendPosition::Inside => {
+            place_inside_dodge(plot_area, legend_width, legend_height, inset, occupancy)
+        }
+        LegendPosition::Outside(edge) => {
+            place_outside(plot_area, legend_width, legend_height, inset, edge)
+        }
     };
 
     let bg_color = theme.background;
@@ -503,6 +532,93 @@ pub fn render_legend(
     }
 
     Ok(())
+}
+
+/// Inside-the-plot dodge: try TR → TL → BR → BL, pick the first corner whose
+/// rect doesn't intersect any [`MarkExtent`]. When all corners overlap, pick
+/// the corner with the lowest count of intersecting marks (tiebreak by total
+/// clipped overlap area, final tiebreak by candidate priority order).
+fn place_inside_dodge(
+    plot_area: &Rect,
+    legend_width: f32,
+    legend_height: f32,
+    inset: f32,
+    occupancy: &[MarkExtent],
+) -> (f32, f32) {
+    let tr = (
+        plot_area.right - legend_width - inset,
+        plot_area.top + inset,
+    );
+    let tl = (plot_area.left + inset, plot_area.top + inset);
+    let br = (
+        plot_area.right - legend_width - inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let bl = (
+        plot_area.left + inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let candidates = [tr, tl, br, bl];
+
+    if occupancy.is_empty() {
+        return tr;
+    }
+
+    let scored: Vec<((f32, f32), usize, f32)> = candidates
+        .iter()
+        .map(|&(x, y)| {
+            let cand = Rect::new(x, y, x + legend_width, y + legend_height);
+            let mut count = 0_usize;
+            let mut area = 0.0_f32;
+            for ext in occupancy {
+                if ext.intersects(&cand) {
+                    count += 1;
+                    area += ext.overlap_area(&cand);
+                }
+            }
+            ((x, y), count, area)
+        })
+        .collect();
+
+    // First clear corner wins (count == 0).
+    if let Some(&((x, y), _, _)) = scored.iter().find(|(_, c, _)| *c == 0) {
+        return (x, y);
+    }
+    // No clear corner: pick min by (count, area). The candidates iterator
+    // order is TR, TL, BR, BL — `min_by` keeps the first match on ties, so
+    // the priority order is preserved as the final tiebreaker.
+    scored
+        .iter()
+        .min_by(|a, b| {
+            a.1.cmp(&b.1)
+                .then_with(|| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal))
+        })
+        .map_or(tr, |&((x, y), _, _)| (x, y))
+}
+
+/// Outside-the-plot placement: anchor the legend on the chosen edge just
+/// outside `plot_area`. The figure layout is expected to have already
+/// reserved an `inset + legend_width` strip on that edge so the legend lives
+/// in canvas space outside the plot rect (see L.7 / L.8 in Epic L).
+fn place_outside(
+    plot_area: &Rect,
+    legend_width: f32,
+    legend_height: f32,
+    inset: f32,
+    edge: Edge,
+) -> (f32, f32) {
+    match edge {
+        Edge::Right => (plot_area.right + inset, plot_area.top + inset),
+        Edge::Left => (plot_area.left - legend_width - inset, plot_area.top + inset),
+        Edge::Top => (
+            plot_area.left + (plot_area.width() - legend_width) * 0.5,
+            plot_area.top - legend_height - inset,
+        ),
+        Edge::Bottom => (
+            plot_area.left + (plot_area.width() - legend_width) * 0.5,
+            plot_area.bottom + inset,
+        ),
+    }
 }
 
 /// Approximate a filled circle with four cubic Béziers (the standard
@@ -618,8 +734,8 @@ pub fn render_axis_labels(
 #[cfg(test)]
 mod tests {
     use super::{
-        LegendEntry, render_axes, render_axis_labels, render_background, render_grid_lines,
-        render_legend, render_title,
+        LegendEntry, LegendPosition, render_axes, render_axis_labels, render_background,
+        render_grid_lines, render_legend, render_title,
     };
     use crate::layout::{LayoutFonts, Side, Slot};
     use starsight_layer_1::backends::vectors::SvgBackend;
@@ -628,7 +744,7 @@ mod tests {
     use starsight_layer_2::axes::Axis;
     use starsight_layer_2::coords::CartesianCoord;
     use starsight_layer_2::scales::LinearScale;
-    use starsight_layer_3::marks::LegendGlyph;
+    use starsight_layer_3::marks::{LegendGlyph, MarkExtent};
 
     fn coord_with_ticks(plot: Rect) -> CartesianCoord {
         CartesianCoord {
@@ -660,7 +776,8 @@ mod tests {
         render_legend(
             &[],
             &Rect::new(0.0, 0.0, 100.0, 100.0),
-            None,
+            &[],
+            LegendPosition::Inside,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),
@@ -686,7 +803,8 @@ mod tests {
         render_legend(
             &entries,
             &Rect::new(0.0, 0.0, 400.0, 200.0),
-            None,
+            &[],
+            LegendPosition::Inside,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),
@@ -708,11 +826,12 @@ mod tests {
             glyph: LegendGlyph::Point,
         }];
         let plot = Rect::new(0.0, 0.0, 400.0, 200.0);
-        let data_rect = Rect::new(200.0, 0.0, 400.0, 100.0);
+        let occupancy = [MarkExtent::Bbox(Rect::new(200.0, 0.0, 400.0, 100.0))];
         render_legend(
             &entries,
             &plot,
-            Some(&data_rect),
+            &occupancy,
+            LegendPosition::Inside,
             &mut backend,
             &DEFAULT_LIGHT,
             &LayoutFonts::default(),

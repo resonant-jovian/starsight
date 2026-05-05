@@ -96,10 +96,10 @@ y
 </text>
 <path d="M47.4,305 L486.4,305" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
 <path d="M47.4,48 L47.4,305" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
-<rect fill="#ffffff" height="36" shape-rendering="crispEdges" width="86" x="384.4" y="64"/>
-<path d="M384.4,64 L470.4,64 L470.4,100 L384.4,100 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
-<path d="M403.19998,78 C403.19998,80.65097,401.05096,82.8,398.4,82.8 C395.74902,82.8,393.6,80.65097,393.6,78 C393.6,75.34903,395.74902,73.2,398.4,73.2 C401.05096,73.2,403.19998,75.34903,403.19998,78" fill="#76b7b2" stroke="#000000" stroke-width="0"/>
-<text fill="#333333" font-family="sans-serif" font-size="12" x="410.4" y="82">
+<rect fill="#ffffff" height="36" shape-rendering="crispEdges" width="85.99999" x="63.4" y="64"/>
+<path d="M63.4,64 L149.4,64 L149.4,100 L63.4,100 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<path d="M82.200005,78 C82.200005,80.65097,80.05097,82.8,77.4,82.8 C74.74903,82.8,72.6,80.65097,72.6,78 C72.6,75.34903,74.74903,73.2,77.4,73.2 C80.05097,73.2,82.200005,75.34903,82.200005,78" fill="#76b7b2" stroke="#000000" stroke-width="0"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="89.4" y="82">
 estimate
 </text>
 </svg>

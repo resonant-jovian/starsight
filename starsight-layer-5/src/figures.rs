@@ -20,6 +20,8 @@ use starsight_layer_2::axes::Axis;
 use starsight_layer_2::coords::{CartesianCoord, PolarCoord};
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 
+use crate::renders::LegendPosition;
+
 use crate::layout::{
     LayoutBuilder, LayoutCtx, Slot, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
     YAxisTitleComponent, YTickLabelsComponent,
@@ -88,6 +90,13 @@ pub struct Figure {
     /// given factor (matplotlib's `axes.margins(...)`). Tracked as
     /// `starsight-3bp.9.1` (Epic I.1, refined per user direction).
     pub axis_padding_override: Option<f64>,
+    /// Where the legend sits relative to the plot area. Default
+    /// [`LegendPosition::Inside`] uses overlap-aware corner dodge;
+    /// [`LegendPosition::Outside(Edge::Right)`](crate::renders::Edge::Right)
+    /// reserves a right-edge strip for an outside-the-plot legend, matching
+    /// matplotlib's `bbox_to_anchor=(1.05, 1)` convention. Set via
+    /// [`Figure::legend_position`]. Tracked as Epic L (`starsight-3bp.10`).
+    pub legend_position: LegendPosition,
 }
 
 impl Figure {
@@ -105,7 +114,26 @@ impl Figure {
             polar_axes: None,
             colorbar_disabled: false,
             axis_padding_override: None,
+            legend_position: LegendPosition::default(),
         }
+    }
+
+    /// Builder: control where the legend sits relative to the plot area.
+    /// Default [`LegendPosition::Inside`] uses corner dodge; switch to
+    /// [`LegendPosition::Outside`] for matplotlib-style outside-the-plot
+    /// placement that never overlaps data.
+    ///
+    /// ```
+    /// use starsight_layer_5::Figure;
+    /// use starsight_layer_5::renders::{Edge, LegendPosition};
+    ///
+    /// let _ = Figure::new(800, 600)
+    ///     .legend_position(LegendPosition::Outside(Edge::Right));
+    /// ```
+    #[must_use]
+    pub fn legend_position(mut self, position: LegendPosition) -> Self {
+        self.legend_position = position;
+        self
     }
 
     /// Builder: opt out of the auto-attached colorbar that
@@ -635,23 +663,19 @@ impl Figure {
             })
             .collect();
 
-        // Project the merged data extent into pixel space so the legend can
-        // dodge corners that would overlap the data (Epic I.4 — `…9.4`). The
-        // four corners account for the inverted y-axis: data y_min lands at
-        // pixel bottom, y_max at pixel top.
-        let p1 = coord.data_to_pixel(extent.x_min, extent.y_min);
-        let p2 = coord.data_to_pixel(extent.x_max, extent.y_max);
-        let data_pixel_rect = Rect::new(
-            p1.x.min(p2.x),
-            p1.y.min(p2.y),
-            p1.x.max(p2.x),
-            p1.y.max(p2.y),
-        );
+        // Per-mark pixel-space footprint contributions for the legend dodge
+        // (Epic L). Replaces the bbox-based `data_pixel_rect` from Epic I —
+        // each mark contributes its actual rendered shape (Bbox / Segments /
+        // Rects / Polygons), so diagonal lines and full-range scatters no
+        // longer false-positive the dodge.
+        let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
+            self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
         if !legend_entries.is_empty() {
             crate::renders::render_legend(
                 &legend_entries,
                 &plot_area,
-                Some(&data_pixel_rect),
+                &occupancy,
+                self.legend_position,
                 backend,
                 &self.theme,
                 &fonts,
@@ -783,13 +807,19 @@ impl Figure {
             .collect();
 
         if !legend_entries.is_empty() {
-            // Polar legend keeps the TR default — Epic I.4's overlap-aware
-            // placement is cartesian-only (polar marks don't expose a
-            // `data_extent` rect that maps to pixel space the same way).
+            // Polar legend now feeds the same MarkExtent dodge as cartesian
+            // (Epic L). Polar marks contribute their pixel-space footprint
+            // through `Mark::pixel_extent(coord)` — the default Bbox falls
+            // back to `coord.plot_area()` for the disk's bounding rect, and
+            // marks that paint annular wedges or radial polygons can override
+            // for tighter overlap detection.
+            let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
+                self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
             crate::renders::render_legend(
                 &legend_entries,
                 &plot_area,
-                None,
+                &occupancy,
+                self.legend_position,
                 backend,
                 &self.theme,
                 &fonts,
