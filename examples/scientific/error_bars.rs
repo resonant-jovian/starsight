@@ -71,7 +71,8 @@ fn main() -> Result<()> {
                 .width(1.5),
         )
         .save(format!(
-            "examples/scientific/error_bars{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/error_bars{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

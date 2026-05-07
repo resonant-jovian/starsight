@@ -66,6 +66,7 @@ fn heatmap_panel(title: &str, t_amp: f64) -> Figure {
         data.push(row);
     }
     Figure::new(420, 360)
+        .theme(theme_from_env())
         .title(title)
         .x_label("h")
         .y_label("k")
@@ -93,6 +94,7 @@ fn cut_panel(title: &str, t_amp: f64) -> Figure {
     // Treat S(h, k) as a count rate ~ I; std deviation ≈ √I.
     let errs: Vec<f64> = ys.iter().map(|y| y.max(0.0).sqrt() * 0.6).collect();
     Figure::new(420, 320)
+        .theme(theme_from_env())
         .title(title)
         .x_label("h (cut at k = 0.5)")
         .y_label("intensity")
@@ -105,12 +107,18 @@ fn cut_panel(title: &str, t_amp: f64) -> Figure {
 }
 
 fn main() -> Result<()> {
-    let mut mp = MultiPanelFigure::new(1320, 720, 2, 3).padding(14.0);
+    let mut mp = MultiPanelFigure::new(1320, 720, 2, 3)
+        .theme(theme_from_env())
+        .padding(14.0);
     for &(label, t_amp) in &TEMPERATURES {
         mp = mp.add(heatmap_panel(label, t_amp));
     }
     for &(label, t_amp) in &TEMPERATURES {
         mp = mp.add(cut_panel(&format!("{label} — h cut"), t_amp));
     }
-    mp.save("examples/scientific/reciprocal_space.png")
+    mp.save(format!(
+        "examples/scientific/reciprocal_space{}.{}",
+        theme_suffix_from_env(),
+        format_extension_from_env()
+    ))
 }

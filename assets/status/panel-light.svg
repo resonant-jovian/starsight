@@ -16,5 +16,5 @@
   <line x1="24" y1="103.5" x2="224" y2="103.5" stroke="#e5e5e5" stroke-width="0.5"/>
   <polyline points="24.0,123.0 30.9,123.0 37.8,123.0 44.7,123.0 51.6,123.0 58.5,123.0 65.4,123.0 72.3,123.0 79.2,123.0 86.1,123.0 93.0,123.0 99.9,123.0 106.8,123.0 113.7,123.0 120.6,123.0 127.4,123.0 134.3,123.0 141.2,123.0 148.1,123.0 155.0,123.0 161.9,123.0 168.8,123.0 175.7,123.0 182.6,123.0 189.5,106.3 196.4,121.1 203.3,121.1 210.2,121.1 217.1,97.0 224.0,119.3" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
   <text x="24" y="137.0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" fill="#888888">last 30d downloads · 28 total</text>
-  <text x="856" y="114.0" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#555555" text-anchor="end">28 downloads since 2026-04-07  ·  0 dependents  ·  updated 8d ago</text>
+  <text x="856" y="114.0" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#555555" text-anchor="end">28 downloads since 2026-04-07  ·  0 dependents  ·  updated 10d ago</text>
 </svg>

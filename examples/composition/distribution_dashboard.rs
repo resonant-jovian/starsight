@@ -70,6 +70,7 @@ fn main() -> Result<()> {
 
     // Panel A — histogram of overall ratings
     let panel_a = Figure::new(500, 400)
+        .theme(theme_from_env())
         .title("A — overall rating, histogram")
         .x_label("overall")
         .y_label("count")
@@ -88,6 +89,7 @@ fn main() -> Result<()> {
         .collect();
     let density = kde.evaluate_grid(&grid, &overall);
     let panel_b = Figure::new(500, 400)
+        .theme(theme_from_env())
         .title("B — overall rating, KDE")
         .x_label("overall")
         .y_label("density")
@@ -104,6 +106,7 @@ fn main() -> Result<()> {
         .map(|(label, data)| BoxPlotGroup::new(*label, data))
         .collect();
     let panel_c = Figure::new(500, 400)
+        .theme(theme_from_env())
         .title("C — overall by country")
         .x_label("country")
         .y_label("overall")
@@ -111,6 +114,7 @@ fn main() -> Result<()> {
 
     // Panel D — scatter overall vs potential (correlation + bias)
     let panel_d = Figure::new(500, 400)
+        .theme(theme_from_env())
         .title("D — overall vs potential")
         .x_label("overall")
         .y_label("potential")
@@ -122,12 +126,17 @@ fn main() -> Result<()> {
         );
 
     MultiPanelFigure::new(1100, 850, 2, 2)
+        .theme(theme_from_env())
         .padding(16.0)
         .add(panel_a)
         .add(panel_b)
         .add(panel_c)
         .add(panel_d)
-        .save("examples/composition/distribution_dashboard.png")
+        .save(format!(
+            "examples/composition/distribution_dashboard{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
+        ))
 }
 
 // ── Synthetic distributions, all deterministic ─────────────────────────────

@@ -102,7 +102,8 @@ fn main() -> Result<()> {
         .y_label("price")
         .add(CandlestickMark::new(data))
         .save(format!(
-            "examples/scientific/candlestick{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/candlestick{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

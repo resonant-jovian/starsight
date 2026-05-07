@@ -1,0 +1,38 @@
+<svg height="800" viewBox="0 0 800 800" width="800" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="752" shape-rendering="crispEdges" width="784" x="8" y="40"/>
+<text fill="#111111" font-family="sans-serif" font-size="16" x="246.4" y="32">
+Player profiles — 8 dimensions
+</text>
+<path d="M491,416 C491,466.2579,450.2579,507,400,507 C349.7421,507,309,466.2579,309,416 C309,365.7421,349.7421,325,400,325 C450.2579,325,491,365.7421,491,416 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M582,416 C582,516.5158,500.51584,598,400,598 C299.48416,598,218,516.5158,218,416 C218,315.48416,299.48416,234,400,234 C500.51584,234,582,315.48416,582,416 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M673,416 C673,566.77374,550.77374,689,400,689 C249.22626,689,127,566.77374,127,416 C127,265.22626,249.22626,143,400,143 C550.77374,143,673,265.22626,673,416 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M764,416 C764,617.0317,601.0317,780,400,780 C198.96834,780,36,617.0317,36,416 C36,214.96834,198.96834,52,400,52 C601.0317,52,764,214.96834,764,416 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L657.38684,158.61313" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L764,416" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L657.38684,673.38684" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L400,780" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L142.61313,673.38684" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L36,416" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L142.61313,158.61313" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400,416 L400,52" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M518.4023,130.15167 L635.4045,318.49225 L702.66296,541.36707 L469.64838,584.14606 L288.5626,685.0337 L137.69212,524.6515 L90.61122,287.847 L295.52744,163.78088 L518.4023,130.15167" fill="#4c72b0" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M518.4023,130.15167 L635.4045,318.49225 L702.66296,541.36707 L469.64838,584.14606 L288.5626,685.0337 L137.69212,524.6515 L90.61122,287.847 L295.52744,163.78088 L518.4023,130.15167" fill="none" stroke="#4c72b0" stroke-width="2"/>
+<path d="M483.57806,214.22472 L719.47754,283.66806 L652.2191,520.4726 L476.61322,600.9607 L281.59775,701.8483 L104.062904,538.5812 L164.59549,318.49225 L330.35162,247.85393 L483.57806,214.22472" fill="#c44e52" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M483.57806,214.22472 L719.47754,283.66806 L652.2191,520.4726 L476.61322,600.9607 L281.59775,701.8483 L104.062904,538.5812 L164.59549,318.49225 L330.35162,247.85393 L483.57806,214.22472" fill="none" stroke="#c44e52" stroke-width="2"/>
+<path d="M497.50775,180.59549 L618.5899,325.4571 L635.4045,513.50775 L528.153,725.3888 L295.52744,668.2191 L181.4101,506.5429 L130.96628,304.5626 L277.41885,120.062904 L497.50775,180.59549" fill="#55a868" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M497.50775,180.59549 L618.5899,325.4571 L635.4045,513.50775 L528.153,725.3888 L295.52744,668.2191 L181.4101,506.5429 L130.96628,304.5626 L277.41885,120.062904 L497.50775,180.59549" fill="none" stroke="#55a868" stroke-width="2"/>
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="86" x="690" y="56"/>
+<path d="M690,56 L776,56 L776,132 L690,132 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<path d="M698,70 L710,70" fill="none" shape-rendering="crispEdges" stroke="#4c72b0" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="716" y="74">
+Player A
+</text>
+<path d="M698,90 L710,90" fill="none" shape-rendering="crispEdges" stroke="#c44e52" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="716" y="94">
+Player B
+</text>
+<path d="M698,110 L710,110" fill="none" shape-rendering="crispEdges" stroke="#55a868" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="716" y="114">
+Player C
+</text>
+</svg>

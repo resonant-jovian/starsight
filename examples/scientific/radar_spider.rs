@@ -51,7 +51,8 @@ fn main() -> Result<()> {
                 .label("Player C"),
         )
         .save(format!(
-            "examples/scientific/radar_spider{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/radar_spider{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

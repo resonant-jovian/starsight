@@ -1,0 +1,79 @@
+<svg height="600" viewBox="0 0 900 600" width="900" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="507" shape-rendering="crispEdges" width="835.39996" x="47.4" y="48"/>
+<text fill="#111111" font-family="sans-serif" font-size="16" x="306.7" y="32">
+Quarterly Revenue by Product Line
+</text>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="439.9" y="590">
+Quarter
+</text>
+<text fill="#333333" font-family="sans-serif" font-size="12" transform="rotate(-90 22, 355.5)" x="22" y="355.5">
+Revenue (M USD)
+</text>
+<path d="M47.4,555 L47.4,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M256.25,555 L256.25,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M465.09998,555 L465.09998,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M673.94995,555 L673.94995,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M882.8,555 L882.8,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,555 L882.8,555" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,453.6 L882.8,453.6" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,352.2 L882.8,352.2" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,250.8 L882.8,250.8" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,149.4 L882.8,149.4" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M47.4,48 L882.8,48" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<rect fill="#4f8ab8" height="324.47998" shape-rendering="crispEdges" width="71.00901" x="71.93987" y="230.52002"/>
+<rect fill="#4f8ab8" height="415.74" shape-rendering="crispEdges" width="71.00903" x="280.78986" y="139.26001"/>
+<rect fill="#4f8ab8" height="385.32" shape-rendering="crispEdges" width="71.00903" x="489.6399" y="169.68"/>
+<rect fill="#4f8ab8" height="476.58" shape-rendering="crispEdges" width="71.00903" x="698.48987" y="78.42001"/>
+<rect fill="#e57b49" height="223.08002" shape-rendering="crispEdges" width="71.009" x="160.70113" y="331.91998"/>
+<rect fill="#e57b49" height="283.92" shape-rendering="crispEdges" width="71.00903" x="369.5511" y="271.08"/>
+<rect fill="#e57b49" height="354.9" shape-rendering="crispEdges" width="71.00903" x="578.4011" y="200.1"/>
+<rect fill="#e57b49" height="425.87997" shape-rendering="crispEdges" width="71.00903" x="787.2511" y="129.12003"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="144.625" y="572">
+Q1
+</text>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="353.47498" y="572">
+Q2
+</text>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="562.325" y="572">
+Q3
+</text>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="771.175" y="572">
+Q4
+</text>
+<path d="M47.4,555 L52.4,555" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="30" y="559.8">
+0
+</text>
+<path d="M47.4,453.6 L52.4,453.6" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="458.4">
+10
+</text>
+<path d="M47.4,352.2 L52.4,352.2" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="357">
+20
+</text>
+<path d="M47.4,250.8 L52.4,250.8" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="255.6">
+30
+</text>
+<path d="M47.4,149.4 L52.4,149.4" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="154.2">
+40
+</text>
+<path d="M47.4,48 L52.4,48" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<text fill="#444444" font-family="sans-serif" font-size="12" x="23" y="52.8">
+50
+</text>
+<path d="M47.4,555 L882.8,555" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<path d="M47.4,48 L47.4,555" fill="none" shape-rendering="crispEdges" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="56" shape-rendering="crispEdges" width="78.99999" x="63.4" y="64"/>
+<path d="M63.4,64 L142.4,64 L142.4,120 L63.4,120 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<rect fill="#4f8ab8" height="12" shape-rendering="crispEdges" width="12" x="71.4" y="72"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="89.4" y="82">
+Widgets
+</text>
+<rect fill="#e57b49" height="12" shape-rendering="crispEdges" width="12" x="71.4" y="92"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="89.4" y="102">
+Gizmos
+</text>
+</svg>

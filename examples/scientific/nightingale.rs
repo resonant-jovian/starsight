@@ -78,7 +78,8 @@ fn main() -> Result<()> {
                 .label("other causes"),
         )
         .save(format!(
-            "examples/scientific/nightingale{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/nightingale{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

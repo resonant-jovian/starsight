@@ -48,8 +48,9 @@ fn main() -> Result<()> {
         .y_label("IMDB bin (1.0..10.0 across 30 buckets)")
         .add(HeatmapMark::new(cells).colormap(VIRIDIS).log_scale())
         .save(format!(
-            "examples/basics/movie_heatmap{}.png",
-            theme_suffix_from_env()
+            "examples/basics/movie_heatmap{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))?;
 
     println!("saved movie_heatmap.png");

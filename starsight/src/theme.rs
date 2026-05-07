@@ -23,3 +23,17 @@ pub fn theme_suffix_from_env() -> &'static str {
         _ => "",
     }
 }
+
+/// Read `STARSIGHT_FORMAT` and return the matching file extension.
+///
+/// `svg` → `"svg"`; anything else (or unset) → `"png"`. Used together with
+/// [`theme_suffix_from_env`] so a single example binary can render any of
+/// the four (theme × format) variants based purely on its environment.
+/// `Figure::save` dispatches on the extension.
+#[must_use]
+pub fn format_extension_from_env() -> &'static str {
+    match std::env::var("STARSIGHT_FORMAT").as_deref() {
+        Ok("svg") => "svg",
+        _ => "png",
+    }
+}

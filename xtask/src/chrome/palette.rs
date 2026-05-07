@@ -63,30 +63,6 @@ pub fn palette(theme: Theme) -> &'static Palette {
     }
 }
 
-/// `(R, G, B, A)` for tiny-skia raster compositing.
-pub mod rgba {
-    use super::Theme;
-
-    pub fn bg(theme: Theme) -> (u8, u8, u8, u8) {
-        match theme {
-            Theme::Light => (0xff, 0xff, 0xff, 0xff),
-            Theme::Dark => (0x0e, 0x0e, 0x10, 0xff),
-        }
-    }
-    pub fn card(theme: Theme) -> (u8, u8, u8, u8) {
-        match theme {
-            Theme::Light => (0xff, 0xff, 0xff, 0xff),
-            Theme::Dark => (0x16, 0x16, 0x1a, 0xff),
-        }
-    }
-    pub fn border(theme: Theme) -> (u8, u8, u8, u8) {
-        match theme {
-            Theme::Light => (0xcc, 0xcc, 0xcc, 0xff),
-            Theme::Dark => (0x2c, 0x2c, 0x33, 0xff),
-        }
-    }
-}
-
 pub const SANS: &str =
     "-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif";
 pub const MONO_FAMILY: &str = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";

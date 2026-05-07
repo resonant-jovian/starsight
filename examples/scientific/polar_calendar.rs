@@ -58,7 +58,8 @@ fn main() -> Result<()> {
         .polar_axes(theta_axis, r_axis)
         .add(PolarRectMark::new(theta_min, theta_max, r_min, r_max).colors(colors))
         .save(format!(
-            "examples/scientific/polar_calendar{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/polar_calendar{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

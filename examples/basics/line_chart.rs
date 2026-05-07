@@ -23,7 +23,8 @@ fn main() -> Result<()> {
                 .width(2.5),
         )
         .save(format!(
-            "examples/basics/line_chart{}.png",
-            theme_suffix_from_env()
+            "examples/basics/line_chart{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

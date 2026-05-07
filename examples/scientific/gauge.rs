@@ -53,7 +53,8 @@ fn main() -> Result<()> {
                 .stroke(Color::WHITE, 1.0),
         )
         .save(format!(
-            "examples/scientific/gauge{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/gauge{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

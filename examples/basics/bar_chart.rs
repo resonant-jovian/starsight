@@ -33,7 +33,8 @@ fn main() -> Result<()> {
                 .group("gizmos"),
         )
         .save(format!(
-            "examples/basics/bar_chart{}.png",
-            theme_suffix_from_env()
+            "examples/basics/bar_chart{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

@@ -83,7 +83,8 @@ fn main() -> Result<()> {
             vec![0.05, 0.1, 0.3, 0.5, 0.7, 0.9],
         ));
     mp.save(format!(
-        "examples/scientific/contour_fields{}.png",
-        theme_suffix_from_env()
+        "examples/scientific/contour_fields{}.{}",
+        theme_suffix_from_env(),
+        format_extension_from_env()
     ))
 }

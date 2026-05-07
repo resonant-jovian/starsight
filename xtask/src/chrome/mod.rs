@@ -65,7 +65,7 @@ pub fn run(args: ChromeArgs) -> Result<()> {
     std::fs::create_dir_all(root.join("assets/status"))?;
 
     if !args.skip_examples {
-        ensure_dark_examples(&root)?;
+        ensure_example_outputs(&root)?;
     }
 
     if let Some(asset) = args.asset {
@@ -118,55 +118,88 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
     }
 }
 
-/// Ensure `<name>_dark.png` siblings exist for every example used in the
-/// hero / gallery composites. Re-runs each example binary once with
-/// `STARSIGHT_THEME=dark` if its dark sibling is missing or older than the
-/// `.rs` source. Skips the build when binaries are already up to date.
-fn ensure_dark_examples(root: &Path) -> Result<()> {
+/// Examples used by hero / gallery / lorenz composites; (group, name) under `examples/`.
+/// Hero set: 9 in `HERO_BASES` (basics + scientific essentials).
+/// Gallery set: 9 in `gallery::GALLERY` (deeper scientific + composition).
+const CHROME_EXAMPLES: &[(&str, &str)] = &[
+    // Hero (basics row)
+    ("basics", "line_chart"),
+    ("basics", "scatter"),
+    ("basics", "bar_chart"),
+    ("basics", "histogram"),
+    // Hero (scientific row)
+    ("scientific", "nightingale"),
+    ("scientific", "candlestick"),
+    ("scientific", "radar_spider"),
+    // Hero + gallery overlap
+    ("scientific", "contour_fields"),
+    ("scientific", "lorenz_line"),
+    ("scientific", "kruskal_szekeres_line"),
+    ("scientific", "laser_plasma"),
+    ("basics", "bubble_scatter"),
+    // Gallery-only
+    ("scientific", "reciprocal_space"),
+    ("scientific", "bollinger_candlestick"),
+    ("theming", "custom_colormap"),
+    ("composition", "distribution_dashboard"),
+    ("composition", "statistical"),
+];
+
+/// Theme + format combinations the chrome composites consume. The light/png cell is
+/// covered by `cargo xtask gallery`, but we still re-run if it's stale to keep the
+/// matrix consistent.
+const VARIANTS: &[(Option<&str>, Option<&str>, &str, &str)] = &[
+    // (STARSIGHT_THEME, STARSIGHT_FORMAT, suffix, ext)
+    (None, None, "", "png"),
+    (Some("dark"), None, "_dark", "png"),
+    (None, Some("svg"), "", "svg"),
+    (Some("dark"), Some("svg"), "_dark", "svg"),
+];
+
+/// Ensure all (theme × format) example outputs exist for every example used by the
+/// chrome composites. Re-runs each example binary as needed when an output file
+/// is missing or older than its `.rs` source.
+fn ensure_example_outputs(root: &Path) -> Result<()> {
     use std::process::Command;
 
-    let needed: &[(&str, &str)] = &[
-        // (group/name, full path stem under examples/)
-        ("basics", "line_chart"),
-        ("basics", "scatter"),
-        ("basics", "bar_chart"),
-        ("basics", "histogram"),
-        ("basics", "heatmap"),
-        ("basics", "bubble_scatter"),
-        ("basics", "movie_heatmap"),
-        ("scientific", "contour_fields"),
-        ("scientific", "nightingale"),
-        ("scientific", "candlestick"),
-        ("scientific", "radar_spider"),
-        ("scientific", "lorenz_line"),
-        ("scientific", "gauge"),
-        ("scientific", "wind_rose"),
-        ("scientific", "polar_calendar"),
-        ("scientific", "kruskal_szekeres_line"),
-        ("scientific", "laser_plasma"),
-        ("scientific", "error_bars"),
-    ];
+    struct Job {
+        name: &'static str,
+        suffix: &'static str,
+        ext: &'static str,
+        theme: Option<&'static str>,
+        format: Option<&'static str>,
+    }
 
-    let mut todo: Vec<&str> = Vec::new();
-    for (group, name) in needed {
-        let dark = root.join(format!("examples/{group}/{name}_dark.png"));
+    let mut todo: Vec<Job> = Vec::new();
+    for (group, name) in CHROME_EXAMPLES {
         let rs = root.join(format!("examples/{group}/{name}.rs"));
-        if !dark.exists() {
-            todo.push(*name);
-            continue;
-        }
-        if let (Ok(d), Ok(s)) = (std::fs::metadata(&dark), std::fs::metadata(&rs))
-            && let (Ok(dt), Ok(st)) = (d.modified(), s.modified())
-            && st > dt
-        {
-            todo.push(*name);
+        for (theme, format, suffix, ext) in VARIANTS {
+            let out = root.join(format!("examples/{group}/{name}{suffix}.{ext}"));
+            let needs = if !out.exists() {
+                true
+            } else if let (Ok(d), Ok(s)) = (std::fs::metadata(&out), std::fs::metadata(&rs))
+                && let (Ok(dt), Ok(st)) = (d.modified(), s.modified())
+            {
+                st > dt
+            } else {
+                false
+            };
+            if needs {
+                todo.push(Job {
+                    name,
+                    suffix,
+                    ext,
+                    theme: *theme,
+                    format: *format,
+                });
+            }
         }
     }
 
     if todo.is_empty() {
         return Ok(());
     }
-    println!("regenerating {} dark example PNG(s)", todo.len());
+    println!("regenerating {} example output(s)", todo.len());
 
     // Build the chrome subset once.
     let manifest = root.join("examples/Cargo.toml");
@@ -183,27 +216,39 @@ fn ensure_dark_examples(root: &Path) -> Result<()> {
         .current_dir(root);
     let status = build.status()?;
     if !status.success() {
-        anyhow::bail!("cargo build --examples failed for dark regen");
+        anyhow::bail!("cargo build --examples failed for chrome regen");
     }
 
     let bin_dir = root.join("target/release/examples");
-    for name in &todo {
-        let bin = bin_dir.join(name);
+    for job in &todo {
+        let bin = bin_dir.join(job.name);
         if !bin.exists() {
-            eprintln!("  skip {name} (binary missing at {})", bin.display());
+            eprintln!("  skip {} (binary missing at {})", job.name, bin.display());
             continue;
         }
-        let out = Command::new(&bin)
-            .env("STARSIGHT_THEME", "dark")
-            .current_dir(root)
-            .output()?;
+        let mut cmd = Command::new(&bin);
+        cmd.current_dir(root);
+        if let Some(t) = job.theme {
+            cmd.env("STARSIGHT_THEME", t);
+        } else {
+            cmd.env_remove("STARSIGHT_THEME");
+        }
+        if let Some(f) = job.format {
+            cmd.env("STARSIGHT_FORMAT", f);
+        } else {
+            cmd.env_remove("STARSIGHT_FORMAT");
+        }
+        let out = cmd.output()?;
         if !out.status.success() {
             anyhow::bail!(
-                "example {name} (dark) failed:\n{}",
+                "example {} (theme={:?}, format={:?}) failed:\n{}",
+                job.name,
+                job.theme.unwrap_or("light"),
+                job.format.unwrap_or("png"),
                 String::from_utf8_lossy(&out.stderr)
             );
         }
-        println!("  rendered {name}_dark.png");
+        println!("  rendered {}{}.{}", job.name, job.suffix, job.ext);
     }
     Ok(())
 }

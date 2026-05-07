@@ -46,7 +46,8 @@ fn main() -> Result<()> {
                 .label("Group β"),
         )
         .save(format!(
-            "examples/basics/scatter{}.png",
-            theme_suffix_from_env()
+            "examples/basics/scatter{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }

@@ -97,6 +97,7 @@ fn main() -> Result<()> {
         .collect();
 
     let candles_panel = Figure::new(1200, 500)
+        .theme(theme_from_env())
         .title("Synthetic asset — candles + 20d Bollinger (±2σ)")
         .y_label("price")
         .add(CandlestickMark::new(ohlc).label("OHLC"))
@@ -121,13 +122,19 @@ fn main() -> Result<()> {
 
     let volume_labels: Vec<String> = (0..volume.len()).map(|i| format!("{i}")).collect();
     let volume_panel = Figure::new(1200, 250)
+        .theme(theme_from_env())
         .title("Volume")
         .y_label("contracts")
         .add(BarMark::new(volume_labels, volume).color(Color::from_hex(0x0044_8855)));
 
     MultiPanelFigure::new(1200, 800, 2, 1)
+        .theme(theme_from_env())
         .padding(10.0)
         .add(candles_panel)
         .add(volume_panel)
-        .save("examples/scientific/bollinger_candlestick.png")
+        .save(format!(
+            "examples/scientific/bollinger_candlestick{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
+        ))
 }

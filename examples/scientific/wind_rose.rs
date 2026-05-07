@@ -87,7 +87,8 @@ fn main() -> Result<()> {
                 .label("15+ m/s"),
         )
         .save(format!(
-            "examples/scientific/wind_rose{}.png",
-            theme_suffix_from_env()
+            "examples/scientific/wind_rose{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
         ))
 }
