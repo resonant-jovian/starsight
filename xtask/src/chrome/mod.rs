@@ -1,17 +1,18 @@
 //! `cargo xtask chrome` — regenerate documentation chrome assets.
 //!
-//! Six paired chrome assets feed the README (12 files total — light + dark each):
+//! Live-data assets (rebuilt by `--live` and the daily chrome cron):
 //!
-//! | asset | live? |
-//! |-------|-------|
-//! | `assets/status/panel-{light,dark}.svg`     | yes (crates.io API)             |
+//! | asset | live input |
+//! |-------|------------|
+//! | `assets/status/panel-{light,dark}.svg`        | crates.io API (downloads, dependents, updated_at) |
 //! | `assets/hero/starsight-hero-{light,dark}.png` | meta strip from `Cargo.toml` + theme-matched example thumbs |
-//! | `assets/roadmap-{light,dark}.svg`          | "current" derived from version  |
-//! | `assets/architecture-{light,dark}.svg`     | static                          |
-//! | `assets/gallery-{light,dark}.png`          | static (theme-matched thumbs)   |
-//! | `assets/wordmark-{light,dark}.svg`         | static                          |
+//! | `assets/roadmap-{light,dark}.svg`             | "current" milestone derived from version |
+//! | `assets/buttons/<name>-{light,dark}.svg`      | version + license from `Cargo.toml`, coverage % from `assets/status/coverage.json` |
 //!
-//! `--live` regenerates only status panel, hero, roadmap. Default = all six.
+//! Static-ish assets (rebuilt only on default runs): architecture, gallery,
+//! wordmark, lorenz_card, social_card, tables, pipeline, matrices,
+//! coming_from, comparison_matrix.
+//!
 //! For hero/gallery, dark thumbnails come from `<name>_dark.png` siblings
 //! produced by re-running examples with `STARSIGHT_THEME=dark`.
 
@@ -105,6 +106,10 @@ pub fn run(args: ChromeArgs) -> Result<()> {
         }
         hero::regen(&root, theme)?;
         roadmap::regen(&root, theme)?;
+        // Buttons read live data (coverage.json + Cargo.toml) so they belong
+        // in the daily live cron — otherwise the codecov button drifts away
+        // from the latest llvm-cov number.
+        buttons::regen_all(&root, theme)?;
     }
 
     if !args.live {
@@ -119,7 +124,6 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             matrices::regen_all(&root, theme)?;
             coming_from::regen(&root, theme)?;
             comparison_matrix::regen(&root, theme)?;
-            buttons::regen_all(&root, theme)?;
         }
     }
 
