@@ -39,6 +39,8 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
         "assets/gallery-dark.svg",
         "assets/lorenz-light.svg",
         "assets/lorenz-dark.svg",
+        "assets/pipeline-light.svg",
+        "assets/pipeline-dark.svg",
         "assets/roadmap-light.svg",
         "assets/roadmap-dark.svg",
         "assets/wordmark-light.svg",

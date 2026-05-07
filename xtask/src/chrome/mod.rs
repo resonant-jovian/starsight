@@ -22,6 +22,7 @@ mod gallery;
 mod hero;
 mod lorenz_card;
 mod palette;
+mod pipeline;
 mod roadmap;
 mod social_card;
 mod status_panel;
@@ -60,6 +61,7 @@ pub enum Asset {
     LorenzCard,
     SocialCard,
     Tables,
+    Pipeline,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -105,6 +107,7 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             lorenz_card::regen(&root, theme)?;
             social_card::regen(&root, theme)?;
             tables::regen_all(&root, theme)?;
+            pipeline::regen(&root, theme)?;
         }
     }
 
@@ -126,6 +129,7 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::LorenzCard => lorenz_card::regen(root, theme),
         Asset::SocialCard => social_card::regen(root, theme),
         Asset::Tables => tables::regen_all(root, theme),
+        Asset::Pipeline => pipeline::regen(root, theme),
     }
 }
 
