@@ -13,7 +13,7 @@ use std::path::Path;
 use super::palette::{MONO_FAMILY, Theme, palette};
 use super::svg::{header, write_atomic};
 
-const W: u32 = 880;
+const W: u32 = 920;
 const PAD: u32 = 24;
 const RADIUS: f32 = 12.0;
 
@@ -39,9 +39,9 @@ const TRACE_PILLS: &[&str] = &[
     "OUTPUT·png",
 ];
 
-const STAGE_W: u32 = 96;
+const STAGE_W: u32 = 92;
 const STAGE_H: u32 = 124;
-const STAGE_GAP: u32 = 4;
+const STAGE_GAP: u32 = 2;
 const ARROW_W: u32 = 10;
 
 const EYEBROW_H: u32 = 32;

@@ -10,11 +10,21 @@ use anyhow::Result;
 use std::path::Path;
 
 pub fn header(width: u32, height: u32, aria: &str, title: &str) -> String {
+    let aria = escape_xml(aria);
+    let title = escape_xml(title);
     format!(
         r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" height="auto" role="img" aria-label="{aria}" preserveAspectRatio="xMidYMid meet">
   <title>{title}</title>
 "#
     )
+}
+
+/// Minimal XML-attribute / text-node escaping for `&`, `<`, `>`, `"`.
+fn escape_xml(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }
 
 pub fn write_atomic(path: &Path, body: &str) -> Result<()> {

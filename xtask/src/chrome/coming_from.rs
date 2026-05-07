@@ -17,13 +17,17 @@ const PAD: u32 = 24;
 const RADIUS: f32 = 12.0;
 
 const CARD_HEAD_H: u32 = 36;
-const CARD_ROW_H: u32 = 26;
 const CARD_GAP: u32 = 12;
 const EYEBROW_H: u32 = 24;
 
 const CELL_PAD_X: u32 = 12;
-const FROM_W: u32 = 360;
-const ARROW_W: u32 = 28;
+const FROM_W: u32 = 320;
+const ARROW_W: u32 = 24;
+const FONT_PX: f32 = 11.0;
+const LINE_H: f32 = 16.0;
+const ROW_VPAD: f32 = 6.0;
+/// Conservative monospace char width at 11pt across the system fallback chain.
+const MONO_CHAR_W: f32 = FONT_PX * 0.62;
 
 struct Group<'a> {
     lib: &'a str,
@@ -283,13 +287,38 @@ fn render(theme: Theme) -> String {
 
     let total_rows: usize = GROUPS.iter().map(|g| g.rows.len()).sum();
 
-    // Total height = pad + eyebrow + sum(card heights + gap) - last gap + pad.
-    let mut content_h: u32 = 0;
-    for g in GROUPS {
-        let card_h = CARD_HEAD_H + CARD_ROW_H * (g.rows.len() as u32) + 2;
-        content_h += card_h + CARD_GAP;
-    }
-    content_h = content_h.saturating_sub(CARD_GAP);
+    let card_w = W - 2 * PAD;
+    let from_inner = (FROM_W - 2 * CELL_PAD_X) as f32;
+    let to_inner = (card_w - FROM_W - ARROW_W - 2 * CELL_PAD_X) as f32;
+
+    // Pre-wrap every row so each card knows its own height.
+    let wrapped: Vec<Vec<(Vec<String>, Vec<String>)>> = GROUPS
+        .iter()
+        .map(|g| {
+            g.rows
+                .iter()
+                .map(|(from, to)| {
+                    let from_lines = wrap(from, from_inner);
+                    let to_lines = wrap(to, to_inner);
+                    (from_lines, to_lines)
+                })
+                .collect()
+        })
+        .collect();
+
+    // Card heights = head + sum of (max(from_lines, to_lines) * LINE_H + 2 * VPAD).
+    let card_heights: Vec<u32> = wrapped
+        .iter()
+        .map(|rows| {
+            let body: f32 = rows
+                .iter()
+                .map(|(f, t)| (f.len().max(t.len()) as f32) * LINE_H + 2.0 * ROW_VPAD)
+                .sum();
+            CARD_HEAD_H + body.ceil() as u32 + 2
+        })
+        .collect();
+
+    let content_h: u32 = card_heights.iter().sum::<u32>() + CARD_GAP * (GROUPS.len() as u32 - 1);
     let h = PAD + EYEBROW_H + content_h + PAD;
 
     let mut out = header(
@@ -328,9 +357,9 @@ fn render(theme: Theme) -> String {
 
     // Card stack.
     let mut card_y: u32 = PAD + EYEBROW_H + 4;
-    for g in GROUPS {
-        let card_h = CARD_HEAD_H + CARD_ROW_H * (g.rows.len() as u32) + 2;
-        out.push_str(&render_card(p, card_y, card_h, g));
+    for (gi, g) in GROUPS.iter().enumerate() {
+        let card_h = card_heights[gi];
+        out.push_str(&render_card(p, card_y, card_h, g, &wrapped[gi]));
         card_y += card_h + CARD_GAP;
     }
 
@@ -338,7 +367,13 @@ fn render(theme: Theme) -> String {
     out
 }
 
-fn render_card(p: &super::palette::Palette, y: u32, h: u32, g: &Group) -> String {
+fn render_card(
+    p: &super::palette::Palette,
+    y: u32,
+    h: u32,
+    g: &Group,
+    wrapped_rows: &[(Vec<String>, Vec<String>)],
+) -> String {
     let mut s = String::new();
     let card_x = PAD;
     let card_w = W - 2 * PAD;
@@ -401,51 +436,115 @@ fn render_card(p: &super::palette::Palette, y: u32, h: u32, g: &Group) -> String
         plural = if g.rows.len() == 1 { "" } else { "s" },
     ));
 
-    // Body rows.
-    for (i, (from, to)) in g.rows.iter().enumerate() {
-        let row_y = y + CARD_HEAD_H + CARD_ROW_H * (i as u32);
+    // Body rows — variable height per row.
+    let mut row_y: f32 = (y + CARD_HEAD_H) as f32;
+    for (i, (from_lines, to_lines)) in wrapped_rows.iter().enumerate() {
+        let lines = from_lines.len().max(to_lines.len()).max(1);
+        let row_h = (lines as f32) * LINE_H + 2.0 * ROW_VPAD;
+
         if i % 2 == 1 {
             s.push_str(&format!(
-                r#"  <rect x="{x}" y="{row_y}" width="{w}" height="{rh}" fill="{c}"/>
+                r#"  <rect x="{x}" y="{ry:.1}" width="{w}" height="{rh:.1}" fill="{c}"/>
 "#,
                 x = card_x + 1,
+                ry = row_y,
                 w = card_w - 2,
-                rh = CARD_ROW_H,
+                rh = row_h,
                 c = p.card,
             ));
         }
-        // From cell.
+
+        let first_baseline = row_y + ROW_VPAD + LINE_H - 4.0;
+
+        // From cell (mono, subtext, possibly multi-line via tspans).
+        let from_x = card_x + CELL_PAD_X;
         s.push_str(&format!(
-            r#"  <text x="{x}" y="{ty}" font-family="{f}" font-size="11" fill="{c}">{txt}</text>
+            r#"  <text x="{x}" y="{ty:.1}" font-family="{f}" font-size="11" fill="{c}">{tspans}</text>
 "#,
-            x = card_x + CELL_PAD_X,
-            ty = row_y + 17,
+            x = from_x,
+            ty = first_baseline,
             f = MONO_FAMILY,
             c = p.subtext,
-            txt = escape(from),
+            tspans = build_tspans(from_lines, from_x),
         ));
-        // Arrow.
+
+        // Arrow (single-line, vertically centred on the row).
+        let arrow_y = row_y + row_h / 2.0 + 4.0;
         s.push_str(&format!(
-            r#"  <text x="{x}" y="{ty}" font-family="{f}" font-size="12" fill="{c}" text-anchor="middle">→</text>
+            r#"  <text x="{x}" y="{ty:.1}" font-family="{f}" font-size="12" fill="{c}" text-anchor="middle">→</text>
 "#,
             x = card_x + CELL_PAD_X + FROM_W + ARROW_W / 2,
-            ty = row_y + 17,
+            ty = arrow_y,
             f = MONO_FAMILY,
             c = p.muted,
         ));
+
         // To cell.
+        let to_x = card_x + CELL_PAD_X + FROM_W + ARROW_W;
         s.push_str(&format!(
-            r#"  <text x="{x}" y="{ty}" font-family="{f}" font-size="11" fill="{c}">{txt}</text>
+            r#"  <text x="{x}" y="{ty:.1}" font-family="{f}" font-size="11" fill="{c}">{tspans}</text>
 "#,
-            x = card_x + CELL_PAD_X + FROM_W + ARROW_W,
-            ty = row_y + 17,
+            x = to_x,
+            ty = first_baseline,
             f = MONO_FAMILY,
             c = p.text,
-            txt = escape(to),
+            tspans = build_tspans(to_lines, to_x),
         ));
-    }
 
+        row_y += row_h;
+    }
+    let _ = h; // not used now that rows are variable-height
     s
+}
+
+/// Build the inner `<tspan>` chain for a multi-line cell. The first line is
+/// emitted as the `<text>` content directly; subsequent lines use
+/// `<tspan x dy="LINE_H">…</tspan>`.
+fn build_tspans(lines: &[String], x: u32) -> String {
+    let mut out = String::new();
+    for (i, line) in lines.iter().enumerate() {
+        if i == 0 {
+            out.push_str(&escape(line));
+        } else {
+            out.push_str(&format!(
+                r#"<tspan x="{x}" dy="{LINE_H}">{txt}</tspan>"#,
+                txt = escape(line),
+            ));
+        }
+    }
+    out
+}
+
+/// Greedy word-wrap to fit `max_width_px`. Wraps at spaces; words that exceed
+/// the column on their own get their own line and may overflow slightly. For
+/// our content (matplotlib calls, Rust idioms) wrapping at the closest space
+/// produces clean breaks.
+fn wrap(s: &str, max_width_px: f32) -> Vec<String> {
+    if max_width_px <= 0.0 {
+        return vec![s.to_string()];
+    }
+    let max_chars = (max_width_px / MONO_CHAR_W).floor().max(1.0) as usize;
+
+    let mut lines: Vec<String> = Vec::new();
+    let mut cur = String::new();
+    for word in s.split(' ') {
+        if cur.is_empty() {
+            cur.push_str(word);
+        } else if cur.chars().count() + 1 + word.chars().count() <= max_chars {
+            cur.push(' ');
+            cur.push_str(word);
+        } else {
+            lines.push(std::mem::take(&mut cur));
+            cur.push_str(word);
+        }
+    }
+    if !cur.is_empty() {
+        lines.push(cur);
+    }
+    if lines.is_empty() {
+        lines.push(String::new());
+    }
+    lines
 }
 
 fn escape(s: &str) -> String {
