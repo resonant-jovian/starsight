@@ -53,17 +53,12 @@ The `plot!` macro forwards through `Figure::from_arrays`, which builds an 800×6
 
 The `default` feature ships a usable starting set: `LineMark`, `PointMark`, `BarMark`, `AreaMark`, `HistogramMark`, `HeatmapMark`, `BoxPlotMark`, `ViolinMark`, `PieMark`, `ContourMark`, `CandlestickMark`, polar marks (`ArcMark`, `PolarBarMark`, `PolarRectMark`, `RadarMark`), the tiny-skia raster backend, the SVG backend, and Wilkinson tick generation. Feature flags toggle the rest:
 
-| flag | what it adds |
-|---|---|
-| `polars` | accept `polars::DataFrame` columns directly |
-| `ndarray` | accept `ndarray::ArrayN` views (planned 0.11) |
-| `arrow` | accept `arrow::RecordBatch` (planned 0.11) |
-| `gpu` | wgpu + vello GPU rendering (planned 0.6) |
-| `interactive` | winit + egui interactive windows (planned 0.6) |
-| `terminal` | TUI via ratatui — Kitty / Sixel / iTerm2 / half-block / Braille (planned 0.8) |
-| `pdf` | PDF export via krilla (planned 0.10) |
-| `web` | WASM + WebGPU browser target (planned 0.10) |
-| `3d` | 3D chart types via nalgebra (planned 0.9) |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tables/install-dark.svg">
+  <img alt="starsight feature flags: polars, ndarray, arrow, gpu, interactive, terminal, pdf, web, 3d — what each one adds and which milestone they land in."
+       src="assets/tables/install-light.svg"
+       width="100%">
+</picture>
 
 `full` enables everything; `minimal` is core types only with no rendering. The `science` and `dashboard` bundles compose related flag sets.
 
@@ -175,34 +170,21 @@ Source for every panel — and 29 more — lives under [`examples/`](examples), 
 
 ## What Works at 0.3.0
 
-| capability | available | added in |
-|---|---|---|
-| `LineMark`, `PointMark`, `Figure`, `plot!`, SVG + tiny-skia backends, Wilkinson ticks | ✓ | 0.1 |
-| `BarMark` (vertical / horizontal / grouped / stacked), `AreaMark` (NaN-gap), `HistogramMark`, `HeatmapMark` | ✓ | 0.2 |
-| `BoxPlotMark`, `ViolinMark` + `Kde`, `PieMark` / donut, `CandlestickMark` | ✓ | 0.3 |
-| `PolarCoord`, `ArcMark` (Nightingale, Gauge, Sunburst), `PolarBarMark` (wind rose), `PolarRectMark` (polar calendar), `RadarMark` (spider) | ✓ | 0.3 |
-| `ContourMark` + marching-squares, `ErrorBarMark`, `RugMark`, auto-attached `Colorbar`, `MultiPanelFigure` | ✓ | 0.3 |
-| Polars `DataFrame` integration | ✓ (`polars` feature) | 0.3 |
-| `LogScale`, `SqrtScale`, `CategoricalScale` | ✓ | 0.3 |
-| `FacetWrap`, shared axes across panels, polar-aware legend placement, contour filled bands | planned | 0.4 |
-| `SymLogScale`, `DateTimeScale`, `BandScale` | planned | 0.5 |
-| GPU + interactivity (wgpu, hover / zoom / pan) | planned | 0.6 |
-| Animation, GIF, frame recording | planned | 0.7 |
-| Terminal backend (Kitty / Sixel / iTerm2 / half-block / Braille) | planned | 0.8 |
-| 3D marks (`Surface3D`, `Scatter3D`, isosurface) | planned | 0.9 |
-| PDF (krilla), interactive HTML, WebGPU | planned | 0.10 |
-| ndarray / Arrow data acceptance | planned | 0.11 |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tables/capabilities-dark.svg">
+  <img alt="starsight 0.3.0 capability matrix — shipped marks (LineMark, PointMark, BarMark, AreaMark, HistogramMark, HeatmapMark, BoxPlotMark, ViolinMark + Kde, PieMark/donut, CandlestickMark, polar suite, ContourMark, ErrorBarMark, RugMark, MultiPanelFigure), Polars DataFrame integration, scale infrastructure, and the 0.4–0.11 planned milestones."
+       src="assets/tables/capabilities-light.svg"
+       width="100%">
+</picture>
 
 ## Backends
 
-| backend | output | dependencies | feature flag | status |
-|---|---|---|---|---|
-| `SkiaBackend` | `.png` / `.jpeg` / raw RGBA | tiny-skia | default | stable |
-| `SvgBackend` | `.svg` text | none | default | stable |
-| `WgpuBackend` | GPU surface, headless or windowed | wgpu, vello | `gpu` | planned 0.6 |
-| `RatatuiBackend` | TUI cells (Kitty / Sixel / iTerm2 / half-block / Braille) | ratatui | `terminal` | planned 0.8 |
-| `KrillaBackend` | `.pdf` | krilla | `pdf` | planned 0.10 |
-| `WasmBackend` | `<canvas>` in browser | wasm-bindgen, web-sys | `web` | planned 0.10 |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tables/backends-dark.svg">
+  <img alt="starsight rendering backends — SkiaBackend (PNG/JPEG, tiny-skia), SvgBackend (text), WgpuBackend (GPU surface, planned 0.6), RatatuiBackend (TUI, planned 0.8), KrillaBackend (PDF, planned 0.10), WasmBackend (canvas, planned 0.10)."
+       src="assets/tables/backends-light.svg"
+       width="100%">
+</picture>
 
 The `DrawBackend` trait is the only interface marks need to render; new backends slot in by implementing it — no other layer needs to change.
 
