@@ -44,13 +44,24 @@ const GALLERY: &[(&str, &str)] = &[
     ("examples/composition/statistical", "statistical"),
 ];
 
+/// How example thumbs are embedded in a cell. `InlineSvg` keeps the SVG
+/// composite vector. `EmbedExamplePng` references the example's pre-rendered
+/// PNG sibling so strokes survive the down-sample to cell size — 2×
+/// rasterization of an inlined SVG cannot guarantee that for thin lines.
+#[derive(Copy, Clone)]
+enum CellMode {
+    InlineSvg,
+    EmbedExamplePng,
+}
+
 pub fn regen(root: &Path, theme: Theme) -> Result<()> {
-    let svg = compose(root, theme)?;
+    let svg = compose(root, theme, CellMode::InlineSvg)?;
     let out = root.join(format!("assets/gallery-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
 
-    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let svg_for_png = compose(root, theme, CellMode::EmbedExamplePng)?;
+    let pix = png::rasterize_at_scale(&svg_for_png, PNG_SCALE, root)?;
     let png_out = root.join(format!("assets/gallery-{}.png", theme.suffix()));
     png::write_png_atomic(&pix, &png_out)?;
     println!(
@@ -61,7 +72,7 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     Ok(())
 }
 
-fn compose(root: &Path, theme: Theme) -> Result<String> {
+fn compose(root: &Path, theme: Theme, cell_mode: CellMode) -> Result<String> {
     let p = palette(theme);
     let cell_w = (W - 2 * PAD - GUTTER * (COLS - 1)) / COLS;
     let cell_img_h = ((cell_w as f32) * 0.62) as u32;
@@ -111,21 +122,45 @@ fn compose(root: &Path, theme: Theme) -> Result<String> {
             c = p.border,
         ));
 
-        let path = root.join(format!("{base}{suffix}.svg"));
-        if path.exists() {
-            let (inner, vb) = inline(&path)?;
-            out.push_str(&format!(
-                r#"  <svg x="{x0}" y="{y0}" width="{cell_w}" height="{cell_img_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
+        let rel = format!("{base}{suffix}");
+        match cell_mode {
+            CellMode::InlineSvg => {
+                let path = root.join(format!("{rel}.svg"));
+                if path.exists() {
+                    let (inner, vb) = inline(&path)?;
+                    out.push_str(&format!(
+                        r#"  <svg x="{x0}" y="{y0}" width="{cell_w}" height="{cell_img_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
 "#,
-            ));
-        } else {
-            out.push_str(&format!(
-                r#"  <text x="{x}" y="{y}" font-size="11" fill="{c}" text-anchor="middle">missing</text>
+                    ));
+                } else {
+                    out.push_str(&format!(
+                        r#"  <text x="{x}" y="{y}" font-size="11" fill="{c}" text-anchor="middle">missing</text>
 "#,
-                x = x0 + cell_w / 2,
-                y = y0 + cell_img_h / 2,
-                c = p.muted,
-            ));
+                        x = x0 + cell_w / 2,
+                        y = y0 + cell_img_h / 2,
+                        c = p.muted,
+                    ));
+                }
+            }
+            CellMode::EmbedExamplePng => {
+                let png_rel = format!("{rel}.png");
+                let path = root.join(&png_rel);
+                if path.exists() {
+                    // usvg resolves relative href against Options::resources_dir (= root).
+                    out.push_str(&format!(
+                        r#"  <image x="{x0}" y="{y0}" width="{cell_w}" height="{cell_img_h}" href="{png_rel}" preserveAspectRatio="xMidYMid meet"/>
+"#,
+                    ));
+                } else {
+                    out.push_str(&format!(
+                        r#"  <text x="{x}" y="{y}" font-size="11" fill="{c}" text-anchor="middle">missing</text>
+"#,
+                        x = x0 + cell_w / 2,
+                        y = y0 + cell_img_h / 2,
+                        c = p.muted,
+                    ));
+                }
+            }
         }
 
         // Caption beneath the cell.

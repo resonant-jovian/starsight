@@ -23,13 +23,24 @@ const PNG_SCALE: f32 = 2.0;
 /// (`lorenz_line` normally renders at 1000×600 ≈ 1.667).
 const FALLBACK_RATIO: f32 = 1000.0 / 600.0;
 
+/// How the Lorenz example is embedded. `InlineSvg` keeps the SVG composite
+/// vector. `EmbedExamplePng` references the example's pre-rendered PNG so
+/// strokes survive the down-sample to card width — 2× rasterization of an
+/// inlined SVG cannot guarantee that for thin lines.
+#[derive(Copy, Clone)]
+enum CellMode {
+    InlineSvg,
+    EmbedExamplePng,
+}
+
 pub fn regen(root: &Path, theme: Theme) -> Result<()> {
-    let svg = compose(root, theme)?;
+    let svg = compose(root, theme, CellMode::InlineSvg)?;
     let out = root.join(format!("assets/lorenz-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
 
-    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let svg_for_png = compose(root, theme, CellMode::EmbedExamplePng)?;
+    let pix = png::rasterize_at_scale(&svg_for_png, PNG_SCALE, root)?;
     let png_out = root.join(format!("assets/lorenz-{}.png", theme.suffix()));
     png::write_png_atomic(&pix, &png_out)?;
     println!(
@@ -40,31 +51,28 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     Ok(())
 }
 
-fn compose(root: &Path, theme: Theme) -> Result<String> {
+fn compose(root: &Path, theme: Theme, cell_mode: CellMode) -> Result<String> {
     let p = palette(theme);
     let suffix = theme.example_suffix();
-    let src = root.join(format!("examples/scientific/lorenz_line{suffix}.svg"));
+    let svg_src = root.join(format!("examples/scientific/lorenz_line{suffix}.svg"));
+    let png_rel = format!("examples/scientific/lorenz_line{suffix}.png");
+    let png_src = root.join(&png_rel);
 
     let inner_w = W - 2 * PAD;
-    let (inner, vb, inner_h) = if src.exists() {
-        let (inner, vb) = inline(&src).with_context(|| format!("inlining {}", src.display()))?;
-        let ratio = parse_ratio(&vb).unwrap_or(FALLBACK_RATIO);
-        let h = ((inner_w as f32) / ratio).round() as u32;
-        (inner, vb, h)
+    // Card height comes from the example's aspect ratio; both modes need the
+    // same height so the surrounding chrome (rect, padding) stays identical.
+    let (vb_for_ratio, has_svg) = if svg_src.exists() {
+        let (_, vb) =
+            inline(&svg_src).with_context(|| format!("inlining {}", svg_src.display()))?;
+        (Some(vb), true)
     } else {
-        let h = ((inner_w as f32) / FALLBACK_RATIO).round() as u32;
-        let display = src.display();
-        (
-            format!(
-                r#"  <text x="{x}" y="{y}" font-size="12" fill="{c}" text-anchor="middle">{display} missing — run `cargo xtask chrome`</text>"#,
-                x = inner_w / 2,
-                y = h / 2,
-                c = p.muted,
-            ),
-            format!("0 0 {inner_w} {h}"),
-            h,
-        )
+        (None, false)
     };
+    let ratio = vb_for_ratio
+        .as_deref()
+        .and_then(parse_ratio)
+        .unwrap_or(FALLBACK_RATIO);
+    let inner_h = ((inner_w as f32) / ratio).round() as u32;
     let h = inner_h + 2 * PAD;
 
     let mut out = header(W, h, "starsight Lorenz worked example", "Lorenz attractor");
@@ -77,12 +85,44 @@ fn compose(root: &Path, theme: Theme) -> Result<String> {
         bg = p.card,
         s = p.border,
     ));
-    out.push_str(&format!(
-        r#"  <svg x="{PAD}" y="{PAD}" width="{inner_w}" height="{inner_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
+
+    match cell_mode {
+        CellMode::InlineSvg => {
+            if has_svg {
+                let (inner, vb) =
+                    inline(&svg_src).with_context(|| format!("inlining {}", svg_src.display()))?;
+                out.push_str(&format!(
+                    r#"  <svg x="{PAD}" y="{PAD}" width="{inner_w}" height="{inner_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
 "#,
-    ));
+                ));
+            } else {
+                out.push_str(&missing(&svg_src, inner_w, inner_h, p.muted));
+            }
+        }
+        CellMode::EmbedExamplePng => {
+            if png_src.exists() {
+                // usvg resolves relative href against Options::resources_dir (= root).
+                out.push_str(&format!(
+                    r#"  <image x="{PAD}" y="{PAD}" width="{inner_w}" height="{inner_h}" href="{png_rel}" preserveAspectRatio="xMidYMid meet"/>
+"#,
+                ));
+            } else {
+                out.push_str(&missing(&png_src, inner_w, inner_h, p.muted));
+            }
+        }
+    }
     out.push_str("</svg>\n");
     Ok(out)
+}
+
+fn missing(src: &Path, inner_w: u32, inner_h: u32, muted: &str) -> String {
+    format!(
+        r#"  <text x="{x}" y="{y}" font-size="12" fill="{muted}" text-anchor="middle">{display} missing — run `cargo xtask chrome`</text>
+"#,
+        x = PAD + inner_w / 2,
+        y = PAD + inner_h / 2,
+        display = src.display(),
+    )
 }
 
 fn parse_ratio(view_box: &str) -> Option<f32> {
