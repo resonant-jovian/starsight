@@ -251,6 +251,10 @@ The `DrawBackend` trait is the only interface marks need to render; new backends
        src="assets/matrices/output-light.svg"
        width="100%">
 </picture>
+
+> [!NOTE]
+> **PNG vs. SVG fidelity at high category density.** The raster (PNG) backend rounds float coordinates to pixel boundaries through skia, so at >50 categories per axis (think 90 daily candles or denser) you may see ±1 px drift between bar edges and gridlines, even when the math is f64-exact. For papers, posters, or anywhere pixel-perfect alignment matters, **prefer `.save("…svg")`** — the SVG backend is float-precise and shows no drift. PNG is best for slides, dashboards, and quick local renders where the eye won't notice 1-pixel offsets at 90+ categories.
+
 </details>
 
 <details>

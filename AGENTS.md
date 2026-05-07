@@ -31,7 +31,17 @@ RUSTDOCFLAGS="-D missing-docs -D rustdoc::broken-intra-doc-links" \
 # Examples
 cargo xtask gallery    # render every example into target/gallery/
 cargo xtask showcase   # symlink example PNGs into showcase/
+
+# README chrome (hero, gallery composite, matrices, status panel, …)
+cargo xtask chrome --release       # full regen incl. example PNGs/SVGs (slow)
+cargo xtask chrome --skip-examples # composites only — assumes example outputs are current
+cargo xtask chrome --asset hero    # one named asset
 ```
+
+> `cargo xtask` is aliased in `.cargo/config.toml` as `run -p xtask --` so the
+> commands above are sugar; for heavy passes (chrome composes ~50 SVGs and
+> shells out to `npx svgo`) prepend `cargo run -p xtask --release --` instead
+> for the release profile.
 
 > `cargo xtask snapshots` is a **stub** in the current xtask binary. Use the `cargo insta` commands above directly.
 

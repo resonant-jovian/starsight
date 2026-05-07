@@ -34,6 +34,11 @@ pub struct Palette {
     pub muted: &'static str,
     pub border: &'static str,
     pub rule: &'static str,
+    /// Stroke colour for the eclipse mark's corona rays. Has to be visibly
+    /// brighter than the surrounding background; dark mode bumps higher than
+    /// `muted` would suggest to compensate for human perception of low-contrast
+    /// shapes against near-black canvases.
+    pub ray: &'static str,
 }
 
 pub const LIGHT: Palette = Palette {
@@ -44,6 +49,7 @@ pub const LIGHT: Palette = Palette {
     muted: "#888888",
     border: "#cccccc",
     rule: "#e5e5e5",
+    ray: "#888888",
 };
 
 pub const DARK: Palette = Palette {
@@ -54,6 +60,7 @@ pub const DARK: Palette = Palette {
     muted: "#6b6b75",
     border: "#2c2c33",
     rule: "#232328",
+    ray: "#c8c8cc",
 };
 
 pub fn palette(theme: Theme) -> &'static Palette {

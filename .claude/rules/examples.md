@@ -20,8 +20,9 @@ Examples are grouped, with each `.rs` source co-located with its rendered `.png`
 
 ## Pipeline
 
-- `cargo xtask gallery` — runs every example, writes outputs to `target/gallery/<group>_<name>.png`. After 262166d (`gallery build performance`) it builds the example binaries once and execs them per invocation, so a full gallery is fast.
+- `cargo xtask gallery` — runs every example, writes outputs to `target/gallery/<group>_<name>.png`. After 262166d (`gallery build performance`) it builds the example binaries once and execs them per invocation, so a full gallery is fast. **Light PNG only** by design — chrome owns the four-variant matrix.
 - `cargo xtask showcase` — symlinks every gallery PNG into the flat `showcase/` directory at the repo root.
+- `cargo xtask chrome` — regenerates README chrome assets. Also regenerates the four (theme × format) example outputs that chrome consumes — `examples/<group>/<name>{,_dark}.{png,svg}` — when they're stale relative to the example *binary* (so backend-only changes that don't touch the example `.rs` source still trigger regen, fixing the `starsight-2ja` drift class of bug). `--skip-examples` bypasses that step. **Use `cargo run -p xtask --release -- chrome`** for chrome work; the `cargo xtask` alias runs the debug profile and chrome composition is ~10× slower without optimisations.
 - The `.png` checked into each example dir is the canonical render — committed alongside the source. Keep them in sync: if you change the source, regenerate.
 
 ## Example shape

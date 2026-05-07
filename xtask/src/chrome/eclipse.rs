@@ -21,10 +21,12 @@ pub fn svg_inner(p: &Palette) -> String {
     ));
 
     // 72 corona rays — tiny, deterministic length jitter for organic feel.
+    // `palette.ray` is tuned per theme so contrast against the canvas is
+    // perceptually equivalent (dark mode bumps brighter than muted would).
     out.push_str(&format!(
-        r#"    <g stroke="{c}" stroke-width="0.4" stroke-linecap="round" opacity="0.55">
+        r#"    <g stroke="{c}" stroke-width="0.4" stroke-linecap="round" opacity="0.85">
 "#,
-        c = p.muted
+        c = p.ray
     ));
     for i in 0..RAY_COUNT {
         let theta = (i as f64) * std::f64::consts::TAU / (RAY_COUNT as f64);

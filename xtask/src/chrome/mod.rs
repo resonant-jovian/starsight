@@ -187,9 +187,16 @@ const VARIANTS: &[(Option<&str>, Option<&str>, &str, &str)] = &[
     (Some("dark"), Some("svg"), "_dark", "svg"),
 ];
 
-/// Ensure all (theme × format) example outputs exist for every example used by the
-/// chrome composites. Re-runs each example binary as needed when an output file
-/// is missing or older than its `.rs` source.
+/// Ensure all (theme × format) example outputs exist and are current for every
+/// example used by the chrome composites.
+///
+/// Freshness check compares the output file's mtime against the example
+/// binary's mtime. Cargo's incremental build re-touches the binary whenever
+/// any of its dependencies change — including backend-side fixes in
+/// `starsight-layer-*` that don't touch the example's own `.rs` source.
+/// Comparing against the binary catches those (the original `.rs`-only check
+/// missed `starsight-2ja`'s SVG opacity regression because the example
+/// source hadn't moved).
 fn ensure_example_outputs(root: &Path) -> Result<()> {
     use std::process::Command;
 
@@ -201,19 +208,41 @@ fn ensure_example_outputs(root: &Path) -> Result<()> {
         format: Option<&'static str>,
     }
 
+    // Build the chrome example subset before computing freshness, so the
+    // binary mtimes we compare against reflect the current source tree.
+    let manifest = root.join("examples/Cargo.toml");
+    let mut build = Command::new("cargo");
+    build
+        .args([
+            "build",
+            "--release",
+            "--examples",
+            "--all-features",
+            "--manifest-path",
+        ])
+        .arg(&manifest)
+        .current_dir(root);
+    let status = build.status()?;
+    if !status.success() {
+        anyhow::bail!("cargo build --examples failed for chrome regen");
+    }
+    let bin_dir = root.join("target/release/examples");
+
     let mut todo: Vec<Job> = Vec::new();
     for (group, name) in CHROME_EXAMPLES {
-        let rs = root.join(format!("examples/{group}/{name}.rs"));
+        let bin = bin_dir.join(name);
         for (theme, format, suffix, ext) in VARIANTS {
             let out = root.join(format!("examples/{group}/{name}{suffix}.{ext}"));
             let needs = if !out.exists() {
                 true
-            } else if let (Ok(d), Ok(s)) = (std::fs::metadata(&out), std::fs::metadata(&rs))
-                && let (Ok(dt), Ok(st)) = (d.modified(), s.modified())
+            } else if let (Ok(o), Ok(b)) = (std::fs::metadata(&out), std::fs::metadata(&bin))
+                && let (Ok(ot), Ok(bt)) = (o.modified(), b.modified())
             {
-                st > dt
+                bt > ot
             } else {
-                false
+                // Binary missing — `cargo build` should have produced it. Force a
+                // regen so the failure surfaces in the exec step below.
+                true
             };
             if needs {
                 todo.push(Job {
@@ -232,25 +261,6 @@ fn ensure_example_outputs(root: &Path) -> Result<()> {
     }
     println!("regenerating {} example output(s)", todo.len());
 
-    // Build the chrome subset once.
-    let manifest = root.join("examples/Cargo.toml");
-    let mut build = Command::new("cargo");
-    build
-        .args([
-            "build",
-            "--release",
-            "--examples",
-            "--all-features",
-            "--manifest-path",
-        ])
-        .arg(&manifest)
-        .current_dir(root);
-    let status = build.status()?;
-    if !status.success() {
-        anyhow::bail!("cargo build --examples failed for chrome regen");
-    }
-
-    let bin_dir = root.join("target/release/examples");
     for job in &todo {
         let bin = bin_dir.join(job.name);
         if !bin.exists() {
