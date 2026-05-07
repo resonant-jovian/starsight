@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-05-07
+
+### Docs
+
+- `CITATION.cff` and the README BibTeX block bumped to `0.3.2`.
+
+### Internal
+
+- CI workflows: merged the daily `chrome.yml` regen and the every-push `coverage.yml` into one `Live Assets` workflow with sequential `coverage` → `chrome` jobs (via `needs:`) so the two bot pushes can no longer race for `main`. Added a rebase-retry loop on each `git push` as defense against external pushes during the long chrome run. Closes the `not a fast-forward` failure observed on 2026-05-07 when both bots tried to push their commits onto the same parent.
+- `release.yml`: added `push: branches: [main]` trigger with `dry-run` hard-forced in the `verify` step. Continuous validation of the publish chain (Cargo metadata, doc lints, `cargo deny`, `cargo publish --dry-run` per crate) without waiting for a tag; tag-driven real releases (`v*.*.*`) continue to work unchanged. Hard-force means an accidental main push can never produce a real release.
+- `cargo xtask chrome --live` now also regenerates `assets/social/card-{light,dark}.{svg,png}` (was previously rebuilt only by full `cargo xtask chrome` runs). The social card embeds the same `Cargo.toml` meta strip as `hero` (version, rust, edition, license), so promoting it to the live set keeps the open-graph PNG aligned with the version on every push and on the daily cron. `live-assets.yml` `git add` widened to include `assets/social/`.
+- `0.3.1` GitHub release/tag was lost in the process of trying to retrofit the new release.yml into the historical `0.3.1` commit (GitHub's Immutable Releases feature permanently reserves the name once a release has existed). `0.3.2` is the recovery release: same code surface as `0.3.1`, plus the CI improvements above.
+
 ## [0.3.1] - 2026-05-07
 
 ### Docs

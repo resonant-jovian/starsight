@@ -32,7 +32,7 @@ starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatma
 <p><a href="https://crates.io/crates/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/crates-dark.svg"><img alt="crates.io" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/crates-light.svg"></picture></a><a href="https://docs.rs/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/docs-dark.svg"><img alt="docs.rs" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/docs-light.svg"></picture></a><a href="https://app.codecov.io/gh/resonant-jovian/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/codecov-dark.svg"><img alt="codecov" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/codecov-light.svg"></picture></a><a href="https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/ci-dark.svg"><img alt="CI" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/ci-light.svg"></picture></a><a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/license-dark.svg"><img alt="License: GPL-3.0" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/license-light.svg"></picture></a></p>
 
 > [!WARNING]
-> **starsight is at 0.3.1 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
+> **starsight is at 0.3.2 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
 
 ---
 
@@ -341,7 +341,7 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
   author  = {Sjögren, Albin},
   title   = {starsight: a typed, layered figure compiler for Rust},
   url     = {https://github.com/resonant-jovian/starsight},
-  version = {0.3.1},
+  version = {0.3.2},
   year    = {2026},
   license = {GPL-3.0-only},
   orcid   = {0009-0008-1372-1727}
@@ -352,7 +352,7 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/social/card-dark.png">
-  <img alt="starsight wordmark and tagline — scientific visualization for Rust, typed, layered, eight backends. v0.3.1 · rust 1.89 · edition 2024 · GPL-3.0-only · github.com/resonant-jovian/starsight"
+  <img alt="starsight wordmark and tagline — scientific visualization for Rust, typed, layered, eight backends. v0.3.2 · rust 1.89 · edition 2024 · GPL-3.0-only · github.com/resonant-jovian/starsight"
        src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/social/card-light.png"
        width="100%">
 </picture>
