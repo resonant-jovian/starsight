@@ -279,6 +279,8 @@ starsight composes with, but does not depend on:
 
 It is part of the [resonant-jovian](https://github.com/resonant-jovian) ecosystem of Latin/Greek-named scientific Rust crates: [`chromata`](https://github.com/resonant-jovian/chromata) (1 104 editor / terminal color themes as compile-time constants), [`prismatica`](https://github.com/resonant-jovian/prismatica) (260+ perceptually uniform colormaps as compile-time LUTs), [`caustic`](https://github.com/resonant-jovian/caustic) (6D Vlasov–Poisson plasma solver), [`phasma`](https://github.com/resonant-jovian/phasma) (terminal UI for `caustic`).
 
+Longer-form recipes and tutorials live on the [GitHub wiki](https://github.com/resonant-jovian/starsight/wiki): [Comparisons](https://github.com/resonant-jovian/starsight/wiki/Comparisons) walks through matplotlib / ggplot2 / plotters / 15+ others side-by-side, and [Tutorials](https://github.com/resonant-jovian/starsight/wiki/Tutorials) is a 25-step ladder from `Hello starsight` to implementing a custom `Mark` or `DrawBackend`.
+
 ## Coming from Another Language
 
 61 concrete syntax mappings across 15 source libraries. Find your line, copy the right column.
