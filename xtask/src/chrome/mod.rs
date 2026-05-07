@@ -16,6 +16,7 @@
 //! produced by re-running examples with `STARSIGHT_THEME=dark`.
 
 mod architecture;
+mod buttons;
 mod coming_from;
 mod comparison_matrix;
 mod crates_io;
@@ -68,6 +69,7 @@ pub enum Asset {
     Matrices,
     ComingFrom,
     Comparison,
+    Buttons,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -117,6 +119,7 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             matrices::regen_all(&root, theme)?;
             coming_from::regen(&root, theme)?;
             comparison_matrix::regen(&root, theme)?;
+            buttons::regen_all(&root, theme)?;
         }
     }
 
@@ -142,6 +145,7 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::Matrices => matrices::regen_all(root, theme),
         Asset::ComingFrom => coming_from::regen(root, theme),
         Asset::Comparison => comparison_matrix::regen(root, theme),
+        Asset::Buttons => buttons::regen_all(root, theme),
     }
 }
 

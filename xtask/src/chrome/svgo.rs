@@ -79,6 +79,14 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
             }
         }
     }
+    for stem in ["crates", "docs", "codecov", "ci", "license"] {
+        for theme in ["light", "dark"] {
+            let p = root.join(format!("assets/buttons/{stem}-{theme}.svg"));
+            if p.exists() {
+                paths.push(p);
+            }
+        }
+    }
     optimize(&paths, "chrome assets")
 }
 
