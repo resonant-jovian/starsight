@@ -112,6 +112,10 @@ name = "donut_sunburst"
 path = "composition/donut_sunburst.rs"
 
 [[example]]
+name = "energy_transition"
+path = "composition/energy_transition.rs"
+
+[[example]]
 name = "rug_with_histogram"
 path = "composition/rug_with_histogram.rs"
 

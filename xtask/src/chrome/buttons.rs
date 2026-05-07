@@ -18,8 +18,8 @@ use super::palette::{MONO_FAMILY, SANS, Theme, palette};
 use super::svg::{header, write_atomic};
 
 const W: u32 = 184;
-const H: u32 = 40;
-const RADIUS: f32 = 4.0;
+const H: u32 = 56;
+const RADIUS: f32 = 6.0;
 
 /// Each button has a label half (dark, mono uppercase tag) and a value half
 /// (slightly different shade, sans bold). Label width is fixed so the seam
@@ -149,23 +149,25 @@ fn render(theme: Theme, b: &Button) -> String {
         h = H - 1,
     ));
 
-    // Label text — mono uppercase, vertically centred via dominant-baseline.
+    // Label text — mono uppercase. Explicit baseline (no dominant-baseline,
+    // which is unreliable in image-mode SVG renderers like GitHub's). Visual
+    // centre at y = H/2 + 4 for 12-pt mono.
     out.push_str(&format!(
-        r#"  <text x="{lx}" y="{cy}" font-family="{f}" font-weight="700" font-size="11" fill="{c}" letter-spacing="0.6" text-anchor="middle" dominant-baseline="central">{label}</text>
+        r#"  <text x="{lx}" y="{ly}" font-family="{f}" font-weight="700" font-size="12" fill="{c}" letter-spacing="0.6" text-anchor="middle">{label}</text>
 "#,
         lx = LABEL_W / 2,
-        cy = H / 2,
+        ly = H / 2 + 4,
         f = MONO_FAMILY,
         c = label_fg,
         label = escape(b.label),
     ));
 
-    // Value text — sans bold, vertically centred.
+    // Value text — sans bold, same explicit baseline strategy.
     out.push_str(&format!(
-        r#"  <text x="{vx}" y="{cy}" font-family="{f}" font-weight="700" font-size="13" fill="{c}" text-anchor="middle" dominant-baseline="central">{value}</text>
+        r#"  <text x="{vx}" y="{vy}" font-family="{f}" font-weight="700" font-size="14" fill="{c}" text-anchor="middle">{value}</text>
 "#,
         vx = LABEL_W + (W - LABEL_W) / 2,
-        cy = H / 2,
+        vy = H / 2 + 5,
         f = SANS,
         c = value_fg,
         value = escape(b.value),

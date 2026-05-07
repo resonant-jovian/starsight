@@ -299,6 +299,8 @@ Candle colors: up `#26a69a`, down `#ef5350`.
 **Mark:** `ArcMark` on `PolarCoord`
 **Why 0.3.0:** PieMark/DonutMark (arc geometry) lands at 0.3.0.
 
+**Shipped status:** Variant A → `examples/composition/donut.rs` (donut with vote-share data; same arc geometry as the spec). Variant B → `examples/composition/energy_transition.rs`. Variant C → `examples/composition/donut_sunburst.rs`.
+
 ### Variant A — Fibonacci donut
 
 ```
@@ -387,11 +389,11 @@ Adds `GridLayout`, `FacetWrap`, `FacetGrid`, `Legend`, `Colorbar`, `PairPlot`, `
 
 ---
 
-## 2  Multi-panel distribution dashboard · `0.4.0`
+## 2  Multi-panel distribution dashboard · `0.3.0` (shipped)
 
 **Marks:** `BarMark` + `Bin` stat (0.2.0), `AreaMark` + `KDE` stat (0.3.0), `BoxPlotMark` (0.3.0), `PointMark` (0.1.0)
-**Layout:** `GridLayout` 2×2 (0.4.0)
-**Why 0.4.0:** All marks exist by 0.3.0, but GridLayout is 0.4.0.
+**Layout:** `MultiPanelFigure` 2×2 (0.3.0)
+**Status:** Shipped at `examples/composition/distribution_dashboard.rs`. Originally tagged 0.4.0 because GridLayout was deferred; pulled forward when `MultiPanelFigure` covered the layout need during Epic L.
 
 ```
 overall ~ Beta(α=5, β=3) scaled to [45, 92]
@@ -551,11 +553,11 @@ Upper tri: hexbin. Diagonal: KDE per species. Lower tri: scatter + OLS.
 
 ---
 
-## 17  Reciprocal-space scattering maps · `0.4.0`
+## 17  Reciprocal-space scattering maps · `0.3.0` (shipped)
 
-**Marks:** `HeatmapMark` (0.2.0), `PointMark` + `ErrorBarMark`
-**Layout:** `GridLayout` 3×3 (0.4.0)
-**Why 0.4.0:** GridLayout for multi-panel.
+**Marks:** `HeatmapMark` (0.2.0), `PointMark` + `ErrorBarMark` (0.3.0)
+**Layout:** `MultiPanelFigure` 2×3 (heatmap row + h-cut row) (0.3.0)
+**Status:** Shipped at `examples/scientific/reciprocal_space.rs`. Originally tagged 0.4.0; pulled forward when `MultiPanelFigure` + `ErrorBarMark` both landed in 0.3.0 (Epic L Phase I).
 
 ```
 S(h, k) = Σ_Q  A_Q / ((h − Q_h)² + (k − Q_k)² + Γ²)
