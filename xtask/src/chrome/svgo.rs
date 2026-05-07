@@ -69,7 +69,9 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
             }
         }
     }
-    for stem in ["marks", "scales", "backends", "stats", "layout", "output", "themes"] {
+    for stem in [
+        "marks", "scales", "backends", "stats", "layout", "output", "themes",
+    ] {
         for theme in ["light", "dark"] {
             let p = root.join(format!("assets/matrices/{stem}-{theme}.svg"));
             if p.exists() {

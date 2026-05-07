@@ -1673,11 +1673,7 @@ fn snapshot_legend_dodge_diagonal() {
         .title("Diagonal line — legend dodge")
         .x_label("x")
         .y_label("y")
-        .add(
-            LineMark::new(xs, ys)
-                .color(Color::BLUE)
-                .label("y = x"),
-        );
+        .add(LineMark::new(xs, ys).color(Color::BLUE).label("y = x"));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }
@@ -1726,11 +1722,7 @@ fn snapshot_legend_outside_right() {
                 .color(Color::BLUE)
                 .label("sin(x)"),
         )
-        .add(
-            LineMark::new(xs, ys2)
-                .color(Color::RED)
-                .label("cos(x)"),
-        );
+        .add(LineMark::new(xs, ys2).color(Color::RED).label("cos(x)"));
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }
@@ -1770,12 +1762,9 @@ fn snapshot_polar_legend_dodge() {
         .title("Polar legend dodge (3 series)")
         .polar_axes(theta_axis, r_axis)
         .add(
-            RadarMark::new(
-                thetas.clone(),
-                vec![0.8, 0.6, 0.7, 0.5, 0.9, 0.7],
-            )
-            .color(Color::BLUE)
-            .label("Series A"),
+            RadarMark::new(thetas.clone(), vec![0.8, 0.6, 0.7, 0.5, 0.9, 0.7])
+                .color(Color::BLUE)
+                .label("Series A"),
         )
         .add(
             RadarMark::new(thetas.clone(), vec![0.5, 0.7, 0.4, 0.8, 0.6, 0.5])

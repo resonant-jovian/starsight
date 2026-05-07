@@ -37,15 +37,36 @@ const GROUPS: &[Group<'_>] = &[
         lang: "python",
         rows: &[
             ("plt.plot(x, y)", "plot!(x, y)"),
-            ("plt.scatter(x, y, c=c)", "PointMark::new(x, y).color_by(&c)"),
+            (
+                "plt.scatter(x, y, c=c)",
+                "PointMark::new(x, y).color_by(&c)",
+            ),
             ("plt.bar(labels, vals)", "BarMark::new(labels, vals)"),
-            ("plt.barh(labels, vals)", "BarMark::new(labels, vals).horizontal()"),
-            ("plt.hist(data, bins=30)", "HistogramMark::new(data).method(BinMethod::Count(30))"),
-            ("plt.boxplot([a, b])", r#"BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])"#),
-            ("plt.pie(values, labels=…)", "PieMark::new(values, labels).show_percent()"),
+            (
+                "plt.barh(labels, vals)",
+                "BarMark::new(labels, vals).horizontal()",
+            ),
+            (
+                "plt.hist(data, bins=30)",
+                "HistogramMark::new(data).method(BinMethod::Count(30))",
+            ),
+            (
+                "plt.boxplot([a, b])",
+                r#"BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])"#,
+            ),
+            (
+                "plt.pie(values, labels=…)",
+                "PieMark::new(values, labels).show_percent()",
+            ),
             ("plt.imshow(matrix)", "HeatmapMark::new(matrix)"),
-            ("plt.fill_between(x, y1, y2)", "AreaMark::new(x, y1).baseline(y2)"),
-            (r#"plt.xlabel("…"); plt.ylabel("…")"#, r#"Figure::new().x_label("…").y_label("…")"#),
+            (
+                "plt.fill_between(x, y1, y2)",
+                "AreaMark::new(x, y1).baseline(y2)",
+            ),
+            (
+                r#"plt.xlabel("…"); plt.ylabel("…")"#,
+                r#"Figure::new().x_label("…").y_label("…")"#,
+            ),
             (r#"plt.title("…")"#, r#".title("…")"#),
             (r#"plt.savefig("out.png")"#, r#".save("out.png")?"#),
             ("plt.show()", ".show()?  // feature `interactive`"),
@@ -56,35 +77,57 @@ const GROUPS: &[Group<'_>] = &[
         lib: "seaborn",
         lang: "python",
         rows: &[
-            ("sns.violinplot(data=df, x, y)", "ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)"),
+            (
+                "sns.violinplot(data=df, x, y)",
+                "ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)",
+            ),
             ("sns.boxplot(data=df, x, y)", "BoxPlotMark::new(groups)"),
-            ("sns.heatmap(data)", "HeatmapMark::new(data)  // prismatica colormaps"),
-            ("sns.kdeplot(data)", "Kde::new(Bandwidth::Silverman, Kernel::Gaussian).evaluate_grid(&grid, &data)"),
-            (r#"sns.set_theme(style="darkgrid")"#, ".theme(theme)  // chromata"),
+            (
+                "sns.heatmap(data)",
+                "HeatmapMark::new(data)  // prismatica colormaps",
+            ),
+            (
+                "sns.kdeplot(data)",
+                "Kde::new(Bandwidth::Silverman, Kernel::Gaussian).evaluate_grid(&grid, &data)",
+            ),
+            (
+                r#"sns.set_theme(style="darkgrid")"#,
+                ".theme(theme)  // chromata",
+            ),
         ],
     },
     Group {
         lib: "plotly.express",
         lang: "python",
         rows: &[
-            (r#"px.scatter(df, x="a", y="b")"#, r#"plot!(df, x="a", y="b")  // feature `polars`"#),
+            (
+                r#"px.scatter(df, x="a", y="b")"#,
+                r#"plot!(df, x="a", y="b")  // feature `polars`"#,
+            ),
             ("px.line(df, x, y, color)", r#"plot!(df, x, y, color="g")"#),
-            ("px.bar(df, x, y, color)", r#"plot!(df, x, y, color="g", kind="bar")"#),
+            (
+                "px.bar(df, x, y, color)",
+                r#"plot!(df, x, y, color="g", kind="bar")"#,
+            ),
             ("px.histogram(df, x)", r#"plot!(df, x, kind="hist")"#),
         ],
     },
     Group {
         lib: "mpl_finance",
         lang: "python",
-        rows: &[
-            ("candlestick_ohlc(ax, quotes)", "CandlestickMark::new(vec![Ohlc { … }, …])"),
-        ],
+        rows: &[(
+            "candlestick_ohlc(ax, quotes)",
+            "CandlestickMark::new(vec![Ohlc { … }, …])",
+        )],
     },
     Group {
         lib: "plotnine",
         lang: "python",
         rows: &[
-            ("ggplot(df) + aes(x, y) + geom_point()", "plot!(df, x, y) + builder chain"),
+            (
+                "ggplot(df) + aes(x, y) + geom_point()",
+                "plot!(df, x, y) + builder chain",
+            ),
             ("+ stat_smooth()", ".add(RegressionMark::new(...))  // 0.5"),
         ],
     },
@@ -92,8 +135,14 @@ const GROUPS: &[Group<'_>] = &[
         lib: "bokeh",
         lang: "python",
         rows: &[
-            ("p = figure(); p.line(x, y)", "Figure::new(W, H).add(LineMark::new(x, y))"),
-            ("p.circle(x, y, size=8)", ".add(PointMark::new(x, y).radius(4.0))"),
+            (
+                "p = figure(); p.line(x, y)",
+                "Figure::new(W, H).add(LineMark::new(x, y))",
+            ),
+            (
+                "p.circle(x, y, size=8)",
+                ".add(PointMark::new(x, y).radius(4.0))",
+            ),
             (r#"output_file("o.html")"#, r#".save("o.html")  // 0.10"#),
         ],
     },
@@ -110,20 +159,29 @@ const GROUPS: &[Group<'_>] = &[
         lib: "ggplot2",
         lang: "r",
         rows: &[
-            ("ggplot(df) + geom_point()", "Figure::new(W, H).add(PointMark::from(df))"),
+            (
+                "ggplot(df) + geom_point()",
+                "Figure::new(W, H).add(PointMark::from(df))",
+            ),
             ("+ geom_line()", ".add(LineMark::from(df))"),
             (r#"+ geom_bar(stat="identity")"#, ".add(BarMark::from(df))"),
             ("+ geom_violin()", ".add(ViolinMark::from(df))"),
             ("+ facet_wrap(~ group)", r#".facet_wrap("group")  // 0.4"#),
             ("+ scale_y_log10()", ".y_scale(LogScale)  // 0.5"),
-            ("+ theme_minimal()", ".theme(rose_pine_dawn.into())  // chromata"),
+            (
+                "+ theme_minimal()",
+                ".theme(rose_pine_dawn.into())  // chromata",
+            ),
         ],
     },
     Group {
         lib: "observable plot",
         lang: "js",
         rows: &[
-            ("Plot.dot(data, {x, y, fill})", "PointMark::new(x, y).color_by(&fill)"),
+            (
+                "Plot.dot(data, {x, y, fill})",
+                "PointMark::new(x, y).color_by(&fill)",
+            ),
             ("Plot.line(data, {x, y})", "LineMark::new(x, y)"),
             ("Plot.barY(data, {x, y})", "BarMark::new(x, y)"),
             ("Plot.rectY(bin(…))", "HistogramMark::new(data)"),
@@ -133,7 +191,10 @@ const GROUPS: &[Group<'_>] = &[
         lib: "d3.js",
         lang: "js",
         rows: &[
-            ("d3.scaleLinear().domain().range()", "LinearScale::new(domain, range)"),
+            (
+                "d3.scaleLinear().domain().range()",
+                "LinearScale::new(domain, range)",
+            ),
             ("d3.axisBottom(scale)", "Axis::bottom(scale)"),
             ("d3.line()(data)", "LineMark::new(x, y)  // pre-rendered"),
         ],
@@ -153,7 +214,10 @@ const GROUPS: &[Group<'_>] = &[
         lib: "gnuplot",
         lang: "gnuplot",
         rows: &[
-            (r#"plot "data.dat" with lines"#, r#"LineMark::from_csv("data.dat")"#),
+            (
+                r#"plot "data.dat" with lines"#,
+                r#"LineMark::from_csv("data.dat")"#,
+            ),
             ("set logscale y", ".y_scale(LogScale)  // 0.5"),
             ("set terminal png", r#".save("out.png")?"#),
         ],
@@ -162,25 +226,46 @@ const GROUPS: &[Group<'_>] = &[
         lib: "plotters",
         lang: "rust",
         rows: &[
-            ("ChartBuilder::on(&root).build_cartesian_2d", "Figure::new(800, 600)"),
-            ("chart.draw_series(LineSeries::new(…))", ".add(LineMark::new(x, y))"),
-            ("BitMapBackend / SVGBackend", r#".save("out.png") / .save("out.svg")"#),
+            (
+                "ChartBuilder::on(&root).build_cartesian_2d",
+                "Figure::new(800, 600)",
+            ),
+            (
+                "chart.draw_series(LineSeries::new(…))",
+                ".add(LineMark::new(x, y))",
+            ),
+            (
+                "BitMapBackend / SVGBackend",
+                r#".save("out.png") / .save("out.svg")"#,
+            ),
         ],
     },
     Group {
         lib: "charming",
         lang: "rust",
         rows: &[
-            ("Chart::new().x_axis(…).y_axis(…)", "Figure::new(W, H).add(LineMark::new(x, y))"),
-            (".series(Line::new().data(data))", ".add(LineMark::new(x, y))"),
+            (
+                "Chart::new().x_axis(…).y_axis(…)",
+                "Figure::new(W, H).add(LineMark::new(x, y))",
+            ),
+            (
+                ".series(Line::new().data(data))",
+                ".add(LineMark::new(x, y))",
+            ),
         ],
     },
     Group {
         lib: "plotly.rs",
         lang: "rust",
         rows: &[
-            ("Plot::new() + Scatter::new(x, y)", "Figure::new(W, H).add(PointMark::new(x, y))"),
-            (r#"plot.write_html("o.html")"#, r#".save("o.html")  // 0.10"#),
+            (
+                "Plot::new() + Scatter::new(x, y)",
+                "Figure::new(W, H).add(PointMark::new(x, y))",
+            ),
+            (
+                r#"plot.write_html("o.html")"#,
+                r#".save("o.html")  // 0.10"#,
+            ),
         ],
     },
 ];

@@ -95,8 +95,7 @@ const CRATES: &[Crate] = &[
     },
 ];
 
-const FOOTER: &str =
-    "starsight is the pre-1.0 newcomer. The bet: one crate covering CPU + GPU + terminal + PDF \
+const FOOTER: &str = "starsight is the pre-1.0 newcomer. The bet: one crate covering CPU + GPU + terminal + PDF \
      with a grammar-of-graphics builder and shared themes/colormaps via chromata + prismatica.";
 
 pub fn regen(root: &Path, theme: Theme) -> Result<()> {
@@ -115,7 +114,12 @@ fn render(theme: Theme) -> String {
     let body_h = HEADER_H + ROW_H * (FEATURES.len() as u32);
     let h = PAD + EYEBROW_H + body_h + FOOTER_H + PAD;
 
-    let mut out = header(W, h, "starsight vs. sibling charting libraries", "starsight comparison");
+    let mut out = header(
+        W,
+        h,
+        "starsight vs. sibling charting libraries",
+        "starsight comparison",
+    );
 
     out.push_str(&format!(
         r#"  <rect x="0.5" y="0.5" width="{w}" height="{hh}" rx="{r}" fill="{bg}" stroke="{s}" stroke-width="1"/>
@@ -140,7 +144,10 @@ fn render(theme: Theme) -> String {
     let body_y = PAD + EYEBROW_H + 4;
 
     // starsight column highlight (full body height).
-    let starsight_idx = CRATES.iter().position(|c| c.name == "starsight").unwrap_or(0) as u32;
+    let starsight_idx = CRATES
+        .iter()
+        .position(|c| c.name == "starsight")
+        .unwrap_or(0) as u32;
     let starsight_x = body_x + FEATURE_COL_W + starsight_idx * crate_col_w;
     out.push_str(&format!(
         r#"  <rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{c}"/>
@@ -173,7 +180,7 @@ fn render(theme: Theme) -> String {
             y = body_y + 22,
             f = SANS,
             fw = if is_us { "700" } else { "600" },
-            cc = if is_us { p.text } else { p.text },
+            cc = p.text,
             name = escape(c.name),
         ));
         out.push_str(&format!(

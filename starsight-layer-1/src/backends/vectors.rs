@@ -89,9 +89,16 @@ impl DrawBackend for SvgBackend {
                     .fill_color
                     .map_or("none".to_string(), Color::to_css_hex),
             );
+        // Per-channel opacity only — drop the umbrella `opacity` attribute
+        // because SVG multiplies it on top of `fill-opacity`/`stroke-opacity`,
+        // so emitting all three at the same value compounds (e.g. 0.098 ×
+        // 0.098 = 0.0096, ~1% effective fill alpha when the caller asked for
+        // 10%). Per-channel opacities also apply during each paint step
+        // independently, avoiding the overlap-double-blend artifact that
+        // group `opacity` produces where stroke crosses fill — same model as
+        // the skia/PNG backend. Tracked as `starsight-2ja`.
         if style.opacity < 1.0 {
             p = p
-                .set("opacity", style.opacity)
                 .set("fill-opacity", style.opacity)
                 .set("stroke-opacity", style.opacity);
         }
@@ -226,7 +233,10 @@ mod tests {
     }
 
     #[test]
-    fn draw_path_with_opacity_emits_opacity_attrs() {
+    fn draw_path_with_opacity_emits_per_channel_opacity_attrs() {
+        // Per-channel only: fill-opacity + stroke-opacity, NOT the umbrella
+        // `opacity` attribute, which would compound on top of the per-channel
+        // values (0.4 × 0.4 = 0.16). See `starsight-2ja`.
         let mut b = SvgBackend::new(100, 100);
         let path = Path::new()
             .move_to(Point::new(0.0, 0.0))
@@ -236,7 +246,22 @@ mod tests {
         style.opacity = 0.4;
         b.draw_path(&path, &style).unwrap();
         let svg = b.svg_string();
-        assert!(svg.contains("opacity"));
+        assert!(
+            svg.contains("fill-opacity=\"0.4\""),
+            "expected fill-opacity=\"0.4\" in {svg}"
+        );
+        assert!(
+            svg.contains("stroke-opacity=\"0.4\""),
+            "expected stroke-opacity=\"0.4\" in {svg}"
+        );
+        // Check the umbrella `opacity` attribute is absent — must not match
+        // `opacity="..."`. `fill-opacity=` and `stroke-opacity=` happen to
+        // contain the substring "opacity" so a `contains("opacity")` check
+        // would not catch a regression.
+        assert!(
+            !svg.contains(" opacity=\""),
+            "umbrella `opacity` attribute must not be set; got {svg}"
+        );
     }
 
     #[test]

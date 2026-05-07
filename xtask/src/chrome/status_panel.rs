@@ -12,14 +12,32 @@ const H: u32 = 148;
 const PAD_X: f32 = 24.0;
 
 pub fn regen(root: &Path, theme: Theme, stats: &crates_io::Stats) -> Result<()> {
-    let svg = render(theme, stats);
+    let coverage = read_coverage(root);
+    let svg = render(theme, stats, coverage);
     let out = root.join(format!("assets/status/panel-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
     Ok(())
 }
 
-fn render(theme: Theme, s: &crates_io::Stats) -> String {
+/// Read `assets/status/coverage.json` if present.
+///
+/// The coverage workflow (`.github/workflows/coverage.yml`) runs cargo
+/// llvm-cov on every push to main + weekly, then commits a single-key JSON
+/// `{"coverage": <line %>}` to `assets/status/coverage.json`. xtask reads
+/// it on the next chrome regen and renders it next to the crates.io facts.
+/// Returns `None` when the file is missing or malformed; the panel renders
+/// without the coverage badge.
+fn read_coverage(root: &Path) -> Option<f32> {
+    let path = root.join("assets/status/coverage.json");
+    let raw = std::fs::read_to_string(&path).ok()?;
+    let v: serde_json::Value = serde_json::from_str(&raw).ok()?;
+    v.get("coverage")
+        .and_then(serde_json::Value::as_f64)
+        .map(|n| n as f32)
+}
+
+fn render(theme: Theme, s: &crates_io::Stats, coverage_pct: Option<f32>) -> String {
     let p = palette(theme);
     let mut out = header(
         W,
@@ -128,13 +146,16 @@ fn render(theme: Theme, s: &crates_io::Stats) -> String {
         ));
     }
 
-    let activity = format!(
+    let mut activity = format!(
         "{tot} downloads since {since}  ·  {dep} dependents  ·  updated {d}d ago",
         tot = s.downloads_lifetime,
         since = s.first_publish,
         dep = s.dependents,
         d = s.updated_days_ago
     );
+    if let Some(cov) = coverage_pct {
+        activity = format!("{activity}  ·  coverage {cov:.1}%");
+    }
     out.push_str(&format!(
         r#"  <text x="{x}" y="{y:.1}" font-family="{f}" font-size="13" fill="{c}" text-anchor="end">{activity}</text>
 "#,

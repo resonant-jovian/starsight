@@ -103,7 +103,11 @@ fn render_matrix(matrix: &Matrix, theme: Theme) -> String {
     let total = matrix.rows.len();
 
     let body_h = HEADER_H + ROW_H * (matrix.rows.len() as u32);
-    let footnote_h = if matrix.footnote.is_some() { FOOTNOTE_H } else { 0 };
+    let footnote_h = if matrix.footnote.is_some() {
+        FOOTNOTE_H
+    } else {
+        0
+    };
     let h = PAD + EYEBROW_H + PROGRESS_H + BAR_GAP + body_h + footnote_h + PAD;
 
     let mut out = header(W, h, matrix.title, matrix.title);
@@ -125,7 +129,11 @@ fn render_matrix(matrix: &Matrix, theme: Theme) -> String {
         matrix.stem,
         working + wip,
         planned,
-        if total == 0 { String::new() } else { format!(" · {total} total") },
+        if total == 0 {
+            String::new()
+        } else {
+            format!(" · {total} total")
+        },
     );
     out.push_str(&format!(
         r#"  <text x="{x}" y="{y}" font-family="{f}" font-size="11" fill="{c}">{txt}</text>

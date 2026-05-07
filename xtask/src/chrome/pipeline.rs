@@ -28,8 +28,7 @@ const STAGES: &[(&str, &[&str])] = &[
     ("OUTPUT", &[".png", ".svg", "window", "tty"]),
 ];
 
-const TRACE_CODE: &str =
-    r#"plot!(&[1.0, 2.0, 3.0], &[10., 20., 15.]).save("chart.png")"#;
+const TRACE_CODE: &str = r#"plot!(&[1.0, 2.0, 3.0], &[10., 20., 15.]).save("chart.png")"#;
 const TRACE_PILLS: &[&str] = &[
     "DATA",
     "MARK·LineMark",
@@ -67,7 +66,12 @@ fn render(theme: Theme) -> String {
 
     let h = PAD + EYEBROW_H + STAGE_H + TRACE_GAP + TRACE_H + PAD;
 
-    let mut out = header(W, h, "starsight pipeline — plot!() trace", "starsight pipeline");
+    let mut out = header(
+        W,
+        h,
+        "starsight pipeline — plot!() trace",
+        "starsight pipeline",
+    );
 
     // Outer rounded card.
     out.push_str(&format!(

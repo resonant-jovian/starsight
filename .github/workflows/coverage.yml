@@ -34,6 +34,29 @@ jobs:
         # build) — its coverage isn't meaningful for the library surface, and
         # llvm-cov on `xtask` slows the run without changing what users see.
         run: cargo llvm-cov --workspace --all-features --locked --exclude xtask --lcov --output-path lcov.info
+      - name: Generate JSON summary for status panel
+        # The chrome status panel embeds the coverage % alongside crates.io
+        # downloads / dependents. xtask reads `assets/status/coverage.json`
+        # (single number) on its next regen.
+        run: cargo llvm-cov report --json --output-path coverage-summary.json
+      - name: Extract line-coverage % into assets/status/coverage.json
+        run: |
+          mkdir -p assets/status
+          line_pct=$(jq '.data[0].totals.lines.percent' coverage-summary.json)
+          printf '{"coverage": %s}\n' "$line_pct" > assets/status/coverage.json
+          echo "wrote assets/status/coverage.json: $(cat assets/status/coverage.json)"
+      - name: Commit coverage.json if changed
+        # Fast-path: skip if the file is bit-identical to main.
+        run: |
+          if [[ -n "$(git status --porcelain assets/status/coverage.json)" ]]; then
+            git config user.name "starsight-bot"
+            git config user.email "starsight-bot@users.noreply.github.com"
+            git add assets/status/coverage.json
+            git commit -m "chore(status): refresh coverage.json from llvm-cov"
+            git push
+          else
+            echo "coverage.json unchanged; skipping commit"
+          fi
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:
