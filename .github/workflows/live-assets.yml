@@ -3,7 +3,7 @@ name: Live Assets
 # Coverage and chrome regen previously lived in separate workflows that both
 # ran on push-to-main and raced for the main ref:
 #   - Coverage (~5 min):  writes assets/status/coverage.json, pushes
-#   - Chrome   (~30 min): regenerates panel/buttons/hero/dark-PNGs, pushes
+#   - Chrome   (~30 min): regenerates panel/buttons/hero/social-card/dark-PNGs, pushes
 # Whichever finished second got "rejected: not a fast-forward" against the
 # other bot's commit. Merging into one workflow with a sequential
 # coverage → chrome chain (via `needs:`) eliminates the bot-vs-bot race; the
@@ -13,8 +13,9 @@ on:
   push:
     branches: [main]
   schedule:
-    # Daily refresh of buttons/panel/hero so chrome reflects current download
-    # counts and license/coverage values even on quiet days.
+    # Daily refresh of buttons/panel/hero/social-card so chrome reflects
+    # current download counts, license/coverage, and version values even on
+    # quiet days.
     - cron: "0 6 * * *"
   workflow_dispatch:
 
@@ -135,7 +136,7 @@ jobs:
           git config user.name  "starsight-bot"
           git config user.email "noreply@github.com"
           git add assets/status/ assets/hero/ assets/roadmap-light.svg assets/roadmap-dark.svg
-          git add assets/buttons/
+          git add assets/buttons/ assets/social/
           git add examples/basics/*_dark.png examples/scientific/*_dark.png 2>/dev/null || true
           git commit -m "chore(chrome): regen live assets [skip ci]"
           # Same rebase-retry as coverage, against the wider 30-min external
