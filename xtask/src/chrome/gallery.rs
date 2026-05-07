@@ -1,13 +1,16 @@
-//! `assets/gallery-{light,dark}.svg` — showcase composite, paired variants.
+//! `assets/gallery-{light,dark}.{svg,png}` — showcase composite, paired variants.
 //!
 //! Outer card (rounded, 1px border) → eyebrow strip → 3×3 grid of captioned
 //! cells. Each cell inlines its theme-matched example SVG and draws a caption
-//! beneath. Vector all the way down so the README image zooms cleanly.
+//! beneath. Dual format: SVG is canonical (vector); a 2× retina PNG is
+//! rasterized alongside and is what the README references — saves the README
+//! from inlining 8 MB of example SVG markup.
 
 use anyhow::Result;
 use std::path::Path;
 
 use super::palette::{MONO_FAMILY, SANS, Theme, palette};
+use super::png;
 use super::svg::{header, inline, write_atomic};
 
 const W: u32 = 880;
@@ -18,6 +21,7 @@ const ROWS: u32 = 3;
 const EYEBROW_H: u32 = 36;
 const CAP_H: u32 = 30;
 const RADIUS: f32 = 12.0;
+const PNG_SCALE: f32 = 2.0;
 
 const GALLERY: &[(&str, &str)] = &[
     ("examples/scientific/contour_fields", "contour fields"),
@@ -45,6 +49,15 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     let out = root.join(format!("assets/gallery-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
+
+    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let png_out = root.join(format!("assets/gallery-{}.png", theme.suffix()));
+    png::write_png_atomic(&pix, &png_out)?;
+    println!(
+        "wrote {} ({} bytes)",
+        png_out.display(),
+        std::fs::metadata(&png_out)?.len()
+    );
     Ok(())
 }
 

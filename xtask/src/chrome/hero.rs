@@ -1,9 +1,13 @@
-//! `assets/hero/starsight-hero-{light,dark}.svg` — composite hero, paired variants.
+//! `assets/hero/starsight-hero-{light,dark}.{svg,png}` — composite hero, paired variants.
 //!
-//! Layout (880 × ~870, scales freely because it's vector):
+//! Layout (880 × ~870):
 //! - rounded outer card (rx=12, 1px border)
 //! - top strip (156 px): eclipse + wordmark + tagline + meta
 //! - 3×3 grid of inlined theme-matched example SVGs
+//!
+//! Dual format: SVG is the canonical authored output (vector, scales freely);
+//! a 2× retina PNG is rasterized alongside and is what the README references —
+//! the PNG saves the README from inlining 5 MB of example SVG markup.
 //!
 //! Light variant uses `<name>.svg`; dark variant uses `<name>_dark.svg` from
 //! the example output directories. Dark siblings come from re-running the
@@ -14,6 +18,7 @@ use std::path::Path;
 
 use super::eclipse;
 use super::palette::{MONO_FAMILY, SANS, Theme, palette};
+use super::png;
 use super::svg::{header, inline, write_atomic};
 
 const W: u32 = 880;
@@ -23,6 +28,7 @@ const GUTTER: u32 = 10;
 const COLS: u32 = 3;
 const ROWS: u32 = 3;
 const RADIUS: f32 = 12.0;
+const PNG_SCALE: f32 = 2.0;
 
 const HERO_BASES: &[&str] = &[
     "examples/basics/line_chart",
@@ -42,6 +48,15 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     let out = root.join(format!("assets/hero/starsight-hero-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
+
+    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let png_out = root.join(format!("assets/hero/starsight-hero-{}.png", theme.suffix()));
+    png::write_png_atomic(&pix, &png_out)?;
+    println!(
+        "wrote {} ({} bytes)",
+        png_out.display(),
+        std::fs::metadata(&png_out)?.len()
+    );
     Ok(())
 }
 
