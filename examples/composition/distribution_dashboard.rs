@@ -152,11 +152,13 @@ fn splitmix(mut z: u64) -> u64 {
     z ^ (z >> 31)
 }
 
-/// Hash a (seed, idx, salt) triple into a uniform `(0, 1)` draw. The bits
+/// Hash a (seed, idx, slot) triple into a uniform `(0, 1)` draw. The bits
 /// are shifted into independent slots of the u64 input so different triples
 /// produce uncorrelated outputs even when the components only differ by 1.
-fn uniform(seed: u32, idx: u32, salt: u32) -> f64 {
-    let mixed = splitmix(u64::from(seed) | (u64::from(idx) << 21) | (u64::from(salt) << 42));
+/// `slot` is just a bit-disambiguator for the splitmix mixing function — it
+/// is not a cryptographic salt.
+fn uniform(seed: u32, idx: u32, slot: u32) -> f64 {
+    let mixed = splitmix(u64::from(seed) | (u64::from(idx) << 21) | (u64::from(slot) << 42));
     let frac = (mixed >> 11) as f64 / (1u64 << 53) as f64;
     frac.clamp(1e-12, 1.0 - 1e-12)
 }
@@ -172,9 +174,9 @@ fn normal_one(seed: u32, idx: u32, mu: f64, sigma: f64) -> f64 {
 /// the sum of `k` independent Exp(1) draws, and `−ln(U)` for `U ~ U(0, 1)`
 /// is one Exp(1). This is the canonical Gamma method when the shape is a
 /// known positive integer.
-fn gamma_int(seed: u32, idx: u32, salt: u32, k: usize) -> f64 {
+fn gamma_int(seed: u32, idx: u32, slot: u32, k: usize) -> f64 {
     (0..k)
-        .map(|j| -uniform(seed, idx, salt.wrapping_add(j as u32)).ln())
+        .map(|j| -uniform(seed, idx, slot.wrapping_add(j as u32)).ln())
         .sum()
 }
 

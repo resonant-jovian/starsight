@@ -35,11 +35,11 @@ use crate::marks::{DataExtent, LegendGlyph, Mark};
 
 // ── ArcMark ──────────────────────────────────────────────────────────────────────────────────────
 
-/// Wedge mark plotted on a [`PolarCoord`].
+/// Wedge mark plotted on a [`PolarCoord`](starsight_layer_2::coords::PolarCoord).
 ///
 /// Each entry produces one wedge spanning `[theta - half_width, theta + half_width]`
 /// in the angular axis, from radius `r_inner_i` (inner) to radius `r_i` (outer)
-/// in the radial axis. Both axes go through [`PolarCoord`]'s scales — pair
+/// in the radial axis. Both axes go through [`PolarCoord`](starsight_layer_2::coords::PolarCoord)'s scales — pair
 /// `Axis::polar_radial_sqrt` with this mark for Nightingale's value-as-area
 /// invariant, or `Axis::polar_angular_categorical` with `theta_half_widths`
 /// equal to half-band-width for an equal-sweep coxcomb.

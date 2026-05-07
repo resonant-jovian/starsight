@@ -418,7 +418,7 @@ pub enum Edge {
 ///   that doesn't intersect any [`MarkExtent`]. When no corner is fully clear,
 ///   pick the corner with the lowest count of intersecting marks; tiebreak by
 ///   total clipped overlap area; final tiebreak by TR > TL > BR > BL priority.
-/// - [`LegendPosition::Outside(Edge)`]: place the legend just outside
+/// - [`LegendPosition::Outside`]`(Edge)`: place the legend just outside
 ///   `plot_area` on the named edge. The figure layout reserves a strip there
 ///   (see [`LayoutBuilder`](crate::layout::LayoutBuilder)) so the legend lives
 ///   in canvas space outside the plot. No dodge.

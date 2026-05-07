@@ -26,6 +26,7 @@ mod roadmap;
 mod social_card;
 mod status_panel;
 mod svg;
+mod svgo;
 mod wordmark;
 
 use anyhow::Result;
@@ -66,12 +67,16 @@ pub fn run(args: ChromeArgs) -> Result<()> {
 
     if !args.skip_examples {
         ensure_example_outputs(&root)?;
+        // Optimize examples first so the composites inline already-minified
+        // copies. Skipping if svgo is unavailable (warns once).
+        svgo::optimize_chrome_examples(&root)?;
     }
 
     if let Some(asset) = args.asset {
         for theme in Theme::ALL {
             regen_one(asset, &root, theme)?;
         }
+        svgo::optimize_chrome_assets(&root)?;
         return Ok(());
     }
 
@@ -99,6 +104,8 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             social_card::regen(&root, theme)?;
         }
     }
+
+    svgo::optimize_chrome_assets(&root)?;
     Ok(())
 }
 
@@ -121,7 +128,7 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
 /// Examples used by hero / gallery / lorenz composites; (group, name) under `examples/`.
 /// Hero set: 9 in `HERO_BASES` (basics + scientific essentials).
 /// Gallery set: 9 in `gallery::GALLERY` (deeper scientific + composition).
-const CHROME_EXAMPLES: &[(&str, &str)] = &[
+pub(crate) const CHROME_EXAMPLES: &[(&str, &str)] = &[
     // Hero (basics row)
     ("basics", "line_chart"),
     ("basics", "scatter"),

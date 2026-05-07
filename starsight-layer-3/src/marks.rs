@@ -129,8 +129,9 @@ pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
     ///
     /// `coord` is `&dyn Coord` so the same trait can dispatch to cartesian and
-    /// polar marks. Cartesian marks use [`require_cartesian`] to downcast at
-    /// the top of their impl; polar marks downcast to their own coord type.
+    /// polar marks. Cartesian marks use the crate-private `require_cartesian`
+    /// helper to downcast at the top of their impl; polar marks downcast to
+    /// their own coord type.
     ///
     /// # Errors
     /// Returns [`StarsightError`] if the coord type is unsupported by this mark
@@ -216,7 +217,7 @@ pub trait Mark {
         true
     }
 
-    /// Whether a polar [`Figure`] should draw the radial-spoke + concentric-
+    /// Whether a polar `Figure` should draw the radial-spoke + concentric-
     /// ring grid behind this mark. Quantitative polar marks (`PolarBarMark`
     /// wind roses, `RadarMark` spider charts, `PolarRectMark` polar heatmaps)
     /// keep the default `true` because the grid carries axis context;
@@ -249,7 +250,7 @@ pub trait Mark {
     }
 
     /// Optional colormap legend description for this mark, used by the
-    /// figure to auto-attach a [`Colorbar`](starsight_layer_3::statistics).
+    /// figure to auto-attach a colorbar (the layer-5 chrome component).
     /// Marks that map a continuous value range through a colormap
     /// (`HeatmapMark`, `ContourMark` with a colormap) override this to
     /// expose `(colormap, value_min, value_max, label?, log?)`. Other marks

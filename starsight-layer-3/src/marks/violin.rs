@@ -5,13 +5,13 @@
 //! a vertically-oriented mirrored shape: the right half traces the kernel
 //! density estimate from the data range top to bottom; the left half
 //! mirrors it. An optional inner box overlay (driven by
-//! [`BoxPlotStats`](crate::statistics::BoxPlotStats)) carries the quartile
+//! [`BoxPlotStats`]) carries the quartile
 //! summary inside the density envelope. With `split = true` and exactly two
 //! groups, the two densities share an x-band: group A occupies the left
 //! half, group B the right.
 //!
 //! Status: lands in 0.3.0. Density math comes from
-//! [`Kde`](crate::statistics::Kde); bandwidth selection is configurable per
+//! [`Kde`]; bandwidth selection is configurable per
 //! mark. The 256-point evaluation grid is wide enough to read smoothly at
 //! gallery sizes without paying for finer resolution most readers will
 //! never see.

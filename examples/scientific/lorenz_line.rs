@@ -87,24 +87,33 @@ fn integrate(rho: f64, ic_jitter: f64) -> (Vec<f64>, Vec<f64>) {
 // ── main ─────────────────────────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    // let rho_values: &[f64] = &[13.0, 15.0, 18.0, 21.0, 24.06, 28.0, 35.0, 50.0, 100.0, 160.0, 250.0];
-    // series above if you want that instead
-    let rho_values: &[f64] = &[28.];
+    let rho_values: &[f64] = &[28.0];
     let n = rho_values.len() as f64;
 
-    let mut fig = Figure::new(1600, 1000).theme(theme_from_env());
+    let theme = theme_from_env();
+    let mut fig = Figure::new(1600, 1000).theme(theme);
     fig = fig
         .title("Lorenz attractor family — x–z projection")
         .x_label("x")
         .y_label("z");
 
+    // Map index to a colormap range that stays legible on both bgs.
+    // INFERNO at t→0 is near-black (invisible on dark), at t→1 near-white
+    // (washed out on light). Both endpoints are skipped.
+    let (t_lo, t_hi) = if theme.is_dark {
+        (0.55, 0.95)
+    } else {
+        (0.20, 0.65)
+    };
     for (i, &rho) in rho_values.iter().enumerate() {
         let jitter = 0.001 * i as f64;
         let (x_data, z_data) = integrate(rho, jitter);
 
-        // map trajectory index to [0, 1] for inferno colormap
-        let t = i as f64 / (n - 1.0);
-        // only valid for series
+        let t = if n > 1.0 {
+            t_lo + (i as f64) * (t_hi - t_lo) / (n - 1.0)
+        } else {
+            0.5 * (t_lo + t_hi)
+        };
         let c: prismatica::Color = prismatica::matplotlib::INFERNO.eval(t as f32);
 
         fig = fig.add(LineMark {

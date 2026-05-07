@@ -10,7 +10,7 @@
 //! [`MarkExtent::Bbox`] of the mark's projected data extent — fine for marks
 //! whose footprint matches their bounding rect (point, bar, heatmap, candle,
 //! pie, donut, rug, errorbar). Marks where the bbox over-claims coverage
-//! ([`crate::LineMark`] on diagonal data, [`crate::AreaMark`] / contour bands
+//! ([`crate::marks::LineMark`] on diagonal data, [`crate::marks::AreaMark`] / contour bands
 //! that fill non-rectangular regions, polar marks whose footprint is annular)
 //! override to a tighter [`MarkExtent`] variant.
 
@@ -24,15 +24,15 @@ use starsight_layer_1::primitives::{Point, Rect};
 /// - [`Bbox`](MarkExtent::Bbox) — axis-aligned rectangle. Default for compact
 ///   marks where the bounding rect already matches the painted footprint.
 /// - [`Segments`](MarkExtent::Segments) — discrete line segments. Used by
-///   [`crate::LineMark`], [`crate::StepMark`], and isoline-mode
-///   [`crate::ContourMark`] where the bbox is much larger than the actual
+///   [`crate::marks::LineMark`], [`crate::marks::StepMark`], and isoline-mode
+///   [`crate::marks::ContourMark`] where the bbox is much larger than the actual
 ///   stroke.
 /// - [`Rects`](MarkExtent::Rects) — multiple axis-aligned rectangles. Used by
-///   marks that paint disjoint rectangles ([`crate::BarMark`] when callers
+///   marks that paint disjoint rectangles ([`crate::marks::BarMark`] when callers
 ///   want bar-level precision rather than the data bbox; whisker rectangles
-///   on [`crate::ErrorBarMark`]).
+///   on [`crate::marks::ErrorBarMark`]).
 /// - [`Polygons`](MarkExtent::Polygons) — filled polygons. Used by
-///   [`crate::AreaMark`], filled-band [`crate::ContourMark`],
+///   [`crate::marks::AreaMark`], filled-band [`crate::marks::ContourMark`],
 ///   [`crate::marks::ViolinMark`], and polar marks whose footprint is annular
 ///   or wedge-shaped.
 #[derive(Debug, Clone)]

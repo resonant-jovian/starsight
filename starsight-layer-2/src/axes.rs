@@ -1,4 +1,4 @@
-//! Axes: a [`Scale`](crate::scales::Scale) bundled with tick positions, labels, and an optional title.
+//! Axes: a [`Scale`] bundled with tick positions, labels, and an optional title.
 
 use crate::scales::{CategoricalScale, LinearScale, LogScale, Scale, SqrtScale};
 
@@ -24,7 +24,7 @@ pub struct Axis {
 impl Axis {
     /// Build an axis whose ticks are chosen by the Wilkinson Extended algorithm.
     ///
-    /// No automatic margin inset — see [`Self::with_padding`] for the opt-in
+    /// No automatic margin inset — see `Figure::axis_padding` for the opt-in
     /// 5% inset that point / line / errorbar / box / violin charts apply
     /// via `Figure::render_within` based on the mix of marks. Bar /
     /// histogram / heatmap / contour figures stay edge-aligned because
