@@ -2,14 +2,15 @@ name: Release
 
 on:
   push:
-    # Real release: tag like `v0.4.0` triggers full publish to crates.io.
-    tags: ["v*.*.*"]
     # Continuous publish-readiness check: every push to main runs the same
     # workflow but with `dry-run` hard-forced (see verify step below) so we
     # find publish-blockers (e.g. unpublishable Cargo.toml metadata, missing
-    # docs, unsatisfiable deps) without waiting for a tag.
+    # docs, unsatisfiable deps) without waiting for a release.
     branches: [main]
   workflow_dispatch:
+    # Real release path: only ever triggered manually with `dry-run` unchecked.
+    # Tag pushes deliberately do NOT trigger this workflow — publishes are an
+    # explicit human action, never an automatic side-effect of pushing a tag.
     inputs:
       dry-run:
         description: "Validate everything but don't actually publish or create the release."
@@ -26,9 +27,9 @@ env:
   RUST_BACKTRACE: short
 
 jobs:
-  # ── Pre-flight: tag must match Cargo.toml workspace.package.version ──────────
+  # ── Pre-flight: read workspace version, decide dry-run mode ─────────────────
   verify:
-    name: verify tag vs Cargo.toml
+    name: verify Cargo.toml version
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -43,32 +44,16 @@ jobs:
           # Workspace version
           version=$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          # Three trigger shapes:
-          #   1. push to a v*.*.* tag → real release; verify tag matches Cargo
-          #   2. push to main         → continuous dry-run, never publishes
-          #   3. workflow_dispatch    → dry-run flag from input, default true
+          tag="$version"
+          # Two trigger shapes:
+          #   1. push to main      → continuous dry-run, never publishes
+          #   2. workflow_dispatch → dry-run flag from input, default true
+          # A real publish requires manual dispatch with dry-run=false.
           case "${{ github.event_name }}" in
-            push)
-              if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-                tag="${GITHUB_REF#refs/tags/v}"
-                dry_run="false"
-                if [[ "$tag" != "$version" ]]; then
-                  echo "::error::Tag v$tag does not match Cargo.toml version $version"
-                  exit 1
-                fi
-              else
-                # Push to main: hard-force dry-run so a misconfigured branch
-                # protection or accidental push can never publish.
-                tag="$version"
-                dry_run="true"
-              fi
-              ;;
             workflow_dispatch)
-              tag="$version"
               dry_run="${{ github.event.inputs.dry-run || 'true' }}"
               ;;
             *)
-              tag="$version"
               dry_run="true"
               ;;
           esac
@@ -113,31 +98,32 @@ jobs:
           DRY_RUN: ${{ needs.verify.outputs.dry-run }}
         run: |
           set -euo pipefail
-          flags=""
           if [[ "$DRY_RUN" == "true" ]]; then
-            flags="--dry-run"
             echo "::notice::Dry-run mode — nothing will be uploaded to crates.io"
-          fi
-          # Each layer depends only on layers below it; the facade depends on all.
-          # See .spec/STARSIGHT.md § "Crate dependency graph" for the rule.
-          for crate in \
-            starsight-layer-1 \
-            starsight-layer-2 \
-            starsight-layer-3 \
-            starsight-layer-4 \
-            starsight-layer-5 \
-            starsight-layer-6 \
-            starsight-layer-7 \
-            starsight; do
-            echo "::group::cargo publish -p $crate $flags"
-            cargo publish -p "$crate" --locked $flags
-            echo "::endgroup::"
-            # Crates.io needs a moment to register the new version before the
-            # next crate that depends on it can resolve it.
-            if [[ "$DRY_RUN" != "true" ]]; then
+            # Cargo resolves workspace publish order itself; nothing is uploaded
+            # so we don't need the bottom-up loop or the inter-crate sleep.
+            cargo publish --workspace --locked --dry-run
+          else
+            # Real publish: bottom-up so each layer is on crates.io before the
+            # layer above it tries to resolve it. See .spec/STARSIGHT.md
+            # § "Crate dependency graph" for the rule.
+            for crate in \
+              starsight-layer-1 \
+              starsight-layer-2 \
+              starsight-layer-3 \
+              starsight-layer-4 \
+              starsight-layer-5 \
+              starsight-layer-6 \
+              starsight-layer-7 \
+              starsight; do
+              echo "::group::cargo publish -p $crate"
+              cargo publish -p "$crate" --locked
+              echo "::endgroup::"
+              # Crates.io needs a moment to register the new version before
+              # the next crate that depends on it can resolve it.
               sleep 30
-            fi
-          done
+            done
+          fi
 
   # ── Generate release notes from the CHANGELOG and create the GitHub release ──
   github-release:
