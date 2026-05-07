@@ -2,7 +2,13 @@ name: Release
 
 on:
   push:
+    # Real release: tag like `v0.4.0` triggers full publish to crates.io.
     tags: ["v*.*.*"]
+    # Continuous publish-readiness check: every push to main runs the same
+    # workflow but with `dry-run` hard-forced (see verify step below) so we
+    # find publish-blockers (e.g. unpublishable Cargo.toml metadata, missing
+    # docs, unsatisfiable deps) without waiting for a tag.
+    branches: [main]
   workflow_dispatch:
     inputs:
       dry-run:
@@ -37,21 +43,37 @@ jobs:
           # Workspace version
           version=$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          # Tag (only on tag push) or workflow_dispatch
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            tag="${GITHUB_REF#refs/tags/v}"
-          else
-            tag="$version"
-          fi
+          # Three trigger shapes:
+          #   1. push to a v*.*.* tag → real release; verify tag matches Cargo
+          #   2. push to main         → continuous dry-run, never publishes
+          #   3. workflow_dispatch    → dry-run flag from input, default true
+          case "${{ github.event_name }}" in
+            push)
+              if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+                tag="${GITHUB_REF#refs/tags/v}"
+                dry_run="false"
+                if [[ "$tag" != "$version" ]]; then
+                  echo "::error::Tag v$tag does not match Cargo.toml version $version"
+                  exit 1
+                fi
+              else
+                # Push to main: hard-force dry-run so a misconfigured branch
+                # protection or accidental push can never publish.
+                tag="$version"
+                dry_run="true"
+              fi
+              ;;
+            workflow_dispatch)
+              tag="$version"
+              dry_run="${{ github.event.inputs.dry-run || 'true' }}"
+              ;;
+            *)
+              tag="$version"
+              dry_run="true"
+              ;;
+          esac
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          # Dry-run flag
-          dry_run="${{ github.event.inputs.dry-run || 'false' }}"
           echo "dry-run=$dry_run" >> "$GITHUB_OUTPUT"
-          # Verify match on tag pushes
-          if [[ "${{ github.event_name }}" == "push" && "$tag" != "$version" ]]; then
-            echo "::error::Tag v$tag does not match Cargo.toml version $version"
-            exit 1
-          fi
           echo "Releasing v$version (dry-run: $dry_run)"
 
   # ── Sanity: full CI must succeed before we publish anything ──────────────────
