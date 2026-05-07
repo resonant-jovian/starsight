@@ -27,6 +27,7 @@ mod social_card;
 mod status_panel;
 mod svg;
 mod svgo;
+mod tables;
 mod wordmark;
 
 use anyhow::Result;
@@ -58,6 +59,7 @@ pub enum Asset {
     Wordmark,
     LorenzCard,
     SocialCard,
+    Tables,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -102,6 +104,7 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             wordmark::regen(&root, theme)?;
             lorenz_card::regen(&root, theme)?;
             social_card::regen(&root, theme)?;
+            tables::regen_all(&root, theme)?;
         }
     }
 
@@ -122,6 +125,7 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::Wordmark => wordmark::regen(root, theme),
         Asset::LorenzCard => lorenz_card::regen(root, theme),
         Asset::SocialCard => social_card::regen(root, theme),
+        Asset::Tables => tables::regen_all(root, theme),
     }
 }
 

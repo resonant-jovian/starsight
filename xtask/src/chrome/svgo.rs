@@ -32,7 +32,7 @@ pub fn optimize_chrome_examples(root: &Path) -> Result<()> {
 
 /// In-place optimize every chrome composite SVG written under `assets/`.
 pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
-    let candidates = [
+    let mut paths: Vec<PathBuf> = [
         "assets/architecture-light.svg",
         "assets/architecture-dark.svg",
         "assets/gallery-light.svg",
@@ -49,12 +49,20 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
         "assets/social/card-dark.svg",
         "assets/status/panel-light.svg",
         "assets/status/panel-dark.svg",
-    ];
-    let paths: Vec<PathBuf> = candidates
-        .iter()
-        .map(|c| root.join(c))
-        .filter(|p| p.exists())
-        .collect();
+    ]
+    .iter()
+    .map(|c| root.join(c))
+    .filter(|p| p.exists())
+    .collect();
+
+    for stem in ["install", "capabilities", "backends", "translation", "comparison"] {
+        for theme in ["light", "dark"] {
+            let p = root.join(format!("assets/tables/{stem}-{theme}.svg"));
+            if p.exists() {
+                paths.push(p);
+            }
+        }
+    }
     optimize(&paths, "chrome assets")
 }
 
