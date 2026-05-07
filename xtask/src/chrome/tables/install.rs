@@ -12,7 +12,10 @@ const ROWS: &[&[&str]] = &[
     &["ndarray", "accept ndarray::ArrayN views (planned 0.11)"],
     &["arrow", "accept arrow::RecordBatch (planned 0.11)"],
     &["gpu", "wgpu + vello GPU rendering (planned 0.6)"],
-    &["interactive", "winit + egui interactive windows (planned 0.6)"],
+    &[
+        "interactive",
+        "winit + egui interactive windows (planned 0.6)",
+    ],
     &[
         "terminal",
         "TUI via ratatui — Kitty / Sixel / iTerm2 / half-block / Braille (planned 0.8)",

@@ -55,7 +55,13 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
     .filter(|p| p.exists())
     .collect();
 
-    for stem in ["install", "capabilities", "backends", "translation", "comparison"] {
+    for stem in [
+        "install",
+        "capabilities",
+        "backends",
+        "translation",
+        "comparison",
+    ] {
         for theme in ["light", "dark"] {
             let p = root.join(format!("assets/tables/{stem}-{theme}.svg"));
             if p.exists() {
@@ -75,31 +81,46 @@ fn optimize(paths: &[PathBuf], label: &str) -> Result<()> {
         return Ok(());
     };
 
-    let total_before: u64 = paths.iter().filter_map(|p| std::fs::metadata(p).ok().map(|m| m.len())).sum();
+    let mut total_before: u64 = 0;
+    let mut total_after: u64 = 0;
+    let mut ok_count = 0_usize;
+    let mut skip_count = 0_usize;
 
-    let mut cmd = Command::new(&npx);
-    cmd.arg("--yes")
-        .arg("svgo")
-        .arg("--multipass")
-        .arg("--quiet");
+    // Process files one-at-a-time. SVGO has a hard cap on attribute-value length
+    // that some heavy chart paths blow through (Lorenz has tens of thousands of
+    // points concatenated into one `d` attribute); a batch error would abort the
+    // whole run, so we tolerate per-file failures and leave the offending source
+    // unchanged.
     for p in paths {
-        cmd.arg(p);
-    }
-    let status = cmd.status()?;
-    if !status.success() {
-        eprintln!("svgo: {label} exited non-zero (continuing)");
-        return Ok(());
+        let before = std::fs::metadata(p).ok().map_or(0, |m| m.len());
+        let mut cmd = Command::new(&npx);
+        cmd.arg("--yes")
+            .arg("svgo")
+            .arg("--multipass")
+            .arg("--quiet")
+            .arg(p);
+        let out = cmd.output()?;
+        if !out.status.success() {
+            skip_count += 1;
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            let first = stderr.lines().next().unwrap_or("").trim();
+            eprintln!(
+                "svgo: skip {} ({first})",
+                p.file_name().and_then(|s| s.to_str()).unwrap_or("?")
+            );
+            continue;
+        }
+        let after = std::fs::metadata(p).ok().map_or(0, |m| m.len());
+        total_before += before;
+        total_after += after;
+        ok_count += 1;
     }
 
-    let total_after: u64 = paths.iter().filter_map(|p| std::fs::metadata(p).ok().map(|m| m.len())).sum();
     if total_before > 0 {
         let saved = total_before.saturating_sub(total_after);
         let pct = (saved as f64 / total_before as f64) * 100.0;
         println!(
-            "svgo {label}: {n} files, {before} → {after} bytes (-{pct:.1}%)",
-            n = paths.len(),
-            before = total_before,
-            after = total_after,
+            "svgo {label}: {ok_count} ok, {skip_count} skipped, {total_before} → {total_after} bytes (-{pct:.1}%)",
         );
     }
     Ok(())

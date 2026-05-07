@@ -796,11 +796,19 @@ impl Mark for BarMark {
 
         match self.orientation {
             Orientation::Vertical => {
+                // Route bar band-center positions through `scale.map(i + 0.5)`
+                // so bar centers stay aligned with the grid line midpoints
+                // (`Axis::category` uses LinearScale with domain 0..n; the
+                // `+ 0.5` puts the center on the band middle). Math stays in
+                // f64 until the single cast to pixel space — fixes the
+                // 1–2 px drift visible at the bollinger 90-bar volume panel
+                // where two f32 chains diverged by one ULP per step.
                 let band_width = area.width() / n as f32;
                 let bar_width = band_width * width_fraction;
+                let n_f64 = n as f64;
 
                 for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
-                    let x_center = area.left + (i as f32 + 0.5) * band_width;
+                    let x_center = area.left + ((i as f64 + 0.5) / n_f64) as f32 * area.width();
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
@@ -819,9 +827,10 @@ impl Mark for BarMark {
             Orientation::Horizontal => {
                 let band_height = area.height() / n as f32;
                 let bar_height = band_height * width_fraction;
+                let n_f64 = n as f64;
 
                 for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
-                    let y_center = area.top + (i as f32 + 0.5) * band_height;
+                    let y_center = area.top + ((i as f64 + 0.5) / n_f64) as f32 * area.height();
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
@@ -892,8 +901,12 @@ impl Mark for BarMark {
                     band_width * width_fraction
                 };
 
+                let n_f64 = n as f64;
                 for (i, (orig_i, label, value)) in valid.iter().enumerate() {
-                    let base_x_center = area.left + (i as f32 + 0.5) * band_width;
+                    // Same f64-mediated band-center math as the simple
+                    // BarMark::render path above.
+                    let base_x_center =
+                        area.left + ((i as f64 + 0.5) / n_f64) as f32 * area.width();
                     let x_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
                             let sub_band = band_width * (1.0 - group_gap) / total as f32;
@@ -975,8 +988,12 @@ impl Mark for BarMark {
                     band_height * width_fraction
                 };
 
+                let n_f64 = n as f64;
                 for (i, (orig_i, label, value)) in valid.iter().enumerate() {
-                    let base_y_center = area.top + (i as f32 + 0.5) * band_height;
+                    // Same f64-mediated band-center math as the simple
+                    // BarMark::render path above.
+                    let base_y_center =
+                        area.top + ((i as f64 + 0.5) / n_f64) as f32 * area.height();
                     let y_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
                             let sub_band = band_height * (1.0 - group_gap) / total as f32;

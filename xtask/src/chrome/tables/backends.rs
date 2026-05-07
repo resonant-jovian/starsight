@@ -2,7 +2,13 @@
 
 use super::{Family, Table};
 
-const HEADER: &[&str] = &["backend", "output", "dependencies", "feature flag", "status"];
+const HEADER: &[&str] = &[
+    "backend",
+    "output",
+    "dependencies",
+    "feature flag",
+    "status",
+];
 const COL_W: &[u32] = &[160, 230, 200, 130, 112];
 const COL_ALIGN: &[&str] = &["start", "start", "start", "start", "end"];
 const COL_FONT: &[Family] = &[
@@ -36,13 +42,7 @@ const ROWS: &[&[&str]] = &[
         "terminal",
         "planned 0.8",
     ],
-    &[
-        "KrillaBackend",
-        ".pdf",
-        "krilla",
-        "pdf",
-        "planned 0.10",
-    ],
+    &["KrillaBackend", ".pdf", "krilla", "pdf", "planned 0.10"],
     &[
         "WasmBackend",
         "<canvas> in browser",

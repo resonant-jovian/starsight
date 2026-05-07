@@ -201,30 +201,21 @@ It is part of the [resonant-jovian](https://github.com/resonant-jovian) ecosyste
 
 ## Coming from Another Language
 
-| you wrote | in starsight | note |
-|---|---|---|
-| `plt.plot(x, y)` (matplotlib) | `Figure::new(800, 600).add(LineMark::new(x, y))` | no global state |
-| `plt.scatter(x, y, c=c)` | `PointMark::new(x, y).color_by(&groups)` | builder pattern |
-| `plt.bar(labels, vals)` | `BarMark::new(categories, values)` | grammar of graphics |
-| `plt.boxplot([a, b])` | `BoxPlotMark::new(vec![BoxPlotGroup::new("a", a), …])` | per-group label travels with the data |
-| `sns.violinplot(data=df, x=…, y=…)` | `ViolinMark::new(groups).bandwidth(Bandwidth::Silverman)` | bandwidth strategy is a builder, not magic |
-| `plt.pie(values, labels=…)` | `PieMark::new(values, labels).show_percent()` | add `.inner_radius(0.5)` for a donut |
-| `mpl_finance.candlestick_ohlc` | `CandlestickMark::new(vec![Ohlc { … }, …])` | inline `Ohlc` rows; no helper crate |
-| `plt.savefig("out.png")` | `.save("out.png")?` | returns `Result` |
-| `plt.show()` | `.show()?` | feature `interactive` |
-| `sns.heatmap(data)` | `HeatmapMark::new(data)` | prismatica colormaps |
-| `ggplot + geom_point()` | `Figure::new(W, H).add(PointMark::new(x, y))` | builder, not `+` |
-| `px.scatter(df, x="a")` (plotly) | `plot!(df, x="a", y="b")` | feature `polars` |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tables/translation-dark.svg">
+  <img alt="Concrete syntax mappings from matplotlib, seaborn, ggplot2, and plotly into starsight — line/scatter/bar/box/violin/pie/candle/heatmap/save/show recipes side-by-side."
+       src="assets/tables/translation-light.svg"
+       width="100%">
+</picture>
 
 ## vs. Siblings
 
-| project | strengths | when to prefer starsight |
-|---|---|---|
-| **plotters** | mature, many backends, WASM-ready | want typed marks; want to compose figures rather than imperatively draw |
-| **plotly-rs** | interactive HTML out of the box | want static SVG/PNG; do not want a JS runtime |
-| **charming** | ECharts-quality visuals | do not want to ship a JS engine (deno_core) at runtime |
-| **plotters-iced / egui_plot** | live in a GUI | want headless rendering as the primary path |
-| **poloto** | small, no_std-friendly, terminal-first | want a richer mark set (polar, contour, candlestick) and academic publication output |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tables/comparison-dark.svg">
+  <img alt="starsight compared to sibling charting libraries: Rust crates (plotters, plotly-rs, charming, plotters-iced/egui_plot, poloto) plus matplotlib, seaborn, ggplot2, plotly.py / vega-altair, Mathematica/MATLAB, and gnuplot — strengths and when to prefer starsight."
+       src="assets/tables/comparison-light.svg"
+       width="100%">
+</picture>
 
 The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with a grammar-of-graphics builder and shared themes/colormaps via `chromata` + `prismatica`. All siblings are alive and growing — these comparisons are "as of starsight 0.3" and the gaps narrow as each ships.
 

@@ -32,7 +32,11 @@ const ROWS: &[&[&str]] = &[
         "shipped",
         "0.3",
     ],
-    &["Polars DataFrame integration", "shipped (polars feature)", "0.3"],
+    &[
+        "Polars DataFrame integration",
+        "shipped (polars feature)",
+        "0.3",
+    ],
     &["LogScale, SqrtScale, CategoricalScale", "shipped", "0.3"],
     &[
         "FacetWrap, shared axes across panels, polar-aware legend placement, contour filled bands",

@@ -80,7 +80,11 @@ fn render_table(table: &Table, theme: Theme) -> String {
         assert_eq!(fonts.len(), table.header.len());
     }
     let total_cols_w: u32 = table.col_widths.iter().sum();
-    assert!(total_cols_w + 2 * PAD <= WIDTH, "table {} columns overflow", table.stem);
+    assert!(
+        total_cols_w + 2 * PAD <= WIDTH,
+        "table {} columns overflow",
+        table.stem
+    );
 
     let body_h = HEADER_H + ROW_H * (table.rows.len() as u32);
     let h = body_h + 2 * PAD;

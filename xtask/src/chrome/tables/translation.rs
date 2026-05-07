@@ -48,11 +48,7 @@ const ROWS: &[&[&str]] = &[
         ".save(\"out.png\")?",
         "returns Result",
     ],
-    &[
-        "plt.show()",
-        ".show()?",
-        "feature: interactive",
-    ],
+    &["plt.show()", ".show()?", "feature: interactive"],
     &[
         "sns.heatmap(data)",
         "HeatmapMark::new(data)",
