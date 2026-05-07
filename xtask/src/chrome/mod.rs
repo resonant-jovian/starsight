@@ -4,14 +4,14 @@
 //!
 //! | asset | live input |
 //! |-------|------------|
-//! | `assets/status/panel-{light,dark}.svg`        | crates.io API (downloads, dependents, updated_at) |
+//! | `assets/status/panel-{light,dark}.svg`        | crates.io API (downloads, dependents, `updated_at`) |
 //! | `assets/hero/starsight-hero-{light,dark}.png` | meta strip from `Cargo.toml` + theme-matched example thumbs |
 //! | `assets/roadmap-{light,dark}.svg`             | "current" milestone derived from version |
 //! | `assets/buttons/<name>-{light,dark}.svg`      | version + license from `Cargo.toml`, coverage % from `assets/status/coverage.json` |
 //!
 //! Static-ish assets (rebuilt only on default runs): architecture, gallery,
-//! wordmark, lorenz_card, social_card, tables, pipeline, matrices,
-//! coming_from, comparison_matrix.
+//! wordmark, `lorenz_card`, `social_card`, tables, pipeline, matrices,
+//! `coming_from`, `comparison_matrix`.
 //!
 //! For hero/gallery, dark thumbnails come from `<name>_dark.png` siblings
 //! produced by re-running examples with `STARSIGHT_THEME=dark`.

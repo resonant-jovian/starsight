@@ -39,11 +39,16 @@ jobs:
   chrome:
     name: regen live chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Cold-cache run: ~13 min build + ~17 min for 68 examples + svgo + chrome
+    # composition. 30 min was just barely too tight; 60 leaves headroom.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # SSH deploy key (write-capable, in bypass_actors of Main branch
+          # protection). GITHUB_TOKEN is blocked by required_signatures + PR
+          # rules; the deploy key bypasses both.
+          ssh-key: ${{ secrets.BOT_DEPLOY_KEY }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Regenerate live chrome assets (light + dark)
