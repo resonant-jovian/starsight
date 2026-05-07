@@ -20,3 +20,4 @@ pub mod sources;
 
 pub use colorbar::Colorbar;
 pub use figures::{Figure, MultiPanelFigure};
+pub use renders::{Edge, LegendPosition};

@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `LegendPosition { Auto, Inside, Outside(Edge) }` + `Edge { Right, Left, Top, Bottom }` enums and `Figure::legend_position(LegendPosition)` builder. `Auto` (default) picks `Outside(Edge::Right)` for figures composed of disk-fill marks (`ArcMark` / `PieMark` / `DonutMark` / `RadarMark` / `PolarBarMark` / `PolarRectMark`) and `Inside` everywhere else. `Outside(edge)` reserves a strip outside `plot_area` so the legend never overlaps data (matplotlib `bbox_to_anchor=(1.05, 1)` equivalent). Re-exported via `starsight::prelude`.
+- `Mark::pixel_extent(coord) -> MarkExtent { Bbox / Segments / Rects / Polygons }` trait hook; per-mark accurate footprint contributions feed the legend dodge. Replaces the bbox-based `data_pixel_rect` heuristic that false-positived on diagonal lines and full-range scatter. `MarkExtent` is re-exported via `starsight::marks` (advanced API; not in prelude).
+- `Mark::prefers_outside_legend() -> bool` trait hook (default `false`); disk-fill marks (`ArcMark`, `PieMark` / `DonutMark`, `RadarMark`, `PolarBarMark`, `PolarRectMark`) override `true` so figures whose data covers the inscribed disk auto-default to outside-legend without explicit configuration.
+- `Mark::wants_polar_grid() -> bool` trait hook (default `true`); `ArcMark` / `PieMark` / `DonutMark` override `false` so polar figures composed of decorative wedges suppress the spoke + ring grid.
+- `LegendStripComponent` in `starsight-layer-5::layout` — reserves a strip on the chosen canvas edge for outside-the-plot legends. Sized from the actual entry count and label widths so the strip always fits the legend.
 - `Mark::wants_axis_padding() -> bool` and `Mark::legend_entries() -> Vec<(Color, String, LegendGlyph)>` trait hooks. Point-shape marks (the default `true`) drive the 5% axis inset; bar / heatmap / contour return `false` so their data stays edge-aligned. `legend_entries` lets `PieMark` and `ArcMark` (when `wedge_labels` is set) emit one entry per slice/wedge so the figure auto-builds a color → category legend.
 - `Figure::axis_padding(Option<f64>)` — explicit opt-in / opt-out override of the mark-mix-aware 5% padding default.
 - `ArcMark::wedge_labels(Vec<String>)` builder — per-wedge labels surfaced through `legend_entries` for sunburst color→category legends.
@@ -102,6 +107,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Disk-fill chart legends (pie / donut / sunburst / nightingale / gauge / wind rose / radar / polar calendar) no longer overlap the data. Whenever any labeled mark on a figure is a disk-fill mark, the legend defaults to outside-right placement (top-aligned, in a reserved right-edge strip outside the plot area). Override with `Figure::legend_position(LegendPosition::Inside)` to recover the pre-fix in-plot dodge.
+- Inside-plot legend dodge now uses per-mark `MarkExtent` instead of a coarse data bbox. Diagonal `LineMark` data and full-range scatter no longer trigger an all-corners-overlap fallback to TR; least-overlap (count → clipped area → TR > TL > BR > BL priority) picks the cleanest corner.
+- Polar figures share the same legend dodge machinery as cartesian; tall multi-entry legends on gauge / nightingale / wind-rose / polar-calendar no longer extend into the inscribed disk. When the figure includes a labeled disk-fill mark, the polar render path also reserves an outside-right strip.
+- `snapshot_arcmark_partial_gauge` no longer wraps a full polar grid through the empty 90° wedge — `wants_polar_grid()` opt-out drops grid spokes/rings behind ArcMark/PieMark/DonutMark figures.
+- `MultiPanelFigure` accepts a theme via `.theme(...)` so dark-mode composites no longer leave a white canvas behind dark panels (`contour_fields_dark.png`).
+- `BarMark` bars now align with the categorical-axis grid + tick positions; previously a 1–2 px subpixel drift was visible at high bar density (90-bar bollinger volume panel). Both vertical and horizontal orientations route through the f64-mediated band-center math like the rest of the marks.
 - `BarMark` waterfall layout (`starsight-7h9`) — multiple `BarMark` instances each with `x.len() == 1` collapsed onto a single x-position because `Figure::category_labels()` only reads the first mark's labels. The fix is structural: per-bar `bases`/`colors` let one `BarMark` carry the entire waterfall, so the category axis spans all 10 labels naturally.
 - `Axis::category(&[])` edge case (`starsight-262`) — debug builds now panic with a clear message; release builds keep the previous best-effort behaviour. Documented the band-edge tick-position invariant and the bar-mark scale-bypass behaviour (`starsight-o8p`).
 - Square heatmap title spacing (`starsight-hko`) — `TitleComponent` reserves an extra 4px so the title doesn't graze the canvas top.

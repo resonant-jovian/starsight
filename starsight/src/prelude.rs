@@ -8,7 +8,7 @@ pub use crate::background::errors::{Result, StarsightError};
 pub use crate::background::primitives::{Color, ColorAlpha, Point, Rect, Size, Transform, Vec2};
 pub use crate::colormap::{Colormap, DEFAULT};
 pub use crate::common::inferences::ChartKind;
-pub use crate::common::{Colorbar, Figure, MultiPanelFigure};
+pub use crate::common::{Colorbar, Edge, Figure, LegendPosition, MultiPanelFigure};
 pub use crate::components::marks::{
     ArcMark, AreaMark, AxisDir, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
     ContourMode, ErrorBarMark, ErrorBarOrientation, HeatmapMark, HistogramMark, LineMark, Mark,

@@ -56,6 +56,11 @@ pub mod ticks;
 pub type Result<T> = crate::background::errors::Result<T>;
 /// Top-level error enum re-export.
 pub use crate::background::errors::StarsightError;
+/// Legend placement enum re-exports — `Edge`, `LegendPosition` (with
+/// `Auto` / `Inside` / `Outside(Edge)` variants). Used via
+/// `Figure::legend_position(...)`. Tracked as Epic L
+/// (`starsight-3bp.10.11`).
+pub use crate::common::{Edge, LegendPosition};
 
 // ── plot! macro ──────────────────────────────────────────────────────────────────────────────────
 
