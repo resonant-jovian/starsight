@@ -8,7 +8,7 @@ const HEADER: &[&str] = &[
     "strengths",
     "when to prefer starsight",
 ];
-const COL_W: &[u32] = &[170, 100, 290, 272];
+const COL_W: &[u32] = &[170, 100, 310, 292];
 const COL_ALIGN: &[&str] = &["start", "start", "start", "start"];
 
 const ROWS: &[&[&str]] = &[

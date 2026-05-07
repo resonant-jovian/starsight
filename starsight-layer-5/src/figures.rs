@@ -23,9 +23,10 @@ use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 use crate::renders::LegendPosition;
 
 use crate::layout::{
-    LayoutBuilder, LayoutCtx, Slot, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
-    YAxisTitleComponent, YTickLabelsComponent,
+    LayoutBuilder, LayoutCtx, LegendStripComponent, Side, Slot, TitleComponent, XAxisTitleComponent,
+    XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
 };
+use crate::renders::Edge;
 
 /// Outer canvas padding used by every single-figure render path.
 ///
@@ -504,6 +505,36 @@ impl Figure {
                 .map(crate::colorbar::Colorbar::new)
         };
 
+        // Pre-compute legend entries here (rather than after layout) so the
+        // `LegendStripComponent` below can size itself from the actual entry
+        // count and label widths. The filter mirrors the post-layout pass:
+        // skip marks whose colormap is already shown by the auto-attached
+        // Colorbar (Epic I.5).
+        let colorbar_active = colorbar_opt.is_some();
+        let legend_entries: Vec<crate::renders::LegendEntry> = self
+            .marks
+            .iter()
+            .filter(|mark| !(colorbar_active && mark.colormap_legend().is_some()))
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
+                        color,
+                        label,
+                        glyph,
+                    })
+            })
+            .collect();
+        let legend_label_strings: Vec<String> =
+            legend_entries.iter().map(|e| e.label.clone()).collect();
+        let outside_edge: Option<Side> = match self.legend_position {
+            LegendPosition::Outside(Edge::Right) => Some(Side::Right),
+            LegendPosition::Outside(Edge::Left) => Some(Side::Left),
+            LegendPosition::Outside(Edge::Top) => Some(Side::Top),
+            LegendPosition::Outside(Edge::Bottom) => Some(Side::Bottom),
+            LegendPosition::Inside => None,
+        };
+
         let layout = {
             let ctx = LayoutCtx {
                 width: viewport.width(),
@@ -552,6 +583,14 @@ impl Figure {
             });
             if let Some(colorbar) = &colorbar_opt {
                 builder.add(&crate::colorbar::ColorbarComponent { colorbar });
+            }
+            if let Some(edge) = outside_edge
+                && !legend_label_strings.is_empty()
+            {
+                builder.add(&LegendStripComponent {
+                    labels: &legend_label_strings,
+                    edge,
+                });
             }
             builder.finish()
         };
@@ -642,32 +681,16 @@ impl Figure {
             )?;
         }
 
-        // Skip marks whose colormap is already shown by the auto-attached
-        // Colorbar — bordered legend entry would duplicate the strip
-        // (`starsight-3bp.9.5` / Epic I.5). PieMark / sunburst ArcMark with
-        // wedge_labels set return multiple entries for the color →
-        // category map (Epic I.6).
-        let colorbar_active = colorbar_opt.is_some();
-        let legend_entries: Vec<crate::renders::LegendEntry> = self
-            .marks
-            .iter()
-            .filter(|mark| !(colorbar_active && mark.colormap_legend().is_some()))
-            .flat_map(|mark| {
-                mark.legend_entries()
-                    .into_iter()
-                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
-                        color,
-                        label,
-                        glyph,
-                    })
-            })
-            .collect();
-
         // Per-mark pixel-space footprint contributions for the legend dodge
         // (Epic L). Replaces the bbox-based `data_pixel_rect` from Epic I —
         // each mark contributes its actual rendered shape (Bbox / Segments /
         // Rects / Polygons), so diagonal lines and full-range scatters no
         // longer false-positive the dodge.
+        //
+        // For `LegendPosition::Outside(...)` the plot_area is already shrunk
+        // by the `LegendStripComponent` reservation set above, so
+        // `place_outside`'s `plot_area.right + inset` (etc) lands inside the
+        // reserved strip. No extra plumbing needed at the render call site.
         let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
             self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
         if !legend_entries.is_empty() {

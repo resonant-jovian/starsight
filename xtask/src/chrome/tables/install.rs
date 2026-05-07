@@ -3,7 +3,7 @@
 use super::{Family, Table};
 
 const HEADER: &[&str] = &["flag", "what it adds"];
-const COL_W: &[u32] = &[180, 652];
+const COL_W: &[u32] = &[200, 672];
 const COL_ALIGN: &[&str] = &["start", "start"];
 const COL_FONT: &[Family] = &[Family::Mono, Family::Sans];
 

@@ -3,7 +3,7 @@
 use super::{Family, Table};
 
 const HEADER: &[&str] = &["you wrote", "in starsight", "note"];
-const COL_W: &[u32] = &[280, 400, 152];
+const COL_W: &[u32] = &[260, 432, 180];
 const COL_ALIGN: &[&str] = &["start", "start", "start"];
 const COL_FONT: &[Family] = &[Family::Mono, Family::Mono, Family::Sans];
 

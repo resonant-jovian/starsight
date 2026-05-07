@@ -3,7 +3,7 @@
 use super::Table;
 
 const HEADER: &[&str] = &["capability", "available", "added in"];
-const COL_W: &[u32] = &[622, 130, 80];
+const COL_W: &[u32] = &[622, 170, 80];
 const COL_ALIGN: &[&str] = &["start", "start", "end"];
 
 const ROWS: &[&[&str]] = &[

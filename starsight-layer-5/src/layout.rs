@@ -439,6 +439,58 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
     }
 }
 
+/// Reserves a strip on the chosen edge for an outside-of-plot legend.
+///
+/// Used when [`Figure::legend_position`](crate::figures::Figure::legend_position)
+/// is set to (or auto-resolves to) `LegendPosition::Outside(edge)`. The strip
+/// is wide / tall enough to hold the entry list at the figure's font sizes,
+/// plus a 16-px outer inset matching the in-plot legend.
+pub struct LegendStripComponent<'a> {
+    /// Display labels for every legend entry. Used to size the strip.
+    pub labels: &'a [String],
+    /// Canvas edge to reserve. Right is the matplotlib `bbox_to_anchor=(1.05, 1)`
+    /// equivalent; the others mirror.
+    pub edge: Side,
+}
+
+impl<'a> LayoutComponent for LegendStripComponent<'a> {
+    fn id(&self) -> &'static str {
+        "legend_strip"
+    }
+    fn reserve(&self, ctx: &mut LayoutCtx) -> Vec<Reservation> {
+        if self.labels.is_empty() {
+            return vec![];
+        }
+        // Match the in-plot legend's geometry from `renders.rs::render_legend`:
+        //   legend_width = max_label_len * 7.0 + 30.0
+        //   legend_height = entries * 20.0 + 2 * padding (8.0)
+        // Plus the 16-px inset around the strip.
+        let max_label_w = self
+            .labels
+            .iter()
+            .filter_map(|l| ctx.backend.text_extent(l, ctx.fonts.label).ok())
+            .map(|(w, _)| w)
+            .fold(0.0_f32, f32::max);
+        // Glyph swatch (12px) + gap (8px) + label width + 16-px inner padding.
+        let legend_width = max_label_w + 12.0 + 8.0 + 16.0;
+        // Each row is 20px; 8px padding top + bottom.
+        let n = self.labels.len() as f32;
+        let legend_height = n * 20.0 + 16.0;
+        let inset = 16.0;
+        let size = match self.edge {
+            Side::Right | Side::Left => legend_width + inset * 2.0,
+            Side::Top | Side::Bottom => legend_height + inset * 2.0,
+        };
+        // Priority 2 puts the legend strip outside the axis-title slot so the
+        // axis labels stay closer to the plot edge.
+        vec![Reservation {
+            side: self.edge,
+            size,
+            priority: 2,
+        }]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{

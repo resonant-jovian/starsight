@@ -9,7 +9,7 @@ const HEADER: &[&str] = &[
     "feature flag",
     "status",
 ];
-const COL_W: &[u32] = &[160, 230, 200, 130, 112];
+const COL_W: &[u32] = &[140, 260, 200, 120, 152];
 const COL_ALIGN: &[&str] = &["start", "start", "start", "start", "end"];
 const COL_FONT: &[Family] = &[
     Family::Mono,
