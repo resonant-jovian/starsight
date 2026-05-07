@@ -35,6 +35,10 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
     let mut paths: Vec<PathBuf> = [
         "assets/architecture-light.svg",
         "assets/architecture-dark.svg",
+        "assets/coming-from-light.svg",
+        "assets/coming-from-dark.svg",
+        "assets/comparison-light.svg",
+        "assets/comparison-dark.svg",
         "assets/gallery-light.svg",
         "assets/gallery-dark.svg",
         "assets/lorenz-light.svg",
@@ -57,15 +61,17 @@ pub fn optimize_chrome_assets(root: &Path) -> Result<()> {
     .filter(|p| p.exists())
     .collect();
 
-    for stem in [
-        "install",
-        "capabilities",
-        "backends",
-        "translation",
-        "comparison",
-    ] {
+    for stem in ["install"] {
         for theme in ["light", "dark"] {
             let p = root.join(format!("assets/tables/{stem}-{theme}.svg"));
+            if p.exists() {
+                paths.push(p);
+            }
+        }
+    }
+    for stem in ["marks", "scales", "backends", "stats", "layout", "output", "themes"] {
+        for theme in ["light", "dark"] {
+            let p = root.join(format!("assets/matrices/{stem}-{theme}.svg"));
             if p.exists() {
                 paths.push(p);
             }

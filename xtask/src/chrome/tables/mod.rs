@@ -12,11 +12,7 @@
 //!
 //! Outputs: `assets/tables/<name>-{light,dark}.svg`.
 
-mod backends;
-mod capabilities;
-mod comparison;
 mod install;
-mod translation;
 
 use anyhow::Result;
 use std::path::Path;
@@ -63,13 +59,7 @@ pub fn regen_all(root: &Path, theme: Theme) -> Result<()> {
     let dir = root.join("assets/tables");
     std::fs::create_dir_all(&dir)?;
 
-    for table in [
-        install::table(),
-        capabilities::table(),
-        backends::table(),
-        translation::table(),
-        comparison::table(),
-    ] {
+    for table in [install::table()] {
         let svg = render_table(&table, theme);
         let out = dir.join(format!("{}-{}.svg", table.stem, theme.suffix()));
         write_atomic(&out, &svg)?;

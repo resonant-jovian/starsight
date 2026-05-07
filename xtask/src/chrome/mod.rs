@@ -16,11 +16,14 @@
 //! produced by re-running examples with `STARSIGHT_THEME=dark`.
 
 mod architecture;
+mod coming_from;
+mod comparison_matrix;
 mod crates_io;
 mod eclipse;
 mod gallery;
 mod hero;
 mod lorenz_card;
+mod matrices;
 mod palette;
 mod pipeline;
 mod roadmap;
@@ -62,6 +65,9 @@ pub enum Asset {
     SocialCard,
     Tables,
     Pipeline,
+    Matrices,
+    ComingFrom,
+    Comparison,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -108,6 +114,9 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             social_card::regen(&root, theme)?;
             tables::regen_all(&root, theme)?;
             pipeline::regen(&root, theme)?;
+            matrices::regen_all(&root, theme)?;
+            coming_from::regen(&root, theme)?;
+            comparison_matrix::regen(&root, theme)?;
         }
     }
 
@@ -130,6 +139,9 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::SocialCard => social_card::regen(root, theme),
         Asset::Tables => tables::regen_all(root, theme),
         Asset::Pipeline => pipeline::regen(root, theme),
+        Asset::Matrices => matrices::regen_all(root, theme),
+        Asset::ComingFrom => coming_from::regen(root, theme),
+        Asset::Comparison => comparison_matrix::regen(root, theme),
     }
 }
 
