@@ -228,6 +228,12 @@ impl Mark for PolarBarMark {
     fn wants_axes(&self) -> bool {
         false
     }
+
+    fn prefers_outside_legend(&self) -> bool {
+        // Wind-rose stacks fill the inscribed disk; outside-right keeps the
+        // legend off the bins. L.17.
+        true
+    }
 }
 
 #[cfg(test)]

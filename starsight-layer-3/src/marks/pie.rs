@@ -284,6 +284,12 @@ impl Mark for PieMark {
         // them is distracting. Fix for Epic L (`starsight-3bp.10.14`).
         false
     }
+
+    fn prefers_outside_legend(&self) -> bool {
+        // Slices fill the bounding rect; legend dodge can't avoid them.
+        // Default to outside-right strip for L.17.
+        true
+    }
 }
 
 /// Rec. 601 luminance for a sRGB color, in `[0.0, 1.0]`. Used to pick a

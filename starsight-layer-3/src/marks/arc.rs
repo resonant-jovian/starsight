@@ -307,6 +307,12 @@ impl Mark for ArcMark {
         // default `true`. Fix for Epic L (`starsight-3bp.10.14`).
         false
     }
+
+    fn prefers_outside_legend(&self) -> bool {
+        // Wedges fill the inscribed disk — corner dodge has no clear corner
+        // to land in. Default to outside-right for L.17.
+        true
+    }
 }
 
 // ── arc geometry ─────────────────────────────────────────────────────────────────────────────────

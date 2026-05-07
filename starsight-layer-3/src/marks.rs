@@ -231,6 +231,24 @@ pub trait Mark {
         true
     }
 
+    /// Whether a `Figure` carrying this mark should default to placing the
+    /// legend OUTSIDE the plot area instead of corner-dodging inside.
+    ///
+    /// Disk-fill marks (`ArcMark`, `PieMark` / `DonutMark`, `RadarMark`,
+    /// `PolarBarMark`, `PolarRectMark`) paint over the entire inscribed disk,
+    /// so the corner dodge never finds a clear corner — the legend always
+    /// overlaps a wedge or polygon edge. They override to `true` so the
+    /// figure auto-resolves `LegendPosition::Auto` to
+    /// `LegendPosition::Outside(Edge::Right)`, reserving a top-aligned strip
+    /// outside the disk. Other marks keep the default `false` and dodge
+    /// inside.
+    ///
+    /// Users override via `Figure::legend_position(...)`. Tracked as Epic L
+    /// (`starsight-3bp.10` / L.17).
+    fn prefers_outside_legend(&self) -> bool {
+        false
+    }
+
     /// Whether this mark needs the axis to inset 5% on both ends so its
     /// data extremes don't visually sit on the plot edge. Default `true`
     /// for point-like marks (`PointMark`, `LineMark`, `AreaMark`,

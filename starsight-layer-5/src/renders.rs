@@ -387,8 +387,15 @@ pub struct LegendEntry {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum LegendPosition {
-    /// In-plot placement with overlap-aware corner dodge. Default.
+    /// Auto-pick: figures composed of disk-fill marks (`ArcMark` /
+    /// `PieMark` / `DonutMark` / `RadarMark` / `PolarBarMark` /
+    /// `PolarRectMark`) resolve to `Outside(Edge::Right)`; everything else
+    /// resolves to `Inside`. Default — the common case "I just added a
+    /// `PieMark`, the legend should not overlap it" works without explicit
+    /// configuration. L.17.
     #[default]
+    Auto,
+    /// In-plot placement with overlap-aware corner dodge.
     Inside,
     /// Out-of-plot placement on the given edge. Plot area shrinks to make
     /// room; legend never overlaps data.
@@ -456,8 +463,12 @@ pub fn render_legend(
     // data points (`starsight-bls`).
     let inset: f32 = 16.0;
 
+    // `LegendPosition::Auto` should be resolved by the caller via
+    // `Figure::render_within`'s `resolve_legend_position` (depends on the
+    // mark mix) — fall through to Inside if it leaks here, so callers that
+    // bypass the figure pipeline still get sensible behavior.
     let (legend_x, legend_y) = match position {
-        LegendPosition::Inside => {
+        LegendPosition::Inside | LegendPosition::Auto => {
             place_inside_dodge(plot_area, legend_width, legend_height, inset, occupancy)
         }
         LegendPosition::Outside(edge) => {

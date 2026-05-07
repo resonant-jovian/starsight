@@ -171,6 +171,12 @@ impl Mark for PolarRectMark {
     fn wants_axes(&self) -> bool {
         false
     }
+
+    fn prefers_outside_legend(&self) -> bool {
+        // Polar calendar / spiral heatmap fills the inscribed disk; outside
+        // legend defaults are correct. L.17.
+        true
+    }
 }
 
 #[cfg(test)]

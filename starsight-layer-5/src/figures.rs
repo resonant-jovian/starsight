@@ -23,8 +23,8 @@ use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 use crate::renders::LegendPosition;
 
 use crate::layout::{
-    LayoutBuilder, LayoutCtx, LegendStripComponent, Side, Slot, TitleComponent, XAxisTitleComponent,
-    XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
+    LayoutBuilder, LayoutCtx, LegendStripComponent, Side, Slot, TitleComponent,
+    XAxisTitleComponent, XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
 };
 use crate::renders::Edge;
 
@@ -55,6 +55,27 @@ fn pad_linear_axis_in_place(axis: &mut starsight_layer_2::axes::Axis, factor: f6
         domain_min: raw_min - pad,
         domain_max: raw_max + pad,
     });
+}
+
+/// Resolve `LegendPosition::Auto` against the mark mix on a figure.
+///
+/// `Auto` is the default — figures with at least one labeled disk-fill mark
+/// (`ArcMark` / `PieMark` / `DonutMark` / `RadarMark` / `PolarBarMark` /
+/// `PolarRectMark`, signaled via `Mark::prefers_outside_legend()`) auto-pick
+/// `Outside(Edge::Right)` so the legend never overlaps the wedges. Everything
+/// else falls back to `Inside`. Explicit `Inside` / `Outside(_)` from
+/// `Figure::legend_position(...)` bypass the auto-resolve.
+fn resolve_legend_position(position: LegendPosition, marks: &[Box<dyn Mark>]) -> LegendPosition {
+    match position {
+        LegendPosition::Auto => {
+            if marks.iter().any(|m| m.prefers_outside_legend()) {
+                LegendPosition::Outside(Edge::Right)
+            } else {
+                LegendPosition::Inside
+            }
+        }
+        explicit => explicit,
+    }
 }
 
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
@@ -527,12 +548,13 @@ impl Figure {
             .collect();
         let legend_label_strings: Vec<String> =
             legend_entries.iter().map(|e| e.label.clone()).collect();
-        let outside_edge: Option<Side> = match self.legend_position {
+        let resolved_position = resolve_legend_position(self.legend_position, &self.marks);
+        let outside_edge: Option<Side> = match resolved_position {
             LegendPosition::Outside(Edge::Right) => Some(Side::Right),
             LegendPosition::Outside(Edge::Left) => Some(Side::Left),
             LegendPosition::Outside(Edge::Top) => Some(Side::Top),
             LegendPosition::Outside(Edge::Bottom) => Some(Side::Bottom),
-            LegendPosition::Inside => None,
+            LegendPosition::Inside | LegendPosition::Auto => None,
         };
 
         let layout = {
@@ -698,7 +720,7 @@ impl Figure {
                 &legend_entries,
                 &plot_area,
                 &occupancy,
-                self.legend_position,
+                resolved_position,
                 backend,
                 &self.theme,
                 &fonts,
@@ -741,8 +763,36 @@ impl Figure {
 
         let fonts = crate::layout::LayoutFonts::default();
 
-        // Reserve only top space for the title; everything else is the
-        // inscribed disk.
+        // Pre-compute legend entries + Auto resolution before layout, mirroring
+        // render_within. Disk-fill polar marks (Radar/PolarBar/PolarRect/Arc)
+        // get auto-Outside via `prefers_outside_legend`. L.17.
+        let legend_entries: Vec<crate::renders::LegendEntry> = self
+            .marks
+            .iter()
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
+                        color,
+                        label,
+                        glyph,
+                    })
+            })
+            .collect();
+        let legend_label_strings: Vec<String> =
+            legend_entries.iter().map(|e| e.label.clone()).collect();
+        let resolved_position = resolve_legend_position(self.legend_position, &self.marks);
+        let outside_edge: Option<Side> = match resolved_position {
+            LegendPosition::Outside(Edge::Right) => Some(Side::Right),
+            LegendPosition::Outside(Edge::Left) => Some(Side::Left),
+            LegendPosition::Outside(Edge::Top) => Some(Side::Top),
+            LegendPosition::Outside(Edge::Bottom) => Some(Side::Bottom),
+            LegendPosition::Inside | LegendPosition::Auto => None,
+        };
+
+        // Reserve top space for the title; everything else is the inscribed
+        // disk. When Outside legend is active, also reserve a strip on the
+        // chosen edge so the disk shrinks instead of overlapping the legend.
         let layout = {
             let ctx = LayoutCtx {
                 width: viewport.width(),
@@ -755,6 +805,14 @@ impl Figure {
             builder.add(&TitleComponent {
                 title: self.title.as_deref(),
             });
+            if let Some(edge) = outside_edge
+                && !legend_label_strings.is_empty()
+            {
+                builder.add(&LegendStripComponent {
+                    labels: &legend_label_strings,
+                    edge,
+                });
+            }
             builder.finish()
         };
 
@@ -821,39 +879,19 @@ impl Figure {
         }
         backend.set_clip(None)?;
 
-        // Legend: same dispatch as cartesian. Will overlap the disk per
-        // documented limitation; reposition in 0.4.0.
-        // Polar Figures don't auto-attach a Colorbar (no polar mark exposes
-        // a `ColormapLegend` today), so the colorbar-suppression filter
-        // from the cartesian path doesn't apply here.
-        let legend_entries: Vec<crate::renders::LegendEntry> = self
-            .marks
-            .iter()
-            .flat_map(|mark| {
-                mark.legend_entries()
-                    .into_iter()
-                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
-                        color,
-                        label,
-                        glyph,
-                    })
-            })
-            .collect();
-
+        // Legend: shares the cartesian render_legend with MarkExtent dodge
+        // (Epic L) and Auto-resolves disk-fill marks to Outside(Right) (L.17).
+        // For Outside, the LegendStripComponent above already shrunk the
+        // plot_area so place_outside lands inside the reserved strip.
+        // Polar figures don't auto-attach a Colorbar.
         if !legend_entries.is_empty() {
-            // Polar legend now feeds the same MarkExtent dodge as cartesian
-            // (Epic L). Polar marks contribute their pixel-space footprint
-            // through `Mark::pixel_extent(coord)` — the default Bbox falls
-            // back to `coord.plot_area()` for the disk's bounding rect, and
-            // marks that paint annular wedges or radial polygons can override
-            // for tighter overlap detection.
             let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
                 self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
             crate::renders::render_legend(
                 &legend_entries,
                 &plot_area,
                 &occupancy,
-                self.legend_position,
+                resolved_position,
                 backend,
                 &self.theme,
                 &fonts,

@@ -157,6 +157,12 @@ impl Mark for RadarMark {
         // Polar — suppress cartesian axes.
         false
     }
+
+    fn prefers_outside_legend(&self) -> bool {
+        // Radar polygons fill the inscribed disk; corner dodge can't avoid
+        // them. Default to outside-right for L.17.
+        true
+    }
 }
 
 #[cfg(test)]
