@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 56" width="100%" height="auto" role="img" aria-label="LICENSE — GPL-3.0-only" preserveAspectRatio="xMidYMid meet">
-  <title>LICENSE — GPL-3.0-only</title>
-  <rect x="0.5" y="0.5" width="183" height="55" rx="6" fill="#0e0e10" stroke="#2c2c33" stroke-width="1"/>
-  <path d="M88 1 H177 A6 6 0 0 1 183 6 V49 A6 6 0 0 1 177 55 H88 Z" fill="#1f1f23"/>
-  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="700" font-size="12" fill="#a0a0a8" letter-spacing="0.6" text-anchor="middle">LICENSE</text>
-  <text x="136" y="33" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#ffffff" text-anchor="middle">GPL-3.0-only</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" height="auto" aria-label="LICENSE — GPL-3.0-only" viewBox="0 0 184 56"><title>LICENSE — GPL-3.0-only</title><rect width="183" height="55" x=".5" y=".5" fill="#0e0e10" stroke="#2c2c33" rx="6"/><path fill="#1f1f23" d="M88 1h89a6 6 0 0 1 6 5v43a6 6 0 0 1-6 6H88Z"/><text x="44" y="32" fill="#a0a0a8" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing=".6" text-anchor="middle">LICENSE</text><text x="136" y="33" fill="#fff" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">GPL-3.0-only</text></svg>

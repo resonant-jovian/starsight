@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-05-07
+
+### Docs
+
+- README hero, gallery, and Lorenz-card composites now ship as 2× retina PNGs alongside the existing SVGs; README `<picture>` blocks reference the PNG. Mirrors the dual-format `assets/social/card-{light,dark}.{svg,png}` pattern and removes a multi-megabyte inlined-example SVG payload from the README hot path on crates.io and GitHub.
+- README image URLs pin to the `0.3.1` tag instead of `main`, so the rendered README on crates.io stays aligned with the assets that shipped with this release rather than drifting with `main`.
+- `CITATION.cff` and the README BibTeX block bumped to `0.3.1`.
+
+### Internal
+
+- New `xtask/src/chrome/png.rs` helper — generalizes the rasterization recipe from `social_card` (parse via `usvg`, allocate `tiny_skia::Pixmap` at `tree.size() * scale`, render via `resvg`) so `hero`, `gallery`, and `lorenz_card` emit a PNG alongside their canonical SVG without each duplicating the plumbing.
+- `cargo xtask chrome` parallelizes the trailing `svgo` pass via `std::thread::scope`. Worker count comes from `available_parallelism()`, clamped to `[2, 32]` (was effectively serial). Per-file resilience preserved (svgo's hard cap on `d`-attribute length still skips Lorenz cleanly).
+- `cargo xtask chrome` now runs the **example pre-renders in parallel** — `ensure_example_outputs` spawns up to 32 concurrent example binaries instead of executing them serially. The old "~17 min for 68 examples" comment was the dominant wall-time term on cold caches; on a 24-thread box the 68-job sweep now completes in roughly job-count / worker-count × per-job cost.
+- `cargo xtask chrome` also runs **light + dark composite regen in parallel** via `std::thread::scope` so hero / gallery / lorenz-card PNG rasterizations overlap.
+- `cargo xtask gallery` parallelizes the per-example run loop with the same `std::thread::scope` pattern, capped at 32 workers.
+- `cargo xtask chrome --asset <name>` scopes the trailing svgo pass to just the file(s) that asset writes, instead of re-optimizing all 36 composite SVGs.
+- New `cargo xtask chrome --no-svgo` flag — skip the trailing svgo optimization pass for fast local iteration. CI continues to optimize.
+- `chrome.yml` `timeout-minutes` raised 30 → 60: cold-cache regen is ~13 min build + ~17 min for 68 examples + svgo + chrome composition; 30 was just too tight (`59dfb21`).
+- `chrome.yml` + `coverage.yml` checkout switched to `ssh-key: BOT_DEPLOY_KEY` so pushes can bypass branch-protection rulesets that `GITHUB_TOKEN` is blocked by; `coverage.yml` also gains an explicit `permissions: contents: write` for parity (`59dfb21`).
+- Backtick snake_case identifiers in `xtask/src/chrome/mod.rs` doc-comment for `clippy::doc_markdown` (`updated_at`, `lorenz_card`, `social_card`, `coming_from`, `comparison_matrix`) (`59dfb21`).
+
 ## [0.3.0] - 2026-05-07
 
 ### Added

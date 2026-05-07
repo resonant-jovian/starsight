@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 56" width="100%" height="auto" role="img" aria-label="CRATES.IO — v0.3.0" preserveAspectRatio="xMidYMid meet">
-  <title>CRATES.IO — v0.3.0</title>
-  <rect x="0.5" y="0.5" width="183" height="55" rx="6" fill="#ebedef" stroke="#cccccc" stroke-width="1"/>
-  <path d="M88 1 H177 A6 6 0 0 1 183 6 V49 A6 6 0 0 1 177 55 H88 Z" fill="#ffffff"/>
-  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="700" font-size="12" fill="#555555" letter-spacing="0.6" text-anchor="middle">CRATES.IO</text>
-  <text x="136" y="33" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#1a1a1a" text-anchor="middle">v0.3.0</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" height="auto" aria-label="CRATES.IO — v0.3.1" viewBox="0 0 184 56"><title>CRATES.IO — v0.3.1</title><rect width="183" height="55" x=".5" y=".5" fill="#ebedef" stroke="#ccc" rx="6"/><path fill="#fff" d="M88 1h89a6 6 0 0 1 6 5v43a6 6 0 0 1-6 6H88Z"/><text x="44" y="32" fill="#555" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700" letter-spacing=".6" text-anchor="middle">CRATES.IO</text><text x="136" y="33" fill="#1a1a1a" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">v0.3.1</text></svg>

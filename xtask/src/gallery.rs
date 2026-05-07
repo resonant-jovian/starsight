@@ -16,6 +16,7 @@ use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::Mutex;
 
 pub fn run() -> Result<()> {
     let workspace_root = workspace_root()?;
@@ -35,34 +36,57 @@ pub fn run() -> Result<()> {
     // directly — no cargo overhead per invocation. Fix for `starsight-qv7`.
     build_examples(&workspace_root)?;
 
-    let mut generated = 0usize;
-    let mut failed: Vec<String> = Vec::new();
-    for example in &examples {
-        let name = &example.name;
-        match run_example(&workspace_root, name) {
-            Ok(()) => {
-                let src = workspace_root.join(example.png_path());
-                let dst = gallery_examples.join(format!("{name}.png"));
-                if src.exists() {
-                    fs::copy(&src, &dst).with_context(|| {
-                        format!("copying {} -> {}", src.display(), dst.display())
-                    })?;
-                    generated += 1;
-                    println!("[OK]   {name}");
-                } else {
-                    failed.push(format!(
-                        "{name} (ran but produced no PNG at {})",
-                        src.display()
-                    ));
-                    println!("[WARN] {name} ran but did not write {}", src.display());
+    // Parallel execution: each example is a separate process, so run them
+    // concurrently across the cores the host has. Cap at 32 to keep memory
+    // bounded (each example holds ~100 MB of figure state mid-render).
+    let workers = std::thread::available_parallelism()
+        .map_or(2, std::num::NonZero::get)
+        .min(examples.len().max(1))
+        .clamp(2, 32);
+    println!(
+        "Running {} example(s) ({workers} workers) ...",
+        examples.len()
+    );
+
+    let queue: Mutex<Vec<&ExampleEntry>> = Mutex::new(examples.iter().collect());
+    let stats: Mutex<(usize, Vec<String>)> = Mutex::new((0, Vec::new()));
+    let workspace_root_ref = &workspace_root;
+    let gallery_examples_ref = &gallery_examples;
+
+    std::thread::scope(|s| {
+        for _ in 0..workers {
+            s.spawn(|| {
+                loop {
+                    let next = {
+                        let mut q = queue
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
+                        q.pop()
+                    };
+                    let Some(example) = next else { break };
+                    let outcome =
+                        process_example(workspace_root_ref, gallery_examples_ref, example);
+                    let mut st = stats
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    match outcome {
+                        Ok(()) => {
+                            st.0 += 1;
+                            println!("[OK]   {}", example.name);
+                        }
+                        Err(msg) => {
+                            st.1.push(msg.clone());
+                            println!("[FAIL] {}: {msg}", example.name);
+                        }
+                    }
                 }
-            }
-            Err(e) => {
-                failed.push(format!("{name} ({e})"));
-                println!("[FAIL] {name}: {e}");
-            }
+            });
         }
-    }
+    });
+
+    let (generated, failed) = stats
+        .into_inner()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
 
     let snapshots_src = workspace_root.join("starsight-layer-5/tests/snapshots");
     let snapshot_count = mirror_snapshots(&snapshots_src, &gallery_snapshots)?;
@@ -200,13 +224,40 @@ fn build_examples(workspace_root: &Path) -> Result<()> {
 
 fn run_example(workspace_root: &Path, name: &str) -> Result<()> {
     let bin = workspace_root.join("target/release/examples").join(name);
-    let status = Command::new(&bin)
+    // `output()` instead of `status()` — collecting the streams keeps parallel
+    // workers from interleaving each example's stdout/stderr with the gallery
+    // driver's progress lines.
+    let out = Command::new(&bin)
         .current_dir(workspace_root)
-        .status()
+        .output()
         .with_context(|| format!("spawning {}", bin.display()))?;
-    if !status.success() {
-        anyhow::bail!("{} exited with {status}", bin.display());
+    if !out.status.success() {
+        anyhow::bail!(
+            "{} exited with {}: {}",
+            bin.display(),
+            out.status,
+            String::from_utf8_lossy(&out.stderr)
+        );
     }
+    Ok(())
+}
+
+fn process_example(
+    workspace_root: &Path,
+    gallery_examples: &Path,
+    example: &ExampleEntry,
+) -> std::result::Result<(), String> {
+    let name = &example.name;
+    if let Err(e) = run_example(workspace_root, name) {
+        return Err(format!("{e}"));
+    }
+    let src = workspace_root.join(example.png_path());
+    let dst = gallery_examples.join(format!("{name}.png"));
+    if !src.exists() {
+        return Err(format!("ran but produced no PNG at {}", src.display()));
+    }
+    fs::copy(&src, &dst)
+        .map_err(|e| format!("copying {} -> {}: {e}", src.display(), dst.display()))?;
     Ok(())
 }
 

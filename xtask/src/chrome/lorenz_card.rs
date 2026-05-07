@@ -1,20 +1,23 @@
-//! `assets/lorenz-{light,dark}.svg` — bordered "worked example" card.
+//! `assets/lorenz-{light,dark}.{svg,png}` — bordered "worked example" card.
 //!
 //! Wraps the `examples/scientific/lorenz_line{,_dark}.svg` chart in a chrome
 //! card (rounded rect, 1px border) so it sits visually next to the hero,
 //! gallery, status, etc. assets in the README. Inline-embeds the example SVG
 //! verbatim — `<img src=...>` SVG sandboxing forbids external `<image href>`
-//! references.
+//! references. Dual format: SVG is canonical; a 2× retina PNG is rasterized
+//! alongside and is what the README references.
 
 use anyhow::{Context, Result};
 use std::path::Path;
 
 use super::palette::{Theme, palette};
+use super::png;
 use super::svg::{header, inline, write_atomic};
 
 const W: u32 = 880;
 const PAD: u32 = 16;
 const RADIUS: f32 = 12.0;
+const PNG_SCALE: f32 = 2.0;
 
 /// Aspect-ratio used to size the card height when the example SVG is missing
 /// (`lorenz_line` normally renders at 1000×600 ≈ 1.667).
@@ -25,6 +28,15 @@ pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     let out = root.join(format!("assets/lorenz-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
+
+    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let png_out = root.join(format!("assets/lorenz-{}.png", theme.suffix()));
+    png::write_png_atomic(&pix, &png_out)?;
+    println!(
+        "wrote {} ({} bytes)",
+        png_out.display(),
+        std::fs::metadata(&png_out)?.len()
+    );
     Ok(())
 }
 

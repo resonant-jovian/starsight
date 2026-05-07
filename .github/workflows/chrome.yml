@@ -1,13 +1,17 @@
 name: Chrome
 
 # Daily regeneration of README chrome assets that carry live data:
-#   - assets/status/panel-{light,dark}.svg          (downloads, dependents, updated_at)
-#   - assets/hero/starsight-hero-{light,dark}.png   (meta strip + theme-matched thumbs)
-#   - assets/roadmap-{light,dark}.svg               (current milestone derived from version)
-#   - assets/buttons/<name>-{light,dark}.svg        (version, license, coverage %)
+#   - assets/status/panel-{light,dark}.svg              (downloads, dependents, updated_at)
+#   - assets/hero/starsight-hero-{light,dark}.{svg,png} (meta strip + theme-matched thumbs;
+#                                                        SVG canonical, 2× retina PNG sibling
+#                                                        is what the README references)
+#   - assets/roadmap-{light,dark}.svg                   (current milestone derived from version)
+#   - assets/buttons/<name>-{light,dark}.svg            (version, license, coverage %)
 #
 # `cargo xtask chrome --live` also re-renders the dark example PNGs that feed
-# the dark hero composite when their .rs source changed.
+# the dark hero composite when their .rs source changed. The dual-format
+# gallery / lorenz composites live outside `--live`; they're rebuilt by the
+# developer-driven full regen (`cargo xtask chrome`).
 
 on:
   schedule:
@@ -39,11 +43,16 @@ jobs:
   chrome:
     name: regen live chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Cold-cache run: ~13 min build + ~17 min for 68 examples + svgo + chrome
+    # composition. 30 min was just barely too tight; 60 leaves headroom.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # SSH deploy key (write-capable, in bypass_actors of Main branch
+          # protection). GITHUB_TOKEN is blocked by required_signatures + PR
+          # rules; the deploy key bypasses both.
+          ssh-key: ${{ secrets.BOT_DEPLOY_KEY }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Regenerate live chrome assets (light + dark)
