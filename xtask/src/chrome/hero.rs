@@ -42,14 +42,26 @@ const HERO_BASES: &[&str] = &[
     "examples/scientific/lorenz_line",
 ];
 
+/// How example thumbs are embedded in a cell. `InlineSvg` keeps the SVG
+/// composite vector (browsers handle the subpixel scaling). `EmbedExamplePng`
+/// references the example's pre-rendered PNG sibling — at native resolution
+/// strokes survive the down-sample to cell size, which 2× rasterization of an
+/// inlined SVG cannot guarantee for thin lines.
+#[derive(Copy, Clone)]
+enum CellMode {
+    InlineSvg,
+    EmbedExamplePng,
+}
+
 pub fn regen(root: &Path, theme: Theme) -> Result<()> {
     let meta = read_meta(root)?;
-    let svg = compose(root, &meta, theme)?;
+    let svg = compose(root, &meta, theme, CellMode::InlineSvg)?;
     let out = root.join(format!("assets/hero/starsight-hero-{}.svg", theme.suffix()));
     write_atomic(&out, &svg)?;
     println!("wrote {} ({} bytes)", out.display(), svg.len());
 
-    let pix = png::rasterize_at_scale(&svg, PNG_SCALE)?;
+    let svg_for_png = compose(root, &meta, theme, CellMode::EmbedExamplePng)?;
+    let pix = png::rasterize_at_scale(&svg_for_png, PNG_SCALE, root)?;
     let png_out = root.join(format!("assets/hero/starsight-hero-{}.png", theme.suffix()));
     png::write_png_atomic(&pix, &png_out)?;
     println!(
@@ -83,7 +95,7 @@ fn read_meta(root: &Path) -> Result<Meta> {
     })
 }
 
-fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<String> {
+fn compose(root: &Path, meta: &Meta, theme: Theme, cell_mode: CellMode) -> Result<String> {
     let p = palette(theme);
     let cell_w = (W - 2 * PAD - GUTTER * (COLS - 1)) / COLS;
     let cell_h = ((cell_w as f32) * 0.62) as u32;
@@ -148,28 +160,35 @@ fn compose(root: &Path, meta: &Meta, theme: Theme) -> Result<String> {
         c = p.border,
     ));
 
-    // 3×3 grid of inlined theme-matched example SVGs.
+    // 3×3 grid of theme-matched example thumbs — vector inline for SVG output,
+    // PNG `<image href>` for PNG output (preserves stroke widths through the
+    // 2× rasterization that subpixel SVG strokes lose).
     let suffix = theme.example_suffix();
     for (i, base) in HERO_BASES.iter().enumerate() {
         let col = (i as u32) % COLS;
         let row = (i as u32) / COLS;
         let x0 = PAD + col * (cell_w + GUTTER);
         let y0 = PAD + TOP_H + row * (cell_h + GUTTER);
-        let path = root.join(format!("{base}{suffix}.svg"));
-        out.push_str(&render_cell(&path, x0, y0, cell_w, cell_h, theme)?);
+        let rel = format!("{base}{suffix}");
+        out.push_str(&render_cell(
+            root, &rel, x0, y0, cell_w, cell_h, theme, cell_mode,
+        )?);
     }
 
     out.push_str("</svg>\n");
     Ok(out)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_cell(
-    src: &Path,
+    root: &Path,
+    rel: &str,
     x: u32,
     y: u32,
     cell_w: u32,
     cell_h: u32,
     theme: Theme,
+    cell_mode: CellMode,
 ) -> Result<String> {
     let p = palette(theme);
     let mut s = String::new();
@@ -183,25 +202,43 @@ fn render_cell(
         c = p.border,
     ));
 
-    if src.exists() {
-        let (inner, vb) = inline(src)?;
-        // Nested <svg> with preserveAspectRatio letterboxes the chart into the cell.
-        s.push_str(&format!(
-            r#"  <svg x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
+    match cell_mode {
+        CellMode::InlineSvg => {
+            let svg_path = root.join(format!("{rel}.svg"));
+            if svg_path.exists() {
+                let (inner, vb) = inline(&svg_path)?;
+                // Nested <svg> with preserveAspectRatio letterboxes the chart into the cell.
+                s.push_str(&format!(
+                    r#"  <svg x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" viewBox="{vb}" preserveAspectRatio="xMidYMid meet">{inner}</svg>
 "#,
-        ));
-    } else {
-        s.push_str(&format!(
-            r#"  <text x="{tx}" y="{ty}" font-size="11" fill="{c}" text-anchor="middle">{name} missing</text>
+                ));
+            } else {
+                s.push_str(&missing(&svg_path, x, y, cell_w, cell_h, p.muted));
+            }
+        }
+        CellMode::EmbedExamplePng => {
+            let png_rel = format!("{rel}.png");
+            let png_path = root.join(&png_rel);
+            if png_path.exists() {
+                // usvg resolves relative href against Options::resources_dir (= root).
+                s.push_str(&format!(
+                    r#"  <image x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" href="{png_rel}" preserveAspectRatio="xMidYMid meet"/>
 "#,
-            tx = x + cell_w / 2,
-            ty = y + cell_h / 2,
-            c = p.muted,
-            name = src
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("?"),
-        ));
+                ));
+            } else {
+                s.push_str(&missing(&png_path, x, y, cell_w, cell_h, p.muted));
+            }
+        }
     }
     Ok(s)
+}
+
+fn missing(path: &Path, x: u32, y: u32, cell_w: u32, cell_h: u32, muted: &str) -> String {
+    format!(
+        r#"  <text x="{tx}" y="{ty}" font-size="11" fill="{muted}" text-anchor="middle">{name} missing</text>
+"#,
+        tx = x + cell_w / 2,
+        ty = y + cell_h / 2,
+        name = path.file_name().and_then(|n| n.to_str()).unwrap_or("?"),
+    )
 }

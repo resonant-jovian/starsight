@@ -11,10 +11,14 @@ use tiny_skia::{Pixmap, Transform};
 
 /// Parse `svg` and rasterize it into a `Pixmap` sized at `tree.size() * scale`,
 /// rendered with that same scale on the resvg transform. System fonts are
-/// loaded so embedded `<text>` nodes resolve.
-pub fn rasterize_at_scale(svg: &str, scale: f32) -> Result<Pixmap> {
+/// loaded so embedded `<text>` nodes resolve. `resources_dir` is the root that
+/// relative `<image href="...">` paths resolve against — needed when the
+/// composite embeds example PNGs at native resolution to preserve stroke
+/// widths that subpixel SVG strokes would otherwise lose at 2× cell scale.
+pub fn rasterize_at_scale(svg: &str, scale: f32, resources_dir: &Path) -> Result<Pixmap> {
     let mut opts = usvg::Options::default();
     opts.fontdb_mut().load_system_fonts();
+    opts.resources_dir = Some(resources_dir.to_path_buf());
     let tree = usvg::Tree::from_str(svg, &opts).context("parse svg for rasterization")?;
     let size = tree.size();
     let w = (size.width() * scale).ceil() as u32;
