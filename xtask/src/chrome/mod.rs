@@ -8,11 +8,11 @@
 //! | `assets/hero/starsight-hero-{light,dark}.{svg,png}` | meta strip from `Cargo.toml` + theme-matched example thumbs |
 //! | `assets/roadmap-{light,dark}.svg`                   | "current" milestone derived from version |
 //! | `assets/buttons/<name>-{light,dark}.svg`            | version + license from `Cargo.toml`, coverage % from `assets/status/coverage.json` |
+//! | `assets/social/card-{light,dark}.{svg,png}`         | meta strip from `Cargo.toml` (version, rust, edition, license) |
 //!
 //! Static-ish assets (rebuilt only on default runs): architecture, `gallery`
-//! (dual SVG+PNG), wordmark, `lorenz_card` (dual SVG+PNG), `social_card`
-//! (dual SVG+PNG), tables, pipeline, matrices, `coming_from`,
-//! `comparison_matrix`.
+//! (dual SVG+PNG), wordmark, `lorenz_card` (dual SVG+PNG), tables, pipeline,
+//! matrices, `coming_from`, `comparison_matrix`.
 //!
 //! Format rule: composites that contain plotted data (`hero`, `gallery`,
 //! `lorenz_card`) ship dual-format — PNG canonical for the README, SVG kept
@@ -51,7 +51,9 @@ pub use palette::Theme;
 
 #[derive(Args)]
 pub struct ChromeArgs {
-    /// Only regenerate live-data assets (status panel, hero, roadmap).
+    /// Only regenerate live-data assets (status panel, hero, roadmap, buttons,
+    /// social card) — anything that embeds a value from `Cargo.toml` or
+    /// `coverage.json` and would otherwise lag the next release.
     #[arg(long)]
     pub live: bool,
     /// Regenerate a single named asset and exit.
@@ -135,6 +137,11 @@ pub fn run(args: ChromeArgs) -> Result<()> {
                 hero::regen(root_ref, theme)?;
                 roadmap::regen(root_ref, theme)?;
                 buttons::regen_all(root_ref, theme)?;
+                // Social card embeds the version + license meta strip
+                // identically to hero; pulling it into the live set keeps the
+                // open-graph PNG aligned with `Cargo.toml` without waiting for
+                // the next manual `cargo xtask chrome` (full) run.
+                social_card::regen(root_ref, theme)?;
                 Ok(())
             }));
         }
@@ -152,7 +159,6 @@ pub fn run(args: ChromeArgs) -> Result<()> {
                     gallery::regen(root_ref, theme)?;
                     wordmark::regen(root_ref, theme)?;
                     lorenz_card::regen(root_ref, theme)?;
-                    social_card::regen(root_ref, theme)?;
                     tables::regen_all(root_ref, theme)?;
                     pipeline::regen(root_ref, theme)?;
                     matrices::regen_all(root_ref, theme)?;
