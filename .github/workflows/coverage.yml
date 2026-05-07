@@ -11,6 +11,9 @@ concurrency:
   group: coverage-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
@@ -23,6 +26,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          # SSH deploy key (write-capable, in bypass_actors of Main branch
+          # protection). GITHUB_TOKEN is blocked by required_signatures + PR
+          # rules; the deploy key bypasses both.
+          ssh-key: ${{ secrets.BOT_DEPLOY_KEY }}
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
