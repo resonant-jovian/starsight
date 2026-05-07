@@ -1,0 +1,40 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: svg
+---
+<svg height="600" viewBox="0 0 600 600" width="600" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="552" shape-rendering="crispEdges" width="458.4" x="8" y="40"/>
+<text fill="#111111" font-family="sans-serif" font-size="16" x="97.999985" y="32">
+Polar legend dodge (3 series)
+</text>
+<path d="M291.5,316 C291.5,345.98907,267.18906,370.3,237.2,370.3 C207.21094,370.3,182.9,345.98907,182.9,316 C182.9,286.01093,207.21094,261.7,237.2,261.7 C267.18906,261.7,291.5,286.01093,291.5,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M345.8,316 C345.8,375.97812,297.17813,424.6,237.2,424.6 C177.22186,424.6,128.6,375.97812,128.6,316 C128.6,256.02188,177.22186,207.4,237.2,207.4 C297.17813,207.4,345.8,256.02188,345.8,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M400.09998,316 C400.09998,405.9672,327.16718,478.9,237.2,478.9 C147.23282,478.9,74.3,405.9672,74.3,316 C74.3,226.0328,147.23282,153.1,237.2,153.1 C327.16718,153.1,400.09998,226.0328,400.09998,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M454.4,316 C454.4,435.95624,357.15625,533.2,237.2,533.2 C117.243744,533.2,20,435.95624,20,316 C20,196.04375,117.243744,98.8,237.2,98.8 C357.15625,98.8,454.4,196.04375,454.4,316 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L425.30072,207.4" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L425.30072,424.6" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L237.2,533.2" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L49.09929,424.6" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L49.09929,207.4" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M237.2,316 L237.2,98.8" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M324.08,165.51942 L367.52,316 L313.22,447.6705 L182.9,410.05035 L41.72,316 L161.18,184.3295 L324.08,165.51942" fill="#0000ff" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M324.08,165.51942 L367.52,316 L313.22,447.6705 L182.9,410.05035 L41.72,316 L161.18,184.3295 L324.08,165.51942" fill="none" stroke="#0000ff" stroke-width="2"/>
+<path d="M291.5,221.94965 L389.24,316 L280.63998,391.2403 L150.31999,466.48056 L106.88,316 L182.9,221.94965 L291.5,221.94965" fill="#ff0000" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M291.5,221.94965 L389.24,316 L280.63998,391.2403 L150.31999,466.48056 L106.88,316 L182.9,221.94965 L291.5,221.94965" fill="none" stroke="#ff0000" stroke-width="2"/>
+<path d="M302.36,203.13957 L345.8,316 L324.08,466.48056 L193.76,391.2403 L128.6,316 L139.45999,146.70935 L302.36,203.13957" fill="#33aa33" fill-opacity="0.09803922" opacity="0.09803922" stroke="#000000" stroke-opacity="0.09803922" stroke-width="0"/>
+<path d="M302.36,203.13957 L345.8,316 L324.08,466.48056 L193.76,391.2403 L128.6,316 L139.45999,146.70935 L302.36,203.13957" fill="none" stroke="#33aa33" stroke-width="2"/>
+<rect fill="#ffffff" height="76" shape-rendering="crispEdges" width="86.00003" x="482.4" y="56"/>
+<path d="M482.4,56 L568.4,56 L568.4,132 L482.4,132 z" fill="none" shape-rendering="crispEdges" stroke="#444444" stroke-width="1"/>
+<path d="M490.4,70 L502.4,70" fill="none" shape-rendering="crispEdges" stroke="#0000ff" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="508.4" y="74">
+Series A
+</text>
+<path d="M490.4,90 L502.4,90" fill="none" shape-rendering="crispEdges" stroke="#ff0000" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="508.4" y="94">
+Series B
+</text>
+<path d="M490.4,110 L502.4,110" fill="none" shape-rendering="crispEdges" stroke="#33aa33" stroke-width="2"/>
+<text fill="#333333" font-family="sans-serif" font-size="12" x="508.4" y="114">
+Series C
+</text>
+</svg>

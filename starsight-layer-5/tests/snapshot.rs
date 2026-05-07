@@ -21,7 +21,7 @@ use starsight_layer_3::marks::{
     ViolinMark,
 };
 use starsight_layer_3::statistics::{Bandwidth, Grid};
-use starsight_layer_5::{Figure, MultiPanelFigure};
+use starsight_layer_5::{Edge, Figure, LegendPosition, MultiPanelFigure};
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -1655,6 +1655,137 @@ fn snapshot_rugmark_y_axis() {
             RugMark::new(ys, AxisDir::Y)
                 .length(8.0)
                 .color(Color::from_hex(0x0030_303A)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── Epic L legend placement (L.9) ───────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_legend_dodge_diagonal() {
+    // Diagonal LineMark: bbox covers the entire plot area but the actual
+    // pixel footprint is one stroke from BL→TR. The MarkExtent::Segments
+    // dispatch lets the legend dodge land in TL or BR (not on the line).
+    let xs: Vec<f64> = (0..10).map(f64::from).collect();
+    let ys = xs.clone();
+    let fig = Figure::new(600, 400)
+        .title("Diagonal line — legend dodge")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            LineMark::new(xs, ys)
+                .color(Color::BLUE)
+                .label("y = x"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_legend_dodge_full_range() {
+    // Points at every corner + interior. With every Bbox candidate
+    // overlapping data, the dodge falls back to the corner with the lowest
+    // count of intersecting marks (least-overlap), then by clipped overlap
+    // area, then TR > TL > BR > BL priority.
+    let xs = vec![
+        0.0, 1.0, 0.0, 1.0, 0.5, 0.25, 0.75, 0.1, 0.9, 0.5, 0.5, 0.3, 0.7,
+    ];
+    let ys = vec![
+        0.0, 0.0, 1.0, 1.0, 0.5, 0.25, 0.75, 0.9, 0.1, 0.2, 0.8, 0.5, 0.5,
+    ];
+    let fig = Figure::new(600, 400)
+        .title("Full-range scatter — legend dodge")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs, ys)
+                .color(Color::RED)
+                .radius(5.0)
+                .label("samples"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_legend_outside_right() {
+    // Explicit Outside(Right) — the LegendStripComponent reserves a strip
+    // outside plot_area, the disk shrinks left, and the legend lands in
+    // the strip instead of corner-dodging.
+    let xs: Vec<f64> = (0..20).map(|i| f64::from(i) * 0.3).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| x.sin()).collect();
+    let ys2: Vec<f64> = xs.iter().map(|x| x.cos()).collect();
+    let fig = Figure::new(700, 400)
+        .title("Two series — outside-right legend")
+        .x_label("x")
+        .y_label("y")
+        .legend_position(LegendPosition::Outside(Edge::Right))
+        .add(
+            LineMark::new(xs.clone(), ys)
+                .color(Color::BLUE)
+                .label("sin(x)"),
+        )
+        .add(
+            LineMark::new(xs, ys2)
+                .color(Color::RED)
+                .label("cos(x)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_pie_auto_outside_legend() {
+    // PieMark with no explicit legend_position — Auto resolves to
+    // Outside(Right) via prefers_outside_legend(). Slices fill the disk
+    // but the legend lives outside.
+    let fig = Figure::new(600, 400)
+        .title("Auto-outside legend on pie")
+        .add(PieMark::new(
+            vec![32.0, 24.0, 18.0, 14.0, 12.0],
+            vec![
+                "Solar".into(),
+                "Wind".into(),
+                "Hydro".into(),
+                "Nuclear".into(),
+                "Other".into(),
+            ],
+        ));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_polar_legend_dodge() {
+    // Multi-entry RadarMark legend. The polar render path applies the same
+    // Auto-resolution (RadarMark prefers_outside_legend == true), so the
+    // legend lands in a right-edge strip instead of the inscribed disk.
+    use starsight_layer_3::marks::RadarMark;
+    let dims_n: usize = 6;
+    let thetas: Vec<f64> = (0..dims_n as u32).map(f64::from).collect();
+    let theta_axis = Axis::polar_angular_categorical(dims_n);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+    let fig = Figure::new(600, 600)
+        .title("Polar legend dodge (3 series)")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            RadarMark::new(
+                thetas.clone(),
+                vec![0.8, 0.6, 0.7, 0.5, 0.9, 0.7],
+            )
+            .color(Color::BLUE)
+            .label("Series A"),
+        )
+        .add(
+            RadarMark::new(thetas.clone(), vec![0.5, 0.7, 0.4, 0.8, 0.6, 0.5])
+                .color(Color::RED)
+                .label("Series B"),
+        )
+        .add(
+            RadarMark::new(thetas, vec![0.6, 0.5, 0.8, 0.4, 0.5, 0.9])
+                .color(Color::from_hex(0x0033_AA33))
+                .label("Series C"),
         );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
