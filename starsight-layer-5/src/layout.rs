@@ -50,6 +50,28 @@ pub struct Slot {
     pub side: Side,
 }
 
+/// Bundle of font sizes used in both layout reservations and render-time text
+/// drawing. Layout components and render helpers take the same instance so the
+/// space reserved for text matches the size at which the text is later drawn —
+/// fixing the drift between `reserve` and `render` that hid behind two
+/// independently-edited literals (`starsight-h4l`).
+#[derive(Clone, Copy, Debug)]
+pub struct LayoutFonts {
+    /// Tick labels, axis titles, and legend labels.
+    pub label: f32,
+    /// Chart title.
+    pub title: f32,
+}
+
+impl Default for LayoutFonts {
+    fn default() -> Self {
+        Self {
+            label: 12.0,
+            title: 16.0,
+        }
+    }
+}
+
 /// Context handed to each component when it computes its reservations.
 ///
 /// Carries `&mut DrawBackend` because `text_extent` takes `&mut self` to allow
@@ -61,10 +83,8 @@ pub struct LayoutCtx<'a> {
     pub height: f32,
     /// Backend used for measuring text.
     pub backend: &'a mut dyn DrawBackend,
-    /// Default text font size for tick/axis labels.
-    pub font_size: f32,
-    /// Title font size.
-    pub title_font_size: f32,
+    /// Font sizes shared with the render pass.
+    pub fonts: LayoutFonts,
     /// Outer canvas padding around all reservations.
     pub padding: f32,
 }
@@ -200,13 +220,15 @@ impl<'a> LayoutComponent for TitleComponent<'a> {
         };
         let h = ctx
             .backend
-            .text_extent(t, ctx.title_font_size)
-            .map_or(ctx.title_font_size, |(_, h)| h);
+            .text_extent(t, ctx.fonts.title)
+            .map_or(ctx.fonts.title, |(_, h)| h);
         // Priority 1 so the Y-tick-label top gutter (priority 0) sits flush
-        // against plot.top and the title goes above it.
+        // against plot.top and the title goes above it. The 16-px breathing
+        // room above the cap-height keeps short canvases (square heatmaps)
+        // from feeling cramped while staying invisible on tall canvases.
         vec![Reservation {
             side: Side::Top,
-            size: h + 12.0,
+            size: h + 16.0,
             priority: 1,
         }]
     }
@@ -222,6 +244,33 @@ pub struct XTickLabelsComponent<'a> {
     pub tick_len: f32,
     /// Gap between tick marks and labels, in pixels.
     pub gap: f32,
+    /// Pixel band width per category for categorical axes (`canvas_width /
+    /// n_categories`). When provided and labels would crowd horizontally
+    /// (`max_label_width > band_width * 0.9`), the layout reserves enough
+    /// vertical space below the plot for rotated labels — paired with the
+    /// renderer's matching adaptive rotation in `render_axes`. `None` keeps
+    /// the original horizontal-only reservation (numeric axes / sparse
+    /// categorical). Tracked as `starsight-74o`.
+    pub band_width: Option<f32>,
+}
+
+/// Tick-label rotation in degrees (clockwise) chosen by the adaptive
+/// crowding heuristic — shared between layout reservation and renderer so
+/// both agree without recomputing.
+///
+/// - `band_width >= max_label_width * 1.0`: 0 (horizontal)
+/// - `band_width >= max_label_width / 1.8`: 45 (sloped)
+/// - otherwise: 90 (vertical)
+#[must_use]
+pub fn x_tick_label_rotation(max_label_width: f32, band_width: Option<f32>) -> f32 {
+    let Some(bw) = band_width else { return 0.0 };
+    if max_label_width > bw * 1.8 {
+        90.0
+    } else if max_label_width > bw * 0.9 {
+        45.0
+    } else {
+        0.0
+    }
 }
 
 impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
@@ -235,7 +284,7 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
         let mut max_w: f32 = 0.0;
         let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.fonts.label) {
                 if w > max_w {
                     max_w = w;
                 }
@@ -245,17 +294,37 @@ impl<'a> LayoutComponent for XTickLabelsComponent<'a> {
             }
         }
         if max_h <= 0.0 {
-            max_h = ctx.font_size;
+            max_h = ctx.fonts.label;
         }
+        // Adaptive vertical reservation: rotated labels take more vertical
+        // space than horizontal ones. The renderer derives the same rotation
+        // from `band_width` so reservation and draw agree.
+        let rotation = x_tick_label_rotation(max_w, self.band_width);
+        let label_height = if rotation >= 89.0 {
+            max_w
+        } else if rotation >= 44.0 {
+            // 45° label occupies max_w * sin(45°) = ~0.71 max_w vertically,
+            // plus a half-line of font height for the upper slope.
+            (max_w + max_h) * 0.71
+        } else {
+            max_h
+        };
+        let right_overflow = if rotation > 0.0 {
+            // Rotated last label hugs its tick column instead of overflowing
+            // half its glyph past plot.right.
+            2.0
+        } else {
+            max_w / 2.0 + 2.0
+        };
         vec![
             Reservation {
                 side: Side::Bottom,
-                size: self.tick_len + self.gap + max_h,
+                size: self.tick_len + self.gap + label_height,
                 priority: 0,
             },
             Reservation {
                 side: Side::Right,
-                size: max_w / 2.0 + 2.0,
+                size: right_overflow,
                 priority: 0,
             },
         ]
@@ -285,7 +354,7 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
         let mut max_w: f32 = 0.0;
         let mut max_h: f32 = 0.0;
         for l in self.labels {
-            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.font_size) {
+            if let Ok((w, h)) = ctx.backend.text_extent(l, ctx.fonts.label) {
                 if w > max_w {
                     max_w = w;
                 }
@@ -295,7 +364,7 @@ impl<'a> LayoutComponent for YTickLabelsComponent<'a> {
             }
         }
         if max_h <= 0.0 {
-            max_h = ctx.font_size;
+            max_h = ctx.fonts.label;
         }
         vec![
             Reservation {
@@ -330,8 +399,8 @@ impl<'a> LayoutComponent for XAxisTitleComponent<'a> {
         };
         let h = ctx
             .backend
-            .text_extent(l, ctx.font_size)
-            .map_or(ctx.font_size, |(_, h)| h);
+            .text_extent(l, ctx.fonts.label)
+            .map_or(ctx.fonts.label, |(_, h)| h);
         vec![Reservation {
             side: Side::Bottom,
             size: self.gap + h,
@@ -360,8 +429,8 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
         // to the *height* of the unrotated glyph box (becomes width after rotation).
         let h = ctx
             .backend
-            .text_extent(l, ctx.font_size)
-            .map_or(ctx.font_size, |(_, h)| h);
+            .text_extent(l, ctx.fonts.label)
+            .map_or(ctx.fonts.label, |(_, h)| h);
         vec![Reservation {
             side: Side::Left,
             size: self.gap + h,
@@ -370,10 +439,62 @@ impl<'a> LayoutComponent for YAxisTitleComponent<'a> {
     }
 }
 
+/// Reserves a strip on the chosen edge for an outside-of-plot legend.
+///
+/// Used when [`Figure::legend_position`](crate::figures::Figure::legend_position)
+/// is set to (or auto-resolves to) `LegendPosition::Outside(edge)`. The strip
+/// is wide / tall enough to hold the entry list at the figure's font sizes,
+/// plus a 16-px outer inset matching the in-plot legend.
+pub struct LegendStripComponent<'a> {
+    /// Display labels for every legend entry. Used to size the strip.
+    pub labels: &'a [String],
+    /// Canvas edge to reserve. Right is the matplotlib `bbox_to_anchor=(1.05, 1)`
+    /// equivalent; the others mirror.
+    pub edge: Side,
+}
+
+impl<'a> LayoutComponent for LegendStripComponent<'a> {
+    fn id(&self) -> &'static str {
+        "legend_strip"
+    }
+    fn reserve(&self, ctx: &mut LayoutCtx) -> Vec<Reservation> {
+        if self.labels.is_empty() {
+            return vec![];
+        }
+        // Match the in-plot legend's geometry from `renders.rs::render_legend`:
+        //   legend_width = max_label_len * 7.0 + 30.0
+        //   legend_height = entries * 20.0 + 2 * padding (8.0)
+        // Plus the 16-px inset around the strip.
+        let max_label_w = self
+            .labels
+            .iter()
+            .filter_map(|l| ctx.backend.text_extent(l, ctx.fonts.label).ok())
+            .map(|(w, _)| w)
+            .fold(0.0_f32, f32::max);
+        // Glyph swatch (12px) + gap (8px) + label width + 16-px inner padding.
+        let legend_width = max_label_w + 12.0 + 8.0 + 16.0;
+        // Each row is 20px; 8px padding top + bottom.
+        let n = self.labels.len() as f32;
+        let legend_height = n * 20.0 + 16.0;
+        let inset = 16.0;
+        let size = match self.edge {
+            Side::Right | Side::Left => legend_width + inset * 2.0,
+            Side::Top | Side::Bottom => legend_height + inset * 2.0,
+        };
+        // Priority 2 puts the legend strip outside the axis-title slot so the
+        // axis labels stay closer to the plot edge.
+        vec![Reservation {
+            side: self.edge,
+            size,
+            priority: 2,
+        }]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        LayoutBuilder, LayoutComponent, LayoutCtx, Reservation, Side, TitleComponent,
+        LayoutBuilder, LayoutComponent, LayoutCtx, LayoutFonts, Reservation, Side, TitleComponent,
         XAxisTitleComponent, XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
     };
     use starsight_layer_1::backends::vectors::SvgBackend;
@@ -383,8 +504,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         }
     }
@@ -425,6 +545,7 @@ mod tests {
             labels: &[],
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         assert!(comp.reserve(&mut ctx).is_empty());
         assert_eq!(comp.id(), "x_tick_labels");
@@ -439,6 +560,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         let res = comp.reserve(&mut ctx);
         assert_eq!(res.len(), 2);
@@ -536,6 +658,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         });
         builder.add(&YTickLabelsComponent {
             labels: &labels,
@@ -636,8 +759,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend: &mut backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         };
         let labels = vec!["a".to_string()];
@@ -645,6 +767,7 @@ mod tests {
             labels: &labels,
             tick_len: 5.0,
             gap: 4.0,
+            band_width: None,
         };
         let res = comp.reserve(&mut ctx);
         // The Bottom reservation includes max_h = font_size = 12.0 fallback.
@@ -659,8 +782,7 @@ mod tests {
             width: 200.0,
             height: 200.0,
             backend: &mut backend,
-            font_size: 12.0,
-            title_font_size: 16.0,
+            fonts: LayoutFonts::default(),
             padding: 4.0,
         };
         let labels = vec!["a".to_string()];

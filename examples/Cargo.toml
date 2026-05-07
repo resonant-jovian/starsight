@@ -6,10 +6,14 @@ license.workspace = true
 authors.workspace = true
 publish = false
 
-[dev-dependencies]
+[dependencies]
 starsight.workspace = true
 chromata.workspace = true
-prismatica = { workspace = true, features = ["matplotlib"] }
+prismatica = { workspace = true, features = ["matplotlib", "colorbrewer"] }
+polars = { workspace = true, optional = true }
+
+[features]
+polars = ["dep:polars", "starsight/polars"]
 
 # ── basics ──────────────────────────────────────────────────────────────────
 # Smallest possible programs that exercise one mark type at a time. Start here
@@ -38,6 +42,14 @@ path = "basics/heatmap.rs"
 [[example]]
 name = "histogram"
 path = "basics/histogram.rs"
+
+[[example]]
+name = "bubble_scatter"
+path = "basics/bubble_scatter.rs"
+
+[[example]]
+name = "movie_heatmap"
+path = "basics/movie_heatmap.rs"
 
 # ── theming ─────────────────────────────────────────────────────────────────
 # Same data as the basics, recoloured: shows how to swap a Theme or a
@@ -71,9 +83,49 @@ path = "composition/gallery.rs"
 name = "waterfall_bar"
 path = "composition/waterfall_bar.rs"
 
+[[example]]
+name = "box_plot"
+path = "composition/box_plot.rs"
+
+[[example]]
+name = "violin"
+path = "composition/violin.rs"
+
+[[example]]
+name = "violin_raincloud"
+path = "composition/violin_raincloud.rs"
+
+[[example]]
+name = "distribution_dashboard"
+path = "composition/distribution_dashboard.rs"
+
+[[example]]
+name = "pie"
+path = "composition/pie.rs"
+
+[[example]]
+name = "donut"
+path = "composition/donut.rs"
+
+[[example]]
+name = "donut_sunburst"
+path = "composition/donut_sunburst.rs"
+
+[[example]]
+name = "energy_transition"
+path = "composition/energy_transition.rs"
+
+[[example]]
+name = "rug_with_histogram"
+path = "composition/rug_with_histogram.rs"
+
 # ── scientific ──────────────────────────────────────────────────────────────
 # Real numerical experiments: integrate an ODE, render a relativity diagram.
 # These exist to prove the library handles real data, not just toy series.
+
+[[example]]
+name = "candlestick"
+path = "scientific/candlestick.rs"
 
 [[example]]
 name = "lorenz_line"
@@ -82,6 +134,46 @@ path = "scientific/lorenz_line.rs"
 [[example]]
 name = "kruskal_szekeres_line"
 path = "scientific/kruskal_szekeres_line.rs"
+
+[[example]]
+name = "laser_plasma"
+path = "scientific/laser_plasma.rs"
+
+[[example]]
+name = "nightingale"
+path = "scientific/nightingale.rs"
+
+[[example]]
+name = "gauge"
+path = "scientific/gauge.rs"
+
+[[example]]
+name = "contour_fields"
+path = "scientific/contour_fields.rs"
+
+[[example]]
+name = "bollinger_candlestick"
+path = "scientific/bollinger_candlestick.rs"
+
+[[example]]
+name = "radar_spider"
+path = "scientific/radar_spider.rs"
+
+[[example]]
+name = "wind_rose"
+path = "scientific/wind_rose.rs"
+
+[[example]]
+name = "polar_calendar"
+path = "scientific/polar_calendar.rs"
+
+[[example]]
+name = "error_bars"
+path = "scientific/error_bars.rs"
+
+[[example]]
+name = "reciprocal_space"
+path = "scientific/reciprocal_space.rs"
 
 # ── planned ─────────────────────────────────────────────────────────────────
 # Placeholders for backends and features that land in 0.3.0+. Each writes a
@@ -105,12 +197,17 @@ name = "streaming"
 path = "planned/streaming.rs"
 
 [[example]]
-name = "polars_integration"
-path = "planned/polars_integration.rs"
-
-[[example]]
 name = "faceting"
 path = "planned/faceting.rs"
+
+# ── data integration ─────────────────────────────────────────────────────────
+# Polars / ndarray / Arrow data acceptance. Polars lands in 0.3.0; the others
+# follow per the roadmap. Feature-gated so the default cargo build is light.
+
+[[example]]
+name = "polars_integration"
+path = "data/polars_integration.rs"
+required-features = ["starsight/polars"]
 
 [lints]
 workspace = true

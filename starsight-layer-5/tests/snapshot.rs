@@ -11,11 +11,17 @@
 //! `blue_rect_on_white` test, neither of which depends on font rendering.
 
 use starsight_layer_1::colormap::{PLASMA, VIRIDIS};
-use starsight_layer_1::primitives::Color;
+use starsight_layer_1::primitives::{Color, Rect};
+use starsight_layer_1::theme::Theme;
+use starsight_layer_2::axes::Axis;
 use starsight_layer_3::marks::{
-    AreaMark, BarMark, HeatmapMark, HistogramMark, LineMark, PointMark, StepMark, StepPosition,
+    ArcMark, AreaMark, AxisDir, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
+    ErrorBarMark, HeatmapColorScale, HeatmapMark, HistogramMark, LineMark, Ohlc, PieMark,
+    PointMark, PolarBarMark, PolarRectMark, RugMark, StepMark, StepPosition, ViolinGroup,
+    ViolinMark,
 };
-use starsight_layer_5::Figure;
+use starsight_layer_3::statistics::{Bandwidth, Grid};
+use starsight_layer_5::{Edge, Figure, LegendPosition, MultiPanelFigure};
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -537,6 +543,1239 @@ fn snapshot_heatmap_plasma() {
     let fig = Figure::new(800, 800)
         .title("Wave Interference Pattern (PLASMA)")
         .add(HeatmapMark::new(data).colormap(PLASMA));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── 0.3.0 additions: per-bar bases/colors + connectors, per-point colors/radii, log heatmap ─────
+
+#[test]
+fn snapshot_bar_waterfall() {
+    // Same 10-row P&L walk as examples/composition/waterfall_bar.rs — the snapshot
+    // doubles as a regression check on the example output.
+    let labels: Vec<String> = [
+        "Revenue",
+        "COGS",
+        "Gross Profit",
+        "OpEx",
+        "R&D",
+        "Marketing",
+        "EBITDA",
+        "D&A",
+        "Interest",
+        "Net Income",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect();
+    let values = vec![
+        4_200_000.0,
+        -1_800_000.0,
+        2_400_000.0,
+        -900_000.0,
+        -500_000.0,
+        -300_000.0,
+        700_000.0,
+        -150_000.0,
+        -50_000.0,
+        500_000.0,
+    ];
+    let bases = vec![
+        0.0,
+        4_200_000.0,
+        0.0,
+        2_400_000.0,
+        1_500_000.0,
+        1_000_000.0,
+        0.0,
+        700_000.0,
+        550_000.0,
+        0.0,
+    ];
+    let kind = [
+        "inc", "dec", "sub", "dec", "dec", "dec", "sub", "dec", "dec", "tot",
+    ];
+    let green = Color::from_hex(0x2E_7D32);
+    let red = Color::from_hex(0xC6_2828);
+    let blue = Color::from_hex(0x15_65C0);
+    let colors: Vec<Color> = kind
+        .iter()
+        .map(|k| match *k {
+            "inc" => green,
+            "dec" => red,
+            _ => blue,
+        })
+        .collect();
+
+    let fig = Figure::new(1200, 700)
+        .title("Waterfall Chart — P&L Walk")
+        .y_label("Amount ($)")
+        .add(
+            BarMark::new(labels, values)
+                .bases(bases)
+                .colors(colors)
+                .width(0.6)
+                .connectors(true),
+        );
+    let svg = fig.render_svg().unwrap();
+    // Connector pass must emit at least one stroked <line>/<path> between bars.
+    // We sanity-check this rather than rely on snapshot drift to catch a missed
+    // connector pass — the connectors are 1px thin and easy to lose visually.
+    assert!(
+        svg.contains("stroke=\"#888888\"") || svg.contains("rgb(136,136,136)"),
+        "expected gray connector strokes in waterfall SVG; got:\n{svg}"
+    );
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_point_per_point_color_size() {
+    // Six points: three at full BLUE/4px (broadcast via single .color/.radius) and
+    // three with explicit per-point colors/radii. Mark-wide alpha 0.5.
+    // Exercises both broadcast paths and per-point paths in one figure.
+    let xs_a = vec![0.0, 1.0, 2.0];
+    let ys_a = vec![1.0, 1.5, 2.0];
+    let xs_b = vec![3.0, 4.0, 5.0];
+    let ys_b = vec![2.5, 1.8, 1.2];
+    let fig = Figure::new(600, 400)
+        .title("Per-point colors and radii")
+        .x_label("x")
+        .y_label("y")
+        // Broadcast path (single-element vecs via .color / .radius convenience).
+        .add(
+            PointMark::new(xs_a, ys_a)
+                .color(Color::BLUE)
+                .radius(6.0)
+                .alpha(0.5),
+        )
+        // Per-point path.
+        .add(
+            PointMark::new(xs_b, ys_b)
+                .colors(vec![Color::RED, Color::GREEN, Color::from_hex(0xFF_8800)])
+                .radii(vec![4.0, 8.0, 12.0])
+                .alpha(0.5),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_heatmap_log() {
+    // Multi-decade dynamic range so the difference between linear and log mapping
+    // is unambiguous: the bottom-right cell is 1e6× the top-left cell.
+    let data: Vec<Vec<f64>> = (0..8)
+        .map(|j| (0..8).map(|i| 10f64.powi(i + j)).collect::<Vec<f64>>())
+        .collect();
+    let fig = Figure::new(600, 600)
+        .title("Log-scale heatmap (multi-decade)")
+        .add(
+            HeatmapMark::new(data)
+                .colormap(VIRIDIS)
+                .color_scale(HeatmapColorScale::Log),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_basic() {
+    // Two side-by-side groups with a clean unimodal sample each. The visual
+    // baseline: two boxes with a median line, whiskers + caps, no outliers.
+    let groups = vec![
+        BoxPlotGroup::new("control", vec![1.0, 2.0, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0]),
+        BoxPlotGroup::new(
+            "treatment",
+            vec![3.0, 4.0, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0],
+        ),
+    ];
+    let fig = Figure::new(600, 400)
+        .title("Treatment effect — box plot")
+        .x_label("group")
+        .y_label("response")
+        .add(BoxPlotMark::new(groups));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_with_outliers() {
+    // A high outlier (20.0) and a low outlier (-5.0) — the visual baseline
+    // should show two black dots beyond each whisker.
+    let groups = vec![BoxPlotGroup::new(
+        "samples",
+        vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 20.0, -5.0],
+    )];
+    let fig = Figure::new(400, 400)
+        .title("Single group, two outliers")
+        .add(BoxPlotMark::new(groups));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_boxplot_palette() {
+    // Four groups with a custom palette so each box reads as a distinct
+    // category. Outliers are turned off — useful when the visual focus is
+    // on quartile spread, not extreme values.
+    let groups = vec![
+        BoxPlotGroup::new("Q1", vec![10.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0]),
+        BoxPlotGroup::new("Q2", vec![14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0]),
+        BoxPlotGroup::new("Q3", vec![18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0]),
+        BoxPlotGroup::new("Q4", vec![22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0]),
+    ];
+    let palette = vec![
+        Color::from_hex(0x0033_77BB),
+        Color::from_hex(0x0033_AA66),
+        Color::from_hex(0x00CC_8800),
+        Color::from_hex(0x00CC_3366),
+    ];
+    let fig = Figure::new(800, 400)
+        .title("Quarterly throughput")
+        .x_label("quarter")
+        .y_label("requests / s")
+        .add(
+            BoxPlotMark::new(groups)
+                .palette(palette)
+                .show_outliers(false),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_basic() {
+    // Three groups with deterministic, slightly skewed samples. Visual
+    // baseline: three violin shapes side by side, each with an inner mini
+    // boxplot showing Q1/Q3 in black + median in white.
+    let groups = vec![
+        ViolinGroup::new(
+            "control",
+            vec![
+                1.0, 1.5, 2.0, 2.2, 2.5, 2.7, 3.0, 3.2, 3.5, 3.8, 4.0, 4.2, 4.5, 5.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "low dose",
+            vec![
+                2.0, 2.5, 3.0, 3.2, 3.5, 3.7, 4.0, 4.2, 4.5, 4.8, 5.0, 5.2, 5.5, 6.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "high dose",
+            vec![
+                3.0, 3.5, 4.0, 4.2, 4.5, 4.7, 5.0, 5.2, 5.5, 5.8, 6.0, 6.2, 6.5, 7.0,
+            ],
+        ),
+    ];
+    let fig = Figure::new(700, 400)
+        .title("Dose-response densities")
+        .x_label("cohort")
+        .y_label("response")
+        .add(ViolinMark::new(groups).bandwidth(Bandwidth::Manual(0.4)));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_no_box() {
+    // Same data as basic, with the inner box overlay disabled. Just the
+    // density envelope and a horizontal median line.
+    let groups = vec![
+        ViolinGroup::new("A", vec![1.0, 2.0, 2.5, 3.0, 3.0, 3.5, 4.0, 5.0, 5.5, 6.0]),
+        ViolinGroup::new("B", vec![2.0, 3.0, 3.5, 4.0, 4.0, 4.5, 5.0, 6.0, 6.5, 7.0]),
+    ];
+    let fig = Figure::new(500, 400).title("Density only").add(
+        ViolinMark::new(groups)
+            .bandwidth(Bandwidth::Manual(0.5))
+            .show_box(false),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_split() {
+    // Paired before/after comparison: group "before" on the left half of
+    // the band, "after" on the right. Each side shows just a half-violin
+    // with a partial median line meeting at the centre.
+    let groups = vec![
+        ViolinGroup::new(
+            "before",
+            vec![
+                10.0, 12.0, 13.0, 14.0, 15.0, 15.5, 16.0, 16.5, 17.0, 18.0, 19.0, 20.0,
+            ],
+        ),
+        ViolinGroup::new(
+            "after",
+            vec![
+                14.0, 16.0, 17.0, 18.0, 19.0, 19.5, 20.0, 20.5, 21.0, 22.0, 23.0, 24.0,
+            ],
+        ),
+    ];
+    let fig = Figure::new(400, 400).title("Pre/post split violin").add(
+        ViolinMark::new(groups)
+            .bandwidth(Bandwidth::Manual(0.8))
+            .split(true)
+            .palette(vec![
+                Color::from_hex(0x0033_77BB),
+                Color::from_hex(0x00CC_3366),
+            ]),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_palette() {
+    // Four groups with a custom palette so the chart reads as four colored
+    // shapes. Default Silverman bandwidth — exercises the auto-pick path.
+    let groups = vec![
+        ViolinGroup::new("Q1", (10..=18).map(f64::from).collect()),
+        ViolinGroup::new("Q2", (14..=22).map(f64::from).collect()),
+        ViolinGroup::new("Q3", (18..=26).map(f64::from).collect()),
+        ViolinGroup::new("Q4", (22..=30).map(f64::from).collect()),
+    ];
+    let palette = vec![
+        Color::from_hex(0x0033_77BB),
+        Color::from_hex(0x0033_AA66),
+        Color::from_hex(0x00CC_8800),
+        Color::from_hex(0x00CC_3366),
+    ];
+    let fig = Figure::new(800, 400)
+        .title("Quarterly throughput densities")
+        .x_label("quarter")
+        .y_label("requests / s")
+        .add(ViolinMark::new(groups).palette(palette));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_violin_raincloud() {
+    // Composition for Epic I.8: violin envelope (with built-in inner box) +
+    // jittered PointMark strip overlay shifted to the right side of each
+    // band. Two categories with visually distinct shapes — bimodal vs
+    // unimodal — so the inner box plus envelope plus rain reads as three
+    // distinct layers.
+    let groups = vec![
+        ViolinGroup::new(
+            "bimodal",
+            vec![1.0, 1.5, 2.0, 2.5, 3.0, 7.0, 7.5, 8.0, 8.5, 9.0],
+        ),
+        ViolinGroup::new(
+            "unimodal",
+            vec![3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0],
+        ),
+    ];
+    let palette = vec![Color::from_hex(0x0033_77BB), Color::from_hex(0x0033_AA66)];
+    // Strip points at band-right (idx + 0.78) with deterministic ±0.13 jitter.
+    let strip_x = vec![
+        0.78, 0.85, 0.71, 0.82, 0.76, // bimodal — 5 reproducible jitter values
+        1.78, 1.85, 1.71, 1.82, 1.76, // unimodal — same offsets, shifted band
+    ];
+    let strip_y = vec![1.0, 8.0, 2.5, 7.5, 1.5, 4.0, 5.5, 3.5, 6.0, 5.0];
+    let strip_colors: Vec<Color> = (0..5)
+        .map(|_| palette[0])
+        .chain((0..5).map(|_| palette[1]))
+        .collect();
+    let fig = Figure::new(600, 400)
+        .title("Raincloud — violin + strip")
+        .x_label("category")
+        .y_label("value")
+        .add(
+            ViolinMark::new(groups)
+                .palette(palette)
+                .half_width(0.20)
+                .show_box(true)
+                .cut(0.0),
+        )
+        .add(
+            PointMark::new(strip_x, strip_y)
+                .colors(strip_colors)
+                .radius(2.5)
+                .alpha(0.7),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_pie_basic() {
+    // Five-slice pie with the default palette and percentage labels at each
+    // midpoint. Visual baseline: clean wedges at the conventional top start
+    // angle, white slice borders, percentages readable in black.
+    let fig = Figure::new(500, 500).title("Energy mix").add(
+        PieMark::new(
+            vec![32.0, 24.0, 18.0, 14.0, 12.0],
+            vec![
+                "Solar".into(),
+                "Wind".into(),
+                "Hydro".into(),
+                "Nuclear".into(),
+                "Other".into(),
+            ],
+        )
+        .show_percent(),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_donut_basic() {
+    // Three-slice donut with a thick ring (inner_radius=0.5) and value
+    // labels. Visual baseline: a donut with a hollow center, three filled
+    // wedges, and the raw counts at each midpoint.
+    let fig = Figure::new(500, 500).title("Vote distribution").add(
+        PieMark::new(
+            vec![1240.0, 980.0, 540.0],
+            vec!["Yes".into(), "No".into(), "Abstain".into()],
+        )
+        .inner_radius(0.5)
+        .show_values(),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_candlestick_basic() {
+    // Six-day OHLC sequence: starts mostly up, dips, recovers. Visual
+    // baseline: green/red bodies in default theme, vertical wicks at body
+    // top/bottom.
+    let data = vec![
+        Ohlc {
+            timestamp: 0.0,
+            open: 100.0,
+            high: 110.0,
+            low: 95.0,
+            close: 105.0,
+        },
+        Ohlc {
+            timestamp: 1.0,
+            open: 105.0,
+            high: 115.0,
+            low: 100.0,
+            close: 112.0,
+        },
+        Ohlc {
+            timestamp: 2.0,
+            open: 112.0,
+            high: 118.0,
+            low: 102.0,
+            close: 104.0,
+        },
+        Ohlc {
+            timestamp: 3.0,
+            open: 104.0,
+            high: 109.0,
+            low: 95.0,
+            close: 97.0,
+        },
+        Ohlc {
+            timestamp: 4.0,
+            open: 97.0,
+            high: 105.0,
+            low: 92.0,
+            close: 102.0,
+        },
+        Ohlc {
+            timestamp: 5.0,
+            open: 102.0,
+            high: 113.0,
+            low: 100.0,
+            close: 111.0,
+        },
+    ];
+    let fig = Figure::new(700, 400)
+        .title("Six-day OHLC")
+        .x_label("session")
+        .y_label("price")
+        .add(CandlestickMark::new(data));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_candlestick_custom_colors() {
+    // Same data with cyan up / orange down — exercises the up_color /
+    // down_color builders.
+    let data = vec![
+        Ohlc {
+            timestamp: 0.0,
+            open: 50.0,
+            high: 55.0,
+            low: 48.0,
+            close: 53.0,
+        },
+        Ohlc {
+            timestamp: 1.0,
+            open: 53.0,
+            high: 56.0,
+            low: 50.0,
+            close: 51.0,
+        },
+        Ohlc {
+            timestamp: 2.0,
+            open: 51.0,
+            high: 57.0,
+            low: 50.0,
+            close: 56.0,
+        },
+        Ohlc {
+            timestamp: 3.0,
+            open: 56.0,
+            high: 60.0,
+            low: 55.0,
+            close: 58.0,
+        },
+    ];
+    let fig = Figure::new(500, 400).title("Cyan/orange OHLC").add(
+        CandlestickMark::new(data)
+            .up_color(Color::from_hex(0x0000_BCD4))
+            .down_color(Color::from_hex(0x00FF_5722)),
+    );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[cfg(feature = "polars")]
+#[test]
+fn snapshot_polars_line() {
+    use polars::prelude::*;
+    use starsight_layer_5::sources::plot_dataframe;
+
+    let df = df!(
+        "x" => &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+        "y" => &[0.0, 1.0, 0.5, 2.0, 1.5, 2.5],
+    )
+    .unwrap();
+    let fig = plot_dataframe(&df, "x", "y", None)
+        .title("Numeric x → LineMark")
+        .x_label("x")
+        .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[cfg(feature = "polars")]
+#[test]
+fn snapshot_polars_grouped_scatter() {
+    use polars::prelude::*;
+    use starsight_layer_5::sources::plot_dataframe;
+
+    let df = df!(
+        "x" => &[0.0, 1.0, 2.0, 0.5, 1.5, 2.5, 0.2, 1.2, 2.2],
+        "y" => &[0.0, 1.0, 0.5, 1.0, 0.0, 1.5, 0.7, 1.4, 0.9],
+        "group" => &["A", "A", "A", "B", "B", "B", "C", "C", "C"],
+    )
+    .unwrap();
+    let fig = plot_dataframe(&df, "x", "y", Some("group"))
+        .title("color = 'group' → 3 PointMarks")
+        .x_label("x")
+        .y_label("y");
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── radar mark ───────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_radar() {
+    // 8-dimensional radar with three overlay series. Tests the polar
+    // polyline path and the transparent-fill code in `RadarMark::render`.
+    use starsight_layer_3::marks::RadarMark;
+    let dims: Vec<String> = [
+        "pass", "shoot", "drib", "def", "stam", "speed", "vis", "lead",
+    ]
+    .iter()
+    .map(|s| (*s).to_string())
+    .collect();
+    let thetas: Vec<f64> = (0..dims.len() as u32).map(f64::from).collect();
+    let player_a = vec![85.0, 70.0, 90.0, 50.0, 80.0, 78.0, 92.0, 75.0];
+    let player_b = vec![60.0, 95.0, 75.0, 55.0, 85.0, 88.0, 70.0, 50.0];
+
+    let mut theta_axis = Axis::polar_angular_categorical(dims.len());
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_categorical(&dims);
+    theta_axis.tick_positions = theta_pos;
+    theta_axis.tick_labels = theta_lab;
+    let mut r_axis = Axis::polar_radial(0.0, 100.0);
+    r_axis.tick_positions = vec![25.0, 50.0, 75.0, 100.0];
+    r_axis.tick_labels = vec!["25".into(), "50".into(), "75".into(), "100".into()];
+
+    let fig = Figure::new(600, 600)
+        .title("Radar — 2 series, 8 dims")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            RadarMark::new(thetas.clone(), player_a)
+                .color(Color::from_hex(0x004C_72B0))
+                .label("A"),
+        )
+        .add(
+            RadarMark::new(thetas, player_b)
+                .color(Color::from_hex(0x00C4_4E52))
+                .label("B"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── arc mark ─────────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_arcmark_full_nightingale() {
+    // Florence Nightingale's coxcomb invariant — 12 monthly slices, area
+    // proportional to value via sqrt radial axis. Each wedge spans 1/12 of
+    // the disk; outer radius encodes month value.
+    let thetas: Vec<f64> = (0..12).map(f64::from).collect();
+    let values = vec![
+        12.0, 19.0, 25.0, 18.0, 28.0, 35.0, 42.0, 38.0, 30.0, 22.0, 16.0, 10.0,
+    ];
+    let theta_axis = Axis::polar_angular_categorical(12);
+    let r_axis = Axis::polar_radial_sqrt(0.0, 50.0);
+    let fig = Figure::new(600, 600)
+        .title("Nightingale coxcomb (synthetic)")
+        .polar_axes(theta_axis, r_axis)
+        .add(ArcMark::new(thetas, values).theta_half_width(0.5));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_arcmark_partial_gauge() {
+    // Real layered gauge — mirrors the example pattern (Epic I.3 fix for
+    // `starsight-3bp.9.3`). 270° dial sweep with three layers:
+    // 1. Outer rim (thin track)
+    // 2. Background track (the unfilled portion)
+    // 3. Foreground value arc
+    //
+    // The previous snapshot rendered only the value arc with no track, so
+    // it didn't read as a gauge. This version is the canonical demo.
+    let value: f64 = 65.0;
+    let max: f64 = 100.0;
+    let total_sweep = 1.5 * std::f64::consts::PI;
+    let half_total = total_sweep / 2.0;
+    let value_sweep = (value / max) * total_sweep;
+    let half_value = value_sweep / 2.0;
+    let value_center = -half_total + half_value;
+    let bg_center: f64 = 0.0;
+
+    let theta_axis = Axis::polar_angular(0.0, std::f64::consts::TAU);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+
+    let fig = Figure::new(600, 400)
+        .title("Gauge — 65 / 100")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            // Outer rim
+            ArcMark::new(vec![bg_center], vec![1.02])
+                .theta_half_widths(vec![half_total])
+                .r_inner(vec![0.99])
+                .colors(vec![Color::from_hex(0x008B_8B8B)]),
+        )
+        .add(
+            // Background track
+            ArcMark::new(vec![bg_center], vec![0.99])
+                .theta_half_widths(vec![half_total])
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x00C8_C8C8)])
+                .stroke(Color::WHITE, 0.5),
+        )
+        .add(
+            // Foreground value arc
+            ArcMark::new(vec![value_center], vec![0.99])
+                .theta_half_widths(vec![half_value])
+                .r_inner(vec![0.68])
+                .colors(vec![Color::from_hex(0x004C_AF50)])
+                .stroke(Color::WHITE, 1.0),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_arcmark_nested_sunburst() {
+    // Three concentric rings of wedges (sunburst). Each ring uses a
+    // different inner radius to stack outward.
+    let theta_axis = Axis::polar_angular(0.0, std::f64::consts::TAU);
+    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let fig = Figure::new(600, 600)
+        .title("Sunburst — 3 levels")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            // Innermost: 4 wedges spanning the full circle.
+            ArcMark::new(
+                vec![
+                    std::f64::consts::PI * 0.25,
+                    std::f64::consts::PI * 0.75,
+                    std::f64::consts::PI * 1.25,
+                    std::f64::consts::PI * 1.75,
+                ],
+                vec![30.0, 30.0, 30.0, 30.0],
+            )
+            .theta_half_widths(vec![std::f64::consts::PI * 0.25; 4]),
+        )
+        .add(
+            // Middle ring: 8 wedges.
+            ArcMark::new(
+                (0..8u32)
+                    .map(|i| {
+                        std::f64::consts::PI * 0.125 + std::f64::consts::PI * 0.25 * f64::from(i)
+                    })
+                    .collect(),
+                vec![60.0; 8],
+            )
+            .r_inner(vec![30.0; 8])
+            .theta_half_widths(vec![std::f64::consts::PI * 0.125; 8]),
+        )
+        .add(
+            // Outer ring: 16 wedges.
+            ArcMark::new(
+                (0..16u32)
+                    .map(|i| {
+                        std::f64::consts::PI * 0.0625 + std::f64::consts::PI * 0.125 * f64::from(i)
+                    })
+                    .collect(),
+                vec![100.0; 16],
+            )
+            .r_inner(vec![60.0; 16])
+            .theta_half_widths(vec![std::f64::consts::PI * 0.0625; 16]),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── contour ──────────────────────────────────────────────────────────────────────────────────────
+
+fn rosenbrock_grid(nx: usize, ny: usize) -> Grid {
+    Grid::sample(nx, ny, -2.0, 2.0, -2.0, 2.0, |x, y| {
+        let a = 1.0 - x;
+        let b = y - x * x;
+        a * a + 100.0 * b * b
+    })
+}
+
+#[test]
+fn snapshot_contour_isolines() {
+    // Rosenbrock function over [-2, 2]² on a 60×60 grid. Levels on a roughly
+    // geometric ladder show the valley near (1, 1) at multiple zoom levels.
+    let grid = rosenbrock_grid(60, 60);
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour — isolines")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .stroke_width(1.5)
+                .label("f(x, y)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_contour_filled() {
+    // Same field as the isoline test, but with `FilledBands` mode — each
+    // band between two consecutive levels samples the colormap at its
+    // band index. Tests the per-cell Sutherland-Hodgman polygon-clipping
+    // path.
+    let grid = rosenbrock_grid(60, 60);
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour — filled bands")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .filled()
+                .label("f(x, y)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_contour_combined() {
+    // FilledWithLines: filled bands underneath, isolines stroked on top.
+    // Bands tint via the colormap; isolines reuse the same colormap (each
+    // level gets its own per-level color).
+    let grid = rosenbrock_grid(60, 60);
+    let levels: Vec<f64> = vec![1.0, 5.0, 20.0, 100.0, 500.0, 2000.0];
+    let fig = Figure::new(800, 800)
+        .title("Rosenbrock contour — filled + lines")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            ContourMark::new(grid, levels)
+                .colormap(VIRIDIS)
+                .mode(starsight_layer_3::marks::ContourMode::FilledWithLines)
+                .stroke_width(1.0)
+                .label("f(x, y)"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── polar grid ───────────────────────────────────────────────────────────────────────────────────
+
+fn polar_grid_svg(theta_axis: Axis, r_axis: Axis) -> String {
+    use starsight_layer_1::backends::vectors::SvgBackend;
+    use starsight_layer_2::coords::PolarCoord;
+    use starsight_layer_5::renders::{render_background, render_grid_lines};
+
+    let mut backend = SvgBackend::new(400, 400);
+    let plot_area = Rect::new(20.0, 20.0, 380.0, 380.0);
+    let coord = PolarCoord::inscribed(theta_axis, r_axis, plot_area);
+    let theme = Theme::default();
+    render_background(&plot_area, &mut backend, &theme).unwrap();
+    render_grid_lines(&coord, &mut backend, &theme).unwrap();
+    backend.svg_string()
+}
+
+#[test]
+fn snapshot_polar_grid_linear() {
+    // 8-spoke compass + 5 concentric rings on a linear radial axis.
+    let mut theta = Axis::polar_angular(0.0, 360.0);
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_degrees(8);
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial(0.0, 100.0);
+    r.tick_positions = vec![20.0, 40.0, 60.0, 80.0, 100.0];
+    r.tick_labels = vec![
+        "20".into(),
+        "40".into(),
+        "60".into(),
+        "80".into(),
+        "100".into(),
+    ];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
+}
+
+#[test]
+fn snapshot_polar_grid_log() {
+    // 4-spoke + log radial axis (decade tick spacing visualizes how rings
+    // cluster near the rim under log scaling).
+    let mut theta = Axis::polar_angular(0.0, 360.0);
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_degrees(4);
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial_log(1.0, 1000.0);
+    r.tick_positions = vec![1.0, 10.0, 100.0, 1000.0];
+    r.tick_labels = vec!["1".into(), "10".into(), "100".into(), "1k".into()];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
+}
+
+#[test]
+fn snapshot_polar_grid_categorical() {
+    // 12-month categorical angular axis (Nightingale layout).
+    let theta = Axis::polar_angular_categorical(12);
+    let labels: Vec<String> = (0..12).map(|i| format!("M{}", i + 1)).collect();
+    let (theta_pos, theta_lab) = starsight_layer_2::ticks::polar_ticks_categorical(&labels);
+    let mut theta = theta;
+    theta.tick_positions = theta_pos;
+    theta.tick_labels = theta_lab;
+    let mut r = Axis::polar_radial_sqrt(0.0, 100.0);
+    r.tick_positions = vec![25.0, 50.0, 75.0, 100.0];
+    r.tick_labels = vec!["25".into(), "50".into(), "75".into(), "100".into()];
+    insta::assert_snapshot!(polar_grid_svg(theta, r));
+}
+
+// ── multi-panel grid ─────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_multipanel_2x2_basic() {
+    // 2×2 grid: a damped-cosine line, a small bar chart, a histogram, and a
+    // step plot. Tests that each panel composes its own axes/title/legend
+    // independently and that panel rects partition the canvas without
+    // overlap.
+    let (x, y) = damped_cosine(40);
+    let line_panel = Figure::new(400, 300)
+        .title("damped cosine")
+        .add(LineMark::new(x.clone(), y.clone()).color(Color::BLUE));
+    let bar_panel = Figure::new(400, 300).title("bars").add(BarMark::new(
+        vec!["a".into(), "b".into(), "c".into()],
+        vec![3.0, 1.5, 4.2],
+    ));
+    let histogram_panel = Figure::new(400, 300)
+        .title("histogram")
+        .add(HistogramMark::new(y.clone()));
+    let step_panel = Figure::new(400, 300)
+        .title("step")
+        .add(StepMark::new(x, y).position(StepPosition::Mid));
+    let mp = MultiPanelFigure::new(800, 600, 2, 2)
+        .padding(8.0)
+        .add(line_panel)
+        .add(bar_panel)
+        .add(histogram_panel)
+        .add(step_panel);
+    let svg = mp.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_legend_glyph_dispatch() {
+    // Three labelled marks of different shapes — exercises the LegendGlyph
+    // dispatch fix for `starsight-f4t`. Visually: the legend should show a
+    // line for "trend", a dot for "samples", and a filled rectangle for
+    // "counts" — not three identical horizontal lines.
+    let fig = Figure::new(600, 400)
+        .title("Mixed-mark legend")
+        .add(
+            LineMark::new(vec![0.0, 1.0, 2.0, 3.0], vec![0.0, 1.0, 0.5, 1.5])
+                .color(Color::BLUE)
+                .label("trend"),
+        )
+        .add(
+            PointMark::new(vec![0.5, 1.5, 2.5], vec![0.2, 1.2, 0.8])
+                .color(Color::RED)
+                .radius(5.0)
+                .label("samples"),
+        )
+        .add(
+            BarMark::new(
+                vec!["a".into(), "b".into(), "c".into()],
+                vec![0.4, 0.8, 0.6],
+            )
+            .color(Color::from_hex(0x0033_AA33))
+            .label("counts"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── polar bar mark ───────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_bar() {
+    // Two stacked layers of 8 bins — minimal wind-rose-style PolarBarMark
+    // exercise. r_base on the second layer threads through the axis scale
+    // so the bars stack rather than overlap.
+    let n = 8usize;
+    let thetas: Vec<f64> = (0..n).map(|i| i as f64).collect();
+    let layer_a = vec![3.0, 4.0, 5.0, 6.0, 5.5, 4.0, 3.0, 2.5];
+    let layer_b = vec![2.0, 3.0, 2.5, 3.5, 4.0, 3.5, 2.0, 1.5];
+    let layer_b_base = layer_a.clone();
+
+    let theta_axis = Axis::polar_angular_categorical(n);
+    let r_axis = Axis::polar_radial(0.0, 12.0);
+
+    let fig = Figure::new(500, 500)
+        .title("Polar bar — stacked annular bars")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            PolarBarMark::new(thetas.clone(), layer_a)
+                .color(Color::from_hex(0x0076_B7B2))
+                .stroke(Color::WHITE, 0.6)
+                .label("low"),
+        )
+        .add(
+            PolarBarMark::new(thetas, layer_b)
+                .r_base(layer_b_base)
+                .color(Color::from_hex(0x00F2_8E2B))
+                .stroke(Color::WHITE, 0.6)
+                .label("high"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── polar rect mark ──────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_polar_rect() {
+    // 4-week × 3-year mini polar calendar — annular tile geometry.
+    let weeks = 4usize;
+    let years = 3usize;
+    let mut theta_min = Vec::with_capacity(weeks * years);
+    let mut theta_max = Vec::with_capacity(weeks * years);
+    let mut r_min = Vec::with_capacity(weeks * years);
+    let mut r_max = Vec::with_capacity(weeks * years);
+    let mut colors = Vec::with_capacity(weeks * years);
+    for y in 0..years {
+        for w in 0..weeks {
+            theta_min.push(w as f64 / weeks as f64);
+            theta_max.push((w as f64 + 1.0) / weeks as f64);
+            r_min.push(y as f64 / years as f64);
+            r_max.push((y as f64 + 1.0) / years as f64);
+            let t = (y * weeks + w) as f64 / (weeks * years - 1) as f64;
+            colors.push(VIRIDIS.sample(t));
+        }
+    }
+    let theta_axis = Axis::polar_angular(0.0, 1.0);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+    let fig = Figure::new(500, 500)
+        .title("Polar rect — annular tiles")
+        .polar_axes(theta_axis, r_axis)
+        .add(PolarRectMark::new(theta_min, theta_max, r_min, r_max).colors(colors));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── error bars ───────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_errorbar_vertical() {
+    let xs: Vec<f64> = (0..6).map(f64::from).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| 2.0 * x + 1.0).collect();
+    let errs = vec![0.5, 0.7, 0.9, 1.1, 1.3, 1.5];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — vertical")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x004E_79A7))
+                .radius(5.0)
+                .label("data"),
+        )
+        .add(ErrorBarMark::new(xs, ys, errs).color(Color::from_hex(0x004E_79A7)));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_errorbar_horizontal() {
+    let xs: Vec<f64> = (0..6).map(|i| f64::from(i) * 2.0).collect();
+    let ys: Vec<f64> = (0..6).map(f64::from).collect();
+    let errs = vec![0.4, 0.6, 0.8, 1.0, 0.7, 0.5];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — horizontal")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x00E1_5759))
+                .radius(5.0)
+                .label("data"),
+        )
+        .add(
+            ErrorBarMark::new(xs, ys, errs)
+                .horizontal()
+                .color(Color::from_hex(0x00E1_5759)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_errorbar_asymmetric() {
+    let xs: Vec<f64> = (0..5).map(f64::from).collect();
+    let ys = vec![10.0, 12.0, 14.0, 13.0, 15.0];
+    let pairs = vec![(0.5, 1.5), (0.8, 1.2), (1.0, 1.0), (1.2, 0.8), (1.5, 0.5)];
+    let fig = Figure::new(500, 350)
+        .title("Error bars — asymmetric")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs.clone(), ys.clone())
+                .color(Color::from_hex(0x0076_B7B2))
+                .radius(5.0)
+                .label("estimate"),
+        )
+        .add(
+            ErrorBarMark::new(xs, ys, vec![0.0; 5])
+                .errors_pair(pairs)
+                .color(Color::from_hex(0x0076_B7B2)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── rug mark ─────────────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_rugmark_x_axis() {
+    let xs: Vec<f64> = (0..30).map(|i| f64::from(i) * 0.3).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| (x * 0.5).sin() * 2.0 + 3.0).collect();
+    let fig = Figure::new(500, 350)
+        .title("Rug along x-axis")
+        .x_label("x")
+        .y_label("y")
+        .add(LineMark::new(xs.clone(), ys).color(Color::from_hex(0x004E_79A7)))
+        .add(
+            RugMark::new(xs, AxisDir::X)
+                .length(8.0)
+                .color(Color::from_hex(0x0030_303A)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_polar_grid_with_data() {
+    // Demonstrates polar grid + data overlay together. After Epic I.10
+    // auto-fills tick_positions on Axis::polar_*, this snapshot exercises
+    // the typical 'Figure::polar_axes(...).add(some polar mark)' path so
+    // grid lines (rings + spokes) are visible alongside the data.
+    use starsight_layer_3::marks::{ArcMark, RadarMark};
+    let theta_axis = Axis::polar_angular_categorical(8);
+    let r_axis = Axis::polar_radial(0.0, 100.0);
+    let fig = Figure::new(500, 500)
+        .title("Polar grid + data overlay")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            // 8-spoke wedge ring at outer half.
+            ArcMark::new((0..8).map(f64::from).collect(), vec![55.0; 8])
+                .theta_half_widths(vec![std::f64::consts::PI * 0.06; 8])
+                .colors(vec![Color::from_hex(0x004E_79A7); 8])
+                .stroke(Color::WHITE, 0.6),
+        )
+        .add(
+            // Single radar polyline tracing across all 8 spokes.
+            RadarMark::new(
+                (0..8).map(f64::from).collect(),
+                vec![45.0, 70.0, 90.0, 60.0, 75.0, 50.0, 80.0, 65.0],
+            )
+            .color(Color::from_hex(0x00E1_5759))
+            .width(2.0),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_rugmark_y_axis() {
+    let ys: Vec<f64> = (0..20)
+        .map(|i| f64::from(i) * 0.5 + (f64::from(i) * 0.7).sin())
+        .collect();
+    let xs: Vec<f64> = (0..20).map(|i| f64::from(i) * 0.5).collect();
+    let fig = Figure::new(500, 350)
+        .title("Rug along y-axis")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs, ys.clone())
+                .color(Color::from_hex(0x00E1_5759))
+                .radius(4.0),
+        )
+        .add(
+            RugMark::new(ys, AxisDir::Y)
+                .length(8.0)
+                .color(Color::from_hex(0x0030_303A)),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+// ── Epic L legend placement (L.9) ───────────────────────────────────────────────────────────────
+
+#[test]
+fn snapshot_legend_dodge_diagonal() {
+    // Diagonal LineMark: bbox covers the entire plot area but the actual
+    // pixel footprint is one stroke from BL→TR. The MarkExtent::Segments
+    // dispatch lets the legend dodge land in TL or BR (not on the line).
+    let xs: Vec<f64> = (0..10).map(f64::from).collect();
+    let ys = xs.clone();
+    let fig = Figure::new(600, 400)
+        .title("Diagonal line — legend dodge")
+        .x_label("x")
+        .y_label("y")
+        .add(LineMark::new(xs, ys).color(Color::BLUE).label("y = x"));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_legend_dodge_full_range() {
+    // Points at every corner + interior. With every Bbox candidate
+    // overlapping data, the dodge falls back to the corner with the lowest
+    // count of intersecting marks (least-overlap), then by clipped overlap
+    // area, then TR > TL > BR > BL priority.
+    let xs = vec![
+        0.0, 1.0, 0.0, 1.0, 0.5, 0.25, 0.75, 0.1, 0.9, 0.5, 0.5, 0.3, 0.7,
+    ];
+    let ys = vec![
+        0.0, 0.0, 1.0, 1.0, 0.5, 0.25, 0.75, 0.9, 0.1, 0.2, 0.8, 0.5, 0.5,
+    ];
+    let fig = Figure::new(600, 400)
+        .title("Full-range scatter — legend dodge")
+        .x_label("x")
+        .y_label("y")
+        .add(
+            PointMark::new(xs, ys)
+                .color(Color::RED)
+                .radius(5.0)
+                .label("samples"),
+        );
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_legend_outside_right() {
+    // Explicit Outside(Right) — the LegendStripComponent reserves a strip
+    // outside plot_area, the disk shrinks left, and the legend lands in
+    // the strip instead of corner-dodging.
+    let xs: Vec<f64> = (0..20).map(|i| f64::from(i) * 0.3).collect();
+    let ys: Vec<f64> = xs.iter().map(|x| x.sin()).collect();
+    let ys2: Vec<f64> = xs.iter().map(|x| x.cos()).collect();
+    let fig = Figure::new(700, 400)
+        .title("Two series — outside-right legend")
+        .x_label("x")
+        .y_label("y")
+        .legend_position(LegendPosition::Outside(Edge::Right))
+        .add(
+            LineMark::new(xs.clone(), ys)
+                .color(Color::BLUE)
+                .label("sin(x)"),
+        )
+        .add(LineMark::new(xs, ys2).color(Color::RED).label("cos(x)"));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_pie_auto_outside_legend() {
+    // PieMark with no explicit legend_position — Auto resolves to
+    // Outside(Right) via prefers_outside_legend(). Slices fill the disk
+    // but the legend lives outside.
+    let fig = Figure::new(600, 400)
+        .title("Auto-outside legend on pie")
+        .add(PieMark::new(
+            vec![32.0, 24.0, 18.0, 14.0, 12.0],
+            vec![
+                "Solar".into(),
+                "Wind".into(),
+                "Hydro".into(),
+                "Nuclear".into(),
+                "Other".into(),
+            ],
+        ));
+    let svg = fig.render_svg().unwrap();
+    insta::assert_snapshot!(svg);
+}
+
+#[test]
+fn snapshot_polar_legend_dodge() {
+    // Multi-entry RadarMark legend. The polar render path applies the same
+    // Auto-resolution (RadarMark prefers_outside_legend == true), so the
+    // legend lands in a right-edge strip instead of the inscribed disk.
+    use starsight_layer_3::marks::RadarMark;
+    let dims_n: usize = 6;
+    let thetas: Vec<f64> = (0..dims_n as u32).map(f64::from).collect();
+    let theta_axis = Axis::polar_angular_categorical(dims_n);
+    let r_axis = Axis::polar_radial(0.0, 1.0);
+    let fig = Figure::new(600, 600)
+        .title("Polar legend dodge (3 series)")
+        .polar_axes(theta_axis, r_axis)
+        .add(
+            RadarMark::new(thetas.clone(), vec![0.8, 0.6, 0.7, 0.5, 0.9, 0.7])
+                .color(Color::BLUE)
+                .label("Series A"),
+        )
+        .add(
+            RadarMark::new(thetas.clone(), vec![0.5, 0.7, 0.4, 0.8, 0.6, 0.5])
+                .color(Color::RED)
+                .label("Series B"),
+        )
+        .add(
+            RadarMark::new(thetas, vec![0.6, 0.5, 0.8, 0.4, 0.5, 0.9])
+                .color(Color::from_hex(0x0033_AA33))
+                .label("Series C"),
+        );
     let svg = fig.render_svg().unwrap();
     insta::assert_snapshot!(svg);
 }

@@ -12,12 +12,64 @@
 
 use crate::statistics::{Bin, BinMethod, BinTransform};
 use starsight_layer_1::backends::DrawBackend;
-use starsight_layer_1::errors::Result;
+use starsight_layer_1::errors::{Result, StarsightError};
 use starsight_layer_1::paths::{LineCap, LineJoin, Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
-use starsight_layer_2::coords::CartesianCoord;
-use starsight_layer_2::scales::Scale;
+use starsight_layer_2::coords::{CartesianCoord, Coord, PolarCoord};
 use std::collections::HashMap;
+
+/// Downcast a `&dyn Coord` to the concrete `CartesianCoord` required by every
+/// 0.2.x-era cartesian mark. New polar marks (`ArcMark`, `RadarMark`, etc.)
+/// bypass this and downcast to their own coord type instead.
+pub(crate) fn require_cartesian(coord: &dyn Coord) -> Result<&CartesianCoord> {
+    coord
+        .as_any()
+        .downcast_ref::<CartesianCoord>()
+        .ok_or_else(|| {
+            StarsightError::Config("this mark requires a Cartesian coordinate system".to_string())
+        })
+}
+
+/// Downcast a `&dyn Coord` to the concrete `PolarCoord`. Mirror of
+/// [`require_cartesian`] for polar marks ([`crate::marks::ArcMark`],
+/// `RadarMark`, etc.).
+pub(crate) fn require_polar(coord: &dyn Coord) -> Result<&PolarCoord> {
+    coord.as_any().downcast_ref::<PolarCoord>().ok_or_else(|| {
+        StarsightError::Config("this mark requires a polar coordinate system".to_string())
+    })
+}
+
+// ── Submodule marks (0.3.0+) ─────────────────────────────────────────────────────────────────────
+//
+// Statistical marks added in 0.3.0 live in their own submodule files to keep
+// this top-level file readable. Each submodule re-exports its public type(s)
+// up to `marks::` so users can write `starsight::marks::BoxPlotMark` without
+// caring that the implementation lives in a sibling file.
+pub mod arc;
+pub mod bar_polar;
+pub mod box_plot;
+pub mod candlestick;
+pub mod contour;
+pub mod errorbar;
+pub mod extent;
+pub(crate) mod palette;
+pub mod pie;
+pub mod radar;
+pub mod rect_polar;
+pub mod rug;
+pub mod violin;
+pub use arc::ArcMark;
+pub use bar_polar::PolarBarMark;
+pub use box_plot::{BoxPlotGroup, BoxPlotMark};
+pub use candlestick::{CandlestickMark, Ohlc};
+pub use contour::{ContourMark, ContourMode};
+pub use errorbar::{ErrorBarMark, ErrorBarOrientation};
+pub use extent::MarkExtent;
+pub use pie::PieMark;
+pub use radar::RadarMark;
+pub use rect_polar::PolarRectMark;
+pub use rug::{AxisDir, RugMark};
+pub use violin::{ViolinGroup, ViolinMark, ViolinScale};
 // ── DataExtent ───────────────────────────────────────────────────────────────────────────────────
 
 /// Axis-aligned bounding box of a mark's data, in data coordinates.
@@ -43,6 +95,29 @@ pub struct BarRenderContext {
     pub first_pass: bool,
 }
 
+// ── LegendGlyph ──────────────────────────────────────────────────────────────────────────────────
+
+/// Visual sample drawn next to a legend entry's label.
+///
+/// Each [`Mark`] reports the glyph that best represents its appearance via
+/// [`Mark::legend_glyph`]. The legend renderer dispatches per variant so
+/// [`PointMark`] entries show a filled disk rather than a horizontal line,
+/// [`BarMark`] / [`HistogramMark`] entries show a filled rectangle, and
+/// [`AreaMark`] entries show a translucent fill — matching what the mark
+/// actually draws on the chart.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum LegendGlyph {
+    /// Horizontal stroke. Default for line-shaped marks ([`LineMark`], [`StepMark`]).
+    Line,
+    /// Filled disk. Used by [`PointMark`].
+    Point,
+    /// Filled rectangle. Used by [`BarMark`] and [`HistogramMark`].
+    Bar,
+    /// Filled rectangle with a top stroke. Used by [`AreaMark`].
+    Area,
+}
+
 // ── Mark ─────────────────────────────────────────────────────────────────────────────────────────
 
 /// Object-safe trait every visual mark implements.
@@ -53,10 +128,15 @@ pub struct BarRenderContext {
 pub trait Mark {
     /// Render the mark via the given coordinate system and backend.
     ///
+    /// `coord` is `&dyn Coord` so the same trait can dispatch to cartesian and
+    /// polar marks. Cartesian marks use the crate-private `require_cartesian`
+    /// helper to downcast at the top of their impl; polar marks downcast to
+    /// their own coord type.
+    ///
     /// # Errors
-    /// Returns the backend's [`Result`] error if drawing any of the mark's
-    /// primitives fails (e.g. invalid clip rect, font shaping failure).
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()>;
+    /// Returns [`StarsightError`] if the coord type is unsupported by this mark
+    /// or if the backend errors on a draw call.
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()>;
     /// Render with bar context for grouped/stacked bar rendering.
     ///
     /// Default implementation forwards to [`render`](Self::render); bar marks
@@ -67,7 +147,7 @@ pub trait Mark {
     #[allow(unused_variables)]
     fn render_bar(
         &self,
-        coord: &CartesianCoord,
+        coord: &dyn Coord,
         backend: &mut dyn DrawBackend,
         _context: &BarRenderContext,
     ) -> Result<()> {
@@ -83,6 +163,36 @@ pub trait Mark {
     }
     /// Bounding box of this mark's data, or `None` if it is empty.
     fn data_extent(&self) -> Option<DataExtent>;
+    /// Pixel-space rendered footprint of this mark.
+    ///
+    /// Used by the legend dodge in layer-5 to find a corner that does not
+    /// overlap any mark. The default impl projects [`Self::data_extent`]
+    /// through `coord` and returns [`MarkExtent::Bbox`] — exact for marks
+    /// whose footprint matches their data bbox (point, bar, heatmap, candle,
+    /// pie, donut, rug). Marks where the bbox over-claims coverage
+    /// ([`LineMark`] on diagonal data, [`AreaMark`] / contour bands that
+    /// fill non-rectangular regions, polar marks whose footprint is annular)
+    /// override this to a tighter [`MarkExtent`] variant.
+    ///
+    /// For non-cartesian coords (e.g. [`PolarCoord`]) the default falls back
+    /// to `coord.plot_area()` because projecting only the `(x_min, y_min)` /
+    /// `(x_max, y_max)` corners of a polar [`DataExtent`] does not bound the
+    /// disk-space footprint. Polar marks should override.
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        if let Some(ext) = self.data_extent()
+            && coord.as_any().downcast_ref::<CartesianCoord>().is_some()
+        {
+            let p1 = coord.data_to_pixel(ext.x_min, ext.y_min);
+            let p2 = coord.data_to_pixel(ext.x_max, ext.y_max);
+            return MarkExtent::Bbox(Rect::new(
+                p1.x.min(p2.x),
+                p1.y.min(p2.y),
+                p1.x.max(p2.x),
+                p1.y.max(p2.y),
+            ));
+        }
+        MarkExtent::Bbox(coord.plot_area())
+    }
     /// Returns the color of this mark for legend display.
     fn legend_color(&self) -> Option<Color> {
         None
@@ -91,6 +201,125 @@ pub trait Mark {
     fn legend_label(&self) -> Option<&str> {
         None
     }
+    /// Returns the glyph the legend should draw for this mark. The default of
+    /// [`LegendGlyph::Line`] suits stroked-line marks; concrete marks override
+    /// to surface a more honest sample (e.g. [`PointMark`] returns
+    /// [`LegendGlyph::Point`], so a scatter legend shows a dot, not a dash).
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Line
+    }
+    /// Whether the figure should draw numeric x/y axes around this mark. Most
+    /// marks live on a Cartesian axis and want them; angular / decorative
+    /// marks like [`PieMark`] override to `false` so the figure suppresses
+    /// the axis chrome. The figure honours this only when *every* mark on it
+    /// returns `false`; mixed charts keep the axes for the others.
+    fn wants_axes(&self) -> bool {
+        true
+    }
+
+    /// Whether a polar `Figure` should draw the radial-spoke + concentric-
+    /// ring grid behind this mark. Quantitative polar marks (`PolarBarMark`
+    /// wind roses, `RadarMark` spider charts, `PolarRectMark` polar heatmaps)
+    /// keep the default `true` because the grid carries axis context;
+    /// decorative wedge marks (`ArcMark` for gauge / nightingale / sunburst,
+    /// `PieMark`, `DonutMark`) override to `false` so their wedges don't
+    /// render against a distracting full-360 grid. The figure suppresses the
+    /// polar grid only when *every* mark returns `false`. Cartesian figures
+    /// ignore this method (they use [`Self::wants_axes`] instead). Fix for
+    /// Epic L (`starsight-3bp.10.14`).
+    fn wants_polar_grid(&self) -> bool {
+        true
+    }
+
+    /// Whether a `Figure` carrying this mark should default to placing the
+    /// legend OUTSIDE the plot area instead of corner-dodging inside.
+    ///
+    /// Disk-fill marks (`ArcMark`, `PieMark` / `DonutMark`, `RadarMark`,
+    /// `PolarBarMark`, `PolarRectMark`) paint over the entire inscribed disk,
+    /// so the corner dodge never finds a clear corner — the legend always
+    /// overlaps a wedge or polygon edge. They override to `true` so the
+    /// figure auto-resolves `LegendPosition::Auto` to
+    /// `LegendPosition::Outside(Edge::Right)`, reserving a top-aligned strip
+    /// outside the disk. Other marks keep the default `false` and dodge
+    /// inside.
+    ///
+    /// Users override via `Figure::legend_position(...)`. Tracked as Epic L
+    /// (`starsight-3bp.10` / L.17).
+    fn prefers_outside_legend(&self) -> bool {
+        false
+    }
+
+    /// Whether this mark needs the axis to inset 5% on both ends so its
+    /// data extremes don't visually sit on the plot edge. Default `true`
+    /// for point-like marks (`PointMark`, `LineMark`, `AreaMark`,
+    /// `ErrorBarMark`, `BoxPlotMark`, `ViolinMark`, `CandlestickMark`,
+    /// `StepMark`, `RugMark` — anything where a single value at the extreme
+    /// would otherwise touch the axis line).
+    ///
+    /// Bar-shaped marks (`BarMark`, `HistogramMark`, `HeatmapMark`,
+    /// `ContourMark`) override to `false` because their data IS the axis
+    /// structure — bars naturally span band edges, heatmap cells tile to
+    /// the plot rect, contour bands fill explicit level boundaries.
+    ///
+    /// `Figure::render_within` aggregates this with `any()` across marks:
+    /// the figure pads only when at least one mark wants padding.
+    fn wants_axis_padding(&self) -> bool {
+        true
+    }
+
+    /// Optional colormap legend description for this mark, used by the
+    /// figure to auto-attach a colorbar (the layer-5 chrome component).
+    /// Marks that map a continuous value range through a colormap
+    /// (`HeatmapMark`, `ContourMark` with a colormap) override this to
+    /// expose `(colormap, value_min, value_max, label?, log?)`. Other marks
+    /// return `None` (the default), so they don't trigger auto-attach.
+    fn colormap_legend(&self) -> Option<ColormapLegend> {
+        None
+    }
+
+    /// Multi-entry legend list for marks that carry one slice / wedge /
+    /// bar per category (`PieMark`, `ArcMark` for sunburst). Default
+    /// derives a single entry from `legend_color` + `legend_label` +
+    /// `legend_glyph` so existing single-color marks (Line, Point, Bar,
+    /// etc.) keep working unchanged.
+    ///
+    /// When this returns multiple entries, the figure renders one legend
+    /// row per entry — color swatch + label — so a pie/sunburst gets a
+    /// proper "color → category" key off to the side.
+    fn legend_entries(&self) -> Vec<(Color, String, LegendGlyph)> {
+        if let (Some(c), Some(l)) = (self.legend_color(), self.legend_label())
+            && !l.is_empty()
+        {
+            vec![(c, l.to_string(), self.legend_glyph())]
+        } else {
+            Vec::new()
+        }
+    }
+}
+
+// ── ColormapLegend ───────────────────────────────────────────────────────────────────────────────
+
+/// Information a mark exposes when it wants the figure to render a
+/// colorbar/scale-to-colormap legend on its behalf.
+///
+/// Returned by [`Mark::colormap_legend`]. Layer-5 inspects every mark on
+/// the figure; when at least one returns `Some` and the figure has not
+/// opted out via `Figure::colorbar(false)`, a vertical colorbar strip is
+/// attached on the right side of the plot area.
+#[derive(Clone, Debug)]
+pub struct ColormapLegend {
+    /// Colormap used to render the mark's continuous value field.
+    pub colormap: starsight_layer_1::colormap::Colormap,
+    /// Lowest value the mark renders.
+    pub value_min: f64,
+    /// Highest value the mark renders.
+    pub value_max: f64,
+    /// Legend label (often the same as the mark's `label`). When `None`,
+    /// the colorbar reads as a bare value scale.
+    pub label: Option<String>,
+    /// Hint that the value range is log-distributed; the colorbar will
+    /// place ticks accordingly.
+    pub log_scale: bool,
 }
 
 // ── LineMark ─────────────────────────────────────────────────────────────────────────────────────
@@ -146,7 +375,8 @@ impl LineMark {
 }
 
 impl Mark for LineMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let mut commands = Vec::new();
         let mut need_move = true;
 
@@ -184,6 +414,30 @@ impl Mark for LineMark {
         extent_from_xy(&self.x, &self.y)
     }
 
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        let mut segments = Vec::with_capacity(self.x.len().saturating_sub(1));
+        let mut prev: Option<Point> = None;
+        for (xv, yv) in self.x.iter().zip(&self.y) {
+            if xv.is_nan() || yv.is_nan() {
+                prev = None;
+                continue;
+            }
+            let p = cart.data_to_pixel(*xv, *yv);
+            if let Some(prev_p) = prev {
+                segments.push((prev_p, p));
+            }
+            prev = Some(p);
+        }
+        if segments.is_empty() {
+            MarkExtent::Bbox(cart.plot_area)
+        } else {
+            MarkExtent::Segments(segments)
+        }
+    }
+
     fn legend_color(&self) -> Option<Color> {
         Some(self.color)
     }
@@ -196,18 +450,25 @@ impl Mark for LineMark {
 // ── PointMark ────────────────────────────────────────────────────────────────────────────────────
 
 /// Scatter plot of individual points.
+///
+/// `colors` and `radii` are parallel to `x`/`y` and follow the same broadcast rule:
+/// `None` → default; `Some(vec)` of length 1 → broadcast; length matching the data
+/// → per-point. Length-mismatched vectors fall through to defaults rather than panic.
 #[derive(Debug, Clone)]
 pub struct PointMark {
     /// X data values.
     pub x: Vec<f64>,
     /// Y data values (must be the same length as `x`).
     pub y: Vec<f64>,
-    /// Point color.
-    pub color: Color,
-    /// Point radius in pixels.
-    pub radius: f32,
+    /// Per-point fill colors. See broadcast rule on the struct doc.
+    pub colors: Option<Vec<Color>>,
+    /// Per-point radii in pixels. See broadcast rule on the struct doc.
+    pub radii: Option<Vec<f32>>,
     /// Legend label.
     pub label: Option<String>,
+    /// Mark-wide alpha multiplier in `[0, 1]`. Applied uniformly to every point
+    /// at draw time via the path's opacity attribute. Default 1.0.
+    pub alpha: f32,
 }
 
 impl PointMark {
@@ -217,23 +478,48 @@ impl PointMark {
         Self {
             x,
             y,
-            color: Color::BLUE,
-            radius: 4.0,
+            colors: Some(vec![Color::BLUE]),
+            radii: Some(vec![4.0]),
             label: None,
+            alpha: 1.0,
         }
     }
 
-    /// Builder: set point color.
+    /// Builder: broadcast a single color to every point.
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
-        self.color = c;
+        self.colors = Some(vec![c]);
         self
     }
 
-    /// Builder: set point radius in pixels.
+    /// Builder: set per-point colors. Length 1 broadcasts; length matching data
+    /// gives per-point colors. Used by bubble scatters where each point's color
+    /// encodes a continuous variable through a colormap.
+    #[must_use]
+    pub fn colors(mut self, cs: Vec<Color>) -> Self {
+        self.colors = Some(cs);
+        self
+    }
+
+    /// Builder: broadcast a single radius (pixels) to every point.
     #[must_use]
     pub fn radius(mut self, r: f32) -> Self {
-        self.radius = r;
+        self.radii = Some(vec![r]);
+        self
+    }
+
+    /// Builder: set per-point radii (pixels). Length 1 broadcasts; length matching
+    /// data gives per-point sizes. Used by bubble scatters.
+    #[must_use]
+    pub fn radii(mut self, rs: Vec<f32>) -> Self {
+        self.radii = Some(rs);
+        self
+    }
+
+    /// Builder: set the mark-wide alpha multiplier (clamped to `[0, 1]`).
+    #[must_use]
+    pub fn alpha(mut self, a: f32) -> Self {
+        self.alpha = a.clamp(0.0, 1.0);
         self
     }
 
@@ -243,32 +529,83 @@ impl PointMark {
         self.label = Some(label.into());
         self
     }
+
+    /// Per-point color lookup. Same broadcast rule as `BarMark` — `None`/mismatched
+    /// fall back to BLUE; length 1 broadcasts; length matching data is per-point.
+    fn color_at(&self, i: usize) -> Color {
+        match self.colors.as_deref() {
+            None => Color::BLUE,
+            Some([c]) => *c,
+            Some(cs) if cs.len() == self.x.len() => cs[i],
+            Some(cs) => cs.first().copied().unwrap_or(Color::BLUE),
+        }
+    }
+
+    /// Per-point radius lookup. Default 4.0 px when unset/mismatched.
+    fn radius_at(&self, i: usize) -> f32 {
+        match self.radii.as_deref() {
+            None => 4.0,
+            Some([r]) => *r,
+            Some(rs) if rs.len() == self.x.len() => rs[i],
+            Some(rs) => rs.first().copied().unwrap_or(4.0),
+        }
+    }
 }
 
 impl Mark for PointMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let mut commands = Vec::new();
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
+        // Per-point colors/radii mean we can't share a single Path across all
+        // points the way the original implementation did. Group consecutive points
+        // by (color, radius) so each unique combination still maps to one draw_path
+        // call — common bubble-scatter cases (a few size buckets) emit at most a
+        // dozen draws, single-color/single-radius cases collapse back to one draw.
+        let mut current_key: Option<(Color, u32)> = None;
+        let mut commands: Vec<PathCommand> = Vec::new();
 
-        for (x, y) in self.x.iter().zip(&self.y) {
+        let flush = |backend: &mut dyn DrawBackend,
+                     commands: &mut Vec<PathCommand>,
+                     key: Option<(Color, u32)>,
+                     alpha: f32|
+         -> Result<()> {
+            if commands.is_empty() {
+                return Ok(());
+            }
+            if let Some((color, _)) = key {
+                let path = Path {
+                    commands: std::mem::take(commands),
+                };
+                let style = PathStyle {
+                    stroke_color: color,
+                    stroke_width: 0.0,
+                    fill_color: Some(color),
+                    opacity: alpha,
+                    ..PathStyle::default()
+                };
+                backend.draw_path(&path, &style)?;
+            }
+            Ok(())
+        };
+
+        for (i, (x, y)) in self.x.iter().zip(&self.y).enumerate() {
             if x.is_nan() || y.is_nan() {
                 continue;
             }
+            let color = self.color_at(i);
+            let radius = self.radius_at(i);
+            // Bucket by radius via its bit representation so f32 NaN is not a key
+            // (already filtered above) and equal radii hash equal.
+            let key = (color, radius.to_bits());
+            if current_key != Some(key) {
+                flush(backend, &mut commands, current_key, self.alpha)?;
+                current_key = Some(key);
+            }
             let center = coord.data_to_pixel(*x, *y);
-            push_circle(&mut commands, center, self.radius);
+            push_circle(&mut commands, center, radius);
         }
+        flush(backend, &mut commands, current_key, self.alpha)?;
 
-        if commands.is_empty() {
-            return Ok(());
-        }
-
-        let path = Path { commands };
-        let style = PathStyle {
-            stroke_color: self.color,
-            stroke_width: 0.0,
-            fill_color: Some(self.color),
-            ..PathStyle::default()
-        };
-        backend.draw_path(&path, &style)
+        Ok(())
     }
 
     fn data_extent(&self) -> Option<DataExtent> {
@@ -276,36 +613,58 @@ impl Mark for PointMark {
     }
 
     fn legend_color(&self) -> Option<Color> {
-        Some(self.color)
+        Some(
+            self.colors
+                .as_deref()
+                .and_then(|cs| cs.first().copied())
+                .unwrap_or(Color::BLUE),
+        )
     }
 
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
     }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Point
+    }
 }
 
 // ── BarMark ──────────────────────────────────────────────────────────────────────────────────────
-/// Bar chart for individual values
+/// Bar chart for individual values.
+///
+/// `colors` and `bases` are parallel arrays to `y`. They follow the same broadcast
+/// rule everywhere they're used:
+///
+/// - `None` → use the default for every bar (blue / 0.0).
+/// - `Some(vec)` with `len == 1` → broadcast the single value across all bars.
+/// - `Some(vec)` with `len == y.len()` → per-bar value at index `i`.
+/// - Anything else → falls through to the default; render is robust, no panic.
 #[derive(Debug, Clone)]
 pub struct BarMark {
     /// X category labels.
     pub x: Vec<String>,
-    /// Y data height
+    /// Y data height (the value rendered as the bar's extent above its base).
     pub y: Vec<f64>,
-    /// Bar color
-    pub color: Option<Color>,
-    /// Define the width of each bar
+    /// Per-bar fill colors (see broadcast rules on the struct doc).
+    pub colors: Option<Vec<Color>>,
+    /// Define the width of each bar as a fraction of the band.
     pub width: Option<f32>,
-    /// Set bar origin axis
+    /// Set bar origin axis.
     pub orientation: Orientation,
-    /// Group name for grouped bars (dodged within band)
+    /// Group name for grouped bars (dodged within band).
     pub group: Option<String>,
-    /// Stack name for stacked bars (accumulated baseline)
+    /// Stack name for stacked bars (accumulated baseline).
     pub stack: Option<String>,
-    /// Base value for waterfall chart (defaults to 0)
-    pub base: Option<f64>,
+    /// Per-bar base values (see broadcast rules on the struct doc). When unset, all
+    /// bars start at 0; when set, each bar floats at its own base — used by waterfall
+    /// charts where bar `i` sits on the running total of bars `0..i`.
+    pub bases: Option<Vec<f64>>,
     /// Legend label.
     pub label: Option<String>,
+    /// Draw thin gray connector lines between consecutive bars at `bases[i] + y[i]`.
+    /// Only honored for `Orientation::Vertical`. Used by waterfall charts.
+    pub connectors: bool,
 }
 /// Bar/box mark orientation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -324,13 +683,14 @@ impl BarMark {
         Self {
             x,
             y,
-            color: Some(Color::BLUE),
+            colors: Some(vec![Color::BLUE]),
             width: Some(0.8),
             orientation: Orientation::Vertical,
             group: None,
             stack: None,
-            base: None,
+            bases: None,
             label: None,
+            connectors: false,
         }
     }
 
@@ -355,21 +715,38 @@ impl BarMark {
         self
     }
 
-    /// Builder: set base value for waterfall chart (where bar starts).
+    /// Builder: broadcast a single base value to every bar (where bars start).
     #[must_use]
     pub fn base(mut self, b: f64) -> Self {
-        self.base = Some(b);
+        self.bases = Some(vec![b]);
         self
     }
 
-    /// Builder: set bar color.
+    /// Builder: set per-bar base values (length should match `y` for per-bar bases;
+    /// length 1 broadcasts). Used by waterfall charts.
+    #[must_use]
+    pub fn bases(mut self, bs: Vec<f64>) -> Self {
+        self.bases = Some(bs);
+        self
+    }
+
+    /// Builder: broadcast a single color to every bar.
     #[must_use]
     pub fn color(mut self, c: Color) -> Self {
-        self.color = Some(c);
+        self.colors = Some(vec![c]);
         self
     }
 
-    /// Builder: set bar width in pixels.
+    /// Builder: set per-bar colors (length should match `y` for per-bar colors;
+    /// length 1 broadcasts). Used by waterfall charts and any other chart where
+    /// individual bars carry semantic color (e.g. above/below threshold).
+    #[must_use]
+    pub fn colors(mut self, cs: Vec<Color>) -> Self {
+        self.colors = Some(cs);
+        self
+    }
+
+    /// Builder: set bar width as a fraction of the band (0.0..1.0).
     #[must_use]
     pub fn width(mut self, r: f32) -> Self {
         self.width = Some(r);
@@ -382,15 +759,49 @@ impl BarMark {
         self.label = Some(label.into());
         self
     }
+
+    /// Builder: enable thin gray connector lines between consecutive bars (at
+    /// `bases[i] + y[i]`). Only honored for vertical orientation. Used by waterfalls.
+    #[must_use]
+    pub fn connectors(mut self, on: bool) -> Self {
+        self.connectors = on;
+        self
+    }
+
+    /// Per-bar color lookup: `colors[i]` if set and lengths align, else broadcast
+    /// the first element, else fall back to BLUE. Robust against length mismatches.
+    fn color_at(&self, i: usize) -> Color {
+        match self.colors.as_deref() {
+            None => Color::BLUE,
+            Some([c]) => *c,
+            Some(cs) if cs.len() == self.y.len() => cs[i],
+            // length mismatch (and not 1) — fall back rather than panic
+            Some(cs) => cs.first().copied().unwrap_or(Color::BLUE),
+        }
+    }
+
+    /// Per-bar base lookup with the same broadcast rules as colors. 0.0 default.
+    fn base_at(&self, i: usize) -> f64 {
+        match self.bases.as_deref() {
+            None => 0.0,
+            Some([b]) => *b,
+            Some(bs) if bs.len() == self.y.len() => bs[i],
+            Some(bs) => bs.first().copied().unwrap_or(0.0),
+        }
+    }
 }
 impl Mark for BarMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
-        let valid: Vec<(&str, f64)> = self
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
+        // Keep the original index alongside each valid bar so per-bar bases/colors
+        // line up with self.y even when some entries are filtered out as NaN/empty.
+        let valid: Vec<(usize, &str, f64)> = self
             .x
             .iter()
             .zip(&self.y)
-            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
-            .map(|(x, y)| (x.as_str(), *y))
+            .enumerate()
+            .filter(|(_, (x, y))| !x.is_empty() && !y.is_nan())
+            .map(|(i, (x, y))| (i, x.as_str(), *y))
             .collect();
 
         let n = valid.len();
@@ -399,40 +810,57 @@ impl Mark for BarMark {
         }
 
         let area = coord.plot_area;
-        let fill = self.color.unwrap_or(Color::BLUE);
         let width_fraction = self.width.unwrap_or(0.8);
 
         match self.orientation {
             Orientation::Vertical => {
+                // Route bar band-center positions through `scale.map(i + 0.5)`
+                // so bar centers stay aligned with the grid line midpoints
+                // (`Axis::category` uses LinearScale with domain 0..n; the
+                // `+ 0.5` puts the center on the band middle). Math stays in
+                // f64 until the single cast to pixel space — fixes the
+                // 1–2 px drift visible at the bollinger 90-bar volume panel
+                // where two f32 chains diverged by one ULP per step.
                 let band_width = area.width() / n as f32;
                 let bar_width = band_width * width_fraction;
+                let n_f64 = n as f64;
 
-                for (i, (_label, value)) in valid.iter().enumerate() {
-                    let x_center = area.left + (i as f32 + 0.5) * band_width;
+                for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
+                    let x_center = area.left + ((i as f64 + 0.5) / n_f64) as f32 * area.width();
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
-                    let y_top = area.bottom - coord.y_axis.scale.map(*value) as f32 * area.height();
-                    let y_bottom = area.bottom - coord.y_axis.scale.map(0.0) as f32 * area.height();
+                    let base = self.base_at(*orig_i);
+                    let y_top =
+                        area.bottom - coord.y_axis.scale.map(base + *value) as f32 * area.height();
+                    let y_bottom =
+                        area.bottom - coord.y_axis.scale.map(base) as f32 * area.height();
+                    let rect_top = y_top.min(y_bottom);
+                    let rect_bottom = y_top.max(y_bottom);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
             }
             Orientation::Horizontal => {
                 let band_height = area.height() / n as f32;
                 let bar_height = band_height * width_fraction;
+                let n_f64 = n as f64;
 
-                for (i, (_label, value)) in valid.iter().enumerate() {
-                    let y_center = area.top + (i as f32 + 0.5) * band_height;
+                for (i, (orig_i, _label, value)) in valid.iter().enumerate() {
+                    let y_center = area.top + ((i as f64 + 0.5) / n_f64) as f32 * area.height();
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
-                    let x_left = area.left + coord.x_axis.scale.map(0.0) as f32 * area.width();
-                    let x_right = area.left + coord.x_axis.scale.map(*value) as f32 * area.width();
+                    let base = self.base_at(*orig_i);
+                    let x_left = area.left + coord.x_axis.scale.map(base) as f32 * area.width();
+                    let x_right =
+                        area.left + coord.x_axis.scale.map(base + *value) as f32 * area.width();
+                    let rect_left = x_left.min(x_right);
+                    let rect_right = x_left.max(x_right);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(rect_left, y_top, rect_right, y_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
             }
         }
@@ -445,16 +873,18 @@ impl Mark for BarMark {
     #[allow(clippy::too_many_lines)]
     fn render_bar(
         &self,
-        coord: &CartesianCoord,
+        coord: &dyn Coord,
         backend: &mut dyn DrawBackend,
         context: &BarRenderContext,
     ) -> Result<()> {
-        let valid: Vec<(&str, f64)> = self
+        let coord = require_cartesian(coord)?;
+        let valid: Vec<(usize, &str, f64)> = self
             .x
             .iter()
             .zip(&self.y)
-            .filter(|(x, y)| !x.is_empty() && !y.is_nan())
-            .map(|(x, y)| (x.as_str(), *y))
+            .enumerate()
+            .filter(|(_, (x, y))| !x.is_empty() && !y.is_nan())
+            .map(|(i, (x, y))| (i, x.as_str(), *y))
             .collect();
 
         let n = valid.len();
@@ -463,8 +893,15 @@ impl Mark for BarMark {
         }
 
         let area = coord.plot_area;
-        let fill = self.color.unwrap_or(Color::BLUE);
         let width_fraction = self.width.unwrap_or(0.8);
+
+        // Connector geometry: collected during the bar pass for vertical orientation
+        // when self.connectors is on. Each entry is (x_left, x_right, y_running_total_pixel).
+        let mut connector_geom: Vec<(f32, f32, f32)> = if self.connectors {
+            Vec::with_capacity(n)
+        } else {
+            Vec::new()
+        };
 
         match self.orientation {
             Orientation::Vertical => {
@@ -482,8 +919,12 @@ impl Mark for BarMark {
                     band_width * width_fraction
                 };
 
-                for (i, (label, value)) in valid.iter().enumerate() {
-                    let base_x_center = area.left + (i as f32 + 0.5) * band_width;
+                let n_f64 = n as f64;
+                for (i, (orig_i, label, value)) in valid.iter().enumerate() {
+                    // Same f64-mediated band-center math as the simple
+                    // BarMark::render path above.
+                    let base_x_center =
+                        area.left + ((i as f64 + 0.5) / n_f64) as f32 * area.width();
                     let x_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
                             let sub_band = band_width * (1.0 - group_gap) / total as f32;
@@ -498,14 +939,15 @@ impl Mark for BarMark {
                     let x_left = x_center - bar_width / 2.0;
                     let x_right = x_center + bar_width / 2.0;
 
-                    // For stacked or floating bars: y_bottom is baseline, y_top is baseline + value
+                    // Stacked > per-bar base > 0.0. Stacked bars float at the running
+                    // height for that category; per-bar bases let waterfalls sit at
+                    // their running totals.
                     let (y_bottom_val, y_top_val) = if self.stack.is_some() {
                         let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
                         (baseline, baseline + value)
-                    } else if let Some(base) = self.base {
-                        (base, base + value)
                     } else {
-                        (0.0, *value)
+                        let base = self.base_at(*orig_i);
+                        (base, base + value)
                     };
 
                     let y_top =
@@ -513,12 +955,40 @@ impl Mark for BarMark {
                     let y_bottom =
                         area.bottom - coord.y_axis.scale.map(y_bottom_val) as f32 * area.height();
 
-                    // Ensure valid rect
                     let rect_top = y_top.min(y_bottom);
                     let rect_bottom = y_top.max(y_bottom);
 
                     let rect = Rect::new(x_left, rect_top, x_right, rect_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
+
+                    if self.connectors {
+                        // y_top is the pixel-y of (base + value), the running total —
+                        // exactly where the connector to the next bar should sit.
+                        connector_geom.push((x_left, x_right, y_top));
+                    }
+                }
+
+                // Connector pass: thin gray segments from bar i's right edge to bar
+                // i+1's left edge, both at bar i's running-total y. Vertical only.
+                if self.connectors && connector_geom.len() >= 2 {
+                    let connector_color = Color::new(0x88, 0x88, 0x88);
+                    let style = PathStyle {
+                        stroke_color: connector_color,
+                        stroke_width: 1.0,
+                        fill_color: None,
+                        ..PathStyle::default()
+                    };
+                    for pair in connector_geom.windows(2) {
+                        let (_, x_right_i, y_running) = pair[0];
+                        let (x_left_next, _, _) = pair[1];
+                        let path = Path {
+                            commands: vec![
+                                PathCommand::MoveTo(Point::new(x_right_i, y_running)),
+                                PathCommand::LineTo(Point::new(x_left_next, y_running)),
+                            ],
+                        };
+                        backend.draw_path(&path, &style)?;
+                    }
                 }
             }
             Orientation::Horizontal => {
@@ -536,8 +1006,12 @@ impl Mark for BarMark {
                     band_height * width_fraction
                 };
 
-                for (i, (label, value)) in valid.iter().enumerate() {
-                    let base_y_center = area.top + (i as f32 + 0.5) * band_height;
+                let n_f64 = n as f64;
+                for (i, (orig_i, label, value)) in valid.iter().enumerate() {
+                    // Same f64-mediated band-center math as the simple
+                    // BarMark::render path above.
+                    let base_y_center =
+                        area.top + ((i as f64 + 0.5) / n_f64) as f32 * area.height();
                     let y_offset = if let Some(group_name) = &self.group {
                         if let Some(&(idx, total)) = context.group_offsets.get(group_name) {
                             let sub_band = band_height * (1.0 - group_gap) / total as f32;
@@ -552,23 +1026,25 @@ impl Mark for BarMark {
                     let y_top = y_center - bar_height / 2.0;
                     let y_bottom = y_center + bar_height / 2.0;
 
-                    // For stacked or floating horizontal bars: x_left is baseline, x_right is baseline + value
                     let (x_left_val, x_right_val) = if self.stack.is_some() {
                         let baseline = *context.stacked_baselines.get(*label).unwrap_or(&0.0);
                         (baseline, baseline + value)
-                    } else if let Some(base) = self.base {
-                        (base, base + value)
                     } else {
-                        (0.0, *value)
+                        let base = self.base_at(*orig_i);
+                        (base, base + value)
                     };
                     let x_left =
                         area.left + coord.x_axis.scale.map(x_left_val) as f32 * area.width();
                     let x_right =
                         area.left + coord.x_axis.scale.map(x_right_val) as f32 * area.width();
+                    let rect_left = x_left.min(x_right);
+                    let rect_right = x_left.max(x_right);
 
-                    let rect = Rect::new(x_left, y_top, x_right, y_bottom);
-                    backend.fill_rect(rect, fill)?;
+                    let rect = Rect::new(rect_left, y_top, rect_right, y_bottom);
+                    backend.fill_rect(rect, self.color_at(*orig_i))?;
                 }
+                // Horizontal connectors are out of scope at 0.3.0 — would need a
+                // second pass keyed on x rather than y. Spec only calls for vertical.
             }
         }
 
@@ -624,11 +1100,29 @@ impl Mark for BarMark {
     }
 
     fn legend_color(&self) -> Option<Color> {
-        self.color
+        // Broadcast first color (or BLUE fallback). We always return Some so that
+        // bar marks reliably render a legend swatch even when colors aren't set.
+        Some(
+            self.colors
+                .as_deref()
+                .and_then(|cs| cs.first().copied())
+                .unwrap_or(Color::BLUE),
+        )
     }
 
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
+    }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
+    }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Bars span band edges by design — their data IS the axis structure,
+        // so 5% inset would just push bars away from the axis line and
+        // create awkward gaps.
+        false
     }
 }
 
@@ -732,7 +1226,8 @@ fn render_segment(
 }
 
 impl Mark for AreaMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let baseline_y = match self.baseline {
             AreaBaseline::Zero => 0.0,
             AreaBaseline::Fixed(y) => y,
@@ -808,11 +1303,83 @@ impl Mark for AreaMark {
             y_max,
         })
     }
+
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        let baseline_y = match self.baseline {
+            AreaBaseline::Zero => 0.0,
+            AreaBaseline::Fixed(y) => y,
+        };
+        // Match render_segment's polygon shape: data points top, then back
+        // along the baseline. NaN gaps split into separate polygons.
+        let mut polygons: Vec<Vec<Point>> = Vec::new();
+        let mut current: Vec<Point> = Vec::new();
+        let mut current_first_x: Option<f64> = None;
+        let mut current_last_x: Option<f64> = None;
+        let n = self.x.len().min(self.y.len());
+        for i in 0..n {
+            let xi = self.x[i];
+            let yi = self.y[i];
+            if xi.is_nan() || yi.is_nan() {
+                if current.len() >= 2
+                    && let (Some(fx), Some(lx)) = (current_first_x, current_last_x)
+                {
+                    current.push(cart.data_to_pixel(lx, baseline_y));
+                    current.push(cart.data_to_pixel(fx, baseline_y));
+                    polygons.push(std::mem::take(&mut current));
+                }
+                current.clear();
+                current_first_x = None;
+                current_last_x = None;
+                continue;
+            }
+            if current.is_empty() {
+                current_first_x = Some(xi);
+            }
+            current.push(cart.data_to_pixel(xi, yi));
+            current_last_x = Some(xi);
+        }
+        if current.len() >= 2
+            && let (Some(fx), Some(lx)) = (current_first_x, current_last_x)
+        {
+            current.push(cart.data_to_pixel(lx, baseline_y));
+            current.push(cart.data_to_pixel(fx, baseline_y));
+            polygons.push(current);
+        }
+        if polygons.is_empty() {
+            MarkExtent::Bbox(cart.plot_area)
+        } else {
+            MarkExtent::Polygons(polygons)
+        }
+    }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Area
+    }
 }
 
 // ── HeatmapMark ──────────────────────────────────────────────────────────────────────────────────
 
 use starsight_layer_1::colormap::Colormap;
+
+/// How heatmap cell values map to the `[0, 1]` colormap input.
+///
+/// The default `Linear` is what most heatmaps want (`(v - vmin) / (vmax - vmin)`).
+/// `Log` applies `log10` to value and bounds with a small epsilon, useful when the
+/// data spans several decades — without it, the brightest cells saturate the
+/// colormap and dim cells collapse into the floor color.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[non_exhaustive]
+pub enum HeatmapColorScale {
+    /// Linear: `t = (v - vmin) / (vmax - vmin)`.
+    #[default]
+    Linear,
+    /// Log10: `t = (log10(v') - log10(vmin')) / (log10(vmax') - log10(vmin'))`,
+    /// where `v' = max(v, eps)` to keep `log10` finite. Negative cells clip to `eps`.
+    Log,
+}
 
 /// Heatmap: a 2D grid of values mapped to colors via a colormap.
 #[derive(Debug, Clone)]
@@ -821,6 +1388,8 @@ pub struct HeatmapMark {
     pub data: Vec<Vec<f64>>,
     /// Colormap for mapping values to colors.
     pub colormap: Colormap,
+    /// How values map to the `[0, 1]` colormap input. Default linear.
+    pub color_scale: HeatmapColorScale,
     /// Optional label for legend.
     pub label: Option<String>,
 }
@@ -832,6 +1401,7 @@ impl HeatmapMark {
         Self {
             data,
             colormap: Colormap::default(),
+            color_scale: HeatmapColorScale::Linear,
             label: None,
         }
     }
@@ -841,6 +1411,19 @@ impl HeatmapMark {
     pub fn colormap(mut self, colormap: Colormap) -> Self {
         self.colormap = colormap;
         self
+    }
+
+    /// Set the value-to-`[0, 1]` mapping mode (linear or log).
+    #[must_use]
+    pub fn color_scale(mut self, scale: HeatmapColorScale) -> Self {
+        self.color_scale = scale;
+        self
+    }
+
+    /// Convenience: switch to log-scale color mapping.
+    #[must_use]
+    pub fn log_scale(self) -> Self {
+        self.color_scale(HeatmapColorScale::Log)
     }
 
     /// Set the legend label.
@@ -866,7 +1449,8 @@ impl HeatmapMark {
 }
 
 impl Mark for HeatmapMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         if self.data.is_empty() || self.data[0].is_empty() {
             return Ok(());
         }
@@ -876,6 +1460,24 @@ impl Mark for HeatmapMark {
             1.0
         } else {
             data_max - data_min
+        };
+
+        // Log-scale prep: pre-compute the log10 bounds and a small epsilon to keep
+        // log10 finite when data hits zero or goes negative. eps scales with vmax so
+        // the floor is a few decades below the top regardless of the data's units.
+        let (log_min, log_range, log_eps) = match self.color_scale {
+            HeatmapColorScale::Log => {
+                let eps = (data_max.abs() * 1e-12).max(f64::MIN_POSITIVE);
+                let lmin = data_min.max(eps).log10();
+                let lmax = data_max.max(eps).log10();
+                let lrange = if (lmax - lmin).abs() < f64::EPSILON {
+                    1.0
+                } else {
+                    lmax - lmin
+                };
+                (lmin, lrange, eps)
+            }
+            HeatmapColorScale::Linear => (0.0, 1.0, 0.0),
         };
 
         let n_rows = self.data.len();
@@ -892,7 +1494,10 @@ impl Mark for HeatmapMark {
                     continue;
                 }
 
-                let normalized = (value - data_min) / range;
+                let normalized = match self.color_scale {
+                    HeatmapColorScale::Linear => (value - data_min) / range,
+                    HeatmapColorScale::Log => (value.max(log_eps).log10() - log_min) / log_range,
+                };
                 let color = self.colormap.sample(normalized);
 
                 // Integer-snapped boundaries: cell N's right == cell N+1's left exactly,
@@ -928,16 +1533,31 @@ impl Mark for HeatmapMark {
     fn legend_label(&self) -> Option<&str> {
         self.label.as_deref()
     }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
+    }
+
+    fn colormap_legend(&self) -> Option<ColormapLegend> {
+        let (vmin, vmax) = self.value_range();
+        if !vmin.is_finite() || !vmax.is_finite() || vmax <= vmin {
+            return None;
+        }
+        Some(ColormapLegend {
+            colormap: self.colormap,
+            value_min: vmin,
+            value_max: vmax,
+            label: self.label.clone(),
+            log_scale: matches!(self.color_scale, HeatmapColorScale::Log),
+        })
+    }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Heatmap cells tile the plot rect — padding would create empty
+        // gutters between the data cells and the axes.
+        false
+    }
 }
-
-// ── BoxMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct BoxMark { groups: Vec<Vec<f64>>, color: Color, ... }
-
-// ── ViolinMark ───────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct ViolinMark { groups: Vec<Vec<f64>>, ... }
-
-// ── PieMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.4.0): pub struct PieMark { values: Vec<f64>, labels: Vec<String>, ... }
 
 // ── ContourMark ──────────────────────────────────────────────────────────────────────────────────
 // TODO(0.4.0): pub struct ContourMark { z: Vec<Vec<f64>>, levels: Vec<f64>, ... }
@@ -1010,7 +1630,8 @@ impl StepMark {
 }
 
 impl Mark for StepMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let mut commands = Vec::new();
         let mut need_move = true;
 
@@ -1082,6 +1703,50 @@ impl Mark for StepMark {
     fn data_extent(&self) -> Option<DataExtent> {
         extent_from_xy(&self.x, &self.y)
     }
+
+    fn pixel_extent(&self, coord: &dyn Coord) -> MarkExtent {
+        let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() else {
+            return MarkExtent::Bbox(coord.plot_area());
+        };
+        // Reproduce the rendered L-leg path as discrete segments so the
+        // legend dodge sees the real footprint, not the diagonal between
+        // consecutive data points.
+        let valid: Vec<(f64, f64)> = self
+            .x
+            .iter()
+            .zip(&self.y)
+            .filter_map(|(x, y)| (!x.is_nan() && !y.is_nan()).then_some((*x, *y)))
+            .collect();
+        if valid.len() < 2 {
+            return MarkExtent::Bbox(cart.plot_area);
+        }
+        let mut segments = Vec::with_capacity(valid.len() * 2);
+        let pts: Vec<Point> = valid
+            .iter()
+            .map(|(x, y)| cart.data_to_pixel(*x, *y))
+            .collect();
+        for i in 1..pts.len() {
+            let prev = pts[i - 1];
+            let curr = pts[i];
+            match self.where_ {
+                StepPosition::Pre => {
+                    segments.push((prev, Point::new(curr.x, prev.y)));
+                    segments.push((Point::new(curr.x, prev.y), curr));
+                }
+                StepPosition::Post => {
+                    segments.push((prev, Point::new(prev.x, curr.y)));
+                    segments.push((Point::new(prev.x, curr.y), curr));
+                }
+                StepPosition::Mid => {
+                    let mid_x = f32::midpoint(prev.x, curr.x);
+                    segments.push((prev, Point::new(mid_x, prev.y)));
+                    segments.push((Point::new(mid_x, prev.y), Point::new(mid_x, curr.y)));
+                    segments.push((Point::new(mid_x, curr.y), curr));
+                }
+            }
+        }
+        MarkExtent::Segments(segments)
+    }
 }
 
 // ── HistogramMark ───────────────────────────────────────────────────────────────────────
@@ -1124,7 +1789,8 @@ impl HistogramMark {
 }
 
 impl Mark for HistogramMark {
-    fn render(&self, coord: &CartesianCoord, backend: &mut dyn DrawBackend) -> Result<()> {
+    fn render(&self, coord: &dyn Coord, backend: &mut dyn DrawBackend) -> Result<()> {
+        let coord = require_cartesian(coord)?;
         let transform = BinTransform::new(self.method);
         let bins: Vec<Bin> = transform.compute(&self.data);
 
@@ -1172,13 +1838,17 @@ impl Mark for HistogramMark {
             y_max: count_max,
         })
     }
+
+    fn legend_glyph(&self) -> LegendGlyph {
+        LegendGlyph::Bar
+    }
+
+    fn wants_axis_padding(&self) -> bool {
+        // Histogram bins tile the x-axis range — padding would push the
+        // first/last bin off the data extents.
+        false
+    }
 }
-
-// ── ErrorBarMark ─────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct ErrorBarMark { x: Vec<f64>, y: Vec<f64>, err: Vec<f64>, color: Color }
-
-// ── RugMark ──────────────────────────────────────────────────────────────────────────────────────
-// TODO(0.3.0): pub struct RugMark { values: Vec<f64>, side: Side, color: Color }
 
 // ── helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -1252,19 +1922,19 @@ mod tests {
     fn coord_for(x_min: f64, x_max: f64, y_min: f64, y_max: f64) -> CartesianCoord {
         CartesianCoord {
             x_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: x_min,
                     domain_max: x_max,
-                },
+                }),
                 label: None,
                 tick_positions: vec![],
                 tick_labels: vec![],
             },
             y_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: y_min,
                     domain_max: y_max,
-                },
+                }),
                 label: None,
                 tick_positions: vec![],
                 tick_labels: vec![],
@@ -1352,10 +2022,23 @@ mod tests {
             .color(Color::GREEN)
             .radius(8.0)
             .label("dots");
-        assert_eq!(m.color, Color::GREEN);
-        assert_eq!(m.radius, 8.0);
+        assert_eq!(m.colors, Some(vec![Color::GREEN]));
+        assert_eq!(m.radii, Some(vec![8.0]));
         assert_eq!(m.legend_color(), Some(Color::GREEN));
         assert_eq!(m.legend_label(), Some("dots"));
+    }
+
+    #[test]
+    fn point_mark_per_point_colors_and_radii() {
+        let m = PointMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 2.0])
+            .colors(vec![Color::RED, Color::GREEN, Color::BLUE])
+            .radii(vec![3.0, 5.0, 7.0])
+            .alpha(0.5);
+        assert_eq!(m.colors.as_ref().map(Vec::len), Some(3));
+        assert_eq!(m.radii.as_ref().map(Vec::len), Some(3));
+        assert!((m.alpha - 0.5).abs() < 1e-6);
+        // legend_color picks the first color
+        assert_eq!(m.legend_color(), Some(Color::RED));
     }
 
     #[test]
@@ -1495,13 +2178,44 @@ mod tests {
             .stack("s")
             .base(2.0)
             .label("series");
-        assert_eq!(m.color, Some(Color::RED));
+        assert_eq!(m.colors, Some(vec![Color::RED]));
         assert_eq!(m.width, Some(0.5));
         assert_eq!(m.group.as_deref(), Some("g"));
         assert_eq!(m.stack.as_deref(), Some("s"));
-        assert_eq!(m.base, Some(2.0));
+        assert_eq!(m.bases, Some(vec![2.0]));
+        assert!(!m.connectors);
         assert_eq!(m.legend_label(), Some("series"));
         assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_per_bar_bases_and_colors() {
+        let m = BarMark::new(
+            vec!["a".to_string(), "b".to_string(), "c".to_string()],
+            vec![1.0, -2.0, 3.0],
+        )
+        .bases(vec![0.0, 1.0, -1.0])
+        .colors(vec![Color::RED, Color::GREEN, Color::BLUE])
+        .connectors(true);
+        assert_eq!(m.bases.as_ref().map(Vec::len), Some(3));
+        assert_eq!(m.colors.as_ref().map(Vec::len), Some(3));
+        assert!(m.connectors);
+        // legend_color picks the first color
+        assert_eq!(m.legend_color(), Some(Color::RED));
+    }
+
+    #[test]
+    fn bar_mark_render_bar_vertical_with_connectors() {
+        let mark = BarMark::new(
+            vec!["a".to_string(), "b".to_string(), "c".to_string()],
+            vec![1.0, -0.5, 1.5],
+        )
+        .bases(vec![0.0, 1.0, 0.5])
+        .connectors(true);
+        let coord = coord_for(0.0, 3.0, -1.0, 3.0);
+        let mut backend = SvgBackend::new(120, 120);
+        let ctx = BarRenderContext::default();
+        mark.render_bar(&coord, &mut backend, &ctx).unwrap();
     }
 
     #[test]

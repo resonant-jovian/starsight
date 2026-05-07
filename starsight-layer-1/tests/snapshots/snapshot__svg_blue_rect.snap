@@ -1,7 +1,7 @@
 ---
-source: starsight-layer-1/tests/snapshot_basic.rs
+source: starsight-layer-1/tests/snapshot.rs
 expression: svg
 ---
 <svg height="100" viewBox="0 0 200 100" width="200" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#0000ff" height="80" width="180" x="10" y="10"/>
+<rect fill="#0000ff" height="80" shape-rendering="crispEdges" width="180" x="10" y="10"/>
 </svg>

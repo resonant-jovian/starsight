@@ -14,15 +14,69 @@ use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::backends::rasters::SkiaBackend;
 use starsight_layer_1::backends::vectors::SvgBackend;
 use starsight_layer_1::errors::{Result, StarsightError};
+use starsight_layer_1::primitives::Rect;
 use starsight_layer_1::theme::Theme;
 use starsight_layer_2::axes::Axis;
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, PolarCoord};
 use starsight_layer_3::marks::{BarRenderContext, DataExtent, Mark, Orientation};
 
+use crate::renders::LegendPosition;
+
 use crate::layout::{
-    LayoutBuilder, LayoutCtx, TitleComponent, XAxisTitleComponent, XTickLabelsComponent,
-    YAxisTitleComponent, YTickLabelsComponent,
+    LayoutBuilder, LayoutCtx, LegendStripComponent, Side, Slot, TitleComponent,
+    XAxisTitleComponent, XTickLabelsComponent, YAxisTitleComponent, YTickLabelsComponent,
 };
+use crate::renders::Edge;
+
+/// Outer canvas padding used by every single-figure render path.
+///
+/// Bumped from 4.0 to 8.0 (matches `MultiPanelFigure::padding` default) so
+/// every chart kind has a consistent breathable margin between the canvas
+/// edge and the layout slot stack — fixes the inconsistent outer-margin
+/// issue tracked as `starsight-c6h`.
+pub(crate) const DEFAULT_FIGURE_PADDING_PX: f32 = 8.0;
+
+/// Inset a `Linear`-shaped axis's scale by `factor * (raw_max - raw_min)`
+/// without touching tick positions — matches matplotlib's
+/// `axes.margins(factor)` convention. Tick labels stay on clean numbers,
+/// the data just no longer touches the plot edges. Tracked as
+/// `starsight-3bp.9.1` (Epic I.1, refined).
+fn pad_linear_axis_in_place(axis: &mut starsight_layer_2::axes::Axis, factor: f64) {
+    if factor <= 0.0 {
+        return;
+    }
+    let raw_min = axis.scale.inverse(0.0);
+    let raw_max = axis.scale.inverse(1.0);
+    if !raw_min.is_finite() || !raw_max.is_finite() || raw_max <= raw_min {
+        return;
+    }
+    let pad = (raw_max - raw_min) * factor;
+    axis.scale = Box::new(starsight_layer_2::scales::LinearScale {
+        domain_min: raw_min - pad,
+        domain_max: raw_max + pad,
+    });
+}
+
+/// Resolve `LegendPosition::Auto` against the mark mix on a figure.
+///
+/// `Auto` is the default — figures with at least one labeled disk-fill mark
+/// (`ArcMark` / `PieMark` / `DonutMark` / `RadarMark` / `PolarBarMark` /
+/// `PolarRectMark`, signaled via `Mark::prefers_outside_legend()`) auto-pick
+/// `Outside(Edge::Right)` so the legend never overlaps the wedges. Everything
+/// else falls back to `Inside`. Explicit `Inside` / `Outside(_)` from
+/// `Figure::legend_position(...)` bypass the auto-resolve.
+fn resolve_legend_position(position: LegendPosition, marks: &[Box<dyn Mark>]) -> LegendPosition {
+    match position {
+        LegendPosition::Auto => {
+            if marks.iter().any(|m| m.prefers_outside_legend()) {
+                LegendPosition::Outside(Edge::Right)
+            } else {
+                LegendPosition::Inside
+            }
+        }
+        explicit => explicit,
+    }
+}
 
 // ── Figure ───────────────────────────────────────────────────────────────────────────────────────
 
@@ -41,6 +95,30 @@ pub struct Figure {
     pub height: u32,
     /// Theme for colors.
     pub theme: Theme,
+    /// Polar mode: when set, the figure renders into a [`PolarCoord`] instead
+    /// of a [`CartesianCoord`]. The `(theta_axis, r_axis)` tuple replaces the
+    /// auto-inferred cartesian axes; only polar marks (e.g. `ArcMark`,
+    /// `RadarMark`) accept this coord and cartesian marks return Config errors.
+    pub polar_axes: Option<(Axis, Axis)>,
+    /// Colorbar opt-out flag. When `true`, suppresses the auto-attached
+    /// colormap legend that `HeatmapMark` and `ContourMark` would otherwise
+    /// trigger. Default is `false` (auto-attach). Tracked as `starsight-kdi`.
+    pub colorbar_disabled: bool,
+    /// User override for axis padding. `None` (default) lets the figure
+    /// pick automatically based on the mix of marks
+    /// (`Mark::wants_axis_padding`); point/line/box/violin marks vote yes,
+    /// bar/heatmap/contour vote no, and the figure pads if any mark votes
+    /// yes. `Some(0.0)` force-disables; `Some(f)` force-enables with the
+    /// given factor (matplotlib's `axes.margins(...)`). Tracked as
+    /// `starsight-3bp.9.1` (Epic I.1, refined per user direction).
+    pub axis_padding_override: Option<f64>,
+    /// Where the legend sits relative to the plot area. Default
+    /// [`LegendPosition::Inside`] uses overlap-aware corner dodge;
+    /// [`LegendPosition::Outside(Edge::Right)`](crate::renders::Edge::Right)
+    /// reserves a right-edge strip for an outside-the-plot legend, matching
+    /// matplotlib's `bbox_to_anchor=(1.05, 1)` convention. Set via
+    /// [`Figure::legend_position`]. Tracked as Epic L (`starsight-3bp.10`).
+    pub legend_position: LegendPosition,
 }
 
 impl Figure {
@@ -55,7 +133,69 @@ impl Figure {
             width,
             height,
             theme: Theme::default(),
+            polar_axes: None,
+            colorbar_disabled: false,
+            axis_padding_override: None,
+            legend_position: LegendPosition::default(),
         }
+    }
+
+    /// Builder: control where the legend sits relative to the plot area.
+    /// Default [`LegendPosition::Inside`] uses corner dodge; switch to
+    /// [`LegendPosition::Outside`] for matplotlib-style outside-the-plot
+    /// placement that never overlaps data.
+    ///
+    /// ```
+    /// use starsight_layer_5::Figure;
+    /// use starsight_layer_5::renders::{Edge, LegendPosition};
+    ///
+    /// let _ = Figure::new(800, 600)
+    ///     .legend_position(LegendPosition::Outside(Edge::Right));
+    /// ```
+    #[must_use]
+    pub fn legend_position(mut self, position: LegendPosition) -> Self {
+        self.legend_position = position;
+        self
+    }
+
+    /// Builder: opt out of the auto-attached colorbar that
+    /// `HeatmapMark` and `ContourMark` would otherwise trigger. Pass
+    /// `false` to suppress, `true` to keep auto-attach (the default).
+    /// Tracked as `starsight-kdi`.
+    #[must_use]
+    pub fn colorbar(mut self, on: bool) -> Self {
+        self.colorbar_disabled = !on;
+        self
+    }
+
+    /// Builder: override the auto-detected axis padding factor. By
+    /// default (`None`) the figure decides based on the mix of marks —
+    /// point-shaped marks (Point/Line/Area/ErrorBar/BoxPlot/Violin/
+    /// Candlestick/Step/Rug) trigger 5% inset, bar-shaped marks (Bar/
+    /// Histogram/Heatmap/Contour) leave the axis edge-aligned. Pass
+    /// `Some(0.0)` to force-disable padding, or `Some(f)` to force a
+    /// specific factor (matches matplotlib's `axes.margins(f)`).
+    #[must_use]
+    pub fn axis_padding(mut self, factor: Option<f64>) -> Self {
+        self.axis_padding_override = factor;
+        self
+    }
+
+    /// Builder: switch the figure into polar mode using the supplied
+    /// angular and radial axes. Pair with polar marks (e.g.
+    /// [`crate::Figure::add`] of an `ArcMark` or `RadarMark`); cartesian
+    /// marks added to a polar figure error at render time.
+    ///
+    /// Polar figures bypass the cartesian tick / axis-title chrome — the
+    /// inscribed disk fills the available rect, with only `title` honored
+    /// from the standard chrome set. Grid lines and legend draw via
+    /// [`crate::renders::render_grid_lines`]'s polar branch and the
+    /// existing legend stack respectively (the legend overlaps the disk
+    /// in 0.3.0 per the documented limitation).
+    #[must_use]
+    pub fn polar_axes(mut self, theta_axis: Axis, r_axis: Axis) -> Self {
+        self.polar_axes = Some((theta_axis, r_axis));
+        self
     }
 
     /// Builder: set the theme for colors.
@@ -276,10 +416,50 @@ impl Figure {
     /// axes and coordinate system, then dispatches drawing to the supplied
     /// backend trait object.
     fn render_to(&self, backend: &mut dyn DrawBackend) -> Result<()> {
+        let viewport = Rect::new(0.0, 0.0, self.width as f32, self.height as f32);
+        self.render_within(viewport, backend)
+    }
+
+    /// Render the figure into a sub-rect of the backend. Used by
+    /// [`MultiPanelFigure`] to draw each panel into its assigned grid cell;
+    /// callers rendering a standalone figure go through [`render_to`] which
+    /// passes a viewport covering the full canvas.
+    ///
+    /// The layout is computed in viewport-local coords (so a 200×200 panel
+    /// composes its own legend, ticks, and title independent of the parent
+    /// canvas size), then every emitted rect is translated by the viewport
+    /// origin before drawing.
+    pub(crate) fn render_within(
+        &self,
+        viewport: Rect,
+        backend: &mut dyn DrawBackend,
+    ) -> Result<()> {
+        if self.polar_axes.is_some() {
+            return self.render_polar_within(viewport, backend);
+        }
         let extent = self
             .merged_extent()
             .ok_or_else(|| StarsightError::Data("No data to render".into()))?;
 
+        // Mark-mix-aware axis padding: when at least one mark on the figure
+        // is point-shaped (Point/Line/Area/ErrorBar/BoxPlot/Violin/
+        // Candlestick/Step/Rug per `Mark::wants_axis_padding`), inset the
+        // numeric scale by 5% so extreme points don't sit on the plot edge.
+        // Bar / histogram / heatmap / contour figures stay edge-aligned
+        // because their data IS the axis structure. User override
+        // `Figure::axis_padding(Some(f))` wins. Padding is applied to the
+        // SCALE post-Wilkinson so tick positions stay on clean numbers
+        // (matplotlib axes.margins convention).
+        let pad_factor = match self.axis_padding_override {
+            Some(f) => f.max(0.0),
+            None => {
+                if !self.marks.is_empty() && self.marks.iter().any(|m| m.wants_axis_padding()) {
+                    0.05
+                } else {
+                    0.0
+                }
+            }
+        };
         let x_vals: Vec<f64> = vec![extent.x_min, extent.x_max];
         let y_vals: Vec<f64> = vec![extent.y_min, extent.y_max];
 
@@ -289,21 +469,33 @@ impl Figure {
         // Bar charts get a category axis on the orientation-appropriate side so
         // bars span the full plot area instead of being squeezed into a Wilkinson-
         // extended numeric range. Numeric axes still use Wilkinson for "nice" ticks.
-        let x_axis = if !category_labels.is_empty() && !use_y_axis_labels {
+        let x_is_category = !category_labels.is_empty() && !use_y_axis_labels;
+        let y_is_category = !category_labels.is_empty() && use_y_axis_labels;
+        let mut x_axis = if x_is_category {
             Axis::category(&category_labels)
         } else {
             Axis::auto_from_data(&x_vals, 5)
                 .ok_or_else(|| StarsightError::Scale("Cannot build X axis".into()))?
         };
-        let y_axis = if !category_labels.is_empty() && use_y_axis_labels {
+        let mut y_axis = if y_is_category {
             Axis::category(&category_labels)
         } else {
             Axis::auto_from_data(&y_vals, 5)
                 .ok_or_else(|| StarsightError::Scale("Cannot build Y axis".into()))?
         };
+        // Apply axis padding to the SCALE post-Wilkinson so tick positions
+        // stay on clean numbers (matplotlib axes.margins convention). Skip
+        // categorical axes where band edges are intentional.
+        if pad_factor > 0.0 {
+            if !x_is_category {
+                pad_linear_axis_in_place(&mut x_axis, pad_factor);
+            }
+            if !y_is_category {
+                pad_linear_axis_in_place(&mut y_axis, pad_factor);
+            }
+        }
 
-        let font_size: f32 = 12.0;
-        let title_font_size: f32 = 16.0;
+        let fonts = crate::layout::LayoutFonts::default();
         let tick_len: f32 = 5.0;
         let label_gap: f32 = 4.0;
 
@@ -321,23 +513,82 @@ impl Figure {
             y_axis.tick_labels.clone()
         };
 
+        // Auto-attach colorbar: if any mark exposes a colormap legend
+        // (HeatmapMark, ContourMark with a colormap) and the figure has not
+        // opted out via `Figure::colorbar(false)`, build a Colorbar that
+        // takes a Right-side slot. Tracked as `starsight-kdi`.
+        let colorbar_opt: Option<crate::colorbar::Colorbar> = if self.colorbar_disabled {
+            None
+        } else {
+            self.marks
+                .iter()
+                .find_map(|m| m.colormap_legend())
+                .map(crate::colorbar::Colorbar::new)
+        };
+
+        // Pre-compute legend entries here (rather than after layout) so the
+        // `LegendStripComponent` below can size itself from the actual entry
+        // count and label widths. The filter mirrors the post-layout pass:
+        // skip marks whose colormap is already shown by the auto-attached
+        // Colorbar (Epic I.5).
+        let colorbar_active = colorbar_opt.is_some();
+        let legend_entries: Vec<crate::renders::LegendEntry> = self
+            .marks
+            .iter()
+            .filter(|mark| !(colorbar_active && mark.colormap_legend().is_some()))
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
+                        color,
+                        label,
+                        glyph,
+                    })
+            })
+            .collect();
+        let legend_label_strings: Vec<String> =
+            legend_entries.iter().map(|e| e.label.clone()).collect();
+        let resolved_position = resolve_legend_position(self.legend_position, &self.marks);
+        let outside_edge: Option<Side> = match resolved_position {
+            LegendPosition::Outside(Edge::Right) => Some(Side::Right),
+            LegendPosition::Outside(Edge::Left) => Some(Side::Left),
+            LegendPosition::Outside(Edge::Top) => Some(Side::Top),
+            LegendPosition::Outside(Edge::Bottom) => Some(Side::Bottom),
+            LegendPosition::Inside | LegendPosition::Auto => None,
+        };
+
         let layout = {
             let ctx = LayoutCtx {
-                width: self.width as f32,
-                height: self.height as f32,
+                width: viewport.width(),
+                height: viewport.height(),
                 backend,
-                font_size,
-                title_font_size,
-                padding: 4.0,
+                fonts,
+                padding: DEFAULT_FIGURE_PADDING_PX,
             };
             let mut builder = LayoutBuilder::new(ctx);
             builder.add(&TitleComponent {
                 title: self.title.as_deref(),
             });
+            // Categorical x-axes pass band_width so the layout (and the
+            // renderer that mirrors the same rotation decision) can
+            // reserve enough vertical space for rotated labels when they
+            // would crowd horizontally.
+            let x_band_width = if !category_labels.is_empty() && !use_y_axis_labels {
+                #[allow(clippy::cast_precision_loss)]
+                let n = category_labels.len() as f32;
+                if n > 0.0 {
+                    Some(viewport.width() / n)
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
             builder.add(&XTickLabelsComponent {
                 labels: &x_label_strings,
                 tick_len,
                 gap: label_gap,
+                band_width: x_band_width,
             });
             builder.add(&YTickLabelsComponent {
                 labels: &y_label_strings,
@@ -352,9 +603,32 @@ impl Figure {
                 label: self.y_label.as_deref(),
                 gap: label_gap,
             });
+            if let Some(colorbar) = &colorbar_opt {
+                builder.add(&crate::colorbar::ColorbarComponent { colorbar });
+            }
+            if let Some(edge) = outside_edge
+                && !legend_label_strings.is_empty()
+            {
+                builder.add(&LegendStripComponent {
+                    labels: &legend_label_strings,
+                    edge,
+                });
+            }
             builder.finish()
         };
-        let plot_area = layout.plot_rect;
+
+        // All layout rects are in viewport-local coords. Translate them into
+        // backend-absolute coords so MultiPanelFigure's per-panel viewport
+        // offsets land each panel correctly. Identity for full-canvas renders.
+        let dx = viewport.left;
+        let dy = viewport.top;
+        let translate_rect =
+            |r: Rect| Rect::new(r.left + dx, r.top + dy, r.right + dx, r.bottom + dy);
+        let translate_slot = |s: Slot| Slot {
+            rect: translate_rect(s.rect),
+            side: s.side,
+        };
+        let plot_area = translate_rect(layout.plot_rect);
 
         let coord = CartesianCoord {
             x_axis,
@@ -365,9 +639,21 @@ impl Figure {
         crate::renders::render_background(&plot_area, backend, &self.theme)?;
 
         if let Some(title) = &self.title {
-            let slot = layout.slots.get("title").and_then(|v| v.first()).copied();
+            let slot = layout
+                .slots
+                .get("title")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
             if let Some(slot) = slot {
-                crate::renders::render_title(title, &slot, backend, &self.theme)?;
+                crate::renders::render_title(
+                    title,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
             }
         }
 
@@ -375,12 +661,14 @@ impl Figure {
             .slots
             .get("x_axis_title")
             .and_then(|v| v.first())
-            .copied();
+            .copied()
+            .map(translate_slot);
         let y_axis_title_slot = layout
             .slots
             .get("y_axis_title")
             .and_then(|v| v.first())
-            .copied();
+            .copied()
+            .map(translate_slot);
         crate::renders::render_axis_labels(
             self.x_label.as_deref(),
             self.y_label.as_deref(),
@@ -389,39 +677,225 @@ impl Figure {
             &plot_area,
             backend,
             &self.theme,
+            &fonts,
         )?;
 
+        // Marks like PieMark are angular and want no Cartesian axis chrome.
+        // Skip render_grid_lines + render_axes only when *every* mark on the
+        // figure agrees — mixed charts keep the axes for the others (yrp.2).
+        let suppress_axes = !self.marks.is_empty() && self.marks.iter().all(|m| !m.wants_axes());
+
         backend.set_clip(Some(plot_area))?;
-        crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        if !suppress_axes {
+            crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        }
         self.render_marks(&coord, backend)?;
         backend.set_clip(None)?;
 
-        crate::renders::render_axes(
-            &coord,
-            backend,
-            &category_labels,
-            use_y_axis_labels,
-            &self.theme,
-        )?;
+        if !suppress_axes {
+            crate::renders::render_axes(
+                &coord,
+                backend,
+                &category_labels,
+                use_y_axis_labels,
+                &self.theme,
+                &fonts,
+            )?;
+        }
 
+        // Per-mark pixel-space footprint contributions for the legend dodge
+        // (Epic L). Replaces the bbox-based `data_pixel_rect` from Epic I —
+        // each mark contributes its actual rendered shape (Bbox / Segments /
+        // Rects / Polygons), so diagonal lines and full-range scatters no
+        // longer false-positive the dodge.
+        //
+        // For `LegendPosition::Outside(...)` the plot_area is already shrunk
+        // by the `LegendStripComponent` reservation set above, so
+        // `place_outside`'s `plot_area.right + inset` (etc) lands inside the
+        // reserved strip. No extra plumbing needed at the render call site.
+        let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
+            self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
+        if !legend_entries.is_empty() {
+            crate::renders::render_legend(
+                &legend_entries,
+                &plot_area,
+                &occupancy,
+                resolved_position,
+                backend,
+                &self.theme,
+                &fonts,
+            )?;
+        }
+
+        // Auto-attached colorbar lands after marks/axes/legend so it sits
+        // on top of any background fill and never falls behind axis chrome.
+        if let Some(colorbar) = &colorbar_opt {
+            let slot = layout
+                .slots
+                .get("colorbar")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
+            if let Some(slot) = slot {
+                crate::colorbar::render_colorbar(
+                    colorbar,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Polar-mode render path. Mirrors [`render_within`](Self::render_within)
+    /// but builds a [`PolarCoord`] inscribed in the viewport (minus a small
+    /// title strip) instead of a [`CartesianCoord`], and skips the cartesian
+    /// tick / axis chrome.
+    fn render_polar_within(&self, viewport: Rect, backend: &mut dyn DrawBackend) -> Result<()> {
+        let (theta_axis, r_axis) = self
+            .polar_axes
+            .as_ref()
+            .expect("render_polar_within called without polar_axes set");
+
+        let fonts = crate::layout::LayoutFonts::default();
+
+        // Pre-compute legend entries + Auto resolution before layout, mirroring
+        // render_within. Disk-fill polar marks (Radar/PolarBar/PolarRect/Arc)
+        // get auto-Outside via `prefers_outside_legend`. L.17.
         let legend_entries: Vec<crate::renders::LegendEntry> = self
             .marks
             .iter()
-            .filter_map(|mark| {
-                if let (Some(color), Some(label)) = (mark.legend_color(), mark.legend_label())
-                    && !label.is_empty()
-                {
-                    return Some(crate::renders::LegendEntry {
+            .flat_map(|mark| {
+                mark.legend_entries()
+                    .into_iter()
+                    .map(|(color, label, glyph)| crate::renders::LegendEntry {
                         color,
-                        label: label.to_string(),
-                    });
-                }
-                None
+                        label,
+                        glyph,
+                    })
             })
             .collect();
+        let legend_label_strings: Vec<String> =
+            legend_entries.iter().map(|e| e.label.clone()).collect();
+        let resolved_position = resolve_legend_position(self.legend_position, &self.marks);
+        let outside_edge: Option<Side> = match resolved_position {
+            LegendPosition::Outside(Edge::Right) => Some(Side::Right),
+            LegendPosition::Outside(Edge::Left) => Some(Side::Left),
+            LegendPosition::Outside(Edge::Top) => Some(Side::Top),
+            LegendPosition::Outside(Edge::Bottom) => Some(Side::Bottom),
+            LegendPosition::Inside | LegendPosition::Auto => None,
+        };
 
+        // Reserve top space for the title; everything else is the inscribed
+        // disk. When Outside legend is active, also reserve a strip on the
+        // chosen edge so the disk shrinks instead of overlapping the legend.
+        let layout = {
+            let ctx = LayoutCtx {
+                width: viewport.width(),
+                height: viewport.height(),
+                backend,
+                fonts,
+                padding: DEFAULT_FIGURE_PADDING_PX,
+            };
+            let mut builder = LayoutBuilder::new(ctx);
+            builder.add(&TitleComponent {
+                title: self.title.as_deref(),
+            });
+            if let Some(edge) = outside_edge
+                && !legend_label_strings.is_empty()
+            {
+                builder.add(&LegendStripComponent {
+                    labels: &legend_label_strings,
+                    edge,
+                });
+            }
+            builder.finish()
+        };
+
+        let dx = viewport.left;
+        let dy = viewport.top;
+        let translate_rect =
+            |r: Rect| Rect::new(r.left + dx, r.top + dy, r.right + dx, r.bottom + dy);
+        let translate_slot = |s: Slot| Slot {
+            rect: translate_rect(s.rect),
+            side: s.side,
+        };
+        let plot_area = translate_rect(layout.plot_rect);
+
+        // Polar marks frequently render slightly past the unit disk (gauge
+        // outer rim at r=1.02, stacked bars that exceed the configured
+        // r-axis max). Inset the disc by 12px so those overflows stay inside
+        // plot_area instead of bleeding into title / canvas margins. Tracked
+        // as Epic I.2 (`starsight-3bp.9.2`).
+        let polar_inset: f32 = 12.0;
+        let polar_disc_area = Rect::new(
+            plot_area.left + polar_inset,
+            plot_area.top + polar_inset,
+            plot_area.right - polar_inset,
+            plot_area.bottom - polar_inset,
+        );
+        let coord = PolarCoord::inscribed(theta_axis.clone(), r_axis.clone(), polar_disc_area);
+
+        crate::renders::render_background(&plot_area, backend, &self.theme)?;
+
+        if let Some(title) = &self.title {
+            let slot = layout
+                .slots
+                .get("title")
+                .and_then(|v| v.first())
+                .copied()
+                .map(translate_slot);
+            if let Some(slot) = slot {
+                crate::renders::render_title(
+                    title,
+                    &slot,
+                    &plot_area,
+                    backend,
+                    &self.theme,
+                    &fonts,
+                )?;
+            }
+        }
+
+        backend.set_clip(Some(plot_area))?;
+        // Suppress the polar grid when every mark on the figure opts out via
+        // `Mark::wants_polar_grid` → `false`. ArcMark/PieMark/DonutMark are
+        // decorative wedge marks that read better without a grid behind them
+        // (gauges, pies, sunbursts); quantitative polar marks (PolarBarMark
+        // for wind roses, RadarMark for spider charts, PolarRectMark for
+        // polar heatmaps) keep the default `true` so their grid context is
+        // visible. Tracked as Epic L (`starsight-3bp.10.14`).
+        let suppress_grid =
+            !self.marks.is_empty() && self.marks.iter().all(|m| !m.wants_polar_grid());
+        if !suppress_grid {
+            crate::renders::render_grid_lines(&coord, backend, &self.theme)?;
+        }
+        for mark in &self.marks {
+            mark.render(&coord, backend)?;
+        }
+        backend.set_clip(None)?;
+
+        // Legend: shares the cartesian render_legend with MarkExtent dodge
+        // (Epic L) and Auto-resolves disk-fill marks to Outside(Right) (L.17).
+        // For Outside, the LegendStripComponent above already shrunk the
+        // plot_area so place_outside lands inside the reserved strip.
+        // Polar figures don't auto-attach a Colorbar.
         if !legend_entries.is_empty() {
-            crate::renders::render_legend(&legend_entries, &plot_area, backend, &self.theme)?;
+            let occupancy: Vec<starsight_layer_3::marks::MarkExtent> =
+                self.marks.iter().map(|m| m.pixel_extent(&coord)).collect();
+            crate::renders::render_legend(
+                &legend_entries,
+                &plot_area,
+                &occupancy,
+                resolved_position,
+                backend,
+                &self.theme,
+                &fonts,
+            )?;
         }
 
         Ok(())
@@ -497,9 +971,165 @@ impl Figure {
     }
 }
 
+// ── MultiPanelFigure ─────────────────────────────────────────────────────────────────────────────
+
+/// Grid of independent [`Figure`] panels rendered into a single canvas.
+///
+/// Each panel keeps its own marks, axes, title, and legend; layout-wise the
+/// canvas is split into a uniform `rows × cols` grid with `padding` pixels of
+/// gap between panels (and the same padding around the outer edge). Per-panel
+/// `width`/`height` are ignored — the parent canvas dimensions decide the cell
+/// size — so panels constructed at any nominal size compose cleanly.
+///
+/// 0.3.0 limitation: each panel computes its axes independently. Shared axes
+/// across rows/columns (and a per-row/per-column title) land in 0.4.0.
+pub struct MultiPanelFigure {
+    panels: Vec<Figure>,
+    /// Number of grid rows.
+    pub rows: u32,
+    /// Number of grid columns.
+    pub cols: u32,
+    /// Output width in pixels.
+    pub width: u32,
+    /// Output height in pixels.
+    pub height: u32,
+    /// Padding (px) between panels and around the outer canvas edge.
+    pub padding: f32,
+    /// Background theme for the canvas (each panel keeps its own theme).
+    pub theme: Theme,
+}
+
+impl MultiPanelFigure {
+    /// New empty `rows × cols` grid sized to `width × height` pixels.
+    #[must_use]
+    pub fn new(width: u32, height: u32, rows: u32, cols: u32) -> Self {
+        Self {
+            panels: Vec::new(),
+            rows,
+            cols,
+            width,
+            height,
+            padding: 8.0,
+            theme: Theme::default(),
+        }
+    }
+
+    /// Builder: append one panel. Panels fill the grid in row-major order
+    /// (top-left first, then across, then down).
+    #[must_use]
+    pub fn add(mut self, panel: Figure) -> Self {
+        self.panels.push(panel);
+        self
+    }
+
+    /// Builder: padding (px) between panels and around the canvas edge.
+    #[must_use]
+    pub fn padding(mut self, padding: f32) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    /// Builder: canvas background theme.
+    #[must_use]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
+    }
+
+    /// Borrow the underlying panel list.
+    #[must_use]
+    pub fn panels(&self) -> &[Figure] {
+        &self.panels
+    }
+
+    /// Allocate the rect for the panel at `(row, col)` within the canvas.
+    fn panel_rect(&self, row: u32, col: u32) -> Rect {
+        let rows = self.rows.max(1) as f32;
+        let cols = self.cols.max(1) as f32;
+        let w = self.width as f32;
+        let h = self.height as f32;
+        let pad = self.padding;
+        let cell_w = ((w - pad * (cols + 1.0)) / cols).max(1.0);
+        let cell_h = ((h - pad * (rows + 1.0)) / rows).max(1.0);
+        let left = pad + col as f32 * (cell_w + pad);
+        let top = pad + row as f32 * (cell_h + pad);
+        Rect::new(left, top, left + cell_w, top + cell_h)
+    }
+
+    fn render_to(&self, backend: &mut dyn DrawBackend) -> Result<()> {
+        let canvas = Rect::new(0.0, 0.0, self.width as f32, self.height as f32);
+        crate::renders::render_background(&canvas, backend, &self.theme)?;
+        for (idx, panel) in self.panels.iter().enumerate() {
+            let row = idx as u32 / self.cols.max(1);
+            let col = idx as u32 % self.cols.max(1);
+            if row >= self.rows {
+                break; // Extra panels past rows × cols are ignored.
+            }
+            let viewport = self.panel_rect(row, col);
+            panel.render_within(viewport, backend)?;
+        }
+        Ok(())
+    }
+
+    /// Render the panel grid to a PNG byte buffer.
+    ///
+    /// # Errors
+    /// - [`StarsightError::Render`] if the backend fails.
+    /// - [`StarsightError::Data`] if any panel has no data (panels error
+    ///   independently; the first failure short-circuits).
+    /// - [`StarsightError::Scale`] if any panel cannot build its axes.
+    /// - [`StarsightError::Export`] if PNG encoding fails.
+    pub fn render_png(&self) -> Result<Vec<u8>> {
+        let mut backend = SkiaBackend::new(self.width, self.height)?;
+        backend.fill(self.theme.background);
+        self.render_to(&mut backend)?;
+        backend.png_bytes()
+    }
+
+    /// Render the panel grid to an in-memory SVG string.
+    ///
+    /// # Errors
+    /// Same conditions as [`render_png`](Self::render_png), minus the PNG
+    /// encode step.
+    pub fn render_svg(&self) -> Result<String> {
+        let mut backend = SvgBackend::new(self.width, self.height);
+        self.render_to(&mut backend)?;
+        Ok(backend.svg_string())
+    }
+
+    /// Save the panel grid to disk; format chosen by extension (`.png` /
+    /// `.svg`).
+    ///
+    /// # Errors
+    /// - Any error from [`render_png`](Self::render_png) or
+    ///   [`render_svg`](Self::render_svg).
+    /// - [`StarsightError::Io`] if writing fails.
+    /// - [`StarsightError::Export`] if the extension is unsupported.
+    pub fn save(&self, path: impl AsRef<std::path::Path>) -> Result<()> {
+        let path = path.as_ref();
+        let ext = path
+            .extension()
+            .and_then(|s| s.to_str())
+            .map(str::to_ascii_lowercase);
+        match ext.as_deref() {
+            Some("svg") => {
+                let svg = self.render_svg()?;
+                std::fs::write(path, svg).map_err(StarsightError::Io)
+            }
+            Some("png") | None => {
+                let bytes = self.render_png()?;
+                std::fs::write(path, bytes).map_err(StarsightError::Io)
+            }
+            Some(other) => Err(StarsightError::Export(format!(
+                "unsupported file extension: .{other}"
+            ))),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::Figure;
+    use super::{Figure, MultiPanelFigure};
     use starsight_layer_1::errors::StarsightError;
     use starsight_layer_1::primitives::Color;
     use starsight_layer_1::theme::DEFAULT_DARK;
@@ -604,5 +1234,87 @@ mod tests {
         let path = dir.path().join("out.bmp");
         let r = fig.save(&path);
         assert!(matches!(r, Err(StarsightError::Export(_))));
+    }
+
+    // ── MultiPanelFigure ─────────────────────────────────────────────────
+
+    fn line_panel() -> Figure {
+        Figure::new(200, 200).add(LineMark::new(vec![0.0, 1.0, 2.0], vec![0.0, 1.0, 4.0]))
+    }
+
+    #[test]
+    fn multi_panel_new_has_no_panels() {
+        let mp = MultiPanelFigure::new(400, 300, 2, 2);
+        assert!(mp.panels().is_empty());
+        assert_eq!(mp.rows, 2);
+        assert_eq!(mp.cols, 2);
+    }
+
+    #[test]
+    fn multi_panel_add_appends() {
+        let mp = MultiPanelFigure::new(400, 300, 1, 2)
+            .add(line_panel())
+            .add(line_panel());
+        assert_eq!(mp.panels().len(), 2);
+    }
+
+    #[test]
+    fn multi_panel_padding_builder() {
+        let mp = MultiPanelFigure::new(400, 300, 2, 2).padding(20.0);
+        assert!((mp.padding - 20.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn multi_panel_rect_partitions_canvas() {
+        // 400×300 canvas, 2×2 grid, 8px padding → cell ≈ 188×134.
+        let mp = MultiPanelFigure::new(400, 300, 2, 2);
+        let r00 = mp.panel_rect(0, 0);
+        let r01 = mp.panel_rect(0, 1);
+        let r10 = mp.panel_rect(1, 0);
+        // Same cell size everywhere.
+        assert!((r00.width() - r01.width()).abs() < 1e-3);
+        assert!((r00.height() - r10.height()).abs() < 1e-3);
+        // Top-left starts at padding offset.
+        assert!((r00.left - 8.0).abs() < 1e-3);
+        assert!((r00.top - 8.0).abs() < 1e-3);
+        // Right column shifted by cell + padding.
+        assert!(r01.left > r00.right);
+    }
+
+    #[test]
+    fn multi_panel_render_svg_with_two_panels_succeeds() {
+        let mp = MultiPanelFigure::new(600, 400, 1, 2)
+            .add(line_panel())
+            .add(line_panel());
+        let svg = mp.render_svg().unwrap();
+        assert!(svg.contains("<svg"));
+    }
+
+    #[test]
+    fn multi_panel_save_svg_writes_file() {
+        let mp = MultiPanelFigure::new(400, 300, 1, 1).add(line_panel());
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("multi.svg");
+        mp.save(&path).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn multi_panel_extra_panels_past_grid_are_ignored() {
+        // 1x1 grid with 3 panels — only the first should render; the rest are
+        // dropped (no panic, no error).
+        let mp = MultiPanelFigure::new(200, 200, 1, 1)
+            .add(line_panel())
+            .add(line_panel())
+            .add(line_panel());
+        let svg = mp.render_svg().unwrap();
+        assert!(svg.contains("<svg"));
+    }
+
+    #[test]
+    fn multi_panel_empty_panel_errors() {
+        // A panel with no marks fails (StarsightError::Data).
+        let mp = MultiPanelFigure::new(200, 200, 1, 1).add(Figure::new(200, 200));
+        assert!(matches!(mp.render_svg(), Err(StarsightError::Data(_))));
     }
 }

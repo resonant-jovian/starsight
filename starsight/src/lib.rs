@@ -56,10 +56,22 @@ pub mod ticks;
 pub type Result<T> = crate::background::errors::Result<T>;
 /// Top-level error enum re-export.
 pub use crate::background::errors::StarsightError;
+/// Legend placement enum re-exports — `Edge`, `LegendPosition` (with
+/// `Auto` / `Inside` / `Outside(Edge)` variants). Used via
+/// `Figure::legend_position(...)`. Tracked as Epic L
+/// (`starsight-3bp.10.11`).
+pub use crate::common::{Edge, LegendPosition};
 
 // ── plot! macro ──────────────────────────────────────────────────────────────────────────────────
 
 /// One-liner: `plot!(&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]).save("out.png").unwrap();`
+///
+/// With the `polars` feature, the macro grows a `DataFrame` arm:
+/// `plot!(df, x = "col_a", y = "col_b")` extracts the named columns from a
+/// Polars frame and dispatches the appropriate mark (`LineMark` for numeric
+/// x, `BarMark` for categorical x). Add `color = "col_c"` to partition rows
+/// by a third column and emit one mark per group with cycled palette
+/// colours and per-group legend labels.
 #[macro_export]
 macro_rules! plot {
     ($x:expr, $y:expr $(,)?) => {{
@@ -68,4 +80,6 @@ macro_rules! plot {
             $y.into_iter().map(|&v| v as f64),
         )
     }};
+    ($df:expr, x = $x:expr, y = $y:expr $(,)?) => {{ $crate::common::sources::plot_dataframe($df, $x, $y, None) }};
+    ($df:expr, x = $x:expr, y = $y:expr, color = $color:expr $(,)?) => {{ $crate::common::sources::plot_dataframe($df, $x, $y, Some($color)) }};
 }

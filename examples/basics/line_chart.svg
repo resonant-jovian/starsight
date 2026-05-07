@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path fill="#fff" d="M54.6 48h928.2v507H54.6z" shape-rendering="crispEdges"/><text x="446.7" y="32" fill="#111" font-family="sans-serif" font-size="16">
+Monthly Revenue
+</text><text x="500.7" y="590" fill="#333" font-family="sans-serif" font-size="12">
+Month
+</text><text x="22" y="355.5" fill="#333" font-family="sans-serif" font-size="12" transform="rotate(-90 22 355.5)">
+Revenue (k USD)
+</text><path fill="none" stroke="#ddd" d="M96.79 555V48m168.765 507V48m168.763 507V48m168.764 507V48m168.763 507V48M940.61 555V48M54.6 531.955h928.2M54.6 416.727h928.2M54.6 301.5h928.2M54.6 186.273h928.2M54.6 71.045h928.2" shape-rendering="crispEdges"/><path fill="none" stroke="#2e7cb8" stroke-width="2.5" d="m130.544 485.897 33.752-39.295 33.753-27.426 33.753-13.355 33.753-.528 33.752 7.913 33.753 9.904 33.753 4.956 33.752-5.72 33.753-19.508 33.753-33.035 33.753-42.987 33.752-46.928 33.753-43.894 33.753-34.626 33.753-21.396 33.752-7.44 33.753 3.824 33.753 9.637 33.752 8.577 33.753.903 33.753-11.505 33.753-25.612 33.752-37.96"/><path fill="none" stroke="#444" d="M96.79 555v5" shape-rendering="crispEdges"/><text x="93.191" y="572" fill="#444" font-family="sans-serif" font-size="12">
+0
+</text><path fill="none" stroke="#444" d="M265.555 555v5" shape-rendering="crispEdges"/><text x="261.955" y="572" fill="#444" font-family="sans-serif" font-size="12">
+5
+</text><path fill="none" stroke="#444" d="M434.318 555v5" shape-rendering="crispEdges"/><text x="427.118" y="572" fill="#444" font-family="sans-serif" font-size="12">
+10
+</text><path fill="none" stroke="#444" d="M603.082 555v5" shape-rendering="crispEdges"/><text x="595.882" y="572" fill="#444" font-family="sans-serif" font-size="12">
+15
+</text><path fill="none" stroke="#444" d="M771.845 555v5" shape-rendering="crispEdges"/><text x="764.645" y="572" fill="#444" font-family="sans-serif" font-size="12">
+20
+</text><path fill="none" stroke="#444" d="M940.61 555v5" shape-rendering="crispEdges"/><text x="933.409" y="572" fill="#444" font-family="sans-serif" font-size="12">
+25
+</text><path fill="none" stroke="#444" d="M54.6 531.955h-5" shape-rendering="crispEdges"/><text x="24" y="536.755" fill="#444" font-family="sans-serif" font-size="12">
+100
+</text><path fill="none" stroke="#444" d="M54.6 416.727h-5" shape-rendering="crispEdges"/><text x="24" y="421.527" fill="#444" font-family="sans-serif" font-size="12">
+150
+</text><path fill="none" stroke="#444" d="M54.6 301.5h-5" shape-rendering="crispEdges"/><text x="24" y="306.3" fill="#444" font-family="sans-serif" font-size="12">
+200
+</text><path fill="none" stroke="#444" d="M54.6 186.273h-5" shape-rendering="crispEdges"/><text x="24" y="191.073" fill="#444" font-family="sans-serif" font-size="12">
+250
+</text><path fill="none" stroke="#444" d="M54.6 71.045h-5" shape-rendering="crispEdges"/><text x="24" y="75.845" fill="#444" font-family="sans-serif" font-size="12">
+300
+</text><path fill="none" stroke="#000" d="M54.6 555h928.2M54.6 48v507" shape-rendering="crispEdges"/></svg>

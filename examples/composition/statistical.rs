@@ -33,6 +33,7 @@ fn main() -> Result<()> {
     let smoothed = rolling_mean(&raw, 7);
 
     Figure::new(1100, 600)
+        .theme(theme_from_env())
         .title("Daily Measurement vs. 7-day Rolling Mean")
         .x_label("Day")
         .y_label("Reading")
@@ -48,5 +49,9 @@ fn main() -> Result<()> {
                 .width(2.5)
                 .label("rolling mean (7d)"),
         )
-        .save("examples/composition/statistical.png")
+        .save(format!(
+            "examples/composition/statistical{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
+        ))
 }

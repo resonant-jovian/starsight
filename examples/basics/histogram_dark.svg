@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path fill="#1e1e1e" d="M61.8 48h917.4v507H61.8z" shape-rendering="crispEdges"/><text x="338.1" y="32" fill="#fff" font-family="sans-serif" font-size="16">
+Distribution of Synthetic Measurements
+</text><text x="502.5" y="590" fill="#ddd" font-family="sans-serif" font-size="12">
+Value
+</text><text x="22" y="333.9" fill="#ddd" font-family="sans-serif" font-size="12" transform="rotate(-90 22 333.9)">
+Frequency
+</text><path fill="none" stroke="#3a3a3a" d="M61.8 555V48m229.35 507V48M520.5 555V48m229.35 507V48M979.2 555V48M61.8 555h917.4M61.8 428.25h917.4M61.8 301.5h917.4M61.8 174.75h917.4M61.8 48h917.4" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M61.8 551.964h65.529V555H61.8zm65.529-6.072h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M192.857 507.943h65.529V555h-65.529zm65.529-97.15h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M323.914 292.898h65.529V555h-65.529zm65.529-197.841h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M454.971 48H520.5v507h-65.529zM520.5 87.467h65.529V555H520.5zm65.529 135.099h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M651.557 374.868h65.529V555h-65.529zm65.529 93.102h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M782.614 533.242h65.529V555h-65.529zm65.529 16.192h65.529V555h-65.529z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M913.671 551.964H979.2V555h-65.529z" shape-rendering="crispEdges"/><path fill="none" stroke="#ccc" d="M61.8 555v5" shape-rendering="crispEdges"/><text x="58.2" y="572" fill="#ccc" font-family="sans-serif" font-size="12">
+0
+</text><path fill="none" stroke="#ccc" d="M291.15 555v5" shape-rendering="crispEdges"/><text x="283.95" y="572" fill="#ccc" font-family="sans-serif" font-size="12">
+25
+</text><path fill="none" stroke="#ccc" d="M520.5 555v5" shape-rendering="crispEdges"/><text x="513.3" y="572" fill="#ccc" font-family="sans-serif" font-size="12">
+50
+</text><path fill="none" stroke="#ccc" d="M749.85 555v5" shape-rendering="crispEdges"/><text x="742.65" y="572" fill="#ccc" font-family="sans-serif" font-size="12">
+75
+</text><path fill="none" stroke="#ccc" d="M979.2 555v5" shape-rendering="crispEdges"/><text x="968.4" y="572" fill="#ccc" font-family="sans-serif" font-size="12">
+100
+</text><path fill="none" stroke="#ccc" d="M61.8 555h-5" shape-rendering="crispEdges"/><text x="45" y="559.8" fill="#ccc" font-family="sans-serif" font-size="12">
+0
+</text><path fill="none" stroke="#ccc" d="M61.8 428.25h-5" shape-rendering="crispEdges"/><text x="31" y="433.05" fill="#ccc" font-family="sans-serif" font-size="12">
+300
+</text><path fill="none" stroke="#ccc" d="M61.8 301.5h-5" shape-rendering="crispEdges"/><text x="31" y="306.3" fill="#ccc" font-family="sans-serif" font-size="12">
+600
+</text><path fill="none" stroke="#ccc" d="M61.8 174.75h-5" shape-rendering="crispEdges"/><text x="31" y="179.55" fill="#ccc" font-family="sans-serif" font-size="12">
+900
+</text><path fill="none" stroke="#ccc" d="M61.8 48h-5" shape-rendering="crispEdges"/><text x="24" y="52.8" fill="#ccc" font-family="sans-serif" font-size="12">
+1200
+</text><path fill="none" stroke="#000" d="M61.8 555h917.4M61.8 48v507" shape-rendering="crispEdges"/></svg>

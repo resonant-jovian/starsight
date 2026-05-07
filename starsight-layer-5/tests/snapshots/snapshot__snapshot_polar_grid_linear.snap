@@ -1,0 +1,20 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: "polar_grid_svg(theta, r)"
+---
+<svg height="400" viewBox="0 0 400 400" width="400" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="360" shape-rendering="crispEdges" width="360" x="20" y="20"/>
+<path d="M236,200 C236,219.88225,219.88225,236,200,236 C180.11775,236,164,219.88225,164,200 C164,180.11775,180.11775,164,200,164 C219.88225,164,236,180.11775,236,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M272,200 C272,239.7645,239.7645,272,200,272 C160.2355,272,128,239.7645,128,200 C128,160.2355,160.2355,128,200,128 C239.7645,128,272,160.2355,272,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M308,200 C308,259.64676,259.64676,308,200,308 C140.35324,308,91.99999,259.64676,91.99999,200 C91.99999,140.35324,140.35324,91.99999,200,91.99999 C259.64676,91.99999,308,140.35324,308,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M344,200 C344,279.529,279.529,344,200,344 C120.47099,344,56,279.529,56,200 C56,120.47099,120.47099,56,200,56 C279.529,56,344,120.47099,344,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M380,200 C380,299.41125,299.41125,380,200,380 C100.58874,380,20,299.41125,20,200 C20,100.58874,100.58874,20,200,20 C299.41125,20,380,100.58874,380,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L200,20" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L327.27924,72.72078" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L380,200" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L327.27924,327.27924" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L200,380" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L72.72078,327.27924" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L20,200" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L72.72078,72.72078" fill="none" stroke="#dddddd" stroke-width="1"/>
+</svg>

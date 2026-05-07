@@ -29,6 +29,7 @@ fn main() -> Result<()> {
     let (xb, yb) = cluster(6.0, 5.5, 80, 4711);
 
     Figure::new(900, 700)
+        .theme(theme_from_env())
         .title("Two Clusters in 2D Feature Space")
         .x_label("Feature A")
         .y_label("Feature B")
@@ -44,5 +45,9 @@ fn main() -> Result<()> {
                 .radius(4.0)
                 .label("Group β"),
         )
-        .save("examples/basics/scatter.png")
+        .save(format!(
+            "examples/basics/scatter{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
+        ))
 }

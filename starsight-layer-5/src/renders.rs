@@ -8,12 +8,13 @@
 
 use starsight_layer_1::backends::DrawBackend;
 use starsight_layer_1::errors::Result;
-use starsight_layer_1::paths::{Path, PathStyle};
+use starsight_layer_1::paths::{Path, PathCommand, PathStyle};
 use starsight_layer_1::primitives::{Color, Point, Rect};
 use starsight_layer_1::theme::Theme;
-use starsight_layer_2::coords::CartesianCoord;
+use starsight_layer_2::coords::{CartesianCoord, Coord, PolarCoord};
+use starsight_layer_3::marks::{LegendGlyph, MarkExtent};
 
-use crate::layout::Slot;
+use crate::layout::{LayoutFonts, Slot};
 
 // ── render_axes ──────────────────────────────────────────────────────────────────────────────────
 
@@ -29,11 +30,12 @@ pub fn render_axes(
     category_labels: &[String],
     use_y_axis_labels: bool,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
     let area = &coord.plot_area;
     let tick_len: f32 = 5.0;
     let tick_color = theme.axis;
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
 
     let n_categories = category_labels.len();
 
@@ -52,13 +54,27 @@ pub fn render_axes(
             tick_color,
         )
     };
+    // Sloped/rotated x-tick label: top of label sits at the tick endpoint
+    // and the label slopes (45°) or descends (90°) downward. Pivot is the
+    // top-left of the visual; SVG/Skia rotate around that point clockwise.
+    let draw_rotated_x_label =
+        |backend: &mut dyn DrawBackend, label: &str, px: f32, rotation: f32| -> Result<()> {
+            let pivot = Point::new(px, area.bottom + tick_len + 4.0);
+            backend.draw_rotated_text(label, pivot, font_size, tick_color, rotation)
+        };
     let draw_y_label = |backend: &mut dyn DrawBackend, label: &str, py: f32| -> Result<()> {
         let (tw, _) = backend
             .text_extent(label, font_size)
             .unwrap_or((0.0, font_size));
+        // Snap measured width up to the next integer pixel and start-anchor the
+        // text there. The right edge becomes `area.left - tick_len - 4.0` for
+        // every label up to ≤1px sub-pixel drift, fixing the inconsistent
+        // flush-right rendering tracked as `starsight-cet`.
+        let tw_px = tw.ceil();
+        let x = (area.left - tick_len - 4.0 - tw_px).round();
         backend.draw_text(
             label,
-            Point::new(area.left - tick_len - 4.0 - tw, py + font_size * 0.4),
+            Point::new(x, py + font_size * 0.4),
             font_size,
             tick_color,
         )
@@ -67,11 +83,32 @@ pub fn render_axes(
     // === Category labels (bar charts) ===
     if n_categories > 0 {
         if use_y_axis_labels {
-            // Labels on Y-axis (left side) - horizontal bars, only X ticks
+            // Labels on Y-axis (left side) - horizontal bars, only X ticks.
+            // Categorical labels use a uniform LEFT edge instead of the per-label
+            // right-anchor used for numeric ticks: with mixed-width category
+            // strings ("Tokyo" vs "São Paulo" vs "Mexico City") the right-anchor
+            // policy makes the left edges visually wobble, which the user flagged
+            // in the snapshot review. Numeric ticks keep right-anchor because
+            // decimal alignment matters there. Fix for I.7 (`starsight-3bp.9.7`).
+            let max_tw_px = category_labels
+                .iter()
+                .map(|label| {
+                    backend
+                        .text_extent(label, font_size)
+                        .map_or(0.0, |(w, _)| w)
+                        .ceil()
+                })
+                .fold(0.0_f32, f32::max);
+            let category_x = (area.left - tick_len - 4.0 - max_tw_px).round();
             let band_height = area.height() / n_categories as f32;
             for (i, label) in category_labels.iter().enumerate() {
                 let py = area.top + (i as f32 + 0.5) * band_height;
-                draw_y_label(backend, label, py)?;
+                backend.draw_text(
+                    label,
+                    Point::new(category_x, py + font_size * 0.4),
+                    font_size,
+                    tick_color,
+                )?;
             }
             // X-axis: ticks to left (label side)
             for (pos, label) in coord
@@ -91,9 +128,24 @@ pub fn render_axes(
         } else {
             // Labels on X-axis (bottom) - vertical bars, only Y ticks
             let band_width = area.width() / n_categories as f32;
+            // Mirror the layout's rotation decision so reservation and
+            // render agree on which path to take.
+            let mut max_label_w: f32 = 0.0;
+            for label in category_labels {
+                if let Ok((w, _)) = backend.text_extent(label, font_size)
+                    && w > max_label_w
+                {
+                    max_label_w = w;
+                }
+            }
+            let rotation = crate::layout::x_tick_label_rotation(max_label_w, Some(band_width));
             for (i, label) in category_labels.iter().enumerate() {
                 let px = area.left + (i as f32 + 0.5) * band_width;
-                draw_x_label(backend, label, px)?;
+                if rotation == 0.0 {
+                    draw_x_label(backend, label, px)?;
+                } else {
+                    draw_rotated_x_label(backend, label, px, rotation)?;
+                }
             }
             // NO X-axis ticks - category labels replace them
             // Y-axis: ticks right (data side)
@@ -159,11 +211,30 @@ pub fn render_axes(
 
 // ── render_grid_lines ────────────────────────────────────────────────────────────────────────────
 
-/// Render light grid lines for both axes.
+/// Render light grid lines for the figure's coord system.
+///
+/// Dispatches by coord type: [`CartesianCoord`] gets vertical/horizontal grid
+/// lines at each tick; [`PolarCoord`] gets concentric rings at each radial
+/// tick plus radial spokes at each angular tick. Unknown coord types render
+/// nothing — extension point for future ternary / 3D coords.
 ///
 /// # Errors
 /// Returns the backend's error if any line draw call fails.
 pub fn render_grid_lines(
+    coord: &dyn Coord,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
+    if let Some(cart) = coord.as_any().downcast_ref::<CartesianCoord>() {
+        render_cartesian_grid_lines(cart, backend, theme)
+    } else if let Some(polar) = coord.as_any().downcast_ref::<PolarCoord>() {
+        render_polar_grid_lines(polar, backend, theme)
+    } else {
+        Ok(())
+    }
+}
+
+fn render_cartesian_grid_lines(
     coord: &CartesianCoord,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
@@ -191,6 +262,87 @@ pub fn render_grid_lines(
     Ok(())
 }
 
+/// Polar grid: concentric rings at each radial tick + radial spokes at each
+/// angular tick.
+///
+/// Ring/spoke styling follows the cartesian grid (theme.grid color, 1px
+/// stroke). Spokes start at the polar center and end at the rim of the
+/// inscribed disk; rings are full circles centered on the polar center.
+/// Tick positions go through the axis scales — `polar_radial_sqrt` will
+/// place rings closer together near the rim, `polar_angular_categorical`
+/// will place spokes at band-center angles.
+///
+/// # Errors
+/// Returns the backend's error if any draw call fails.
+fn render_polar_grid_lines(
+    coord: &PolarCoord,
+    backend: &mut dyn DrawBackend,
+    theme: &Theme,
+) -> Result<()> {
+    let grid_color = theme.grid;
+    let line_style = PathStyle::stroke(grid_color, 1.0);
+    let center = coord.center;
+    let radius = coord.radius;
+
+    // Concentric rings at each r-tick (skip the degenerate r=0 ring).
+    for &r_tick in &coord.r_axis.tick_positions {
+        let r_norm = coord.r_axis.scale.map(r_tick) as f32;
+        let r_pixels = radius * r_norm;
+        if r_pixels <= 0.5 {
+            continue;
+        }
+        let circle = build_circle_path(center, r_pixels);
+        backend.draw_path(&circle, &line_style)?;
+    }
+
+    // Radial spokes at each theta-tick. Compass convention: theta=0 is up,
+    // angle increases clockwise — matches PolarCoord::data_to_pixel.
+    for &theta_tick in &coord.theta_axis.tick_positions {
+        let theta_norm = coord.theta_axis.scale.map(theta_tick);
+        let angle = theta_norm * std::f64::consts::TAU;
+        let edge_x = center.x + radius * (angle.sin() as f32);
+        let edge_y = center.y - radius * (angle.cos() as f32);
+        let path = Path::new()
+            .move_to(center)
+            .line_to(Point::new(edge_x, edge_y));
+        backend.draw_path(&path, &line_style)?;
+    }
+
+    Ok(())
+}
+
+/// Four-cubic-Bezier circle approximation. Magic constant
+/// `k = 4/3 · tan(π/8) ≈ 0.5523` makes the cubic tangent match the true
+/// circle within 0.027% — invisible at any practical chart scale.
+fn build_circle_path(center: Point, r: f32) -> Path {
+    let cx = center.x;
+    let cy = center.y;
+    let k = 0.552_284_8_f32;
+    let kr = k * r;
+    let mut path = Path::new().move_to(Point::new(cx + r, cy));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + r, cy + kr),
+        Point::new(cx + kr, cy + r),
+        Point::new(cx, cy + r),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - kr, cy + r),
+        Point::new(cx - r, cy + kr),
+        Point::new(cx - r, cy),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - r, cy - kr),
+        Point::new(cx - kr, cy - r),
+        Point::new(cx, cy - r),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + kr, cy - r),
+        Point::new(cx + r, cy - kr),
+        Point::new(cx + r, cy),
+    ));
+    path.close()
+}
+
 // ── render_background ────────────────────────────────────────────────────────────────────────────
 
 /// Fill the plot area background with the theme background color.
@@ -213,23 +365,91 @@ pub struct LegendEntry {
     pub color: Color,
     /// Display text for this legend row.
     pub label: String,
+    /// Sample shape drawn next to the label. Honest legend glyphs let scatter
+    /// plots show a dot (not a dash) and bar charts show a swatch (not a
+    /// hairline). Fix for `starsight-f4t`.
+    pub glyph: LegendGlyph,
+}
+
+/// Where the legend sits relative to the plot area.
+///
+/// [`Inside`](Self::Inside) (default) places the legend in a corner of
+/// `plot_area` and uses the per-mark dodge: try TR → TL → BR → BL, picking the
+/// first corner whose rect does not intersect any mark's pixel-space footprint.
+/// When no corner is fully clear, falls back to the corner with the lowest
+/// overlap (count tiebreaker first, then area, finally TR > TL > BR > BL).
+///
+/// [`Outside`](Self::Outside) places the legend on the opposite side of the
+/// chosen plot-area edge — equivalent to matplotlib's
+/// `bbox_to_anchor=(1.05, 1)` for `Outside(Edge::Right)`. The
+/// [`LayoutBuilder`](crate::layout::LayoutBuilder) reserves a strip on that
+/// edge so plot data never collides with the legend.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum LegendPosition {
+    /// Auto-pick: figures composed of disk-fill marks (`ArcMark` /
+    /// `PieMark` / `DonutMark` / `RadarMark` / `PolarBarMark` /
+    /// `PolarRectMark`) resolve to `Outside(Edge::Right)`; everything else
+    /// resolves to `Inside`. Default — the common case "I just added a
+    /// `PieMark`, the legend should not overlap it" works without explicit
+    /// configuration. L.17.
+    #[default]
+    Auto,
+    /// In-plot placement with overlap-aware corner dodge.
+    Inside,
+    /// Out-of-plot placement on the given edge. Plot area shrinks to make
+    /// room; legend never overlaps data.
+    Outside(Edge),
+}
+
+/// Which edge of the plot area to reserve for [`LegendPosition::Outside`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum Edge {
+    /// Right of the plot area (matplotlib `bbox_to_anchor=(1.05, 1)`).
+    Right,
+    /// Left of the plot area.
+    Left,
+    /// Above the plot area.
+    Top,
+    /// Below the plot area.
+    Bottom,
 }
 
 /// Render a legend with colored line/box samples and labels.
+///
+/// `occupancy` is one [`MarkExtent`] per mark on the figure (in pixel space).
+/// `position` controls placement strategy:
+///
+/// - [`LegendPosition::Inside`]: try corners TR → TL → BR → BL, pick the first
+///   that doesn't intersect any [`MarkExtent`]. When no corner is fully clear,
+///   pick the corner with the lowest count of intersecting marks; tiebreak by
+///   total clipped overlap area; final tiebreak by TR > TL > BR > BL priority.
+/// - [`LegendPosition::Outside`]`(Edge)`: place the legend just outside
+///   `plot_area` on the named edge. The figure layout reserves a strip there
+///   (see [`LayoutBuilder`](crate::layout::LayoutBuilder)) so the legend lives
+///   in canvas space outside the plot. No dodge.
+///
+/// Replaces the bbox-based `data_pixel_rect: Option<&Rect>` parameter from
+/// Epic I — the per-`MarkExtent` contributions are accurate even for diagonal
+/// line marks and full-range scatter where the bbox over-claimed coverage.
 ///
 /// # Errors
 /// Returns the backend's error if any rect or text draw call fails.
 pub fn render_legend(
     entries: &[LegendEntry],
     plot_area: &Rect,
+    occupancy: &[MarkExtent],
+    position: LegendPosition,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
     if entries.is_empty() {
         return Ok(());
     }
 
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
     let label_color = theme.tick_label;
     let sample_size: f32 = 12.0;
     let padding: f32 = 8.0;
@@ -239,10 +459,24 @@ pub fn render_legend(
     let legend_width = max_label_len as f32 * 7.0 + 30.0;
     let legend_height = (entries.len() as f32 * line_spacing) + padding * 2.0;
 
-    let legend_x = plot_area.right - legend_width - 10.0;
-    let legend_y = plot_area.top + 10.0;
+    // Inset bumped 10→16 so the legend sits visibly clear of axis-extreme
+    // data points (`starsight-bls`).
+    let inset: f32 = 16.0;
 
-    let bg_color = theme.background.with_alpha(230).without_alpha();
+    // `LegendPosition::Auto` should be resolved by the caller via
+    // `Figure::render_within`'s `resolve_legend_position` (depends on the
+    // mark mix) — fall through to Inside if it leaks here, so callers that
+    // bypass the figure pipeline still get sensible behavior.
+    let (legend_x, legend_y) = match position {
+        LegendPosition::Inside | LegendPosition::Auto => {
+            place_inside_dodge(plot_area, legend_width, legend_height, inset, occupancy)
+        }
+        LegendPosition::Outside(edge) => {
+            place_outside(plot_area, legend_width, legend_height, inset, edge)
+        }
+    };
+
+    let bg_color = theme.background;
     let bg_rect = Rect::new(
         legend_x,
         legend_y,
@@ -250,14 +484,55 @@ pub fn render_legend(
         legend_y + legend_height,
     );
     backend.fill_rect(bg_rect, bg_color)?;
+    // 1-px border so the legend box has a visible edge against bright plot
+    // backgrounds (yrp.1). Drawn after the fill so it sits on top.
+    let border = Path::new()
+        .move_to(Point::new(bg_rect.left, bg_rect.top))
+        .line_to(Point::new(bg_rect.right, bg_rect.top))
+        .line_to(Point::new(bg_rect.right, bg_rect.bottom))
+        .line_to(Point::new(bg_rect.left, bg_rect.bottom))
+        .close();
+    backend.draw_path(&border, &PathStyle::stroke(theme.axis, 1.0))?;
 
     for (i, entry) in entries.iter().enumerate() {
         let y = legend_y + padding + (i as f32 * line_spacing) + sample_size / 2.0;
+        let sample_left = legend_x + padding;
+        let sample_right = sample_left + sample_size;
 
-        let line = Path::new()
-            .move_to(Point::new(legend_x + padding, y))
-            .line_to(Point::new(legend_x + padding + sample_size, y));
-        backend.draw_path(&line, &PathStyle::stroke(entry.color, 2.0))?;
+        match entry.glyph {
+            LegendGlyph::Point => {
+                // Filled disk centered on the sample slot, radius matching
+                // PointMark's default visual weight in legends.
+                let radius = sample_size / 2.5;
+                let cx = f32::midpoint(sample_left, sample_right);
+                draw_filled_disk(backend, Point::new(cx, y), radius, entry.color)?;
+            }
+            LegendGlyph::Bar => {
+                let half = sample_size / 2.0;
+                let rect = Rect::new(sample_left, y - half, sample_right, y + half);
+                backend.fill_rect(rect, entry.color)?;
+            }
+            LegendGlyph::Area => {
+                // Translucent fill + top stroke conveys the "area under a line"
+                // shape — readable even at the small legend swatch size.
+                let half = sample_size / 2.0;
+                let rect = Rect::new(sample_left, y - half, sample_right, y + half);
+                let fill = entry.color.with_alpha(140).without_alpha();
+                backend.fill_rect(rect, fill)?;
+                let top = Path::new()
+                    .move_to(Point::new(sample_left, y - half))
+                    .line_to(Point::new(sample_right, y - half));
+                backend.draw_path(&top, &PathStyle::stroke(entry.color, 1.5))?;
+            }
+            // LegendGlyph::Line and any future variant fall back to a
+            // horizontal stroke — the safe, readable default for unknown shapes.
+            LegendGlyph::Line | _ => {
+                let line = Path::new()
+                    .move_to(Point::new(sample_left, y))
+                    .line_to(Point::new(sample_right, y));
+                backend.draw_path(&line, &PathStyle::stroke(entry.color, 2.0))?;
+            }
+        }
 
         backend.draw_text(
             &entry.label,
@@ -270,24 +545,158 @@ pub fn render_legend(
     Ok(())
 }
 
+/// Inside-the-plot dodge: try TR → TL → BR → BL, pick the first corner whose
+/// rect doesn't intersect any [`MarkExtent`]. When all corners overlap, pick
+/// the corner with the lowest count of intersecting marks (tiebreak by total
+/// clipped overlap area, final tiebreak by candidate priority order).
+fn place_inside_dodge(
+    plot_area: &Rect,
+    legend_width: f32,
+    legend_height: f32,
+    inset: f32,
+    occupancy: &[MarkExtent],
+) -> (f32, f32) {
+    let tr = (
+        plot_area.right - legend_width - inset,
+        plot_area.top + inset,
+    );
+    let tl = (plot_area.left + inset, plot_area.top + inset);
+    let br = (
+        plot_area.right - legend_width - inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let bl = (
+        plot_area.left + inset,
+        plot_area.bottom - legend_height - inset,
+    );
+    let candidates = [tr, tl, br, bl];
+
+    if occupancy.is_empty() {
+        return tr;
+    }
+
+    let scored: Vec<((f32, f32), usize, f32)> = candidates
+        .iter()
+        .map(|&(x, y)| {
+            let cand = Rect::new(x, y, x + legend_width, y + legend_height);
+            let mut count = 0_usize;
+            let mut area = 0.0_f32;
+            for ext in occupancy {
+                if ext.intersects(&cand) {
+                    count += 1;
+                    area += ext.overlap_area(&cand);
+                }
+            }
+            ((x, y), count, area)
+        })
+        .collect();
+
+    // First clear corner wins (count == 0).
+    if let Some(&((x, y), _, _)) = scored.iter().find(|(_, c, _)| *c == 0) {
+        return (x, y);
+    }
+    // No clear corner: pick min by (count, area). The candidates iterator
+    // order is TR, TL, BR, BL — `min_by` keeps the first match on ties, so
+    // the priority order is preserved as the final tiebreaker.
+    scored
+        .iter()
+        .min_by(|a, b| {
+            a.1.cmp(&b.1)
+                .then_with(|| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal))
+        })
+        .map_or(tr, |&((x, y), _, _)| (x, y))
+}
+
+/// Outside-the-plot placement: anchor the legend on the chosen edge just
+/// outside `plot_area`. The figure layout is expected to have already
+/// reserved an `inset + legend_width` strip on that edge so the legend lives
+/// in canvas space outside the plot rect (see L.7 / L.8 in Epic L).
+fn place_outside(
+    plot_area: &Rect,
+    legend_width: f32,
+    legend_height: f32,
+    inset: f32,
+    edge: Edge,
+) -> (f32, f32) {
+    match edge {
+        Edge::Right => (plot_area.right + inset, plot_area.top + inset),
+        Edge::Left => (plot_area.left - legend_width - inset, plot_area.top + inset),
+        Edge::Top => (
+            plot_area.left + (plot_area.width() - legend_width) * 0.5,
+            plot_area.top - legend_height - inset,
+        ),
+        Edge::Bottom => (
+            plot_area.left + (plot_area.width() - legend_width) * 0.5,
+            plot_area.bottom + inset,
+        ),
+    }
+}
+
+/// Approximate a filled circle with four cubic Béziers (the standard
+/// `0.5522847498` Kappa constant). The legend-internal helper avoids pulling in
+/// any additional renderer dependencies for what is a one-off use today.
+fn draw_filled_disk(
+    backend: &mut dyn DrawBackend,
+    center: Point,
+    radius: f32,
+    color: Color,
+) -> Result<()> {
+    // Kappa for cubic-Bézier circle approximation: 4·(√2 − 1)/3 ≈ 0.552_284_8.
+    let k = 0.552_284_8 * radius;
+    let cx = center.x;
+    let cy = center.y;
+    let mut path = Path::new().move_to(Point::new(cx + radius, cy));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + radius, cy + k),
+        Point::new(cx + k, cy + radius),
+        Point::new(cx, cy + radius),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - k, cy + radius),
+        Point::new(cx - radius, cy + k),
+        Point::new(cx - radius, cy),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx - radius, cy - k),
+        Point::new(cx - k, cy - radius),
+        Point::new(cx, cy - radius),
+    ));
+    path.commands.push(PathCommand::CubicTo(
+        Point::new(cx + k, cy - radius),
+        Point::new(cx + radius, cy - k),
+        Point::new(cx + radius, cy),
+    ));
+    let style = PathStyle::fill(color);
+    backend.draw_path(&path, &style)
+}
+
 // ── render_title ───────────────────────────────────────────────────────────────────────────────
 
-/// Render the chart title centered inside its layout slot.
+/// Render the chart title horizontally centered over the *plot area* (so the
+/// title balances over the data, not the full canvas including y-axis label
+/// margin) and vertically centered inside the title slot.
+///
+/// Centering policy: title-x = midpoint of `plot_area`. Pre-fix `starsight-cet`
+/// centered to the title slot's full width, which on axis-bearing charts left
+/// the title offset to the right of the visible plot.
 ///
 /// # Errors
 /// Returns the backend's error if text measurement or drawing fails.
 pub fn render_title(
     title: &str,
     slot: &Slot,
+    plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
-    let font_size: f32 = 16.0;
+    let font_size = fonts.title;
     let title_color = theme.title;
     let (tw, th) = backend
         .text_extent(title, font_size)
         .unwrap_or((0.0, font_size));
-    let x = slot.rect.left + (slot.rect.width() - tw) / 2.0;
+    let cx = f32::midpoint(plot_area.left, plot_area.right);
+    let x = cx - tw * 0.5;
     let y = f32::midpoint(slot.rect.height(), th) + slot.rect.top;
     backend.draw_text(title, Point::new(x, y), font_size, title_color)
 }
@@ -297,6 +706,7 @@ pub fn render_title(
 ///
 /// # Errors
 /// Returns the backend's error if text measurement or drawing fails.
+#[allow(clippy::too_many_arguments)]
 pub fn render_axis_labels(
     x_label: Option<&str>,
     y_label: Option<&str>,
@@ -305,8 +715,9 @@ pub fn render_axis_labels(
     plot_area: &Rect,
     backend: &mut dyn DrawBackend,
     theme: &Theme,
+    fonts: &LayoutFonts,
 ) -> Result<()> {
-    let font_size: f32 = 12.0;
+    let font_size = fonts.label;
     let label_color = theme.tick_label;
 
     if let (Some(label), Some(slot)) = (x_label, x_slot) {
@@ -334,33 +745,34 @@ pub fn render_axis_labels(
 #[cfg(test)]
 mod tests {
     use super::{
-        LegendEntry, render_axes, render_axis_labels, render_background, render_grid_lines,
-        render_legend, render_title,
+        LegendEntry, LegendPosition, render_axes, render_axis_labels, render_background,
+        render_grid_lines, render_legend, render_title,
     };
-    use crate::layout::{Side, Slot};
+    use crate::layout::{LayoutFonts, Side, Slot};
     use starsight_layer_1::backends::vectors::SvgBackend;
     use starsight_layer_1::primitives::{Color, Rect};
     use starsight_layer_1::theme::DEFAULT_LIGHT;
     use starsight_layer_2::axes::Axis;
     use starsight_layer_2::coords::CartesianCoord;
     use starsight_layer_2::scales::LinearScale;
+    use starsight_layer_3::marks::{LegendGlyph, MarkExtent};
 
     fn coord_with_ticks(plot: Rect) -> CartesianCoord {
         CartesianCoord {
             x_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: 0.0,
                     domain_max: 1.0,
-                },
+                }),
                 label: None,
                 tick_positions: vec![0.0, 0.5, 1.0],
                 tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
             },
             y_axis: Axis {
-                scale: LinearScale {
+                scale: Box::new(LinearScale {
                     domain_min: 0.0,
                     domain_max: 1.0,
-                },
+                }),
                 label: None,
                 tick_positions: vec![0.0, 0.5, 1.0],
                 tick_labels: vec!["0".into(), "0.5".into(), "1".into()],
@@ -375,8 +787,11 @@ mod tests {
         render_legend(
             &[],
             &Rect::new(0.0, 0.0, 100.0, 100.0),
+            &[],
+            LegendPosition::Inside,
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
     }
@@ -388,22 +803,54 @@ mod tests {
             LegendEntry {
                 color: Color::RED,
                 label: "first".into(),
+                glyph: LegendGlyph::Line,
             },
             LegendEntry {
                 color: Color::BLUE,
                 label: "second".into(),
+                glyph: LegendGlyph::Point,
             },
         ];
         render_legend(
             &entries,
             &Rect::new(0.0, 0.0, 400.0, 200.0),
+            &[],
+            LegendPosition::Inside,
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
         let svg = backend.svg_string();
         assert!(svg.contains("first"));
         assert!(svg.contains("second"));
+    }
+
+    #[test]
+    fn render_legend_dodges_overlapping_data() {
+        // Data covers the entire upper-right quadrant of the plot — TR
+        // candidate must overlap, so the legend should fall through to TL.
+        let mut backend = SvgBackend::new(400, 200);
+        let entries = vec![LegendEntry {
+            color: Color::RED,
+            label: "x".into(),
+            glyph: LegendGlyph::Point,
+        }];
+        let plot = Rect::new(0.0, 0.0, 400.0, 200.0);
+        let occupancy = [MarkExtent::Bbox(Rect::new(200.0, 0.0, 400.0, 100.0))];
+        render_legend(
+            &entries,
+            &plot,
+            &occupancy,
+            LegendPosition::Inside,
+            &mut backend,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
+        let svg = backend.svg_string();
+        // Expect a fill rect whose left edge is ~16 (TL inset), not ~plot_right - lw - 16.
+        assert!(svg.contains('x'));
     }
 
     #[test]
@@ -418,13 +865,22 @@ mod tests {
     }
 
     #[test]
-    fn render_title_centers_in_slot() {
+    fn render_title_centers_over_plot_area() {
         let mut backend = SvgBackend::new(200, 50);
         let slot = Slot {
             rect: Rect::new(0.0, 0.0, 200.0, 30.0),
             side: Side::Top,
         };
-        render_title("Hello", &slot, &mut backend, &DEFAULT_LIGHT).unwrap();
+        let plot_area = Rect::new(20.0, 30.0, 180.0, 50.0);
+        render_title(
+            "Hello",
+            &slot,
+            &plot_area,
+            &mut backend,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
         assert!(backend.svg_string().contains("Hello"));
     }
 
@@ -448,6 +904,7 @@ mod tests {
             &plot,
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
         let svg = backend.svg_string();
@@ -466,6 +923,7 @@ mod tests {
             &Rect::new(0.0, 0.0, 200.0, 200.0),
             &mut backend,
             &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
         )
         .unwrap();
     }
@@ -481,7 +939,15 @@ mod tests {
     fn render_axes_numeric_branch() {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
-        render_axes(&coord, &mut backend, &[], false, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &[],
+            false,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -489,7 +955,15 @@ mod tests {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
         let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-        render_axes(&coord, &mut backend, &cats, false, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &cats,
+            false,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -497,6 +971,14 @@ mod tests {
         let mut backend = SvgBackend::new(200, 200);
         let coord = coord_with_ticks(Rect::new(20.0, 20.0, 180.0, 180.0));
         let cats = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-        render_axes(&coord, &mut backend, &cats, true, &DEFAULT_LIGHT).unwrap();
+        render_axes(
+            &coord,
+            &mut backend,
+            &cats,
+            true,
+            &DEFAULT_LIGHT,
+            &LayoutFonts::default(),
+        )
+        .unwrap();
     }
 }

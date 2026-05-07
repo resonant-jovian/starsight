@@ -1,131 +1,113 @@
 # AGENTS.md — starsight
 
-Quick reference for agents working in this repo.
+Universal brief for any agent working in this repo.
 
 ## Build & Test
 
 ```bash
-# Full workspace build
 cargo build --workspace
-
-# Run all tests
 cargo test --workspace
 
-# Run tests for a single layer (e.g., layer-3)
+# Single layer
 cargo test -p starsight-layer-3
 
-# Run snapshot tests
-cargo xtask snapshots         # update: pass --write to update
-cargo xtask snapshots --check  # CI mode
+# Snapshots (insta, layer-5 only)
+cargo test --workspace --test snapshot                              # run all
+cargo test -p starsight-layer-5 --test snapshot                      # run one layer
+INSTA_UPDATE=always cargo test --workspace --test snapshot           # update locally
+cargo insta test --workspace --check --unreferenced reject           # CI mode
+cargo insta accept                                                    # accept pending after a normal run
 
-# Lint order: fmt -> clippy -> typecheck -> test
+# Lint order: fmt → clippy → check → test
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo check --workspace --all-features
 cargo test --workspace
+
+# Docs (CI gate)
+RUSTDOCFLAGS="-D missing-docs -D rustdoc::broken-intra-doc-links" \
+  cargo doc --workspace --no-deps --all-features
+
+# Examples
+cargo xtask gallery    # render every example into target/gallery/
+cargo xtask showcase   # symlink example PNGs into showcase/
+
+# README chrome (hero, gallery composite, matrices, status panel, …)
+cargo xtask chrome --release       # full regen incl. example PNGs/SVGs (slow)
+cargo xtask chrome --skip-examples # composites only — assumes example outputs are current
+cargo xtask chrome --asset hero    # one named asset
 ```
 
-## Workspace Structure
+> `cargo xtask` is aliased in `.cargo/config.toml` as `run -p xtask --` so the
+> commands above are sugar; for heavy passes (chrome composes ~50 SVGs and
+> shells out to `npx svgo`) prepend `cargo run -p xtask --release --` instead
+> for the release profile.
 
-- **starsight** (facade): re-exports layers 1-7
-- **starsight-layer-1**: primitives, backends (SkiaBackend, SvgBackend), errors
-- **starsight-layer-2**: scales, coords, axes, ticks
-- **starsight-layer-3**: marks (LineMark, PointMark, BarMark, AreaMark)
-- **starsight-layer-4**: layout (grid, legend)
-- **starsight-layer-5**: Figure, plot! macro
-- **starsight-layer-6**: interactivity (winit)
-- **starsight-layer-7**: export (PDF, GIF, HTML, WASM)
+> `cargo xtask snapshots` is a **stub** in the current xtask binary. Use the `cargo insta` commands above directly.
 
-## Module Paths (current)
+## Workspace structure
+
+- **starsight** (facade): re-exports layers 1-7 via prelude, by category, and by layer alias.
+- **starsight-layer-1** (`background`): primitives, backends (Skia, Svg), errors, paths, colormaps, theme.
+- **starsight-layer-2** (`modifiers`): scales (Linear, Band), coords, axes, ticks (Wilkinson Extended).
+- **starsight-layer-3** (`components`): marks (Line, Point, Bar, Area, Heatmap, Histogram, Step, BoxPlot, Violin, Pie, Candlestick), statistics (Kde, BoxPlotStats), aesthetics, positions.
+- **starsight-layer-4** (`composition`): layout, legend dispatch.
+- **starsight-layer-5** (`common`): Figure, `plot!` macro, snapshot tests.
+- **starsight-layer-6** (`interactivity`): winit (planned 0.6.0).
+- **starsight-layer-7** (`export`): PDF, GIF, HTML, WASM (planned).
+
+Layer-N may only depend on layer-1..N-1.
+
+## Module paths
 
 - Errors: `crate::errors::{Result, StarsightError}` (not `crate::error`)
 - Backends: `crate::backends::DrawBackend` (not `crate::backend`)
-- Skia: `starsight_layer_1::backends::skia::SkiaBackend`
+- Skia / SVG: `starsight_layer_1::backends::{skia::SkiaBackend, svg::SvgBackend}`
 - Coords: `starsight_layer_2::coords::CartesianCoord`
 - Paths: `crate::paths::{Path, PathCommand, PathStyle}`
 
-## Key Conventions
+## Key conventions
 
-- **No global state**: `plot!(x, y)` returns a Figure, no `plt.show()`
-- **Builder pattern**: `Figure::new(800, 600).title("...").add(mark)`
-- **NaN = gap**: LineMark treats NaN values as breaks in the line
-- **Returns Result**: All public APIs return `Result<T>`, handle or propagate
-- **MSRV 1.89**: pinned in workspace Cargo.toml, checked in CI
-- **Edition 2024**: some Rust 2024 idioms, `std::path::Path` not `::std`
+- **No global state**: `plot!(x, y)` returns a `Figure`; no `plt.show()`.
+- **Builder pattern**: `Figure::new(800, 600).title("…").add(mark)`.
+- **NaN = gap**: `LineMark` and `AreaMark` treat `NaN` as breaks.
+- **`Result<T>` everywhere**: handle or propagate; no `unwrap()` in library code.
+- **MSRV 1.89**, **Edition 2024** (workspace-pinned in `Cargo.toml`).
+- **Snapshots are insta-based**, every layer has a `tests/snapshot.rs`. Layer-1 and layer-5 are populated today; the rest are placeholders that fill out as those surfaces stabilize. SVG is the default snapshot format (byte-exact across OS/fonts); PNG (`assert_binary_snapshot!`) only for backend-pure tests with no text.
 
-## Test Fixtures
+## What works now (0.3.x)
 
-- Snapshot tests in `starsight-layer-5/tests/snapshot.rs`
-- Reference PNGs in `examples/<group>/`, alongside each `.rs` source (run `cargo xtask gallery` to refresh them all)
-- SVG backend used for deterministic CI renders
+- Marks: Line, Point (per-point color/radius/alpha), Bar (vertical/horizontal/grouped/per-bar bases+colors+connectors), Area (with baseline), Heatmap (Linear + Log scale), Histogram (auto-bin), Step, BoxPlot+BoxPlotGroup, Violin+ViolinGroup+ViolinScale (KDE-driven, split mode, Area/Count/Width norm), Pie+PieLabelMode (donut via `inner_radius`, percent/value labels), Candlestick+Ohlc, **Contour (marching squares, isolines + colormap, with seam-stroked filled bands)**, **Arc (polar wedges for Nightingale / Gauge / Sunburst)**, **Radar (polyline on polar)**, **PolarBar (stacked annular bars)**, **PolarRect (annular tile for spiral heatmaps)**, **ErrorBar (symmetric / asymmetric whiskers + caps)**, **Rug (1-D ticks along axis margin)**.
+- Polars: `polars` feature → `FrameSource` + `plot!(df, x="col", y="col", color="col")`.
+- Coords: `CartesianCoord` and **`PolarCoord`** (compass convention, `inscribed`/`with_center`/`with_radius` builders); `Mark::render` dispatches via `&dyn Coord` with `as_any()` downcast helpers.
+- Scales: `LinearScale`, `LogScale`, `SqrtScale`, `CategoricalScale`, `BandScale` (categorical x); `infer_chart_kind` chart-type inference.
+- Axes: `Axis::auto_from_data` + `Axis::category` + polar variants (`polar_angular`, `polar_angular_categorical`, `polar_radial`, `polar_radial_sqrt`, `polar_radial_log`).
+- Ticks: Wilkinson Extended for numeric; `polar_ticks_{degrees,radians,categorical}` formatters (π-fraction labels reduced to lowest terms).
+- Color: `Color::cycle_next` (Tableau10); LegendGlyph dispatch (line/point/bar/area).
+- Layout: title + axis labels; LayoutFonts shared between layout + render.
+- **Multi-panel**: `MultiPanelFigure(width, height, rows, cols)` + per-panel padding + per-panel independent axes; `Figure::render_within(viewport, backend)` is the parameterized dispatch point.
+- **Polar Figure mode**: `Figure::polar_axes(theta, r)` builds a `PolarCoord` and renders with `render_grid_lines`'s polar branch (radial spokes + concentric rings); skips cartesian axis chrome.
+- **Auto-attached `Colorbar`**: `Figure` introspects every mark via `Mark::colormap_legend()` and reserves a Right-side gradient strip slot when any mark exposes a legend (`HeatmapMark` and `ContourMark` with a colormap). Opt-out via `Figure::colorbar(false)`.
+- **Adaptive x-tick label rotation**: `XTickLabelsComponent.band_width` threads the categorical band width through layout reservation; `crate::layout::x_tick_label_rotation()` is the shared decision (0°, 45°, or 90° clockwise) that both reservation and renderer use.
+- Stats: `BoxPlotStats`, `Kde` (Gaussian, Silverman/Scott/Manual bandwidth), `percentile`, `std_dev`, **`Contour::compute(grid, &levels)` (average-of-corners saddle disambiguation)**.
+- Backends: Skia (raster, with AA auto-detect on axis-aligned paths), SVG (with opacity).
+- Figure + `plot!` macro (DataFrame arm gated on `polars`).
 
-## What Works Now (0.2.x)
+## Not yet implemented
 
-- LineMark, PointMark, BarMark (vertical/horizontal/grouped), AreaMark (with baseline), HeatmapMark, HistogramMark (auto-binning), StepMark
-- BandScale for categorical x-axis
-- `infer_chart_kind` chart-type inference
-- `Color::cycle_next` (Tableau10 default palette)
-- Title and axis-label rendering
-- SkiaBackend, SvgBackend (with opacity)
-- Figure + plot! macro
-- Wilkinson Extended ticks (layer-2)
-- Snapshot tests in layer-5
+- 0.4.0: `FacetWrap`, shared axes across `MultiPanelFigure` panels, polar-aware legend placement, path-effects halo for label-over-fill text, log-scale colorbar ticks (`Colorbar` shipped 0.3.0)
+- 0.5.0: `SymLogScale`, `DateTimeScale` (LogScale/SqrtScale/CategoricalScale shipped 0.3.0)
+- 0.6.0: wgpu, hover/zoom/pan
+- 0.7.0: Animation, GIF
+- 0.8.0: Terminal backends
+- 0.9.0: Surface3D, Scatter3D
+- 0.10.0: PDF (krilla), interactive HTML, WASM
+- 0.11.0: ndarray / Arrow input (Polars landed early in 0.3.0)
 
-## Not Implemented (yet)
+## Where to find detail
 
-- Layout: GridLayout, faceting, legends, colorbars (0.4.0)
-- LogScale, SymLogScale, DateTimeScale (0.5.0)
-- GPU + interactivity: wgpu, hover/zoom/pan (0.6.0)
-- Animation, GIF (0.7.0)
-- Terminal backends (0.8.0)
-- 3D: Surface3D, Scatter3D (0.9.0)
-- PDF (krilla), interactive HTML, WASM (0.10.0)
-- Polars / ndarray / Arrow input (0.11.0)
-- BoxMark, ViolinMark, KDE, PieMark (0.3.0)
-
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
+- Path-scoped rules (load when matching files enter context): `.claude/rules/`
+- Slash workflows: `.claude/skills/` (`/check`, `/snap`, `/release-prep`, `/quickfix`, `/scout`)
+- Subagents: `.claude/agents/` (`@snapshot-reviewer`, `@layer-boundary-check`)
+- Master spec: `.spec/STARSIGHT.md`; learning doc: `.spec/LEARN.md`
+- Issue tracker / session protocol: handled by the `bd prime` SessionStart hook

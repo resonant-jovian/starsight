@@ -22,12 +22,19 @@ starsight-layer-1.workspace = true
 starsight-layer-2.workspace = true
 starsight-layer-3.workspace = true
 starsight-layer-4.workspace = true
+log = { workspace = true }
+polars = { workspace = true, optional = true }
+
+[features]
+default = []
+polars = ["dep:polars"]
 
 [dev-dependencies]
 # Snapshot tests for the full Figure → marks → backend pipeline live here
 # (moved from layer-3) so the cycle layer-3 → layer-5 → layer-3 disappears.
 insta = { workspace = true }
 tempfile = "3"
+polars = { workspace = true }
 
 [lints]
 workspace = true

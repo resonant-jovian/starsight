@@ -7,10 +7,17 @@
 pub use crate::background::errors::{Result, StarsightError};
 pub use crate::background::primitives::{Color, ColorAlpha, Point, Rect, Size, Transform, Vec2};
 pub use crate::colormap::{Colormap, DEFAULT};
-pub use crate::common::Figure;
 pub use crate::common::inferences::ChartKind;
+pub use crate::common::{Colorbar, Edge, Figure, LegendPosition, MultiPanelFigure};
 pub use crate::components::marks::{
-    BarMark, HistogramMark, LineMark, Mark, Orientation, PointMark, StepMark,
+    ArcMark, AreaMark, AxisDir, BarMark, BoxPlotGroup, BoxPlotMark, CandlestickMark, ContourMark,
+    ContourMode, ErrorBarMark, ErrorBarOrientation, HeatmapMark, HistogramMark, LineMark, Mark,
+    Ohlc, Orientation, PieMark, PointMark, PolarBarMark, PolarRectMark, RadarMark, RugMark,
+    StepMark, ViolinGroup, ViolinMark, ViolinScale,
 };
 pub use crate::plot;
-pub use crate::theme::{DEFAULT_DARK, DEFAULT_LIGHT, Theme};
+pub use crate::statistics::BinMethod;
+pub use crate::theme::{
+    DEFAULT_DARK, DEFAULT_LIGHT, Theme, format_extension_from_env, theme_from_env,
+    theme_suffix_from_env,
+};

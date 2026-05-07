@@ -70,10 +70,12 @@ feature-depth = 1
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
 ignore = [
-  #"RUSTSEC-0000-0000",
-  #{ id = "RUSTSEC-0000-0000", reason = "you can specify a reason the advisory is ignored" },
-  #"a-crate-that-is-yanked@0.1.1", # you can also ignore yanked crate versions if you wish
-  #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
+  # `paste 1.0.15` is unmaintained (archived upstream) but pulled in only
+  # transitively via `rav1e -> ravif -> image` for xtask's AVIF support.
+  # No safe upgrade exists; the alternative `pastey` would require
+  # upstream changes in the `image` crate. Accept for 0.3.0; revisit
+  # when `image` updates its rav1e dependency.
+  { id = "RUSTSEC-2024-0436", reason = "transitive via xtask AVIF chain (rav1e → ravif → image); no safe upgrade" },
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
 # If this is false, then it uses a built-in git library.
@@ -98,10 +100,18 @@ allow = [
   "Zlib",
   "0BSD",
   "Unicode-3.0",
-  "GPL-3.0",
-  "GPL-3.0-only",
-  "MPL-2.0",
   "CC0-1.0",
+  # xtask's own GPL-3.0 license — required because cargo-deny inspects the
+  # workspace member itself.
+  "GPL-3.0-only",
+  # `xxhash-rust` ships under Boost-1.0; pulled in transitively by polars-core.
+  "BSL-1.0",
+  # `webpki-roots` ships under CDLA-Permissive-2.0; pulled in transitively
+  # by reqwest's TLS path (used by xtask only — not in the library surface).
+  "CDLA-Permissive-2.0",
+  # `libfuzzer-sys` carries an NCSA component on top of MIT/Apache-2.0;
+  # pulled in transitively via `rav1e -> ravif -> image` (xtask AVIF support).
+  "NCSA",
 ]
 # The confidence threshold for detecting a license from license text.
 # The higher the value, the more closely the license text must be to the

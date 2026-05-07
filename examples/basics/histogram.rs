@@ -20,9 +20,14 @@ fn main() -> Result<()> {
     }
 
     Figure::new(1000, 600)
+        .theme(theme_from_env())
         .title("Distribution of Synthetic Measurements")
         .x_label("Value")
         .y_label("Frequency")
         .add(HistogramMark::new(samples).color(Color::from_hex(0x4F_8AB8)))
-        .save("examples/basics/histogram.png")
+        .save(format!(
+            "examples/basics/histogram{}.{}",
+            theme_suffix_from_env(),
+            format_extension_from_env()
+        ))
 }

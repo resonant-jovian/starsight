@@ -1,6 +1,6 @@
 # starsight examples
 
-Twenty runnable examples grouped by what they teach. Each `.rs` file lives
+Forty-two runnable examples grouped by what they teach. Each `.rs` file lives
 next to its rendered `.png`, so you can browse the gallery on GitHub without
 running anything.
 
@@ -30,6 +30,8 @@ you've never used starsight before, read these in order.
 | [`bar_chart`](basics/bar_chart.rs) — [PNG](basics/bar_chart.png) | Grouped `BarMark`s — quarters × product lines |
 | [`heatmap`](basics/heatmap.rs) — [PNG](basics/heatmap.png) | A 30×30 `HeatmapMark` of a synthetic 2D field |
 | [`histogram`](basics/histogram.rs) — [PNG](basics/histogram.png) | `HistogramMark` over 5 000 deterministic Gaussian samples |
+| [`bubble_scatter`](basics/bubble_scatter.rs) — [PNG](basics/bubble_scatter.png) | Per-point continuous color (RdPu colormap) and per-point radius on `PointMark`, alpha 0.5 — wine-shaped synthetic data (spec #3) |
+| [`movie_heatmap`](basics/movie_heatmap.rs) — [PNG](basics/movie_heatmap.png) | `HeatmapMark` with `log_scale()` — synthetic Rotten Tomatoes × IMDB cross-tab, log lift on the dim secondary lobe (spec #16) |
 
 ### [`theming/`](theming) — recolour without touching the data
 
@@ -51,7 +53,16 @@ auto-derived legend lives here.
 | [`statistical`](composition/statistical.rs) — [PNG](composition/statistical.png) | Noisy daily readings + a 7-day rolling-mean overlay |
 | [`recipe`](composition/recipe.rs) — [PNG](composition/recipe.png) | The reference for "what a good starsight chart looks like" — three series, custom palette, `DEFAULT_LIGHT` theme, full chrome |
 | [`gallery`](composition/gallery.rs) — [PNG](composition/gallery.png) | A `LineMark` model fit over `PointMark` observations |
-| [`waterfall_bar`](composition/waterfall_bar.rs) — [PNG](composition/waterfall_bar.png) | A P&L-walk waterfall built from per-bar `base` offsets |
+| [`waterfall_bar`](composition/waterfall_bar.rs) — [PNG](composition/waterfall_bar.png) | A P&L-walk waterfall — single `BarMark` with per-bar `bases` + `colors` and `connectors(true)` linking running totals (spec #37) |
+| [`box_plot`](composition/box_plot.rs) — [PNG](composition/box_plot.png) | `BoxPlotMark` over four synthetic groups with five-number summary and Tukey-fence outliers |
+| [`violin`](composition/violin.rs) — [PNG](composition/violin.png) | `ViolinMark` (KDE-driven) with optional inner-box overlay |
+| [`pie`](composition/pie.rs) — [PNG](composition/pie.png) | `PieMark` with `show_percent()` and a custom 6-color palette |
+| [`donut`](composition/donut.rs) — [PNG](composition/donut.png) | `PieMark` with `inner_radius(0.5)` and raw value labels |
+| [`donut_sunburst`](composition/donut_sunburst.rs) — [PNG](composition/donut_sunburst.png) | Three-level nested `ArcMark` sunburst on `Figure::polar_axes` (spec #39 var C) |
+| [`energy_transition`](composition/energy_transition.rs) — [PNG](composition/energy_transition.png) | Two concentric `ArcMark` rings comparing 2020 vs 2025 energy mix (six sources × two years) on `Figure::polar_axes` (spec #39 var B) |
+| [`rug_with_histogram`](composition/rug_with_histogram.rs) — [PNG](composition/rug_with_histogram.png) | `HistogramMark` (40-bin Gaussian) + `RugMark` overlay on the x-axis margin showing per-sample density |
+| [`violin_raincloud`](composition/violin_raincloud.rs) — [PNG](composition/violin_raincloud.png) | Raincloud composition — `ViolinMark` with built-in inner box plot, plus a jittered `PointMark` strip shifted to the right side of each band (spec #19) |
+| [`distribution_dashboard`](composition/distribution_dashboard.rs) — [PNG](composition/distribution_dashboard.png) | 2×2 `MultiPanelFigure`: histogram, KDE area, `BoxPlotMark` by country, and `PointMark` scatter — four views of the same Beta(5, 3) synthetic dataset (spec #2) |
 
 ### [`scientific/`](scientific) — real numerical experiments
 
@@ -62,8 +73,25 @@ Both run their own ODE/transform integration before plotting.
 |---|---|
 | [`lorenz_line`](scientific/lorenz_line.rs) — [PNG](scientific/lorenz_line.png) | Lorenz attractor (RK4, 80 000 steps) projected onto the x–z plane, accent from `prismatica::matplotlib::INFERNO` |
 | [`kruskal_szekeres_line`](scientific/kruskal_szekeres_line.rs) — [PNG](scientific/kruskal_szekeres_line.png) | Kruskal–Szekeres extension of Schwarzschild — constant-r hyperbolas, constant-t rays, horizons, singularities |
+| [`laser_plasma`](scientific/laser_plasma.rs) — [PNG](scientific/laser_plasma.png) | Stimulated Raman scattering — electron phase-space density on a 200×200 grid, log-scale viridis (spec #7, single-panel; multi-panel deferred to 0.4.0) |
+| [`candlestick`](scientific/candlestick.rs) — [PNG](scientific/candlestick.png) | OHLC candlesticks with wicks and up/down body color dispatch — 30 trading days |
+| [`nightingale`](scientific/nightingale.rs) — [PNG](scientific/nightingale.png) | Florence Nightingale coxcomb — `ArcMark` on `Figure::polar_axes`, 12 monthly stacks of 3 mortality categories on `polar_radial_sqrt` (value-as-area invariant, spec #34) |
+| [`gauge`](scientific/gauge.rs) — [PNG](scientific/gauge.png) | Single-value 270° gauge — partial-sweep `ArcMark` with foreground value arc + muted background arc (spec #41) |
+| [`contour_fields`](scientific/contour_fields.rs) — [PNG](scientific/contour_fields.png) | 2×2 `MultiPanelFigure` of Rosenbrock + Himmelblau + Rastrigin + Gaussian-mixture contour plots (spec #22) |
+| [`bollinger_candlestick`](scientific/bollinger_candlestick.rs) — [PNG](scientific/bollinger_candlestick.png) | Two-panel `MultiPanelFigure`: candles + 20d SMA + Bollinger bands on top, daily volume `BarMark` below (spec #38) |
+| [`radar_spider`](scientific/radar_spider.rs) — [PNG](scientific/radar_spider.png) | Three-player competence radar across 8 dimensions — `RadarMark` overlays on `Figure::polar_axes` with translucent fill (spec #31) |
+| [`reciprocal_space`](scientific/reciprocal_space.rs) — [PNG](scientific/reciprocal_space.png) | 2×3 `MultiPanelFigure` of `S(h, k)` Lorentzian Bragg-peak heatmaps at three temperatures, with bottom-row 1D cuts and `ErrorBarMark` √I bars (spec #17) |
+| [`wind_rose`](scientific/wind_rose.rs) — [PNG](scientific/wind_rose.png) | 16 compass directions × 4 wind-speed bins — stacked `PolarBarMark` layers via `r_base` (spec #33) |
+| [`polar_calendar`](scientific/polar_calendar.rs) — [PNG](scientific/polar_calendar.png) | 21 years × 52 weeks of synthetic seasonal data on `PolarRectMark` — annular tile heatmap (spec #8) |
+| [`error_bars`](scientific/error_bars.rs) — [PNG](scientific/error_bars.png) | Two regression series with symmetric and asymmetric `ErrorBarMark` whiskers + caps |
 
-### [`planned/`](planned) — placeholders for 0.3.0+ features
+### [`data/`](data) — DataFrame integrations
+
+| Example | What it shows |
+|---|---|
+| [`polars_integration`](data/polars_integration.rs) — [PNG](data/polars_integration.png) | `plot!(df, x = "...", y = "...", color = "...")` against a Polars LazyFrame, with auto-derived legend |
+
+### [`planned/`](planned) — placeholders for 0.4.0+ features
 
 Each of these writes a static PNG announcing a deferred feature so
 `cargo xtask gallery` always emits a uniform set of outputs. The real
@@ -71,12 +99,11 @@ implementations land per the [project roadmap](../README.md#roadmap).
 
 | Example | Lands in | What it'll show |
 |---|---|---|
-| [`terminal`](planned/terminal.rs) — [PNG](planned/terminal.png) | 0.3.0 (ratatui backend) | Inline terminal rendering |
-| [`interactive`](planned/interactive.rs) — [PNG](planned/interactive.png) | 0.3.0 (winit + wgpu backend) | Windowed chart with hover and zoom |
-| [`surface3d`](planned/surface3d.rs) — [PNG](planned/surface3d.png) | 0.3.0 (vello/wgpu backend) | A 3D surface |
-| [`streaming`](planned/streaming.rs) — [PNG](planned/streaming.png) | 0.3.0 (windowed data source) | Live data plotted over a sliding window |
-| [`polars_integration`](planned/polars_integration.rs) — [PNG](planned/polars_integration.png) | 0.3.0 (`polars` optional feature) | A `polars::DataFrame` going straight into a figure |
-| [`faceting`](planned/faceting.rs) — [PNG](planned/faceting.png) | 0.3.0 (layer-4 grid layout) | A small-multiples grid via the planned grid composer |
+| [`terminal`](planned/terminal.rs) — [PNG](planned/terminal.png) | 0.8.0 (ratatui backend) | Inline terminal rendering |
+| [`interactive`](planned/interactive.rs) — [PNG](planned/interactive.png) | 0.6.0 (winit + wgpu backend) | Windowed chart with hover and zoom |
+| [`surface3d`](planned/surface3d.rs) — [PNG](planned/surface3d.png) | 0.9.0 (vello/wgpu backend) | A 3D surface |
+| [`streaming`](planned/streaming.rs) — [PNG](planned/streaming.png) | 0.7.0 (windowed data source) | Live data plotted over a sliding window |
+| [`faceting`](planned/faceting.rs) — [PNG](planned/faceting.png) | 0.4.0 (`FacetWrap`) | A small-multiples grid via the planned `FacetWrap` composer (`MultiPanelFigure` shipped 0.3.0) |
 
 ## Adding a new example
 

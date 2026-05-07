@@ -232,3 +232,163 @@ proptest! {
         }
     }
 }
+
+// ── polar tick formatters ────────────────────────────────────────────────────────────────────────
+
+/// Evenly-spaced angular tick positions in degrees with `"60°"`-style labels.
+///
+/// Returns `n` ticks at multiples of `360 / n` in `[0, 360)`. The endpoint at
+/// 360° is omitted because polar axes wrap and a tick there would overlap the
+/// 0° tick. Common values: 4 (every 90°), 8 (every 45°), 12 (every 30°),
+/// 24 (every 15°). Returns empty vectors for `n == 0`.
+#[must_use]
+pub fn polar_ticks_degrees(n: usize) -> (Vec<f64>, Vec<String>) {
+    if n == 0 {
+        return (vec![], vec![]);
+    }
+    let step = 360.0 / n as f64;
+    let positions: Vec<f64> = (0..n).map(|i| i as f64 * step).collect();
+    let labels = positions
+        .iter()
+        .map(|t| {
+            // Drop the trailing ".0" for whole-degree increments so "60°" reads
+            // cleaner than "60.0°"; a fractional step (rare) keeps one decimal.
+            if (*t - t.round()).abs() < 1e-9 {
+                format!("{t:.0}°")
+            } else {
+                format!("{t:.1}°")
+            }
+        })
+        .collect();
+    (positions, labels)
+}
+
+/// Evenly-spaced angular tick positions in radians with π-fraction labels
+/// (`"π/2"`, `"3π/4"`, …).
+///
+/// Returns `n` ticks at multiples of `2π / n` in `[0, 2π)`. The 2π endpoint
+/// is omitted (wraps to 0). For clean fractions pick `n` from `{4, 6, 8,
+/// 12, 24}`. Returns empty vectors for `n == 0`.
+#[must_use]
+pub fn polar_ticks_radians(n: usize) -> (Vec<f64>, Vec<String>) {
+    if n == 0 {
+        return (vec![], vec![]);
+    }
+    let step = std::f64::consts::TAU / n as f64;
+    let positions: Vec<f64> = (0..n).map(|i| i as f64 * step).collect();
+    let labels = (0..n).map(|i| pi_fraction_label(i, n)).collect();
+    (positions, labels)
+}
+
+/// Format the i-th tick of an n-tick radian axis as a π-fraction.
+///
+/// `i / n · 2π` → reduce `2i / n` to lowest terms, then render. Examples:
+/// `(0, 4) → "0"`, `(1, 4) → "π/2"`, `(2, 4) → "π"`, `(3, 8) → "3π/4"`.
+#[must_use]
+fn pi_fraction_label(i: usize, n: usize) -> String {
+    if i == 0 {
+        return "0".to_string();
+    }
+    // Tick at i·2π/n = (2i/n)·π. Reduce 2i/n.
+    let mut num = 2 * i;
+    let mut den = n;
+    let g = gcd(num, den);
+    num /= g;
+    den /= g;
+    match (num, den) {
+        (1, 1) => "π".to_string(),
+        (n, 1) => format!("{n}π"),
+        (1, d) => format!("π/{d}"),
+        (n, d) => format!("{n}π/{d}"),
+    }
+}
+
+#[must_use]
+fn gcd(mut a: usize, mut b: usize) -> usize {
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a.max(1)
+}
+
+/// One tick per band-center for a categorical angular axis.
+///
+/// Returns positions `[0.5, 1.5, …, n-0.5]` (band centers in
+/// [`CategoricalScale`](crate::scales::CategoricalScale) data units) paired
+/// with the supplied labels. Empty input → empty output.
+#[must_use]
+pub fn polar_ticks_categorical(labels: &[String]) -> (Vec<f64>, Vec<String>) {
+    let positions: Vec<f64> = (0..labels.len()).map(|i| i as f64 + 0.5).collect();
+    (positions, labels.to_vec())
+}
+
+#[cfg(test)]
+mod polar_tests {
+    use super::{polar_ticks_categorical, polar_ticks_degrees, polar_ticks_radians};
+
+    #[test]
+    fn degrees_quad_returns_four_compass_points() {
+        let (pos, lab) = polar_ticks_degrees(4);
+        assert_eq!(pos, vec![0.0, 90.0, 180.0, 270.0]);
+        assert_eq!(lab, vec!["0°", "90°", "180°", "270°"]);
+    }
+
+    #[test]
+    fn degrees_zero_is_empty() {
+        let (pos, lab) = polar_ticks_degrees(0);
+        assert!(pos.is_empty());
+        assert!(lab.is_empty());
+    }
+
+    #[test]
+    fn degrees_drops_360_endpoint() {
+        let (pos, _) = polar_ticks_degrees(8);
+        assert_eq!(pos.len(), 8);
+        // No 360° entry — would wrap onto 0°.
+        assert!(pos.iter().all(|p| *p < 360.0));
+    }
+
+    #[test]
+    fn radians_quad_uses_pi_fractions() {
+        let (_pos, lab) = polar_ticks_radians(4);
+        assert_eq!(lab, vec!["0", "π/2", "π", "3π/2"]);
+    }
+
+    #[test]
+    fn radians_eighths_reduces_to_lowest_terms() {
+        let (_pos, lab) = polar_ticks_radians(8);
+        // 1/8 → 2/8 reduces to 1/4 → "π/4"; 2/8 → 4/8 → 1/2 → "π/2"; 3/8 → 6/8 → 3/4 → "3π/4".
+        assert_eq!(
+            lab,
+            vec!["0", "π/4", "π/2", "3π/4", "π", "5π/4", "3π/2", "7π/4"]
+        );
+    }
+
+    #[test]
+    fn radians_zero_is_empty() {
+        let (pos, lab) = polar_ticks_radians(0);
+        assert!(pos.is_empty());
+        assert!(lab.is_empty());
+    }
+
+    #[test]
+    fn categorical_band_centers_match_categoricalscale() {
+        let labels: Vec<String> = ["Jan", "Feb", "Mar"]
+            .iter()
+            .map(|s| (*s).to_string())
+            .collect();
+        let (pos, lab) = polar_ticks_categorical(&labels);
+        // CategoricalScale maps i+0.5 → (i+0.5)/n; positions should match.
+        assert_eq!(pos, vec![0.5, 1.5, 2.5]);
+        assert_eq!(lab, labels);
+    }
+
+    #[test]
+    fn categorical_empty_is_empty() {
+        let (pos, lab) = polar_ticks_categorical(&[]);
+        assert!(pos.is_empty());
+        assert!(lab.is_empty());
+    }
+}

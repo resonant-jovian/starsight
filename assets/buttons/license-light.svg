@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 56" width="100%" height="auto" role="img" aria-label="LICENSE — GPL-3.0-only" preserveAspectRatio="xMidYMid meet">
+  <title>LICENSE — GPL-3.0-only</title>
+  <rect x="0.5" y="0.5" width="183" height="55" rx="6" fill="#ebedef" stroke="#cccccc" stroke-width="1"/>
+  <path d="M88 1 H177 A6 6 0 0 1 183 6 V49 A6 6 0 0 1 177 55 H88 Z" fill="#ffffff"/>
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="700" font-size="12" fill="#555555" letter-spacing="0.6" text-anchor="middle">LICENSE</text>
+  <text x="136" y="33" font-family="-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#1a1a1a" text-anchor="middle">GPL-3.0-only</text>
+</svg>

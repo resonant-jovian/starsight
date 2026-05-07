@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600"><path fill="#fff" d="M47.4 48h835.4v507H47.4z" shape-rendering="crispEdges"/><text x="306.7" y="32" fill="#111" font-family="sans-serif" font-size="16">
+Quarterly Revenue by Product Line
+</text><text x="439.9" y="590" fill="#333" font-family="sans-serif" font-size="12">
+Quarter
+</text><text x="22" y="355.5" fill="#333" font-family="sans-serif" font-size="12" transform="rotate(-90 22 355.5)">
+Revenue (M USD)
+</text><path fill="none" stroke="#ddd" d="M47.4 555V48m208.85 507V48M465.1 555V48m208.85 507V48M882.8 555V48M47.4 555h835.4M47.4 453.6h835.4M47.4 352.2h835.4M47.4 250.8h835.4M47.4 149.4h835.4M47.4 48h835.4" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M71.94 230.52h71.009V555H71.94zm208.85-91.26h71.009V555H280.79zm208.85 30.42h71.009V555H489.64zm208.85-91.26h71.009V555H698.49z" shape-rendering="crispEdges"/><path fill="#e57b49" d="M160.701 331.92h71.009V555h-71.009zm208.85-60.84h71.009V555h-71.009zm208.85-70.98h71.009V555h-71.009zm208.85-70.98h71.009V555h-71.009z" shape-rendering="crispEdges"/><text x="144.625" y="572" fill="#444" font-family="sans-serif" font-size="12">
+Q1
+</text><text x="353.475" y="572" fill="#444" font-family="sans-serif" font-size="12">
+Q2
+</text><text x="562.325" y="572" fill="#444" font-family="sans-serif" font-size="12">
+Q3
+</text><text x="771.175" y="572" fill="#444" font-family="sans-serif" font-size="12">
+Q4
+</text><path fill="none" stroke="#444" d="M47.4 555h5" shape-rendering="crispEdges"/><text x="30" y="559.8" fill="#444" font-family="sans-serif" font-size="12">
+0
+</text><path fill="none" stroke="#444" d="M47.4 453.6h5" shape-rendering="crispEdges"/><text x="23" y="458.4" fill="#444" font-family="sans-serif" font-size="12">
+10
+</text><path fill="none" stroke="#444" d="M47.4 352.2h5" shape-rendering="crispEdges"/><text x="23" y="357" fill="#444" font-family="sans-serif" font-size="12">
+20
+</text><path fill="none" stroke="#444" d="M47.4 250.8h5" shape-rendering="crispEdges"/><text x="23" y="255.6" fill="#444" font-family="sans-serif" font-size="12">
+30
+</text><path fill="none" stroke="#444" d="M47.4 149.4h5" shape-rendering="crispEdges"/><text x="23" y="154.2" fill="#444" font-family="sans-serif" font-size="12">
+40
+</text><path fill="none" stroke="#444" d="M47.4 48h5" shape-rendering="crispEdges"/><text x="23" y="52.8" fill="#444" font-family="sans-serif" font-size="12">
+50
+</text><path fill="none" stroke="#000" d="M47.4 555h835.4M47.4 48v507" shape-rendering="crispEdges"/><path fill="#fff" d="M63.4 64h79v56h-79z" shape-rendering="crispEdges"/><path fill="none" stroke="#444" d="M63.4 64h79v56h-79z" shape-rendering="crispEdges"/><path fill="#4f8ab8" d="M71.4 72h12v12h-12z" shape-rendering="crispEdges"/><text x="89.4" y="82" fill="#333" font-family="sans-serif" font-size="12">
+Widgets
+</text><path fill="#e57b49" d="M71.4 92h12v12h-12z" shape-rendering="crispEdges"/><text x="89.4" y="102" fill="#333" font-family="sans-serif" font-size="12">
+Gizmos
+</text></svg>

@@ -62,9 +62,9 @@ jobs:
       # Allowing network access for the metadata call is harmless: cargo-insta
       # doesn't modify Cargo.toml, so the lockfile can't drift after step 1.
       - name: Verify lockfile and pre-build test binaries
-        run: cargo test --workspace --no-run --locked
+        run: cargo test --workspace --all-features --no-run --locked
       - name: Run snapshot tests
-        run: cargo insta test --workspace --check --unreferenced reject
+        run: cargo insta test --workspace --all-features --check --unreferenced reject
       - name: Upload mismatched snapshots on failure
         if: failure()
         uses: actions/upload-artifact@v4

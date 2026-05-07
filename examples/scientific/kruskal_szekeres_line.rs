@@ -85,13 +85,29 @@ fn t_arc(t: f64, su: f64, steps: usize) -> (Vec<f64>, Vec<f64>) {
 // ── Main ───────────────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    let mut fig = Figure::new(1200, 1200);
+    let theme = theme_from_env();
+    let mut fig = Figure::new(1200, 1200).theme(theme);
     fig = fig
         .title("Kruskal–Szekeres Diagram  (M = 1)")
         .x_label("u  (spacelike Kruskal)")
         .y_label("v  (timelike Kruskal)");
 
-    // ── Constant-r arcs (blue) ─────────────────────────────────────────────────
+    // Theme-aware palette: hardcoded blue/red are tuned to read on both bgs.
+    // Horizon + singularity were originally pure black (invisible on dark);
+    // routed through theme.foreground so they always contrast the canvas.
+    let arc_blue = if theme.is_dark {
+        Color::from_hex(0x4D_A6FF) // light cobalt for dark
+    } else {
+        Color::from_hex(0x1F_4FA8) // deep cobalt for light
+    };
+    let ray_red = if theme.is_dark {
+        Color::from_hex(0xFF_6B6B) // warm coral for dark
+    } else {
+        Color::from_hex(0xC0_2828) // brick for light
+    };
+    let structural = theme.foreground;
+
+    // ── Constant-r arcs ───────────────────────────────────────────────────────
     // r > 2M → left/right hyperbolas in Regions I (su=+1) and III (su=−1)
     // r < 2M → top/bottom hyperbolas in Regions II (sv=+1) and IV (sv=−1)
     let r_exterior = [2.5, 3.0, 4.0, 5.0, 7.0, 10.0];
@@ -104,7 +120,7 @@ fn main() -> Result<()> {
                 fig = fig.add(LineMark {
                     x: xs,
                     y: ys,
-                    color: Color::BLUE,
+                    color: arc_blue,
                     width: 0.9,
                     label: None,
                 });
@@ -118,7 +134,7 @@ fn main() -> Result<()> {
                 fig = fig.add(LineMark {
                     x: xs,
                     y: ys,
-                    color: Color::BLUE,
+                    color: arc_blue,
                     width: 0.9,
                     label: None,
                 });
@@ -126,7 +142,7 @@ fn main() -> Result<()> {
         }
     }
 
-    // ── Constant-t rays (red, exterior Regions I and III only) ────────────────
+    // ── Constant-t rays (exterior Regions I and III only) ─────────────────────
     let t_vals = [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0];
     for &t in &t_vals {
         for su in [1.0_f64, -1.0] {
@@ -135,7 +151,7 @@ fn main() -> Result<()> {
                 fig = fig.add(LineMark {
                     x: xs,
                     y: ys,
-                    color: Color::RED,
+                    color: ray_red,
                     width: 0.8,
                     label: None,
                 });
@@ -150,26 +166,23 @@ fn main() -> Result<()> {
         .map(|i| -CLIP + 2.0 * CLIP * (i as f64) / (n as f64))
         .collect();
     let neg: Vec<f64> = ss.iter().map(|&s| -s).collect();
-    // u = v
     fig = fig.add(LineMark {
         x: ss.clone(),
         y: ss.clone(),
-        color: Color::BLACK,
+        color: structural,
         width: 2.5,
         label: None,
     });
-    // u = -v
     fig = fig.add(LineMark {
         x: neg,
         y: ss.clone(),
-        color: Color::BLACK,
+        color: structural,
         width: 2.5,
         label: None,
     });
 
     // ── Singularity r = 0: v² − u² = 1 (future and past, separate) ───────────
-    // Parametrize by u; clip where |v| > CLIP (occurs near |u| ≈ sqrt(CLIP²−1)).
-    let u_max_sing = (CLIP * CLIP - 1.0).sqrt(); // ≈ 4.39 for CLIP=4.5
+    let u_max_sing = (CLIP * CLIP - 1.0).sqrt();
     let m = 400usize;
     let us: Vec<f64> = (0..=m)
         .map(|i| -u_max_sing + 2.0 * u_max_sing * (i as f64) / (m as f64))
@@ -180,19 +193,23 @@ fn main() -> Result<()> {
     fig = fig.add(LineMark {
         x: us.clone(),
         y: vs_fut,
-        color: Color::BLACK,
+        color: structural,
         width: 3.5,
         label: None,
     });
     fig = fig.add(LineMark {
         x: us.clone(),
         y: vs_past,
-        color: Color::BLACK,
+        color: structural,
         width: 3.5,
         label: None,
     });
 
-    fig.save("examples/scientific/kruskal_szekeres_line.png")?;
+    fig.save(format!(
+        "examples/scientific/kruskal_szekeres_line{}.{}",
+        theme_suffix_from_env(),
+        format_extension_from_env()
+    ))?;
     println!("Saved kruskal_szekeres_line.png");
     Ok(())
 }

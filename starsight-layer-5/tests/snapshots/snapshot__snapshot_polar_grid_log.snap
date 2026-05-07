@@ -1,0 +1,14 @@
+---
+source: starsight-layer-5/tests/snapshot.rs
+expression: "polar_grid_svg(theta, r)"
+---
+<svg height="400" viewBox="0 0 400 400" width="400" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="360" shape-rendering="crispEdges" width="360" x="20" y="20"/>
+<path d="M260,200 C260,233.13708,233.13708,260,200,260 C166.86292,260,140,233.13708,140,200 C140,166.86292,166.86292,140,200,140 C233.13708,140,260,166.86292,260,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M320,200 C320,266.27417,266.27417,320,200,320 C133.72583,320,80,266.27417,80,200 C80,133.72583,133.72583,80,200,80 C266.27417,80,320,133.72583,320,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M380,200 C380,299.41125,299.41125,380,200,380 C100.58874,380,20,299.41125,20,200 C20,100.58874,100.58874,20,200,20 C299.41125,20,380,100.58874,380,200 z" fill="none" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L200,20" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L380,200" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L200,380" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+<path d="M200,200 L20,200" fill="none" shape-rendering="crispEdges" stroke="#dddddd" stroke-width="1"/>
+</svg>

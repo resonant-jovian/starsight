@@ -1,6 +1,8 @@
-//! Re-exports of layer-4 legend and colorbar types.
+//! Re-exports of legend and colorbar types.
 //!
-//! Status: stub. Concrete re-exports land alongside the layer-4 implementations.
+//! `Colorbar` shipped in 0.3.0 and lives in layer-5 (the renderer assembles
+//! it from the figure's marks via `Mark::colormap_legend`). The standalone
+//! `Legend` / `LegendItem` types remain a 0.4.0+ surface — for now legend
+//! rendering is internal to `render_legend` in layer-5.
 
-// TODO(0.4.0+): pub use crate::composition::legends::{Legend, LegendItem, LegendPosition};
-// TODO(0.4.0+): pub use crate::composition::colorbars::{Colorbar, ColorbarOrientation};
+pub use crate::common::Colorbar;
