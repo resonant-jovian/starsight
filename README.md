@@ -27,11 +27,9 @@ starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatma
        width="100%">
 </picture>
 
-[![crates.io](https://img.shields.io/crates/v/starsight?style=for-the-badge&logo=rust&color=000000&labelColor=1a1a1a&label=crates.io)](https://crates.io/crates/starsight)
-[![docs.rs](https://img.shields.io/docsrs/starsight/latest?style=for-the-badge&logo=docs.rs&color=000000&labelColor=1a1a1a&label=docs.rs)](https://docs.rs/starsight)
-[![codecov](https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&color=000000&labelColor=1a1a1a&label=codecov)](https://app.codecov.io/gh/resonant-jovian/starsight)
-[![CI](https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?branch=main&style=for-the-badge&logo=github&color=000000&labelColor=1a1a1a&label=ci)](https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml)
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0--only-000000?style=for-the-badge&labelColor=1a1a1a)](LICENSE)
+<p>
+  <a href="https://crates.io/crates/starsight"><img alt="crates.io" src="https://img.shields.io/crates/v/starsight?style=for-the-badge&logo=rust&color=000000&labelColor=1a1a1a&label=crates.io"></a>&nbsp;<a href="https://docs.rs/starsight"><img alt="docs.rs" src="https://img.shields.io/docsrs/starsight/latest?style=for-the-badge&logo=docs.rs&color=000000&labelColor=1a1a1a&label=docs.rs"></a>&nbsp;<a href="https://app.codecov.io/gh/resonant-jovian/starsight"><img alt="codecov" src="https://img.shields.io/codecov/c/github/resonant-jovian/starsight?style=for-the-badge&logo=codecov&color=000000&labelColor=1a1a1a&label=codecov"></a>&nbsp;<a href="https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/resonant-jovian/starsight/ci.yml?branch=main&style=for-the-badge&logo=github&color=000000&labelColor=1a1a1a&label=ci"></a>&nbsp;<a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0--only-000000?style=for-the-badge&labelColor=1a1a1a"></a>
+</p>
 
 > [!WARNING]
 > **starsight is at 0.3.0 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
