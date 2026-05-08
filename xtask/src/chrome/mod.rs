@@ -32,6 +32,7 @@ mod fonts;
 mod gallery;
 mod hero;
 mod lorenz_card;
+mod math;
 mod matrices;
 mod palette;
 mod pipeline;
@@ -85,6 +86,7 @@ pub enum Asset {
     ComingFrom,
     Comparison,
     Buttons,
+    Math,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -102,6 +104,12 @@ pub fn run(args: ChromeArgs) -> Result<()> {
     }
 
     if let Some(asset) = args.asset {
+        // Math is theme-agnostic (currentColor inheritance) so we render
+        // once, not per-theme; dispatch it directly without the theme loop.
+        if matches!(asset, Asset::Math) {
+            math::regen_all(&root)?;
+            return Ok(());
+        }
         let mut written: Vec<PathBuf> = Vec::new();
         for theme in Theme::ALL {
             regen_one(asset, &root, theme)?;
@@ -170,6 +178,10 @@ pub fn run(args: ChromeArgs) -> Result<()> {
             }
             join_handles(handles, "static regen")
         })?;
+        // Math is theme-agnostic (currentColor) so it runs once, outside the
+        // per-theme thread scope. Skipped silently if `latex` / `dvisvgm`
+        // aren't installed — see `math::regen_all`.
+        math::regen_all(&root)?;
     }
 
     if !args.no_svgo {
@@ -225,6 +237,8 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::ComingFrom => coming_from::regen(root, theme),
         Asset::Comparison => comparison_matrix::regen(root, theme),
         Asset::Buttons => buttons::regen_all(root, theme),
+        // Handled via the no-theme branch in `run`; should never reach here.
+        Asset::Math => math::regen_all(root),
     }
 }
 
@@ -256,6 +270,10 @@ fn asset_svg_outputs(asset: Asset, root: &Path, theme: Theme) -> Vec<PathBuf> {
             .iter()
             .map(|stem| root.join(format!("assets/buttons/{stem}-{s}.svg")))
             .collect(),
+        // Math SVGs are scoped via their own dispatch path in `run` and never
+        // reach the per-theme svgo sweep; we deliberately return an empty list
+        // here so the existing scoped svgo call is a no-op for `--asset math`.
+        Asset::Math => Vec::new(),
     }
 }
 

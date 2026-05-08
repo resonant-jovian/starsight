@@ -111,13 +111,9 @@ What `plot!()` actually does, stage by stage:
 
 starsight is a viz library; the math is what it draws. The Lorenz system
 
-$$
-\dot{x} = \sigma (y - x), \qquad
-\dot{y} = x (\rho - z) - y, \qquad
-\dot{z} = x y - \beta z
-$$
+<img alt="dot{x} = σ (y - x), dot{y} = x (ρ - z) - y, dot{z} = x y - β z" src="assets/math/lorenz-system.svg" width="700" height="28" style="display:block; margin:0 auto;">
 
-with $\sigma = 10$, $\beta = 8/3$, $\rho = 28$ is the textbook strange attractor. Eleven trajectories sweeping $\rho \in \{13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250\}$, integrated with RK4 at $\mathrm{d}t = 0.005$ for 80 000 steps and projected onto the $x$–$z$ plane:
+with <img alt="σ = 10" src="assets/math/sigma-10.svg" width="40" height="14" style="vertical-align:-5px; transform:translateY(5px);">, <img alt="β = 8/3" src="assets/math/beta-8-3.svg" width="45" height="18" style="vertical-align:-8px; transform:translateY(8px);">, <img alt="ρ = 28" src="assets/math/rho-28.svg" width="38" height="16" style="vertical-align:-6px; transform:translateY(6px);"> is the textbook strange attractor. Eleven trajectories sweeping <img alt="ρ ∈ {13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250}" src="assets/math/rho-sweep.svg" width="690" height="28" style="vertical-align:-9px; transform:translateY(9px);">, integrated with RK4 at <img alt="dt = 0.005" src="assets/math/dt.svg" width="60" height="14" style="vertical-align:-4px; transform:translateY(4px);"> for 80 000 steps and projected onto the <img alt="x" src="assets/math/x-var.svg" width="9" height="10" style="vertical-align:-4px; transform:translateY(4px);"><img alt="–" src="assets/math/em-dash.svg" width="7" height="6" style="vertical-align:-4px; transform:translateY(4px);"><img alt="z" src="assets/math/z-var.svg" width="8" height="10" style="vertical-align:-4px; transform:translateY(4px);"> plane:
 
 <details>
 <summary><b>Rust integration loop (RK4)</b></summary>
@@ -163,7 +159,7 @@ fn main() -> starsight::Result<()> {
 
 </details>
 
-Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
+Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by <img alt="ρ" src="assets/math/rho-var.svg" width="8" height="12" style="vertical-align:-5px; transform:translateY(5px);"> on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/lorenz-dark.png">
