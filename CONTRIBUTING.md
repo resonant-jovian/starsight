@@ -60,6 +60,38 @@ cargo deny check
 
 If a snapshot test fails, review the diff with `cargo insta review` and accept it if intentional.
 
+### Required tooling
+
+A working **Rust 1.89+** toolchain (rustup is recommended) covers `cargo build / check / test / clippy / fmt / doc`. Beyond that the workflow uses a small set of cargo plugins:
+
+| Tool | Used for | Install |
+|---|---|---|
+| `cargo-insta` | Reviewing snapshot test diffs (`cargo insta review`, `cargo insta test --check`) | `cargo install cargo-insta` |
+| `cargo-deny` | License + advisory audit gate (`cargo deny check`) | `cargo install cargo-deny` |
+| `cargo-llvm-cov` | Line-coverage report (`cargo llvm-cov`); the CI workflow runs this. **Do not** use `cargo tarpaulin` — it OOMs locally under concurrent load and is banned. | `cargo install cargo-llvm-cov` + rustup component `llvm-tools-preview` |
+
+### Optional: regenerating chrome assets
+
+`cargo xtask chrome` rebuilds the README chrome (status panel, hero, social card, matrices, prose cards, ...). It shells out to a few external tools — each is gated by a "warn once and skip" check, so missing tooling never breaks the build, but the affected composites won't refresh:
+
+| Tool | Required by | Install |
+|---|---|---|
+| `npx` (Node.js + npm, ≥ Node 18 recommended) | `xtask/src/chrome/svgo.rs` runs `npx --yes svgo --multipass` to optimize composite SVGs. Pass `--no-svgo` to skip locally. | Arch: `sudo pacman -S --needed nodejs npm` · Debian/Ubuntu: `sudo apt install nodejs npm` · macOS: `brew install node` |
+| `latex` + `dvisvgm` (TeX Live) | The **prose-card** composite (Lorenz intro under `assets/prose/`) typesets prose + math through `latex` + `dvisvgm` and embeds glyph paths. Skipped silently if either binary is missing. | See block below. |
+
+```sh
+# Arch
+sudo pacman -S --needed texlive-basic texlive-latex texlive-latexextra texlive-mathscience texlive-fontsrecommended texlive-fontsextra texlive-bin
+
+# Debian/Ubuntu
+sudo apt install texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-science dvisvgm
+
+# macOS (with Homebrew)
+brew install --cask mactex-no-gui    # or `brew install texlive` for a smaller install
+```
+
+You need the LaTeX core, the math packages (`amsmath`, `amssymb`, `amsfonts`), the latex-extra bundle (for `preview.sty`, which gives the tight-bbox crop the prose card needs), the recommended fonts, the extra-fonts bundle (for `tgheros` — TeX Gyre Heros, the Helvetica-equivalent sans face), and `dvisvgm`. If any of these are missing, `cargo xtask chrome` warns once and skips the prose-card pass — every other chrome composite still regenerates.
+
 ## Code conventions
 
 - **Doc comments on every public item.** `cargo doc` is built with `-D missing-docs`. Trait methods that return `Result` need a `# Errors` section.

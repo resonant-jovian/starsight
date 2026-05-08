@@ -32,7 +32,7 @@ starsight turns a `Figure` of marks (line, scatter, bar, area, histogram, heatma
 <p><a href="https://crates.io/crates/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/crates-dark.svg"><img alt="crates.io" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/crates-light.svg"></picture></a><a href="https://docs.rs/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/docs-dark.svg"><img alt="docs.rs" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/docs-light.svg"></picture></a><a href="https://app.codecov.io/gh/resonant-jovian/starsight"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/codecov-dark.svg"><img alt="codecov" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/codecov-light.svg"></picture></a><a href="https://github.com/resonant-jovian/starsight/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/ci-dark.svg"><img alt="CI" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/ci-light.svg"></picture></a><a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/license-dark.svg"><img alt="License: GPL-3.0" width="20%" src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/buttons/license-light.svg"></picture></a></p>
 
 > [!WARNING]
-> **starsight is at 0.3.2 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
+> **starsight is at 0.3.3 of a planned 1.0.0 trajectory.** The roadmap below is the contract — items marked **shipped** are stable within the 0.x line; items marked **planned** may shift in scope. Pre-1.0, every minor bump is potentially breaking. MSRV bumps require a minor version bump until 1.0.
 
 ---
 
@@ -109,15 +109,12 @@ What `plot!()` actually does, stage by stage:
 
 ## A Worked Example — the Lorenz Attractor
 
-starsight is a viz library; the math is what it draws. The Lorenz system
-
-$$
-\dot{x} = \sigma (y - x), \qquad
-\dot{y} = x (\rho - z) - y, \qquad
-\dot{z} = x y - \beta z
-$$
-
-with $\sigma = 10$, $\beta = 8/3$, $\rho = 28$ is the textbook strange attractor. Eleven trajectories sweeping $\rho \in \{13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250\}$, integrated with RK4 at $\mathrm{d}t = 0.005$ for 80 000 steps and projected onto the $x$–$z$ plane:
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/prose/lorenz-intro-dark.svg">
+  <img alt="starsight is a viz library; the math is what it draws. The Lorenz system: dot-x = sigma (y - x), dot-y = x (rho - z) - y, dot-z = x y - beta z, with sigma = 10, beta = 8/3, rho = 28 is the textbook strange attractor. Eleven trajectories sweeping rho in {13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250}, integrated with RK4 at dt = 0.005 for 80 000 steps and projected onto the x–z plane:"
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/prose/lorenz-intro-light.svg"
+       width="100%">
+</picture>
 
 <details>
 <summary><b>Rust integration loop (RK4)</b></summary>
@@ -163,7 +160,7 @@ fn main() -> starsight::Result<()> {
 
 </details>
 
-Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by $\rho$ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
+Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by ρ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/lorenz-dark.png">
@@ -324,6 +321,14 @@ starsight 0.3.x compiles on **Rust 1.89** and later, edition 2024. The MSRV trac
 
 Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
 
+> **Note on fonts in chrome composites.** The hero and social-card PNGs are rasterized from SVG by `cargo xtask chrome` and pin their text to bundled DejaVu Sans / DejaVu Sans Mono (`xtask/src/chrome/fonts/`) so the output is byte-stable across macOS, Linux, and Windows runners. The canonical SVGs are still browser-rendered with system-native faces — only the PNG path is pinned. Example chart PNGs under `examples/` use whatever fonts the renderer picks up at build time and may differ slightly between contributor machines; the daily live cron passes `--skip-examples` so it never re-renders them.
+
+> **Note on prose-card chrome.** The Lorenz / butterfly intro card under `assets/prose/` is typeset by `latex` and converted to a glyph-path SVG by `dvisvgm`, then wrapped in a themed card frame. To regenerate it locally, install **TeX Live** with the math + recommended-fonts + extra-fonts bundles plus the `preview` package. On Arch:
+> ```sh
+> sudo pacman -S --needed texlive-basic texlive-latex texlive-latexextra texlive-mathscience texlive-fontsrecommended texlive-fontsextra texlive-bin
+> ```
+> Other platforms and the full list of cargo plugins / external tools `cargo xtask chrome` shells out to (cargo-insta, cargo-deny, cargo-llvm-cov, `npx svgo`) live in [`CONTRIBUTING.md`](CONTRIBUTING.md#required-tooling). The daily live cron does **not** rebuild prose cards (they only change when README prose moves), so CI runners don't need TeX Live. If `latex` or `dvisvgm` is missing, `cargo xtask chrome` warns once and skips the prose-card pass — the rest of chrome regenerates as normal.
+
 ## License
 
 starsight is licensed under **GPL-3.0-only**. See [`LICENSE`](LICENSE). Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If the GPL is incompatible with your use case, [reach out](mailto:albin@sjoegren.se) — a permissively-licensed core may be carved out post-1.0.
@@ -341,7 +346,7 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
   author  = {Sjögren, Albin},
   title   = {starsight: a typed, layered figure compiler for Rust},
   url     = {https://github.com/resonant-jovian/starsight},
-  version = {0.3.2},
+  version = {0.3.3},
   year    = {2026},
   license = {GPL-3.0-only},
   orcid   = {0009-0008-1372-1727}
@@ -352,7 +357,7 @@ starsight is built by [Albin Sjögren](https://github.com/resonant-jovian) ([ORC
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/social/card-dark.png">
-  <img alt="starsight wordmark and tagline — scientific visualization for Rust, typed, layered, eight backends. v0.3.2 · rust 1.89 · edition 2024 · GPL-3.0-only · github.com/resonant-jovian/starsight"
+  <img alt="starsight wordmark and tagline — scientific visualization for Rust, typed, layered, eight backends. v0.3.3 · rust 1.89 · edition 2024 · GPL-3.0-only · github.com/resonant-jovian/starsight"
        src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/social/card-light.png"
        width="100%">
 </picture>

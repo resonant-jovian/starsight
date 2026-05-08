@@ -70,6 +70,15 @@ pub fn palette(theme: Theme) -> &'static Palette {
     }
 }
 
-pub const SANS: &str =
-    "-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif";
-pub const MONO_FAMILY: &str = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+/// Sans family list. Leads with `&quot;DejaVu Sans&quot;` so the chrome PNG path
+/// (rasterized via `usvg`/`resvg` from xtask, with `DejaVu` loaded into
+/// `fontdb` by `chrome::fonts::load_into`) renders identically across macOS,
+/// Linux, and Windows runners. The Apple / Segoe / Roboto / Helvetica / Arial
+/// fallbacks remain so browsers viewing the canonical SVGs still pick a
+/// system-native face on each platform.
+pub const SANS: &str = "&quot;DejaVu Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif";
+/// Mono family list. Same rationale as `SANS` — `&quot;DejaVu Sans Mono&quot;`
+/// leads so the bundled face wins during rasterization, with system mono
+/// fallbacks kept for SVG consumers.
+pub const MONO_FAMILY: &str =
+    "&quot;DejaVu Sans Mono&quot;, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";

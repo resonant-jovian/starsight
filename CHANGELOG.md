@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-05-09
+
+### Fixed
+
+- Hero and social-card PNGs lost all text on the GitHub Actions Ubuntu runner because none of the SANS family entries (`-apple-system`, `BlinkMacSystemFont`, `&quot;Segoe UI&quot;`, Roboto, Helvetica, Arial) resolved in the runner's font database — `usvg` silently dropped glyphs and the rasterized PNG shipped without the wordmark, tagline, or meta strip. Bundle DejaVu Sans + DejaVu Sans Mono in `xtask/src/chrome/fonts/` and load them into `usvg`'s `fontdb` *before* `load_system_fonts()` so chrome PNG output is byte-stable across macOS / Linux / Windows runners. The canonical SVGs are still browser-rendered with system-native faces — only the PNG path is pinned (`be46dee`).
+
+### Docs
+
+- Replace the inline math `<img src="assets/math/*.svg">` model in the README's "Worked Example — the Lorenz Attractor" prose with a single themed SVG card per theme (`assets/prose/lorenz-intro-{light,dark}.svg`). The previous approach put each math fragment behind a fixed pixel `height` that interacted with the surrounding markdown font's line-height differently on every viewer (crates.io vs github.com vs GitHub mobile vs IDE preview), so math glyphs floated above or oversized against the prose. Baking the whole paragraph into one fixed-pixel SVG card insulates the layout from the surrounding markdown flow exactly the way `status_panel`, `comparison_matrix`, and the other text-heavy chrome composites already do (`01be5f2`).
+- New `xtask/src/chrome/prose_card.rs` module: typesets `assets/prose/<stem>.tex` LaTeX paragraphs through `latex` + `dvisvgm --no-fonts --exact-bbox`, embeds the glyph-path output inside a palette-themed rounded-rect card frame, and writes per-theme `<stem>-{light,dark}.svg`. Prose is in TeX Gyre Heros (Helvetica-equivalent sans), math is in Latin Modern Math via amsmath. Theme cascading via `<g color={p.text}>` + inner `<svg fill="currentColor">` so glyph paths inherit the right shade without rendering twice.
+- New `Asset::ProseCard` variant for `cargo xtask chrome --asset prose-card`. `tools_present()` warns once and skips silently if `latex` / `dvisvgm` are absent so contributors without TeX Live can still rebuild every other chrome composite.
+- `CITATION.cff` and the README BibTeX block bumped to `0.3.3`.
+- New "Required tooling" + "Optional: regenerating chrome assets" tables in `CONTRIBUTING.md` covering cargo-insta, cargo-deny, cargo-llvm-cov, the `npx svgo` SVG optimization step, and the TeX Live bundles needed for prose-card regen (texlive-basic, texlive-latex, texlive-latexextra for `preview.sty`, texlive-mathscience, texlive-fontsrecommended, texlive-fontsextra for `tgheros`, texlive-bin for `dvisvgm`). Per-OS install commands for Arch, Debian/Ubuntu, and macOS. Fresh-machine setup is now a single doc lookup.
+
+### Internal
+
+- Retire the per-equation math infrastructure: delete `xtask/src/chrome/math.rs`, the `Asset::Math` enum variant + its no-theme dispatch carve-outs in `xtask/src/chrome/mod.rs`, and the `assets/math/` tree (12 `.tex` / `.svg` pairs + README). The latex+dvisvgm pipeline lives in `prose_card.rs` now.
+- `live-assets.yml` chrome cron passes `--skip-examples` so it never re-rasterizes example `_dark.png` files. Examples aren't live data — they only change when source moves — and re-rendering them on the Ubuntu runner picked different system fonts than the macOS contributor render, flipping font metrics on every cron / local commit cycle. The hero composite embeds whatever example PNGs are already in the working tree, pinning the embedded thumbs to the committed macOS-rendered copies (`be46dee`).
+- New `/coverage` skill mirroring the live-assets.yml `cargo llvm-cov --workspace --all-features --locked --exclude xtask` command for local coverage runs (`2c10ac2`). `cargo tarpaulin` remains banned for local use — OOMs under concurrent load.
+
 ## [0.3.2] - 2026-05-07
 
 ### Docs

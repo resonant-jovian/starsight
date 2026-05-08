@@ -127,6 +127,9 @@ fn render_svg(theme: Theme, meta: &Meta) -> String {
 
 fn rasterize(svg: &str, w: u32, h: u32) -> Result<Pixmap> {
     let mut opts = usvg::Options::default();
+    // Bundled DejaVu first so the wordmark / tagline / meta strip survive on
+    // CI runners that lack the Apple/Segoe family names that lead `SANS`.
+    super::fonts::load_into(&mut opts);
     opts.fontdb_mut().load_system_fonts();
     let tree = usvg::Tree::from_str(svg, &opts).context("parse social card svg")?;
     let mut pix = Pixmap::new(w, h).ok_or_else(|| anyhow!("alloc social pixmap"))?;
