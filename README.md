@@ -109,11 +109,12 @@ What `plot!()` actually does, stage by stage:
 
 ## A Worked Example — the Lorenz Attractor
 
-starsight is a viz library; the math is what it draws. The Lorenz system
-
-<img alt="dot{x} = σ (y - x), dot{y} = x (ρ - z) - y, dot{z} = x y - β z" src="assets/math/lorenz-system.svg" height="28" style="display:block; margin:0 auto;">
-
-with <img alt="σ = 10" src="assets/math/sigma-10.svg" height="16">, <img alt="β = 8/3" src="assets/math/beta-8-3.svg" height="16">, <img alt="ρ = 28" src="assets/math/rho-28.svg" height="16"> is the textbook strange attractor. Eleven trajectories sweeping <img alt="ρ ∈ {13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250}" src="assets/math/rho-sweep.svg" height="16">, integrated with RK4 at <img alt="dt = 0.005" src="assets/math/dt.svg" height="16"> for 80 000 steps and projected onto the <img alt="x" src="assets/math/x-var.svg" height="16"><img alt="–" src="assets/math/em-dash.svg" width="8" height="16"><img alt="z" src="assets/math/z-var.svg" height="16"> plane:
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/prose/lorenz-intro-dark.svg">
+  <img alt="starsight is a viz library; the math is what it draws. The Lorenz system: dot-x = sigma (y - x), dot-y = x (rho - z) - y, dot-z = x y - beta z, with sigma = 10, beta = 8/3, rho = 28 is the textbook strange attractor. Eleven trajectories sweeping rho in {13, 15, 18, 21, 24.06, 28, 35, 50, 100, 160, 250}, integrated with RK4 at dt = 0.005 for 80 000 steps and projected onto the x–z plane:"
+       src="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/prose/lorenz-intro-light.svg"
+       width="100%">
+</picture>
 
 <details>
 <summary><b>Rust integration loop (RK4)</b></summary>
@@ -159,7 +160,7 @@ fn main() -> starsight::Result<()> {
 
 </details>
 
-Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by <img alt="ρ" src="assets/math/rho-var.svg" height="16"> on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
+Real source: [`examples/scientific/lorenz_line.rs`](examples/scientific/lorenz_line.rs) (the eleven-trajectory sweep, coloured by ρ on prismatica's inferno map). A second worked example — the Kruskal–Szekeres coordinate chart for the Schwarzschild metric — lives at [`examples/scientific/kruskal_szekeres_line.rs`](examples/scientific/kruskal_szekeres_line.rs).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/resonant-jovian/starsight/main/assets/lorenz-dark.png">
@@ -321,6 +322,12 @@ starsight 0.3.x compiles on **Rust 1.89** and later, edition 2024. The MSRV trac
 Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
 
 > **Note on fonts in chrome composites.** The hero and social-card PNGs are rasterized from SVG by `cargo xtask chrome` and pin their text to bundled DejaVu Sans / DejaVu Sans Mono (`xtask/src/chrome/fonts/`) so the output is byte-stable across macOS, Linux, and Windows runners. The canonical SVGs are still browser-rendered with system-native faces — only the PNG path is pinned. Example chart PNGs under `examples/` use whatever fonts the renderer picks up at build time and may differ slightly between contributor machines; the daily live cron passes `--skip-examples` so it never re-renders them.
+
+> **Note on prose-card chrome.** The Lorenz / butterfly intro card under `assets/prose/` is typeset by `latex` and converted to a glyph-path SVG by `dvisvgm`, then wrapped in a themed card frame. To regenerate it locally, install **TeX Live** with the math + recommended-fonts + extra-fonts bundles plus the `preview` package. On Arch:
+> ```sh
+> sudo pacman -S --needed texlive-basic texlive-latex texlive-latexextra texlive-mathscience texlive-fontsrecommended texlive-fontsextra texlive-bin
+> ```
+> Other platforms and the full list of cargo plugins / external tools `cargo xtask chrome` shells out to (cargo-insta, cargo-deny, cargo-llvm-cov, `npx svgo`) live in [`CONTRIBUTING.md`](CONTRIBUTING.md#required-tooling). The daily live cron does **not** rebuild prose cards (they only change when README prose moves), so CI runners don't need TeX Live. If `latex` or `dvisvgm` is missing, `cargo xtask chrome` warns once and skips the prose-card pass — the rest of chrome regenerates as normal.
 
 ## License
 

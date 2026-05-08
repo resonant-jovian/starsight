@@ -32,11 +32,11 @@ mod fonts;
 mod gallery;
 mod hero;
 mod lorenz_card;
-mod math;
 mod matrices;
 mod palette;
 mod pipeline;
 mod png;
+mod prose_card;
 mod roadmap;
 mod social_card;
 mod status_panel;
@@ -86,7 +86,7 @@ pub enum Asset {
     ComingFrom,
     Comparison,
     Buttons,
-    Math,
+    ProseCard,
 }
 
 pub fn run(args: ChromeArgs) -> Result<()> {
@@ -104,12 +104,6 @@ pub fn run(args: ChromeArgs) -> Result<()> {
     }
 
     if let Some(asset) = args.asset {
-        // Math is theme-agnostic (currentColor inheritance) so we render
-        // once, not per-theme; dispatch it directly without the theme loop.
-        if matches!(asset, Asset::Math) {
-            math::regen_all(&root)?;
-            return Ok(());
-        }
         let mut written: Vec<PathBuf> = Vec::new();
         for theme in Theme::ALL {
             regen_one(asset, &root, theme)?;
@@ -173,15 +167,12 @@ pub fn run(args: ChromeArgs) -> Result<()> {
                     matrices::regen_all(root_ref, theme)?;
                     coming_from::regen(root_ref, theme)?;
                     comparison_matrix::regen(root_ref, theme)?;
+                    prose_card::regen(root_ref, theme)?;
                     Ok(())
                 }));
             }
             join_handles(handles, "static regen")
         })?;
-        // Math is theme-agnostic (currentColor) so it runs once, outside the
-        // per-theme thread scope. Skipped silently if `latex` / `dvisvgm`
-        // aren't installed — see `math::regen_all`.
-        math::regen_all(&root)?;
     }
 
     if !args.no_svgo {
@@ -237,8 +228,7 @@ fn regen_one(asset: Asset, root: &Path, theme: Theme) -> Result<()> {
         Asset::ComingFrom => coming_from::regen(root, theme),
         Asset::Comparison => comparison_matrix::regen(root, theme),
         Asset::Buttons => buttons::regen_all(root, theme),
-        // Handled via the no-theme branch in `run`; should never reach here.
-        Asset::Math => math::regen_all(root),
+        Asset::ProseCard => prose_card::regen(root, theme),
     }
 }
 
@@ -270,10 +260,13 @@ fn asset_svg_outputs(asset: Asset, root: &Path, theme: Theme) -> Vec<PathBuf> {
             .iter()
             .map(|stem| root.join(format!("assets/buttons/{stem}-{s}.svg")))
             .collect(),
-        // Math SVGs are scoped via their own dispatch path in `run` and never
-        // reach the per-theme svgo sweep; we deliberately return an empty list
-        // here so the existing scoped svgo call is a no-op for `--asset math`.
-        Asset::Math => Vec::new(),
+        // Prose-card SVGs live under `assets/prose/<stem>-{theme}.svg`,
+        // but the actual file list is determined at regen time from
+        // `assets/prose/*.tex`. We deliberately return an empty list so
+        // the scoped svgo pass after `--asset prose-card` is a no-op —
+        // `optimize_chrome_assets` (or a manual `cargo xtask chrome`
+        // without `--asset`) sweeps the directory anyway.
+        Asset::ProseCard => Vec::new(),
     }
 }
 

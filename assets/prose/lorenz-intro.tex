@@ -1,0 +1,13 @@
+starsight is a viz library; the math is what it draws. The Lorenz system
+
+\[
+\dot{x} = \sigma(y - x), \qquad
+\dot{y} = x(\rho - z) - y, \qquad
+\dot{z} = xy - \beta z
+\]
+
+with $\sigma = 10$, $\beta = 8/3$, $\rho = 28$ is the textbook strange
+attractor. Eleven trajectories sweeping $\rho \in \{13,\, 15,\, 18,\, 21,\,
+24.06,\, 28,\, 35,\, 50,\, 100,\, 160,\, 250\}$, integrated with RK4 at
+$\mathrm{d}t = 0.005$ for 80\,000 steps and projected onto the $x$--$z$
+plane:
