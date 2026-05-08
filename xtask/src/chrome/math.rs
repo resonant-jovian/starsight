@@ -142,6 +142,8 @@ fn render_one(tex_path: &Path) -> Result<()> {
     Ok(())
 }
 
+
+
 /// Add `fill="currentColor"` to the root `<svg>` element so the math inherits
 /// the surrounding text colour — the same SVG renders dark text on light
 /// backgrounds and light text on dark, without a second render pass.
