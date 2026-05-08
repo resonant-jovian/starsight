@@ -28,6 +28,7 @@ mod coming_from;
 mod comparison_matrix;
 mod crates_io;
 mod eclipse;
+mod fonts;
 mod gallery;
 mod hero;
 mod lorenz_card;

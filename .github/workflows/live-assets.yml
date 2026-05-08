@@ -126,10 +126,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Regenerate live chrome assets (light + dark)
-        run: cargo run -p xtask --release -- chrome --live
+        # `--skip-examples` keeps the cron from re-rasterizing the example
+        # `_dark.png` files. Examples aren't live data — they only change when
+        # source moves — and re-rendering them on the Ubuntu runner picked
+        # different system fonts than the macOS contributor render, flipping
+        # font metrics on every cron / local commit cycle. The hero composite
+        # embeds whatever example PNGs are already in the working tree, so
+        # skipping the regen also pins the embedded thumbs to the committed
+        # macOS-rendered copies.
+        run: cargo run -p xtask --release -- chrome --live --skip-examples
       - name: Commit if changed
         run: |
-          if git diff --quiet -- assets/ examples/; then
+          if git diff --quiet -- assets/; then
             echo "no chrome changes"
             exit 0
           fi
@@ -137,7 +145,6 @@ jobs:
           git config user.email "noreply@github.com"
           git add assets/status/ assets/hero/ assets/roadmap-light.svg assets/roadmap-dark.svg
           git add assets/buttons/ assets/social/
-          git add examples/basics/*_dark.png examples/scientific/*_dark.png 2>/dev/null || true
           git commit -m "chore(chrome): regen live assets [skip ci]"
           # Same rebase-retry as coverage, against the wider 30-min external
           # push window.

@@ -324,6 +324,8 @@ starsight 0.3.x compiles on **Rust 1.89** and later, edition 2024. The MSRV trac
 
 Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). The workspace conventions (layered architecture, error policy, snapshot tests) are documented in [`AGENTS.md`](AGENTS.md). Issues and discussion: [github.com/resonant-jovian/starsight/issues](https://github.com/resonant-jovian/starsight/issues).
 
+> **Note on fonts in chrome composites.** The hero and social-card PNGs are rasterized from SVG by `cargo xtask chrome` and pin their text to bundled DejaVu Sans / DejaVu Sans Mono (`xtask/src/chrome/fonts/`) so the output is byte-stable across macOS, Linux, and Windows runners. The canonical SVGs are still browser-rendered with system-native faces — only the PNG path is pinned. Example chart PNGs under `examples/` use whatever fonts the renderer picks up at build time and may differ slightly between contributor machines; the daily live cron passes `--skip-examples` so it never re-renders them.
+
 ## License
 
 starsight is licensed under **GPL-3.0-only**. See [`LICENSE`](LICENSE). Any project that links against it must be GPL-3.0-compatible — copyleft propagates through derivative works. If the GPL is incompatible with your use case, [reach out](mailto:albin@sjoegren.se) — a permissively-licensed core may be carved out post-1.0.
