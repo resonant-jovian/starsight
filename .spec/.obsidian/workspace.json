@@ -11,10 +11,14 @@
             "id": "7cf58d4ca62a37c1",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "STARSIGHT.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "STARSIGHT"
             }
           }
         ]
@@ -74,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "e54be2812f300750",
@@ -152,12 +157,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "STARSIGHT.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of STARSIGHT"
             }
           }
         ],
@@ -165,7 +171,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,6 +187,8 @@
   },
   "active": "7cf58d4ca62a37c1",
   "lastOpenFiles": [
+    "STARSIGHT_DESIGN_REFERENCE.md",
+    "STARSIGHT_VIZ_RESEARCH.md",
     "STARSIGHT.md",
     "SHOWCASE_INPUTS.md",
     "LEARN_CHEATSHEET.md",
