@@ -109,5 +109,5 @@ Layer-N may only depend on layer-1..N-1.
 - Path-scoped rules (load when matching files enter context): `.claude/rules/`
 - Slash workflows: `.claude/skills/` (`/check`, `/snap`, `/release-prep`, `/quickfix`, `/scout`)
 - Subagents: `.claude/agents/` (`@snapshot-reviewer`, `@layer-boundary-check`)
-- Master spec: `.spec/STARSIGHT.md`; learning doc: `.spec/LEARN.md`
+- Master spec: `.spec/STARSIGHT.md`
 - Issue tracker / session protocol: handled by the `bd prime` SessionStart hook

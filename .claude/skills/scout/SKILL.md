@@ -45,7 +45,7 @@ For feature-level questions ("does it support log heatmap?"), check the AGENTS.m
 
 ## 5. Master spec
 
-For deep architectural context, `.spec/STARSIGHT.md` (~250KB) is the design document. Don't read it whole — `rg <symbol> .spec/STARSIGHT.md` first.
+For deep architectural context, `.spec/STARSIGHT.md` (~65KB, ~1700 lines) is the design document — what starsight is, the 7-layer architecture, design axioms, milestone roadmap, empirical defaults, antipatterns, common rules, and a 42-example showcase appendix. `rg <symbol> .spec/STARSIGHT.md` to find specific items.
 
 ## Reporting
 

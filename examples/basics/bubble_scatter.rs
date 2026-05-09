@@ -3,7 +3,7 @@
 //! Per-point continuous color and per-point radius, applied to wine-shaped
 //! synthetic data. Color encodes color-intensity through `ColorBrewer`'s `RdPu`
 //! sequential colormap; radius encodes proline (size ∝ √proline). Implements
-//! spec example #3 from `.spec/SHOWCASE_INPUTS.md`.
+//! spec example #3 from `.spec/STARSIGHT.md`.
 //!
 //! Full `ColorScale` infrastructure lands at 0.5.0 — at 0.3.0 we apply the
 //! colormap manually and pass per-point colors via `PointMark::colors()`.

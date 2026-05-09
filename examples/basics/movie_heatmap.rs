@@ -5,7 +5,7 @@
 //! dimmer secondary lobe at low ratings; the log-scale color mapping lifts the
 //! secondary lobe out of the noise floor where linear scale would crush it.
 //!
-//! Implements spec example #16 from `.spec/SHOWCASE_INPUTS.md`. Demonstrates
+//! Implements spec example #16 from `.spec/STARSIGHT.md`. Demonstrates
 //! the 0.3.0 `HeatmapMark::log_scale()` builder.
 
 use starsight::colormap::VIRIDIS;

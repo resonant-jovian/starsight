@@ -6,7 +6,7 @@
 //! direction (green = increase, red = decrease, blue = subtotal/total). Thin
 //! gray connector lines link consecutive bars at the running-total level.
 //!
-//! Implements spec example #37 from `.spec/SHOWCASE_INPUTS.md`. The 0.3.0
+//! Implements spec example #37 from `.spec/STARSIGHT.md`. The 0.3.0
 //! `BarMark` carries per-bar `bases` and `colors` plus the `connectors` flag,
 //! so the whole chart is a single mark.
 
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
         "inc", "dec", "sub", "dec", "dec", "dec", "sub", "dec", "dec", "tot",
     ];
 
-    // Spec colors (.spec/SHOWCASE_INPUTS.md:175).
+    // Spec colors (.spec/STARSIGHT.md, example 37).
     let green = Color::from_hex(0x2E_7D32);
     let red = Color::from_hex(0xC6_2828);
     let blue = Color::from_hex(0x15_65C0);

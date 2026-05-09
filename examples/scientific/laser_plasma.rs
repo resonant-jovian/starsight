@@ -6,7 +6,7 @@
 //! profile and electric-field overlays from spec #7) needs `GridLayout`,
 //! which lands at 0.4.0.
 //!
-//! Implements spec example #7 from `.spec/SHOWCASE_INPUTS.md`. Reuses the
+//! Implements spec example #7 from `.spec/STARSIGHT.md`. Reuses the
 //! 0.3.0 `HeatmapMark::log_scale()` builder added for spec #16.
 
 use starsight::colormap::VIRIDIS;

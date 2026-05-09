@@ -96,7 +96,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `ContourMark` + `ContourMode { Isolines, FilledBands, FilledWithLines }` — marching-squares contours with optional colormap tinting per level. `Isolines` mode ships fully; `FilledBands` is API-stable but currently falls back to isoline rendering (polygon-tracing follow-up tracked separately).
 - `Contour::compute(grid, &levels) -> Vec<Polyline>` — marching-squares extractor with average-of-corners saddle disambiguation (matplotlib default). New `Grid` (row-major scalar field) and `Polyline` (per-segment 2-point output) types in `statistics`.
 - `ArcMark` — polar wedge mark for Nightingale coxcomb (#34), Gauge (#41), and Sunburst (#39 var C). Per-wedge `r_inner`/`theta_half_widths`/`start_offset` plus a default 8-color palette and per-wedge stroke.
-- New showcase examples: `examples/scientific/{nightingale,gauge,contour_fields}.rs` and `examples/composition/donut_sunburst.rs` — covering `.spec/SHOWCASE_INPUTS.md` entries #22, #34, #39 var C, and #41.
+- New showcase examples: `examples/scientific/{nightingale,gauge,contour_fields}.rs` and `examples/composition/donut_sunburst.rs` — covering `.spec/STARSIGHT.md` entries #22, #34, #39 var C, and #41.
 - `ChartKind::Contour` variant; the enum becomes `#[non_exhaustive]` so future polar / 3D variants slot in without a breaking change.
 - New snapshot tests: `snapshot_polar_grid_{linear,log,categorical}`, `snapshot_multipanel_2x2_basic`, `snapshot_contour_isolines`, `snapshot_arcmark_{full_nightingale,partial_gauge,nested_sunburst}`.
 - `BarMark` per-bar bases via `bases: Option<Vec<f64>>` and `bases(Vec<f64>)` builder
@@ -106,7 +106,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `PointMark` per-point radii via `radii: Option<Vec<f32>>` and `radii(Vec<f32>)` builder
 - `PointMark::alpha(f32)` builder — mark-wide alpha multiplier applied at draw time
 - `HeatmapColorScale` enum (`Linear`, `Log`) and `HeatmapMark::color_scale()` / `log_scale()` builders — log path normalizes via `log10` with a small epsilon to handle zero/negative cells
-- New showcase examples (`.spec/SHOWCASE_INPUTS.md`):
+- New showcase examples (see `.spec/STARSIGHT.md` showcase appendix):
   - `examples/basics/bubble_scatter.rs` (spec #3) — wine-shaped data with per-point continuous color (RdPu) and size, alpha 0.5
   - `examples/basics/movie_heatmap.rs` (spec #16) — Rotten Tomatoes × IMDB cross-tab with log-scale viridis
   - `examples/scientific/laser_plasma.rs` (spec #7, single-panel) — stimulated Raman scattering electron phase space, log-scale viridis

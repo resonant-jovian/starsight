@@ -311,7 +311,7 @@ The bet behind starsight: **one crate** covering CPU + GPU + terminal + PDF with
        width="100%">
 </picture>
 
-The full task-level roadmap with 338 checkboxes lives in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md).
+The full milestone roadmap, design axioms, and 42-example showcase appendix live in [`.spec/STARSIGHT.md`](.spec/STARSIGHT.md).
 
 ## Minimum Supported Rust Version
 

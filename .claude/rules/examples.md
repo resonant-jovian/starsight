@@ -41,4 +41,4 @@ The output filename should match the file name `<group>_<name>.png` so `cargo xt
 
 - **examples/**: source + canonical PNG, browsable per-group.
 - **showcase/**: flat PNG directory (symlinks) for the README image gallery.
-- **`.spec/SHOWCASE_INPUTS.md`**: input-data specs the showcase examples depend on.
+- **`.spec/STARSIGHT.md`**: master spec; the showcase appendix at the bottom is the input-data spec the showcase examples depend on.
